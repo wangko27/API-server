@@ -49,7 +49,7 @@ public enum ApiApplication {
 
         try {
             server.start();
-            serverUri = "http://" + ip + ":" + port + "/" + moduleUrl;
+            serverUri = RpcConstant.HTTP + ip + RpcConstant.COLON + port + RpcConstant.URI_SEPARATOR + moduleUrl;
             Log.info("http restFul server is started!url is " + serverUri);
         } catch (IOException e) {
             Log.error(e);
