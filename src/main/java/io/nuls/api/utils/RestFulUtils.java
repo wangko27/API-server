@@ -23,6 +23,7 @@
  */
 package io.nuls.api.utils;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.nuls.api.entity.RpcClientResult;
 
 import javax.ws.rs.client.Client;
@@ -51,6 +52,7 @@ public class RestFulUtils {
 
     public void init(String serverUri) {
         this.serverUri = serverUri;
+        client.register(JacksonJsonProvider.class);
     }
 
 
