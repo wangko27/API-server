@@ -24,6 +24,7 @@
 package io.nuls.api.server.resources.impl;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import io.nuls.api.fiter.ExceptionFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
@@ -42,6 +43,7 @@ public class NulsResourceConfig extends ResourceConfig {
         register(RequestContextFilter.class);
         register(JacksonJsonProvider.class);
         register(CorsFilter.class);
+        register(ExceptionFilter.class);
     }
 
 }
