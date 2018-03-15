@@ -14,23 +14,7 @@
     </bean>
     <bean id="DailyTaskBalance" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="nulsBalanceTask" />
-        <!--<property name="cronExpression" value="0 15 0 * * ? *" />-->
-        <property name="cronExpression" value="0 0 14 * * ? *" />
-    </bean>
-
-    <!-- mined blocks top -->
-    <bean id="nulsMinedTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <property name="targetObject">
-            <ref bean="minedTask"/>
-        </property>
-        <property name="targetMethod">
-            <value>execute</value>
-        </property>
-    </bean>
-    <bean id="DailyTaskMined" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="nulsMinedTask" />
-        <!--<property name="cronExpression" value="0 30 0 * * ? *" />-->
-        <property name="cronExpression" value="0 0 14 * * ? *" />
+        <property name="cronExpression" value="0 15 0 * * ? *" />
     </bean>
 
     <!-- daily txCount  -->
@@ -44,16 +28,29 @@
     </bean>
     <bean id="DailyTaskTxHistory" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="nulsTxHistoryTask" />
-        <!--<property name="cronExpression" value="0 45 0 * * ? *" />-->
-        <property name="cronExpression" value="0 0 14 * * ? *" />
+        <property name="cronExpression" value="0 30 0 * * ? *" />
+    </bean>
+
+    <!-- mined blocks top -->
+    <bean id="nulsMinedTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="minedTask"/>
+        </property>
+        <property name="targetMethod">
+            <value>execute</value>
+        </property>
+    </bean>
+    <bean id="DailyTaskMined" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="nulsMinedTask" />
+        <property name="cronExpression" value="0 45 0 * * ? *" />
     </bean>
 
     <bean id="SpringJobSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
                 <ref bean="DailyTaskBalance"/>
-                <ref bean="DailyTaskMined"/>
                 <ref bean="DailyTaskTxHistory"/>
+                <ref bean="DailyTaskMined"/>
             </list>
         </property>
     </bean>
