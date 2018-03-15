@@ -27,6 +27,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
+import org.springframework.web.filter.CorsFilter;
 
 /**
  *
@@ -40,6 +41,7 @@ public class NulsResourceConfig extends ResourceConfig {
         register(MultiPartFeature.class);
         register(RequestContextFilter.class);
         register(JacksonJsonProvider.class);
+        register(CorsFilter.class);
     }
 
 }
