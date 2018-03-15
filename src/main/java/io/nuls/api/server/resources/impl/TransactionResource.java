@@ -31,6 +31,8 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -58,7 +60,7 @@ public class TransactionResource {
     }
 
     @GET
-    @Path("/list")
+    @Path("/address/list")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult list(@QueryParam("address") String address, @QueryParam("type") int type
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
@@ -75,16 +77,13 @@ public class TransactionResource {
         } else if (pageSize > 100) {
             pageSize = 100;
         }
+        Map<String, String> param = new HashMap<>();
+        param.put("address", address);
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        param.put("type", String.valueOf(type));
         try {
-            StringBuilder path = new StringBuilder("/tx/list");
-            path.append("?pageNumber=").append(pageNumber)
-                    .append("&pageSize=").append(pageSize);
-            if(!StringUtils.isBlank(address))
-                path.append("&address=").append(address);
-            if(0 >= type) {
-                path.append("&type=").append(type);
-            }
-            result = RestFulUtils.getInstance().get(path.toString(), null);
+            result = RestFulUtils.getInstance().get("/tx/address/list", param);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
