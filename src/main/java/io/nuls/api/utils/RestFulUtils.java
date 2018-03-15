@@ -72,10 +72,18 @@ public class RestFulUtils {
         WebTarget target = client.target(serverUri).path(path);
         if (null != params && !params.isEmpty()) {
             for (String key : params.keySet()) {
-                target.queryParam(key, params.get(key));
+                target = target.queryParam(key, params.get(key));
             }
         }
         return target.request(APPLICATION_JSON).get(RpcClientResult.class);
+    }
+
+    public RpcClientResult post(String path, Map<String, String> paramsMap) {
+        try {
+            return post(path, JSONUtils.obj2json(paramsMap));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public RpcClientResult post(String path, String content) {
@@ -92,19 +100,6 @@ public class RestFulUtils {
         }
         WebTarget target = client.target(serverUri).path(path);
         return target.request().buildPut(Entity.entity(content, MediaType.APPLICATION_JSON)).invoke(RpcClientResult.class);
-    }
-
-    public RpcClientResult delete(String path, Map<String, String> params) {
-        if (null == serverUri) {
-            throw new RuntimeException("service url is null");
-        }
-        WebTarget target = client.target(serverUri).path(path);
-        if (null != params && !params.isEmpty()) {
-            for (String key : params.keySet()) {
-                target.queryParam(key, params.get(key));
-            }
-        }
-        return target.request().delete(RpcClientResult.class);
     }
 
 }

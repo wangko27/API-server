@@ -18,7 +18,7 @@ public class ReportDao {
         String deleteTempSQL = "delete from balance_top_temp";
         String executeSQL = "INSERT INTO balance_top_temp( address, balance, tx_count) select o.address, sum(o.value), (select count(*) from tx_account_relation tx where tx.address = o.address) from utxo_output o where o.status = 0 group by o.address";
         String deteleSQL = "delete from balance_top";
-        String insertSQL = "insert into balance_top(address, balance, tx_count, create_time) select address, balance, tx_count, ROUND(UNIX_TIMESTAMP(CURTIME(4)) * 1000) from balance_top_temp";
+        String insertSQL = "insert into balance_top(address, balance, tx_count, create_time) select address, balance, tx_count, ROUND(UNIX_TIMESTAMP(CURTIME(4)) * 1000) from balance_top_temp ORDER BY balance DESC ";
         jdbcTemplate.batchUpdate(deleteTempSQL, executeSQL);
         jdbcTemplate.batchUpdate(deteleSQL, insertSQL, deleteTempSQL);
     }
@@ -29,7 +29,7 @@ public class ReportDao {
         String deleteTempSQL = "delete from mined_top_temp";
         String executeSQL = "INSERT INTO mined_top( consensus_address, mined_count, reward, last_height) select v.consensus_address, count(*), sum(v.blockReward), max(v.height) from ( select b.consensus_address, b.height, (select sum(uo.value) from transaction t,utxo_output uo where t.hash=uo.tx_hash and t.type=1 and t.block_height=b.height) as blockReward from block_header b group by b.consensus_address,b.height ) v group by v.consensus_address ";
         String deteleSQL = "delete from mined_top";
-        String insertSQL = "insert into mined_top(consensus_address, mined_count, reward, last_height, create_time) select consensus_address, mined_count, reward, last_height, ROUND(UNIX_TIMESTAMP(CURTIME(4)) * 1000) from mined_top_temp";
+        String insertSQL = "insert into mined_top(consensus_address, mined_count, reward, last_height, create_time) select consensus_address, mined_count, reward, last_height, ROUND(UNIX_TIMESTAMP(CURTIME(4)) * 1000) from mined_top_temp ORDER BY mined_count DESC ";
         jdbcTemplate.batchUpdate(deleteTempSQL, executeSQL);
         jdbcTemplate.batchUpdate(deteleSQL, insertSQL, deleteTempSQL);
     }

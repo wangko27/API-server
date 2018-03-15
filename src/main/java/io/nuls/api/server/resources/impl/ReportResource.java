@@ -1,11 +1,9 @@
 package io.nuls.api.server.resources.impl;
 
-import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.server.business.AccountBalanceReportBusiness;
-import io.nuls.api.server.business.AliasBusiness;
-import io.nuls.api.server.business.MinedReportBusiness;
-import io.nuls.api.entity.Alias;
-import io.nuls.api.entity.AliasParam;
+import io.nuls.api.entity.*;
+import io.nuls.api.server.business.*;
+import io.nuls.api.server.dto.Page;
+import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,24 +20,42 @@ import java.util.List;
 public class ReportResource {
 
     @Autowired
-    private MinedReportBusiness minedReportBusiness;
+    private BalanceTopBusiness balanceTopBusiness;
     @Autowired
-    private AccountBalanceReportBusiness accountBalanceReportBusiness;
+    private MinedTopBusiness minedTopBusiness;
     @Autowired
-    private AliasBusiness aliasBusiness;
+    private TxHistoryBusiness txHistoryBusiness;
 
     @GET
     @Path("/balance")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult balance(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcClientResult result;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed();
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
         try {
-            AliasParam aliasParam = new AliasParam();
-            AliasParam.Criteria criteria = aliasParam.createCriteria();
-            criteria.andAddressIsNotNull();
-            List<Alias> aliases = aliasBusiness.selectAliasList(aliasParam);
+            Page<BalanceTop> page = new Page<>();
+            page.setPageNumber(pageNumber);
+            page.setPageSize(pageSize);
+            page.setTotal(balanceTopBusiness.countBalanceTopList(null));
+            BalanceTopParam balanceTopParam = new BalanceTopParam();
+            balanceTopParam.setOrderByClause("id asc");
+            balanceTopParam.setStart(page.getStart());
+            balanceTopParam.setCount(pageSize);
+            List<BalanceTop> list = balanceTopBusiness.selectBalanceTopList(balanceTopParam);
+            page.setList(list);
             result = RpcClientResult.getSuccess();
-            result.setData(aliases);
+            result.setData(page);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
@@ -52,14 +68,51 @@ public class ReportResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult mined(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcClientResult result;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed();
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
         try {
-            //AliasParam aliasParam = new AliasParam();
-            //AliasParam.Criteria criteria = aliasParam.createCriteria();
-            //criteria.andAddressIsNotNull();
-            //List<Alias> aliases = aliasBusiness.selectAliasList(aliasParam);
-            System.out.println("================test client function request====================");
+            Page<MinedTop> page = new Page<>();
+            page.setPageNumber(pageNumber);
+            page.setPageSize(pageSize);
+            page.setTotal(minedTopBusiness.countMinedTopList(null));
+            MinedTopParam minedTopParam = new MinedTopParam();
+            minedTopParam.setOrderByClause("id asc");
+            minedTopParam.setStart(page.getStart());
+            minedTopParam.setCount(pageSize);
+            List<MinedTop> list = minedTopBusiness.selectMinedTopList(minedTopParam);
+            page.setList(list);
             result = RpcClientResult.getSuccess();
-            result.setData(null);
+            result.setData(page);
+        } catch (Exception e) {
+            result = RpcClientResult.getFailed();
+            Log.error(e);
+        }
+        return result;
+    }
+
+    @GET
+    @Path("/txhistory")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult txhistory() {
+        RpcClientResult result;
+        try {
+            TxHistoryParam txHistoryParam = new TxHistoryParam();
+            txHistoryParam.setOrderByClause("id desc");
+            txHistoryParam.setStart(0);
+            txHistoryParam.setCount(14);
+            List<TxHistory> list = txHistoryBusiness.selectTxHistoryList(txHistoryParam);
+            result = RpcClientResult.getSuccess();
+            result.setData(list);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
