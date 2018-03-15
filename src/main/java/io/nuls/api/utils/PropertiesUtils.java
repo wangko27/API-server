@@ -1,5 +1,7 @@
 package io.nuls.api.utils;
 
+import io.nuls.api.utils.log.Log;
+
 import java.util.Properties;
 
 public class PropertiesUtils {
@@ -9,7 +11,7 @@ public class PropertiesUtils {
         try {
             properties.load(PropertiesUtils.class.getClassLoader().getResourceAsStream("sys.properties"));
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Log.error(e);
         }
     }
 
