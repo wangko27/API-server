@@ -4,14 +4,13 @@ import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
 /**
- * @author: lichao
+ * @author: Charlie
  * @date: 2018/3/15
  */
 public class AccountResourceTest {
@@ -36,7 +35,6 @@ public class AccountResourceTest {
     }
 
     @Test
-    @Ignore
     public void balanceTest(){
         RpcClientResult result = this.util.get("/account/balance/2CdYovbhsiKGW18HRNiFuLQva1Voz6i", null);
         System.out.println(result.toString());
