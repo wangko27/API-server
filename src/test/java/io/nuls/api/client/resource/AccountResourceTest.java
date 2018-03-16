@@ -9,14 +9,13 @@ import org.junit.Test;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author: lichao
- * @date: 2018/03/15
+ * @date: 2018/3/15
  */
-public class TransactionResourceTest {
+public class AccountResourceTest {
+
     private RestFulUtils util;
     private String serverUri;
     private Client client;
@@ -31,26 +30,20 @@ public class TransactionResourceTest {
     }
 
     @Test
-    public void loadTest(){
-        RpcClientResult result = this.util.get("/tx/hash/0000205af03534f8ddc28a6918f3d0c4d3c57d41abca067589b9d70ce6e2c546a42f2f",null);
+    public void accountTest(){
+        RpcClientResult result = this.util.get("/account/2CdYovbhsiKGW18HRNiFuLQva1Voz6i", null);
         System.out.println(result.toString());
     }
 
     @Test
     @Ignore
-    public void listTest(){
-        Integer pageSize = 20;
-        Integer pageNumber = 1;
-        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
-        int type = 1;
-        Map<String, String> param = new HashMap<>();
-        param.put("address", address);
-        param.put("pageNumber", String.valueOf(pageNumber));
-        param.put("pageSize", String.valueOf(pageSize));
-        param.put("type", String.valueOf(type));
-
-        RpcClientResult result = this.util.get("/tx/address/list",param);
+    public void balanceTest(){
+        RpcClientResult result = this.util.get("/account/balance/2CdYovbhsiKGW18HRNiFuLQva1Voz6i", null);
         System.out.println(result.toString());
     }
 
+    @After
+    public void stop(){
+        System.out.println("end...");
+    }
 }
