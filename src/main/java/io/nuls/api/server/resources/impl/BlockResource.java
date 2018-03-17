@@ -32,6 +32,8 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -138,6 +140,65 @@ public class BlockResource {
         }
         return result;
     }
+
+    @GET
+    @Path("/list/address")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getListByAddress(@QueryParam("address") String address, @QueryParam("type") int type
+            , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
+        if(!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0){
+            return RpcClientResult.getFailed();
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        Map<String, String> param = new HashMap<>(4);
+        param.put("address", address);
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result;
+        try {
+            result = RestFulUtils.getInstance().get("/block/list/address", param);
+        } catch (Exception e) {
+            result = RpcClientResult.getFailed();
+            Log.error(e);
+        }
+        return result;
+    }
+
+    @GET
+    @Path("/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
+        if(pageNumber < 0 || pageSize < 0){
+            return RpcClientResult.getFailed();
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        Map<String, String> param = new HashMap<>(2);
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result;
+        try {
+            result = RestFulUtils.getInstance().get("/block/list", param);
+        } catch (Exception e) {
+            result = RpcClientResult.getFailed();
+            Log.error(e);
+        }
+        return result;
+    }
+
 
     @POST
     @Path("/test")

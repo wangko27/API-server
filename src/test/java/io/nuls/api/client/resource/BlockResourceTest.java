@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -59,6 +61,30 @@ public class BlockResourceTest {
     @Test
     public void getHeader(){
         RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/0000202cf0fdc799312730d974a9153414fc4f1fb93bcba8038518425ae0a695c8054b",null);
+        System.out.println(result.toString());
+    }
+
+    @Test
+    public void getList(){
+        Integer pageSize = 20;
+        Integer pageNumber = 1;
+        Map<String, String> param = new HashMap<>();
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/list",param);
+        System.out.println(result.toString());
+    }
+
+    @Test
+    public void getListByAddress(){
+        Integer pageSize = 20;
+        Integer pageNumber = 1;
+        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        Map<String, String> param = new HashMap<>();
+        param.put("address",address);
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/list/address",param);
         System.out.println(result.toString());
     }
 }

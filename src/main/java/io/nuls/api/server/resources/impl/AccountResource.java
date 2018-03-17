@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import java.util.Map;
 
 /**
@@ -21,6 +23,7 @@ public class AccountResource {
 
     @GET
     @Path("/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult account(@PathParam("address") String address){
         RpcClientResult result;
         if(!StringUtils.validAddress(address)){
@@ -47,6 +50,7 @@ public class AccountResource {
 
     @GET
     @Path("/balance/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult balance(@PathParam("address") String address){
         RpcClientResult result;
         if(!StringUtils.validAddress(address)){

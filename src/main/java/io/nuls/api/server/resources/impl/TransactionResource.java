@@ -60,28 +60,34 @@ public class TransactionResource {
     }
 
     @GET
-    @Path("/address/list")
+    @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult list(@QueryParam("address") String address, @QueryParam("type") int type
+    public RpcClientResult addressList(@QueryParam("address") String address, @QueryParam("type") int type
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        RpcClientResult result;
-        if (!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed();
-            return result;
+        if(StringUtils.isNotBlank(address) && !StringUtils.validAddress(address)){
+            return RpcClientResult.getFailed();
+        }
+        if (pageNumber < 0 || pageSize < 0) {
+            return RpcClientResult.getFailed();
         }
         if (pageNumber == 0) {
             pageNumber = 1;
         }
         if (pageSize == 0) {
-            pageSize = 20;
+            pageSize = 10;
         } else if (pageSize > 100) {
             pageSize = 100;
         }
-        Map<String, String> param = new HashMap<>();
-        param.put("address", address);
+        Map<String, String> param = new HashMap<>(4);
+        if (StringUtils.isNotBlank(address)) {
+            param.put("address", address);
+        }
+        if(type > 0) {
+            param.put("type", String.valueOf(type));
+        }
         param.put("pageNumber", String.valueOf(pageNumber));
         param.put("pageSize", String.valueOf(pageSize));
-        param.put("type", String.valueOf(type));
+        RpcClientResult result;
         try {
             result = RestFulUtils.getInstance().get("/tx/address/list", param);
         } catch (Exception e) {
@@ -91,4 +97,63 @@ public class TransactionResource {
         return result;
     }
 
+    @GET
+    @Path("/block/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult blockList(@QueryParam("height") long height
+            , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
+        if(height < 0||pageNumber < 0 || pageSize < 0){
+            return RpcClientResult.getFailed();
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        RpcClientResult result;
+        Map<String, String> param = new HashMap<>(4);
+        param.put("height", String.valueOf(height));
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        try {
+            result = RestFulUtils.getInstance().get("/tx/block/list", param);
+        } catch (Exception e) {
+            result = RpcClientResult.getFailed();
+            Log.error(e);
+        }
+        return result;
+    }
+
+    @GET
+    @Path("/locked")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult locked(@QueryParam("address") String address
+            , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
+        if(!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0){
+            return RpcClientResult.getFailed();
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 10;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        Map<String, String> param = new HashMap<>(4);
+        param.put("address", address);
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result;
+        try {
+            result = RestFulUtils.getInstance().get("tx/locked", param);
+        } catch (Exception e) {
+            result = RpcClientResult.getFailed();
+            Log.error(e);
+        }
+        return result;
+    }
 }

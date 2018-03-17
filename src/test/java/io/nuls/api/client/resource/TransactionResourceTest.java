@@ -37,19 +37,43 @@ public class TransactionResourceTest {
     }
 
     @Test
-    @Ignore
     public void listTest(){
         Integer pageSize = 20;
         Integer pageNumber = 1;
         String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
-        int type = 1;
+        int type = 0;
         Map<String, String> param = new HashMap<>();
         param.put("address", address);
         param.put("pageNumber", String.valueOf(pageNumber));
         param.put("pageSize", String.valueOf(pageSize));
-        param.put("type", String.valueOf(type));
+        //param.put("type", String.valueOf(type));
+        RpcClientResult result = this.util.get("/tx/list",param);
+        System.out.println(result.toString());
+    }
 
-        RpcClientResult result = this.util.get("/tx/address/list",param);
+    @Test
+    public void blockTest(){
+        Integer pageSize = 20;
+        Integer pageNumber = 1;
+        String height = "0";
+        Map<String, String> param = new HashMap<>();
+        param.put("height",height);
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result = this.util.get("/tx/block/list",param);
+        System.out.println(result.toString());
+    }
+
+    @Test
+    public void lockedTest(){
+        Integer pageSize = 20;
+        Integer pageNumber = 1;
+        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        Map<String, String> param = new HashMap<>();
+        param.put("address", address);
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result = this.util.get("/tx/locked",param);
         System.out.println(result.toString());
     }
 
