@@ -6,12 +6,19 @@ import jersey.repackaged.com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
+import org.glassfish.grizzly.strategies.WorkerThreadIOStrategy;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.grizzly.utils.Charsets;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public enum ApiApplication {
     ENTRY;
@@ -38,7 +45,17 @@ public enum ApiApplication {
 
         server = new HttpServer();
         NetworkListener listener = new NetworkListener("grizzly2", ip, port);
-        listener.getTransport().getWorkerThreadPoolConfig().setThreadFactory((new ThreadFactoryBuilder()).setNameFormat("grizzly-http-server-%d").build());
+        TCPNIOTransport transport = listener.getTransport();
+        ThreadPoolConfig workerPool = ThreadPoolConfig.defaultConfig()
+                .setCorePoolSize(8)
+                .setMaxPoolSize(16)
+                .setQueueLimit(1000)
+                .setThreadFactory((new ThreadFactoryBuilder()).setNameFormat("grizzly-http-server-%d").build());
+        transport.configureBlocking(false);
+        transport.setSelectorRunnersCount(2);
+        transport.setWorkerThreadPoolConfig(workerPool);
+        transport.setIOStrategy(WorkerThreadIOStrategy.getInstance());
+        transport.setTcpNoDelay(true);
         listener.setSecure(false);
         server.addListener(listener);
 

@@ -54,6 +54,12 @@ public interface RpcConstant {
     String DEFAULT_REMOTE_URL = "nuls";
     String DEFAULT_REMOTE_SERVER = HTTP + DEFAULT_REMOTE_IP + COLON + DEFAULT_REMOTE_PORT + URI_SEPARATOR + DEFAULT_REMOTE_URL;
 
+    String REQUEST_FREQUENCY = "request.frequency";
+    String DEFAULT_REQUEST_FREQUENCY = "100";
+    String INTEGER = "java.lang.Integer";
+    String STRING = "java.lang.String";
+
+
 
     String CFG_RPC_SECTION = "api";
 
