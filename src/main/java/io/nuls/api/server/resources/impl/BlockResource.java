@@ -71,7 +71,7 @@ public class BlockResource {
             return RpcClientResult.getFailed();
         }
         try {
-            result = RestFulUtils.getInstance().get("/block/height/"+height, null);
+            result = RestFulUtils.getInstance().get("/block/height/" + height, null);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
@@ -80,12 +80,12 @@ public class BlockResource {
     }
 
     @GET
-    @Path("/bestheight")
+    @Path("/newest")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getBestBlockHeight() {
+    public RpcClientResult newest() {
         RpcClientResult result;
         try {
-            result = RestFulUtils.getInstance().get("/block/bestheight", null);
+            result = RestFulUtils.getInstance().get("/block/newest", null);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
@@ -93,19 +93,6 @@ public class BlockResource {
         return result;
     }
 
-    @GET
-    @Path("/besthash")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getBestBlockHash() {
-        RpcClientResult result;
-        try {
-            result = RestFulUtils.getInstance().get("/block/besthash", null);
-        } catch (Exception e) {
-            result = RpcClientResult.getFailed();
-            Log.error(e);
-        }
-        return result;
-    }
 
     @GET
     @Path("/header/height/{height}")
@@ -146,7 +133,7 @@ public class BlockResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getListByAddress(@QueryParam("address") String address, @QueryParam("type") int type
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
-        if(!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0){
+        if(!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0 || type < 1 || type > 2 ){
             return RpcClientResult.getFailed();
         }
         if (pageNumber == 0) {
@@ -161,6 +148,7 @@ public class BlockResource {
         param.put("address", address);
         param.put("pageNumber", String.valueOf(pageNumber));
         param.put("pageSize", String.valueOf(pageSize));
+        param.put("type", String.valueOf(type));
         RpcClientResult result;
         try {
             result = RestFulUtils.getInstance().get("/block/list/address", param);

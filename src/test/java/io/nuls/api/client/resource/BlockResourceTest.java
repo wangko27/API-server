@@ -30,7 +30,7 @@ public class BlockResourceTest {
 
     @Test
     public void loadBlockTest(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/0000202cf0fdc799312730d974a9153414fc4f1fb93bcba8038518425ae0a695c8054b",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/000020eeb6c5482fd017e463c249b3dd972c3cb32a255d90cd8596fb6bce5f034fff92",null);
         System.out.println(result.toString());
     }
 
@@ -41,16 +41,11 @@ public class BlockResourceTest {
     }
 
     @Test
-    public void getBestBlockHeight(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/bestheight",null);
+    public void newest(){
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/newest",null);
         System.out.println(result.toString());
     }
 
-    @Test
-    public void getBestBlockHash(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/bestheight",null);
-        System.out.println(result.toString());
-    }
 
     @Test
     public void getHeaderByHeight(){
@@ -60,7 +55,7 @@ public class BlockResourceTest {
 
     @Test
     public void getHeader(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/0000202cf0fdc799312730d974a9153414fc4f1fb93bcba8038518425ae0a695c8054b",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/000020eeb6c5482fd017e463c249b3dd972c3cb32a255d90cd8596fb6bce5f034fff92",null);
         System.out.println(result.toString());
     }
 
@@ -79,11 +74,13 @@ public class BlockResourceTest {
     public void getListByAddress(){
         Integer pageSize = 20;
         Integer pageNumber = 1;
-        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        String address = "2ChegErt2tJLC7Pp62p1wrqPz49w3Xo";
+        int type = 1;
         Map<String, String> param = new HashMap<>();
         param.put("address",address);
         param.put("pageNumber", String.valueOf(pageNumber));
         param.put("pageSize", String.valueOf(pageSize));
+        param.put("type", String.valueOf(type));
         RpcClientResult result = RestFulUtils.getInstance().get("/block/list/address",param);
         System.out.println(result.toString());
     }
