@@ -15,7 +15,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-@Path("/report")
+@Path("/")
 @Component
 public class ReportResource {
 
@@ -27,7 +27,7 @@ public class ReportResource {
     private TxHistoryBusiness txHistoryBusiness;
 
     @GET
-    @Path("/balance")
+    @Path("/address/balancelist")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult balance(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcClientResult result;
@@ -64,7 +64,7 @@ public class ReportResource {
     }
 
     @GET
-    @Path("/mined")
+    @Path("/address/minedlist")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult mined(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcClientResult result;
