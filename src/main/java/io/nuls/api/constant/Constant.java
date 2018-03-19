@@ -28,12 +28,15 @@ package io.nuls.api.constant;
  * @author Niels
  * @date 2017/10/9
  */
-public interface RpcConstant {
+public interface Constant {
     //version
     int RPC_MODULE_VERSION = 1111;
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;
 
+    String CFG_SYSTEM_LANGUAGE = "language";
+    String DEFAULT_LANGUAGE = "zh-cn";
+    String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
     String DEFAULT_ENCODING = "UTF-8";
     String PACKAGES = "io.nuls.api.server.resources.impl";
     String CFG_RPC_SERVER_IP = "server.ip";

@@ -24,7 +24,7 @@
 package io.nuls.api.fiter;
 
 
-import io.nuls.api.constant.RpcConstant;
+import io.nuls.api.constant.Constant;
 import io.nuls.api.counter.RequestCounter;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.PropertiesUtils;
@@ -57,7 +57,7 @@ public class ApiServerFilter implements ContainerRequestFilter, ContainerRespons
         } catch (ExecutionException e) {
             Log.warn("RequestCounter increment unsuccessful, remoteIP: " + remoteIP);
         }
-        if(count > Integer.valueOf(PropertiesUtils.readProperty(RpcConstant.REQUEST_FREQUENCY, RpcConstant.DEFAULT_REQUEST_FREQUENCY))) {
+        if(count > Integer.valueOf(PropertiesUtils.readProperty(Constant.REQUEST_FREQUENCY, Constant.DEFAULT_REQUEST_FREQUENCY))) {
             Log.warn("A service request has been rejected due to more frequently request("+count+"/s), remoteIP: " + remoteIP);
             RpcClientResult result = RpcClientResult.getFailed("Server Rejected.");
             requestContext.abortWith(Response.ok(result, MediaType.APPLICATION_JSON).build());

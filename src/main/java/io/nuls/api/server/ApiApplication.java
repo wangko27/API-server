@@ -1,6 +1,6 @@
 package io.nuls.api.server;
 
-import io.nuls.api.constant.RpcConstant;
+import io.nuls.api.constant.Constant;
 import io.nuls.api.utils.log.Log;
 import jersey.repackaged.com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -15,10 +15,6 @@ import org.glassfish.grizzly.utils.Charsets;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 public enum ApiApplication {
     ENTRY;
@@ -40,7 +36,7 @@ public enum ApiApplication {
         ServletRegistration servletRegistration = webappContext.addServlet("jersey-servlet", ServletContainer.class);
 
         servletRegistration.setInitParameter("javax.ws.rs.Application","io.nuls.api.server.resources.impl.NulsResourceConfig");
-        servletRegistration.setInitParameter("jersey.config.server.provider.packages", RpcConstant.PACKAGES);
+        servletRegistration.setInitParameter("jersey.config.server.provider.packages", Constant.PACKAGES);
         servletRegistration.addMapping("/*");
 
         server = new HttpServer();
@@ -66,7 +62,7 @@ public enum ApiApplication {
 
         try {
             server.start();
-            serverUri = RpcConstant.HTTP + ip + RpcConstant.COLON + port + RpcConstant.URI_SEPARATOR + moduleUrl;
+            serverUri = Constant.HTTP + ip + Constant.COLON + port + Constant.URI_SEPARATOR + moduleUrl;
             Log.info("http restFul server is started!url is " + serverUri);
         } catch (IOException e) {
             Log.error(e);

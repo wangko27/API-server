@@ -24,7 +24,7 @@
 package io.nuls.api.i18n;
 
 import io.nuls.api.constant.ErrorCode;
-import io.nuls.api.constant.RpcConstant;
+import io.nuls.api.constant.Constant;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 
@@ -43,7 +43,7 @@ import java.util.Properties;
 public class I18nUtils {
 
     private static final Map<String, Properties> ALL_MAPPING = new HashMap<>();
-    private static Properties nowMapping = new Properties();
+    private static Properties nowMapping = null;
     /**
      * default language is English
      */
@@ -63,7 +63,7 @@ public class I18nUtils {
                 for (File file : folderFile.listFiles()) {
                     InputStream is = new FileInputStream(file);
                     Properties prop = new Properties();
-                    prop.load(new InputStreamReader(is, RpcConstant.DEFAULT_ENCODING));
+                    prop.load(new InputStreamReader(is, Constant.DEFAULT_ENCODING));
                     String key = file.getName().replace(".properties", "");
                     ALL_MAPPING.put(key, prop);
                 }

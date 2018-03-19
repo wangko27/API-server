@@ -1,6 +1,8 @@
 package io.nuls.api.server;
 
+import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.i18n.I18nUtils;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.log.Log;
 import org.junit.After;
@@ -22,7 +24,7 @@ public class ConnectionTest {
     private Client client;
 
     @Before
-    public void init() {
+    public void init() throws Exception {
         client = ClientBuilder.newClient();
         serverUri = "http://127.0.0.1:6666/test";
         RestFulUtils.getInstance().init(serverUri);
@@ -46,7 +48,7 @@ public class ConnectionTest {
         }
         RpcClientResult result = get("/", null);
         Log.debug(result.toString());
-        Assert.assertEquals("SUCCESS", result.getMsg());
+        Assert.assertEquals("Success", result.getMsg());
     }
 
     private RpcClientResult get(String path, Map<String, String> params) {
