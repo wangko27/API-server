@@ -1,5 +1,6 @@
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
@@ -23,7 +24,7 @@ public class ConsensusResource {
     public RpcClientResult info(@PathParam("address") String address){
         RpcClientResult result;
         if(!StringUtils.validAddress(address)){
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try {
             result = RestFulUtils.getInstance().get("/consensus/info/" + address, null);

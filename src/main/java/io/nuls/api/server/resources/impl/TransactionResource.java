@@ -23,6 +23,7 @@
  */
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
@@ -48,7 +49,7 @@ public class TransactionResource {
     public RpcClientResult load(@PathParam("hash") String hash) {
         RpcClientResult result;
         if (!StringUtils.validHash(hash)) {
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try {
             result = RestFulUtils.getInstance().get("/tx/hash/"+hash, null);
@@ -65,10 +66,10 @@ public class TransactionResource {
     public RpcClientResult addressList(@QueryParam("address") String address, @QueryParam("type") int type
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         if(StringUtils.isNotBlank(address) && !StringUtils.validAddress(address)){
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber < 0 || pageSize < 0) {
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;
@@ -103,7 +104,7 @@ public class TransactionResource {
     public RpcClientResult blockList(@QueryParam("height") long height
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         if(height < 0||pageNumber < 0 || pageSize < 0){
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;
@@ -133,7 +134,7 @@ public class TransactionResource {
     public RpcClientResult locked(@QueryParam("address") String address
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         if(!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0){
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;

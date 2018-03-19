@@ -23,6 +23,7 @@
  */
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
@@ -50,7 +51,7 @@ public class BlockResource {
     public RpcClientResult loadBlock(@PathParam("hash") String hash) {
         RpcClientResult result;
         if (!StringUtils.validHash(hash)) {
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try {
             result = RestFulUtils.getInstance().get("/block/hash/"+hash, null);
@@ -68,7 +69,7 @@ public class BlockResource {
     public RpcClientResult getBlock(@PathParam("height") Long height) {
         RpcClientResult result;
         if (height < 0) {
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try {
             result = RestFulUtils.getInstance().get("/block/height/" + height, null);
@@ -100,7 +101,7 @@ public class BlockResource {
     public RpcClientResult getHeaderByHeight(@PathParam("height") Integer height) {
         RpcClientResult result;
         if (height < 0) {
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try {
             result = RestFulUtils.getInstance().get("/block/header/height/"+height, null);
@@ -117,7 +118,7 @@ public class BlockResource {
     public RpcClientResult getHeader(@PathParam("hash") String hash) {
         RpcClientResult result;
         if (!StringUtils.validHash(hash)) {
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try {
             result = RestFulUtils.getInstance().get("/block/header/hash/"+hash, null);
@@ -134,7 +135,7 @@ public class BlockResource {
     public RpcClientResult getListByAddress(@QueryParam("address") String address, @QueryParam("type") int type
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         if(!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0 || type < 1 || type > 2 ){
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;
@@ -164,7 +165,7 @@ public class BlockResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         if(pageNumber < 0 || pageSize < 0){
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;
