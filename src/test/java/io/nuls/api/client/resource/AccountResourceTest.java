@@ -19,11 +19,9 @@ public class AccountResourceTest {
 
     private RestFulUtils util;
     private String serverUri;
-    private Client client;
 
     @Before
     public void init(){
-        client = ClientBuilder.newClient();
         serverUri = "http://192.168.1.223:8765/nuls";
         //serverUri = "http://127.0.0.1:8001/nuls";
         this.util = RestFulUtils.getInstance();
