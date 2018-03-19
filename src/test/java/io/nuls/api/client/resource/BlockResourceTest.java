@@ -30,13 +30,13 @@ public class BlockResourceTest {
 
     @Test
     public void loadBlockTest(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/000020eeb6c5482fd017e463c249b3dd972c3cb32a255d90cd8596fb6bce5f034fff92",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/000020585b478c2a912ced102875d5f8ceeb36b04f5e1e825b00c13c368e87a0bcc147",null);
         System.out.println(result.toString());
     }
 
     @Test
     public void getBlockTest(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/height/0",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/height/w5",null);
         System.out.println(result.toString());
     }
 
@@ -55,7 +55,7 @@ public class BlockResourceTest {
 
     @Test
     public void getHeader(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/000020eeb6c5482fd017e463c249b3dd972c3cb32a255d90cd8596fb6bce5f034fff92",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/000020585b478c2a912ced102875d5f8ceeb36b04f5e1e825b00c13c368e87a0bcc147",null);
         System.out.println(result.toString());
     }
 

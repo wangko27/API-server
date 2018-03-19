@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -30,18 +32,19 @@ public class AccountResourceTest {
 
     @Test
     public void accountTest(){
-        RpcClientResult result = this.util.get("/account/2CdYovbhsiKGW18HRNiFuLQva1Voz6i", null);
+        RpcClientResult result = this.util.get("/account/2CYbFsnYkfry3uQS3Cx7pxSybhQP5hu", null);
         System.out.println(result.toString());
     }
 
     @Test
-    public void balanceTest(){
-        RpcClientResult result = this.util.get("/account/balance/2CdYovbhsiKGW18HRNiFuLQva1Voz6i", null);
+    public void utxoTest(){
+        String address = "2CYbFsnYkfry3uQS3Cx7pxSybhQP5hu";
+        long amount = 10000000;
+        Map<String, String> param = new HashMap<>(2);
+        param.put("address", address);
+        param.put("amount", String.valueOf(amount));
+        RpcClientResult result = this.util.get("/account/utxo", param);
         System.out.println(result.toString());
     }
 
-    @After
-    public void stop(){
-        System.out.println("end...");
-    }
 }

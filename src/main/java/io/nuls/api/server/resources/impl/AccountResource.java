@@ -1,16 +1,15 @@
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.entity.Na;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -49,22 +48,23 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/balance/{address}")
+    @Path("/utxo")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult balance(@PathParam("address") String address){
-        RpcClientResult result;
-        if(!StringUtils.validAddress(address)){
+    public RpcClientResult utxo(@QueryParam("address") String address, @QueryParam("amount") long amount){
+        if(!StringUtils.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE){
             return RpcClientResult.getFailed();
         }
-        try{
-            result = RestFulUtils.getInstance().get("/account/balance/" + address, null);
-            System.out.println(result.getData() instanceof Map);
-        }catch (Exception e){
+        RpcClientResult result;
+        Map<String, String> param = new HashMap<>(2);
+        param.put("address", address);
+        param.put("amount", String.valueOf(amount));
+        try {
+            result = RestFulUtils.getInstance().get("/account/utxo", param);
+        } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
         }
         return result;
     }
-
 
 }

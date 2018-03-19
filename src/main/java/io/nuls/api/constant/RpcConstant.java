@@ -34,6 +34,7 @@ public interface RpcConstant {
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;
 
+    String DEFAULT_ENCODING = "UTF-8";
     String PACKAGES = "io.nuls.api.server.resources.impl";
     String CFG_RPC_SERVER_IP = "server.ip";
     String CFG_RPC_SERVER_PORT ="server.port" ;
