@@ -1,5 +1,6 @@
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.counter.QueryCounter;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.business.*;
@@ -36,7 +37,7 @@ public class ReportResource {
     public RpcClientResult balance(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcClientResult result;
         if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed();
+            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;
         }
         if (pageNumber == 0) {
@@ -73,7 +74,7 @@ public class ReportResource {
     public RpcClientResult mined(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcClientResult result;
         if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed();
+            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;
         }
         if (pageNumber == 0) {
