@@ -1,5 +1,6 @@
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.Na;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
@@ -26,16 +27,16 @@ public class AccountResource {
     public RpcClientResult account(@PathParam("address") String address){
         RpcClientResult result;
         if(!StringUtils.validAddress(address)){
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try{
             result = RestFulUtils.getInstance().get("/account/" + address, null);
             if(!result.isSuccess()){
-                return RpcClientResult.getFailed();
+                return result;
             }
             RpcClientResult resultBalance = RestFulUtils.getInstance().get("/account/balance/" + address, null);
             if(!resultBalance.isSuccess()){
-                return RpcClientResult.getFailed();
+                return result;
             }
             Map map = (Map)result.getData();
             map.putAll((Map)resultBalance.getData());
@@ -52,7 +53,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult utxo(@QueryParam("address") String address, @QueryParam("amount") long amount){
         if(!StringUtils.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE){
-            return RpcClientResult.getFailed();
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         RpcClientResult result;
         Map<String, String> param = new HashMap<>(2);
