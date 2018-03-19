@@ -4,6 +4,7 @@ import io.nuls.api.counter.QueryCounter;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dto.Page;
+import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Path("/")
 @Component
@@ -91,6 +94,15 @@ public class ReportResource {
             minedTopParam.setStart(page.getStart());
             minedTopParam.setCount(pageSize);
             List<MinedTop> list = minedTopBusiness.selectMinedTopList(minedTopParam);
+
+            RpcClientResult status = RestFulUtils.getInstance().get("/address/consensuslist", null);
+            List<Map<String, String>> statusList = (List<Map<String, String>>) status.getData();
+            if(statusList != null) {
+                Map<String, String> statusMap = statusList.stream()
+                        .collect(Collectors.toMap(map -> map.get("address"), map -> map.get("consensusStatus")));
+                list.stream().forEach(minedTop -> minedTop.setConsensusStatus(statusMap.get(minedTop.getConsensusAddress())));
+            }
+
             page.setList(list);
             result = RpcClientResult.getSuccess();
             result.setData(page);

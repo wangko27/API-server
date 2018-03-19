@@ -8,7 +8,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * (necessary) need a running server, otherwise pls skip it.
@@ -26,9 +28,9 @@ public class ReportResourceTest {
         Map<String, String> map = new HashMap<>();
         map.put("pageNumber", "1");
         map.put("pageSize", "101");
-        RpcClientResult result = RestFulUtils.getInstance().get("/report/balance", map);
+        RpcClientResult result = RestFulUtils.getInstance().get("/address/balancelist", map);
         Log.debug(result.toString());
-        Assert.assertEquals("SUCCESS", result.getMsg());
+        Assert.assertEquals("SYS000", result.getCode());
     }
 
     @Test
@@ -36,15 +38,15 @@ public class ReportResourceTest {
         Map<String, String> map = new HashMap<>();
         map.put("pageNumber", "2");
         map.put("pageSize", "30");
-        RpcClientResult result = RestFulUtils.getInstance().get("/report/mined", map);
+        RpcClientResult result = RestFulUtils.getInstance().get("/address/minedlist", map);
         Log.debug(result.toString());
-        Assert.assertEquals("SUCCESS", result.getMsg());
+        Assert.assertEquals("SYS000", result.getCode());
     }
 
     @Test
     public void txHistoryTest() {
-        RpcClientResult result = RestFulUtils.getInstance().get("/report/txhistory", null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/txhistory", null);
         Log.debug(result.toString());
-        Assert.assertEquals("SUCCESS", result.getMsg());
+        Assert.assertEquals("SYS000", result.getCode());
     }
 }
