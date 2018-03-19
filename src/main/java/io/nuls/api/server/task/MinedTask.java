@@ -1,5 +1,6 @@
 package io.nuls.api.server.task;
 
+import io.nuls.api.counter.QueryCounter;
 import io.nuls.api.server.dao.ReportDao;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ public class MinedTask {
     public void execute() {
         Log.debug("start to execute mined report");
         reportDao.mined();
+        QueryCounter.setMinedModify(1);
         Log.debug("the mined report completed");
     }
 }

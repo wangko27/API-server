@@ -1,5 +1,6 @@
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.counter.QueryCounter;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dto.Page;
@@ -47,7 +48,7 @@ public class ReportResource {
             Page<BalanceTop> page = new Page<>();
             page.setPageNumber(pageNumber);
             page.setPageSize(pageSize);
-            page.setTotal(balanceTopBusiness.countBalanceTopList(null));
+            page.setTotal(QueryCounter.getBalance(balanceTopBusiness));
             BalanceTopParam balanceTopParam = new BalanceTopParam();
             balanceTopParam.setOrderByClause("id asc");
             balanceTopParam.setStart(page.getStart());
@@ -84,7 +85,7 @@ public class ReportResource {
             Page<MinedTop> page = new Page<>();
             page.setPageNumber(pageNumber);
             page.setPageSize(pageSize);
-            page.setTotal(minedTopBusiness.countMinedTopList(null));
+            page.setTotal(QueryCounter.getMined(minedTopBusiness));
             MinedTopParam minedTopParam = new MinedTopParam();
             minedTopParam.setOrderByClause("id asc");
             minedTopParam.setStart(page.getStart());

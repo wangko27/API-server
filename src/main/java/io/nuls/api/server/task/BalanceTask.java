@@ -1,5 +1,6 @@
 package io.nuls.api.server.task;
 
+import io.nuls.api.counter.QueryCounter;
 import io.nuls.api.server.dao.ReportDao;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ public class BalanceTask {
     public void execute() {
         Log.debug("start to execute balance report");
         reportDao.balance();
+        QueryCounter.setBalanceModify(1);
         Log.debug("the balance report completed");
     }
 }

@@ -16,11 +16,10 @@ public class RequestCounter {
                 .expireAfterWrite(1, TimeUnit.SECONDS)
                 .initialCapacity(10)
                 .maximumSize(100)
-                .recordStats()
                 .build(
                         new CacheLoader<String, AtomicInteger>() {
                             @Override
-                            public AtomicInteger load(String key) throws Exception {
+                            public AtomicInteger load(String key) {
                                 Log.info("load ip " + key);
                                 return new AtomicInteger(0);
                             }
