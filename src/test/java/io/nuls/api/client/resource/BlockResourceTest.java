@@ -3,6 +3,7 @@ package io.nuls.api.client.resource;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.client.Client;
@@ -15,17 +16,15 @@ import java.util.Map;
  * @date: 2018/3/16
  */
 public class BlockResourceTest {
-    private RestFulUtils util;
-    private String serverUri;
-    private Client client;
+    private static RestFulUtils util;
+    private static String serverUri;
 
-    @Before
-    public void init(){
-        client = ClientBuilder.newClient();
+    @BeforeClass
+    public static void init(){
         serverUri = "http://192.168.1.223:8765/nuls";
         //serverUri = "http://127.0.0.1:8001/nuls";
-        this.util = RestFulUtils.getInstance();
-        this.util.init(serverUri);
+        util = RestFulUtils.getInstance();
+       util.init(serverUri);
     }
 
     @Test
@@ -36,7 +35,7 @@ public class BlockResourceTest {
 
     @Test
     public void getBlockTest(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/height/w5",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/height/5",null);
         System.out.println(result.toString());
     }
 

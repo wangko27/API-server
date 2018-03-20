@@ -3,6 +3,7 @@ package io.nuls.api.client.resource;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -10,14 +11,14 @@ import org.junit.Test;
  * @date: 2018/3/19
  */
 public class ConsensusResourceTest {
-    private RestFulUtils util;
-    private String serverUri;
+    private static RestFulUtils util;
+    private static String serverUri;
 
-    @Before
-    public void init(){
+    @BeforeClass
+    public static void init(){
         serverUri = "http://192.168.1.223:8765/nuls";
-        this.util = RestFulUtils.getInstance();
-        this.util.init(serverUri);
+        util = RestFulUtils.getInstance();
+        util.init(serverUri);
     }
 
     @Test
