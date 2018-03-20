@@ -25,10 +25,10 @@ package io.nuls.api.server.resources.impl;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.nuls.api.fiter.ApiServerFilter;
+import io.nuls.api.fiter.CorsFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
-import org.springframework.web.filter.CorsFilter;
 
 /**
  *

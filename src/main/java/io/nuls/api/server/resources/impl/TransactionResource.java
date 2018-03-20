@@ -90,7 +90,7 @@ public class TransactionResource {
         param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result;
         try {
-            result = RestFulUtils.getInstance().get("/tx/address/list", param);
+            result = RestFulUtils.getInstance().get("/tx/list", param);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
@@ -129,7 +129,7 @@ public class TransactionResource {
     }
 
     @GET
-    @Path("/locked")
+    @Path("/utxo/locked")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult locked(@QueryParam("address") String address
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
@@ -150,7 +150,7 @@ public class TransactionResource {
         param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result;
         try {
-            result = RestFulUtils.getInstance().get("tx/locked", param);
+            result = RestFulUtils.getInstance().get("tx/utxo/locked", param);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
