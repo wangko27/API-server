@@ -36,8 +36,7 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
- * Created by Niels on 2017/10/31.
- *
+ * (necessary) need a running server, otherwise pls skip it.
  */
 public class RestFulUtilsTest {
     private RestFulUtils util;
@@ -47,18 +46,15 @@ public class RestFulUtilsTest {
     @Before
     public void init() {
         client = ClientBuilder.newClient();
-        serverUri = "http://127.0.0.1:8765/nuls";
+        serverUri = "http://192.168.1.201:8001/nuls";
         this.util = RestFulUtils.getInstance();
         this.util.init(serverUri);
     }
 
-    /**
-     * (necessary) need a running server, otherwise pls comment it.
-     */
     @Test
     public void test() {
-        //RpcClientResult result = this.util.get("/", null);
-        //System.out.println(result.toString());
+        RpcClientResult result = this.util.get("/", null);
+        System.out.println(result.toString());
     }
 
     private String get(String path, Map<String, String> params) {

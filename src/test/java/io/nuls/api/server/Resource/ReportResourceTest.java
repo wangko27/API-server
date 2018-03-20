@@ -8,9 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * (necessary) need a running server, otherwise pls skip it.
@@ -50,3 +48,4 @@ public class ReportResourceTest {
         Assert.assertEquals("SYS000", result.getCode());
     }
 }
+
