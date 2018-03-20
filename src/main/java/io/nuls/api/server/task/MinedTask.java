@@ -2,6 +2,7 @@ package io.nuls.api.server.task;
 
 import io.nuls.api.counter.QueryCounter;
 import io.nuls.api.server.dao.ReportDao;
+import io.nuls.api.server.resources.QueryHelper;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ public class MinedTask {
         Log.debug("start to execute mined report");
         reportDao.mined();
         QueryCounter.setMinedModify(1);
+        QueryHelper.HELPER.clear();
         Log.debug("the mined report completed");
     }
 }
