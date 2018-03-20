@@ -1,10 +1,14 @@
 package io.nuls.api.server.resources.impl;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.counter.QueryCounter;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dto.Page;
+import io.nuls.api.server.resources.QueryHelper;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
@@ -18,6 +22,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Path("/")
@@ -35,7 +42,7 @@ public class ReportResource {
     @Path("/address/balancelist")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult balance(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        RpcClientResult result;
+        RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;
@@ -54,10 +61,29 @@ public class ReportResource {
             page.setPageSize(pageSize);
             page.setTotal(QueryCounter.getBalance(balanceTopBusiness));
             BalanceTopParam balanceTopParam = new BalanceTopParam();
-            balanceTopParam.setOrderByClause("id asc");
-            balanceTopParam.setStart(page.getStart());
-            balanceTopParam.setCount(pageSize);
-            List<BalanceTop> list = balanceTopBusiness.selectBalanceTopList(balanceTopParam);
+            List<BalanceTop> list;
+            // first page, default query way -> eg. limit 0, 20
+            if(pageNumber == 1) {
+                balanceTopParam.setOrderByClause("id asc");
+                balanceTopParam.setStart(page.getStart());
+                balanceTopParam.setCount(pageSize);
+                list = balanceTopBusiness.selectBalanceTopList(balanceTopParam);
+            } else {
+                // page 2 or larger page, skipping id query way -> eg. where id > 20 limit 20
+                balanceTopParam.setOrderByClause("id asc");
+                BalanceTopParam.Criteria criteria = balanceTopParam.createCriteria();
+                Long prePageMaxId = QueryHelper.HELPER.getCache(pageSize + "-balancelist-"+(pageNumber-1));
+                if(prePageMaxId != null) {
+                    balanceTopParam.setStart(pageSize);
+                    criteria.andIdGreaterThan(prePageMaxId);
+                } else {
+                    balanceTopParam.setStart(page.getStart());
+                    balanceTopParam.setCount(pageSize);
+                }
+                list = balanceTopBusiness.selectBalanceTopList(balanceTopParam);
+            }
+            if(list != null && list.size() > 0)
+                QueryHelper.HELPER.putCache(pageSize + "-balancelist-"+pageNumber, list.get(list.size() - 1).getId());
             page.setList(list);
             result = RpcClientResult.getSuccess();
             result.setData(page);
@@ -91,17 +117,42 @@ public class ReportResource {
             page.setPageSize(pageSize);
             page.setTotal(QueryCounter.getMined(minedTopBusiness));
             MinedTopParam minedTopParam = new MinedTopParam();
-            minedTopParam.setOrderByClause("id asc");
-            minedTopParam.setStart(page.getStart());
-            minedTopParam.setCount(pageSize);
-            List<MinedTop> list = minedTopBusiness.selectMinedTopList(minedTopParam);
+            List<MinedTop> list;
 
-            RpcClientResult status = RestFulUtils.getInstance().get("/address/consensuslist", null);
-            List<Map<String, String>> statusList = (List<Map<String, String>>) status.getData();
-            if(statusList != null) {
-                Map<String, String> statusMap = statusList.stream()
-                        .collect(Collectors.toMap(map -> map.get("address"), map -> map.get("consensusStatus")));
-                list.stream().forEach(minedTop -> minedTop.setConsensusStatus(statusMap.get(minedTop.getConsensusAddress())));
+            // first page, default query way -> eg. limit 0, 20
+            if(pageNumber == 1) {
+                minedTopParam.setOrderByClause("id asc");
+                minedTopParam.setStart(page.getStart());
+                minedTopParam.setCount(pageSize);
+                list = minedTopBusiness.selectMinedTopList(minedTopParam);
+            } else {
+                // page 2 or larger page query way -> eg. where id > 20 limit 20
+                minedTopParam.setOrderByClause("id asc");
+                MinedTopParam.Criteria criteria = minedTopParam.createCriteria();
+                Long prePageMaxId = QueryHelper.HELPER.getCache(pageSize + "-minedlist-"+(pageNumber-1));
+                if(prePageMaxId != null) {
+                    minedTopParam.setStart(pageSize);
+                    criteria.andIdGreaterThan(prePageMaxId);
+                } else {
+                    minedTopParam.setStart(page.getStart());
+                    minedTopParam.setCount(pageSize);
+                }
+                list = minedTopBusiness.selectMinedTopList(minedTopParam);
+            }
+            if(list != null && list.size() > 0)
+                QueryHelper.HELPER.putCache(pageSize + "-minedlist-"+pageNumber, list.get(list.size() - 1).getId());
+
+            try {
+                RpcClientResult status = RestFulUtils.getInstance().get("/address/consensuslist", null);
+                List<Map<String, String>> statusList = (List<Map<String, String>>) status.getData();
+                if(statusList != null) {
+                    Map<String, String> statusMap = statusList.stream()
+                            .collect(Collectors.toMap(map -> map.get("address"), map -> map.get("consensusStatus")));
+                    list.stream().forEach(minedTop -> minedTop.setConsensusStatus(statusMap.get(minedTop.getConsensusAddress())));
+                }
+            } catch (Exception e) {
+                Log.warn("can not get consensuslist.", e);
+                // skip
             }
 
             page.setList(list);
