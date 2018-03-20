@@ -2,12 +2,8 @@ package io.nuls.api.client.resource;
 
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -2,7 +2,6 @@ package io.nuls.api.client.resource;
 
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
