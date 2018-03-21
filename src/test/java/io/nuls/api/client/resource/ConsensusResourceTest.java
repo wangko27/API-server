@@ -21,8 +21,8 @@ public class ConsensusResourceTest {
     }
 
     @Test
-    public void infoTest(){
-        RpcClientResult result = this.util.get("/consensus/info/2ChegErt2tJLC7Pp62p1wrqPz49w3Xo", null);
+    public void addressTest(){
+        RpcClientResult result = this.util.get("/consensus/address/2ChegErt2tJLC7Pp62p1wrqPz49w3Xo", null);
         System.out.println(result.toString());
     }
 }

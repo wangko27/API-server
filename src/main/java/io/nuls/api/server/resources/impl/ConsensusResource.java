@@ -20,14 +20,14 @@ import javax.ws.rs.PathParam;
 public class ConsensusResource {
 
     @GET
-    @Path("/info/{address}")
+    @Path("/address/{address}")
     public RpcClientResult info(@PathParam("address") String address){
         RpcClientResult result;
         if(!StringUtils.validAddress(address)){
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try {
-            result = RestFulUtils.getInstance().get("/consensus/info/" + address, null);
+            result = RestFulUtils.getInstance().get("/consensus/address/" + address, null);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
