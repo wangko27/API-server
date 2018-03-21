@@ -11,17 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:ApplicationContext.xml")
 @Transactional
-public class ReportDaoTest {
+public class ReportDAOTest {
 
     @Autowired
-    private ReportDao reportDao;
+    private ReportDAO reportDAO;
 
     @Test
     public void testTaskDB() {
         try {
-            reportDao.txHistory();
-            reportDao.mined();
-            reportDao.balance();
+            reportDAO.txHistory();
+            reportDAO.mined();
+            reportDAO.balance();
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();

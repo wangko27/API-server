@@ -1,7 +1,8 @@
 package io.nuls.api.server.task;
 
 import io.nuls.api.counter.QueryCounter;
-import io.nuls.api.server.dao.ReportDao;
+import io.nuls.api.server.dao.ReportDAO;
+import io.nuls.api.server.resources.QueryHelper;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,13 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class BalanceTask {
 
     @Autowired
-    private ReportDao reportDao;
+    private ReportDAO reportDAO;
 
     @Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
     public void execute() {
         Log.debug("start to execute balance report");
-        reportDao.balance();
-        QueryCounter.setBalanceModify(1);
+        reportDAO.balance();
+        TaskHelper.HELPER.queryReset(this);
         Log.debug("the balance report completed");
     }
 }
