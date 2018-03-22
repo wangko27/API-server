@@ -2,6 +2,7 @@ package io.nuls.api.client.resource;
 
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import java.util.HashMap;
@@ -27,18 +28,21 @@ public class BlockResourceTest {
     public void loadBlockTest(){
         RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/000020585b478c2a912ced102875d5f8ceeb36b04f5e1e825b00c13c368e87a0bcc147",null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
     public void getBlockTest(){
         RpcClientResult result = RestFulUtils.getInstance().get("/block/height/5",null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
     public void newest(){
         RpcClientResult result = RestFulUtils.getInstance().get("/block/newest",null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
 
@@ -46,12 +50,14 @@ public class BlockResourceTest {
     public void getHeaderByHeight(){
         RpcClientResult result = RestFulUtils.getInstance().get("/block/header/height/9",null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
     public void getHeader(){
         RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/000020585b478c2a912ced102875d5f8ceeb36b04f5e1e825b00c13c368e87a0bcc147",null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
@@ -63,6 +69,7 @@ public class BlockResourceTest {
         param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result = RestFulUtils.getInstance().get("/block/list",param);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
@@ -78,5 +85,6 @@ public class BlockResourceTest {
         param.put("type", String.valueOf(type));
         RpcClientResult result = RestFulUtils.getInstance().get("/block/list/address",param);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 }

@@ -2,6 +2,7 @@ package io.nuls.api.client.resource;
 
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class AccountResourceTest {
     public void accountTest(){
         RpcClientResult result = this.util.get("/account/2CYbFsnYkfry3uQS3Cx7pxSybhQP5hu", null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
@@ -39,6 +41,7 @@ public class AccountResourceTest {
         param.put("amount", String.valueOf(amount));
         RpcClientResult result = this.util.get("/account/utxo", param);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
 }

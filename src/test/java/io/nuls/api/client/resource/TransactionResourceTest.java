@@ -26,6 +26,7 @@ public class TransactionResourceTest {
     public void loadTest(){
         RpcClientResult result = this.util.get("/tx/hash/0000205af03534f8ddc28a6918f3d0c4d3c57d41abca067589b9d70ce6e2c546a42f2f",null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
@@ -41,6 +42,7 @@ public class TransactionResourceTest {
         //param.put("type", String.valueOf(type));
         RpcClientResult result = this.util.get("/tx/list",param);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
@@ -54,6 +56,7 @@ public class TransactionResourceTest {
         param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result = this.util.get("/tx/block/list",param);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
@@ -67,6 +70,7 @@ public class TransactionResourceTest {
         param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result = this.util.get("/tx/utxo/locked",param);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
 }

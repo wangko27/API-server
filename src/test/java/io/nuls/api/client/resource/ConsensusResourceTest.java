@@ -2,6 +2,7 @@ package io.nuls.api.client.resource;
 
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -28,6 +29,7 @@ public class ConsensusResourceTest {
         String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
         RpcClientResult result = this.util.get("/consensus/agent/address/" + address, null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
@@ -41,18 +43,21 @@ public class ConsensusResourceTest {
         param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result = this.util.get("/consensus/agent/list", param);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
     public void queryAllOfAgentStatusTest(){
         RpcClientResult result = this.util.get("/consensus/agent/status", null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
     public void queryAllAgentStatisticsTest(){
         RpcClientResult result = this.util.get("/consensus", null);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
@@ -67,5 +72,6 @@ public class ConsensusResourceTest {
         //param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result = this.util.get("/consensus/deposit/address/"+ address, param);
         System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
     }
 }
