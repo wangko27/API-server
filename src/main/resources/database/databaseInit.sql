@@ -146,8 +146,8 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `alias` (
-  `alias` VARCHAR(20) NOT NULL,
-  `address` varchar(30) NOT NULL,
+  `alias` VARCHAR(40) NOT NULL,
+  `address` varchar(40) NOT NULL,
   `status` tinyint(1),
   PRIMARY KEY (`alias`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
