@@ -5,6 +5,9 @@ import io.nuls.api.utils.RestFulUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author: Charlie
  * @date: 2018/3/19
@@ -21,8 +24,48 @@ public class ConsensusResourceTest {
     }
 
     @Test
-    public void addressTest(){
-        RpcClientResult result = this.util.get("/consensus/address/2ChegErt2tJLC7Pp62p1wrqPz49w3Xo", null);
+    public void queryAgentTest(){
+        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        RpcClientResult result = this.util.get("/consensus/agent/address/" + address, null);
+        System.out.println(result.toString());
+    }
+
+    @Test
+    public void queryAgentListTest(){
+        Integer pageSize = 20;
+        Integer pageNumber = 1;
+        //String keyword = "keyword";
+        //String sort = "address";
+        Map<String, String> param = new HashMap<>();
+        param.put("pageNumber", String.valueOf(pageNumber));
+        param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result = this.util.get("/consensus/agent/list", param);
+        System.out.println(result.toString());
+    }
+
+    @Test
+    public void queryAllOfAgentStatusTest(){
+        RpcClientResult result = this.util.get("/consensus/agent/status", null);
+        System.out.println(result.toString());
+    }
+
+    @Test
+    public void queryAllAgentStatisticsTest(){
+        RpcClientResult result = this.util.get("/consensus", null);
+        System.out.println(result.toString());
+    }
+
+    @Test
+    public void queryDepositByAddressTest(){
+        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        String agentAddress = "";
+        Integer pageSize = 20;
+        Integer pageNumber = 1;
+        Map<String, String> param = new HashMap<>();
+        param.put("address", address);
+        //param.put("pageNumber", String.valueOf(pageNumber));
+        //param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result = this.util.get("/consensus/deposit/address/"+ address, param);
         System.out.println(result.toString());
     }
 }
