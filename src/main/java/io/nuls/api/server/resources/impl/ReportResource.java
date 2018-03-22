@@ -143,15 +143,14 @@ public class ReportResource {
                 QueryHelper.HELPER.putCache(pageSize + "-minedlist-"+pageNumber, list.get(list.size() - 1).getId());
 
             try {
-                RpcClientResult status = RestFulUtils.getInstance().get("/address/consensuslist", null);
-                List<Map<String, String>> statusList = (List<Map<String, String>>) status.getData();
-                if(statusList != null) {
-                    Map<String, String> statusMap = statusList.stream()
-                            .collect(Collectors.toMap(map -> map.get("address"), map -> map.get("consensusStatus")));
+                RpcClientResult status = RestFulUtils.getInstance().get("/consensus/agent/status", null);
+                Map<String, String> statusMap = (Map<String, String>) status.getData();
+                if(statusMap != null) {
+                    //Map<String, String> statusMap = statusList.stream() .collect(Collectors.toMap(map -> map.get("address"), map -> map.get("consensusStatus")));
                     list.stream().forEach(minedTop -> minedTop.setConsensusStatus(statusMap.get(minedTop.getConsensusAddress())));
                 }
             } catch (Exception e) {
-                Log.warn("can not get consensuslist.", e);
+                Log.warn("can not get consensus status list.", e);
                 // skip
             }
 
