@@ -24,14 +24,14 @@ public class ConsensusResource {
 
 
     @GET
-    @Path("/agent/address/{address}")
-    public RpcClientResult queryAgent(@PathParam("address") String address){
-        if(!StringUtils.validAddress(address)){
+    @Path("/agent/{agentAddress}")
+    public RpcClientResult queryAgent(@PathParam("agentAddress") String agentAddress){
+        if(!StringUtils.validAddress(agentAddress)){
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         RpcClientResult result;
         try {
-            result = RestFulUtils.getInstance().get("/consensus/agent/address/" + address, null);
+            result = RestFulUtils.getInstance().get("/consensus/agent/" + agentAddress, null);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

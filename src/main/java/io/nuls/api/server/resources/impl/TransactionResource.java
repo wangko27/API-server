@@ -63,9 +63,12 @@ public class TransactionResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult addressList(@QueryParam("address") String address, @QueryParam("type") int type
-            , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+    public RpcClientResult addressList(@QueryParam("blockHeight") Long blockHeight, @QueryParam("address") String address
+            , @QueryParam("type") int type, @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         if(StringUtils.isNotBlank(address) && !StringUtils.validAddress(address)){
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if(null != blockHeight && blockHeight < 0){
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber < 0 || pageSize < 0) {
@@ -85,6 +88,9 @@ public class TransactionResource {
         }
         if(type > 0) {
             param.put("type", String.valueOf(type));
+        }
+        if(null != blockHeight){
+            param.put("blockHeight", String.valueOf(blockHeight));
         }
         param.put("pageNumber", String.valueOf(pageNumber));
         param.put("pageSize", String.valueOf(pageSize));

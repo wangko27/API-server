@@ -17,7 +17,7 @@ public class TransactionResourceTest {
     @BeforeClass
     public static void init(){
         //serverUri = "http://192.168.1.223:8765/nuls";
-        serverUri = "http://127.0.0.1:8001/nuls";
+        serverUri = "http://127.0.0.1:8765/nuls";
         util = RestFulUtils.getInstance();
         util.init(serverUri);
     }

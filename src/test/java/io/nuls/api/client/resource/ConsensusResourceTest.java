@@ -26,8 +26,8 @@ public class ConsensusResourceTest {
 
     @Test
     public void queryAgentTest(){
-        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
-        RpcClientResult result = this.util.get("/consensus/agent/address/" + address, null);
+        String agentAddress = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        RpcClientResult result = this.util.get("/consensus/agent/" + agentAddress, null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }
