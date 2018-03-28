@@ -104,35 +104,6 @@ public class TransactionResource {
         return result;
     }
 
-    @GET
-    @Path("/block/list")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult blockList(@QueryParam("height") long height
-            , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
-        if(height < 0||pageNumber < 0 || pageSize < 0){
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
-        }
-        if (pageNumber == 0) {
-            pageNumber = 1;
-        }
-        if (pageSize == 0) {
-            pageSize = 10;
-        } else if (pageSize > 100) {
-            pageSize = 100;
-        }
-        RpcClientResult result;
-        Map<String, String> param = new HashMap<>(4);
-        param.put("height", String.valueOf(height));
-        param.put("pageNumber", String.valueOf(pageNumber));
-        param.put("pageSize", String.valueOf(pageSize));
-        try {
-            result = RestFulUtils.getInstance().get("/tx/block/list", param);
-        } catch (Exception e) {
-            result = RpcClientResult.getFailed();
-            Log.error(e);
-        }
-        return result;
-    }
 
     @GET
     @Path("/utxo/locked")
