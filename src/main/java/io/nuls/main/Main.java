@@ -41,7 +41,11 @@ public enum Main {
         if (StringUtils.isBlank(remoteIp) || StringUtils.isBlank(remotePort)) {
             serverUri = Constant.DEFAULT_REMOTE_SERVER;
         } else {
-            serverUri = Constant.HTTP + remoteIp + Constant.COLON + Integer.parseInt(remotePort) + Constant.URI_SEPARATOR + remoteModuleUrl;
+            if(StringUtils.isBlank(remoteModuleUrl)) {
+                serverUri = Constant.HTTP + remoteIp + Constant.COLON + Integer.parseInt(remotePort);
+            } else {
+                serverUri = Constant.HTTP + remoteIp + Constant.COLON + Integer.parseInt(remotePort) + Constant.URI_SEPARATOR + remoteModuleUrl;
+            }
         }
         RestFulUtils.getInstance().init(serverUri);
         if(StringUtils.isBlank(language)) {

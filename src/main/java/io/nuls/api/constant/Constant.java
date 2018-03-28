@@ -54,9 +54,9 @@ public interface Constant {
     String CFG_RPC_REMOTE_SERVER_PORT ="remote.server.port" ;
     String CFG_RPC_REMOTE_SERVER_URL = "remote.server.url";
     int DEFAULT_REMOTE_PORT = 8001;
-    String DEFAULT_REMOTE_IP = "127.0.0.1";
+    String DEFAULT_REMOTE_IP = "192.168.1.233";
     String DEFAULT_REMOTE_URL = "nuls";
-    String DEFAULT_REMOTE_SERVER = HTTP + DEFAULT_REMOTE_IP + COLON + DEFAULT_REMOTE_PORT + URI_SEPARATOR + DEFAULT_REMOTE_URL;
+    String DEFAULT_REMOTE_SERVER = HTTP + DEFAULT_REMOTE_IP + COLON + DEFAULT_REMOTE_PORT;
 
     String REQUEST_FREQUENCY = "request.frequency";
     String DEFAULT_REQUEST_FREQUENCY = "100";
