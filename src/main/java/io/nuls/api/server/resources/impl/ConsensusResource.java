@@ -7,12 +7,12 @@ import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * @author: Charlie
@@ -25,6 +25,7 @@ public class ConsensusResource {
 
     @GET
     @Path("/agent/{agentAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult queryAgent(@PathParam("agentAddress") String agentAddress){
         if(!StringUtils.validAddress(agentAddress)){
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -41,6 +42,7 @@ public class ConsensusResource {
 
     @GET
     @Path("/agent/list")
+    @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult queryAgentList(@QueryParam("keyword") String keyword, @QueryParam("sortType") String sortType
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         if(pageNumber < 0 || pageSize < 0){
@@ -76,6 +78,7 @@ public class ConsensusResource {
 
     @GET
     @Path("/agent/status")
+    @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult queryAllOfAgentStatus(){
         RpcClientResult result;
         try {
@@ -88,6 +91,8 @@ public class ConsensusResource {
     }
 
     @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult queryAllAgentStatistics(){
         RpcClientResult result;
         try {
@@ -101,6 +106,7 @@ public class ConsensusResource {
 
     @GET
     @Path("/deposit/address/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult queryDepositByAddress(@PathParam("address") String address, @QueryParam("agentAddress") String agentAddress
             , @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         if(!StringUtils.validAddress(address) || pageNumber < 0 || pageSize < 0){
