@@ -26,7 +26,7 @@ public class ConsensusResourceTest {
 
     @Test
     public void queryAgentTest(){
-        String agentAddress = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        String agentAddress = "2CkDeEJ2EyUEzEEVhN14L53kLakReX4";
         RpcClientResult result = this.util.get("/consensus/agent/" + agentAddress, null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
@@ -39,9 +39,9 @@ public class ConsensusResourceTest {
         //String keyword = "keyword";
         //String sort = "address";
         Map<String, String> param = new HashMap<>();
-        param.put("pageNumber", String.valueOf(pageNumber));
-        param.put("pageSize", String.valueOf(pageSize));
-        RpcClientResult result = this.util.get("/consensus/agent/list", param);
+        //param.put("pageNumber", String.valueOf(pageNumber));
+       // param.put("pageSize", String.valueOf(pageSize));
+        RpcClientResult result = this.util.get("/consensus/agent/list", null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }

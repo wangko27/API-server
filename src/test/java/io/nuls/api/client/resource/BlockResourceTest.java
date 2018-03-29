@@ -26,7 +26,7 @@ public class BlockResourceTest {
 
     @Test
     public void loadBlockTest(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/000020585b478c2a912ced102875d5f8ceeb36b04f5e1e825b00c13c368e87a0bcc147",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/00002000d5b7cf0b9effff37bc06ff66caff54f12a94b779faf7d414f6d50ee568c76f",null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }
@@ -55,7 +55,7 @@ public class BlockResourceTest {
 
     @Test
     public void getHeader(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/000020585b478c2a912ced102875d5f8ceeb36b04f5e1e825b00c13c368e87a0bcc147",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/00002000142747b6c99088ab9afdedeb463ba3ac9254489ef55b476117c729120b53ff",null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }

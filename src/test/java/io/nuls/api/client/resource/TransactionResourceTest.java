@@ -24,7 +24,7 @@ public class TransactionResourceTest {
 
     @Test
     public void loadTest(){
-        RpcClientResult result = this.util.get("/tx/hash/0000205af03534f8ddc28a6918f3d0c4d3c57d41abca067589b9d70ce6e2c546a42f2f",null);
+        RpcClientResult result = this.util.get("/tx/hash/0000204ea2b0b85d66010a0e2d3475e98ea22c9fadaedfb4f5932cd41ba4236c56ea11",null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }
@@ -34,7 +34,7 @@ public class TransactionResourceTest {
         Integer pageSize = 10;
         Integer pageNumber = 1;
 //        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
-        String address = "2Cc1AWqyB1Fj82S32AB2Tuvvrhsbmod";
+        String address = "2CaWijtZQaUVayV2c5Yd1MRjyWWQugv";
         //int type = 1;
         int blockHeight = 0;
         Map<String, String> param = new HashMap<>();
@@ -53,7 +53,7 @@ public class TransactionResourceTest {
     public void lockedTest(){
         Integer pageSize = 20;
         Integer pageNumber = 1;
-        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        String address = "2CVxEw3XJXwc2H5Ue7FYn82XDEJ2Wbm";
         Map<String, String> param = new HashMap<>();
         param.put("address", address);
         param.put("pageNumber", String.valueOf(pageNumber));

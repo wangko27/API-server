@@ -27,7 +27,7 @@ public class AccountResourceTest {
 
     @Test
     public void accountTest(){
-        RpcClientResult result = this.util.get("/account/2CYbFsnYkfry3uQS3Cx7pxSybhQP5hu", null);
+        RpcClientResult result = this.util.get("/account/2CbzTVZA8vtU7W421UMckGpkzqBFaV6", null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }
@@ -35,7 +35,7 @@ public class AccountResourceTest {
     @Test
     public void utxoTest(){
         String address = "2CYbFsnYkfry3uQS3Cx7pxSybhQP5hu";
-        long amount = 10000000;
+        long amount = 100;
         Map<String, String> param = new HashMap<>(2);
         param.put("address", address);
         param.put("amount", String.valueOf(amount));
