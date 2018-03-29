@@ -23,6 +23,7 @@
  */
 package io.nuls.api.i18n;
 
+import com.alibaba.druid.util.JdbcUtils;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.utils.StringUtils;
@@ -52,24 +53,28 @@ public class I18nUtils {
     /**
      * default properties file folder
      */
-    private static final String FOLDER = "languages";
+    private static final String[] FOLDER = {"languages/en.properties", "languages/zh-cn.properties"};
 
     static {
         //load all language properties
+        InputStream input = null;
+        InputStreamReader reader = null;
         try {
-            URL furl = I18nUtils.class.getClassLoader().getResource(FOLDER);
-            if (null != furl) {
-                File folderFile = new File(furl.getPath());
-                for (File file : folderFile.listFiles()) {
-                    InputStream is = new FileInputStream(file);
-                    Properties prop = new Properties();
-                    prop.load(new InputStreamReader(is, Constant.DEFAULT_ENCODING));
-                    String key = file.getName().replace(".properties", "");
-                    ALL_MAPPING.put(key, prop);
-                }
+            for (String file : FOLDER) {
+                input = I18nUtils.class.getClassLoader().getResourceAsStream(file);
+                Properties prop = new Properties();
+                reader = new InputStreamReader(input, Constant.DEFAULT_ENCODING);
+                prop.load(reader);
+                JdbcUtils.close(reader);
+                JdbcUtils.close(input);
+                String key = file.replace(".properties", "").replace("languages/", "");
+                ALL_MAPPING.put(key, prop);
             }
         } catch (IOException e) {
             Log.error(e);
+        } finally {
+            JdbcUtils.close(reader);
+            JdbcUtils.close(input);
         }
     }
 
