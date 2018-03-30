@@ -12,8 +12,6 @@ import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-
 /**
  * @author: Charlie
  * @date: 2018/3/19
@@ -91,7 +89,6 @@ public class ConsensusResource {
     }
 
     @GET
-    @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult queryAllAgentStatistics(){
         RpcClientResult result;
