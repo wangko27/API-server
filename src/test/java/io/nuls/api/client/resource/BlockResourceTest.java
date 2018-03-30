@@ -26,7 +26,7 @@ public class BlockResourceTest {
 
     @Test
     public void loadBlockTest(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/00002000d5b7cf0b9effff37bc06ff66caff54f12a94b779faf7d414f6d50ee568c76f",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/hash/000020001bb7c923c3b8ef383baf8950337e8e7a4d836fedfae5888305781dba7a9a93",null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }
@@ -55,7 +55,7 @@ public class BlockResourceTest {
 
     @Test
     public void getHeader(){
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/00002000142747b6c99088ab9afdedeb463ba3ac9254489ef55b476117c729120b53ff",null);
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/header/hash/000020001bb7c923c3b8ef383baf8950337e8e7a4d836fedfae5888305781dba7a9a93",null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }
@@ -74,9 +74,9 @@ public class BlockResourceTest {
 
     @Test
     public void getListByAddress(){
-        Integer pageSize = 20;
+        Integer pageSize = 10;
         Integer pageNumber = 1;
-        String address = "2ChegErt2tJLC7Pp62p1wrqPz49w3Xo";
+        String address = "2CW2BDqPPba3BDCsiocEDsTHqqqcwFN";
         int type = 1;
         Map<String, String> param = new HashMap<>();
         param.put("address",address);

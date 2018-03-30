@@ -24,7 +24,7 @@ public class TransactionResourceTest {
 
     @Test
     public void loadTest(){
-        RpcClientResult result = this.util.get("/tx/hash/0000204ea2b0b85d66010a0e2d3475e98ea22c9fadaedfb4f5932cd41ba4236c56ea11",null);
+        RpcClientResult result = this.util.get("/tx/hash/000020ed62d53b0e3b5aa791a720c672e7902252b46201dc764aa91869ae56d8d45cf5",null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }

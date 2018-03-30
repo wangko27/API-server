@@ -48,6 +48,7 @@ public class AccountResource {
         return result;
     }
 
+
     @GET
     @Path("/utxo")
     @Produces(MediaType.APPLICATION_JSON)

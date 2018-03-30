@@ -62,12 +62,12 @@ public class ConsensusResourceTest {
 
     @Test
     public void queryDepositByAddressTest(){
-        String address = "2CdYovbhsiKGW18HRNiFuLQva1Voz6i";
+        String address = "2CYbFsnYkfry3uQS3Cx7pxSybhQP5hu";
         String agentAddress = "";
         Integer pageSize = 20;
         Integer pageNumber = 1;
         Map<String, String> param = new HashMap<>();
-        param.put("address", address);
+        //param.put("agenthAddress", "2CW2BDqPPba3BDCsiocEDsTHqqqcwFN");
         //param.put("pageNumber", String.valueOf(pageNumber));
         //param.put("pageSize", String.valueOf(pageSize));
         RpcClientResult result = this.util.get("/consensus/deposit/address/"+ address, param);

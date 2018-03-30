@@ -122,14 +122,14 @@ public class ConsensusResource {
         }
         RpcClientResult result;
         Map<String, String> param = new HashMap<>(4);
-        param.put("address", address);
+        //param.put("address", address);
         param.put("pageNumber", String.valueOf(pageNumber));
         param.put("pageSize", String.valueOf(pageSize));
         if (StringUtils.isNotBlank(agentAddress)) {
             param.put("agentAddress", agentAddress);
         }
         try {
-            result = RestFulUtils.getInstance().get("/consensus/deposit/address/"+ address, null);
+            result = RestFulUtils.getInstance().get("/consensus/deposit/address/"+ address, param);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
