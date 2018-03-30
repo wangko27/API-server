@@ -1,7 +1,7 @@
 <configuration scan="true" scanPeriod="30 seconds">
 	
 	<contextName>API-Server</contextName>
-	<property name="LOG_HOME" value="~/logs/" />
+	<property name="LOG_HOME" value="${user.home}/logs" />
 	
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -21,7 +21,7 @@
 		</encoder>
 	</appender>
 
-	<logger name="systemLog" level="DEBUG">
+	<logger name="systemLog" level="INFO">
 		<appender-ref ref="systemLog" />
 	</logger>
 

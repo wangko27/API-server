@@ -19,6 +19,7 @@ CLASS_PATH="./:./API-Server-1.0-SNAPSHOT.jar"
 
 echo "now starting the API-Server..."
 
+# (java -Dfile.encoding=UTF-8 $JAVA_OPTS -classpath $CLASS_PATH io.nuls.main.Main &)
 nohup java -Dfile.encoding=UTF-8 $JAVA_OPTS -classpath $CLASS_PATH io.nuls.main.Main >./logs/starting.log 2>&1 &
 
 if [ $? -ne 0 ]; then
