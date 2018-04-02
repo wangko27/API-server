@@ -24,6 +24,8 @@
 package io.nuls.api.utils;
 
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Niels on 2017/10/9.
@@ -71,16 +73,52 @@ public class StringUtils {
         }
     }
 
+    private static final int HASH_LENGTH = 23;
 
     public static boolean validAddress(String address) {
-        if (isBlank(address)) return false;
-        if (address.length() > 35) return false;
+        if (StringUtils.isBlank(address)) {
+            return false;
+        }
+        byte[] bytes = null;
+        try {
+            bytes = Base58.decode(address);
+            if (bytes.length != HASH_LENGTH) {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        try {
+            checkXOR(bytes);
+        } catch (Exception e) {
+            return false;
+        }
         return true;
     }
 
+    protected static void checkXOR(byte[] hashs) {
+        byte[] body = new byte[22];
+        System.arraycopy(hashs, 0, body, 0, 22);
+
+        byte xor = 0x00;
+        for (int i = 0; i < body.length; i++) {
+            xor ^= body[i];
+        }
+        byte[] sign = new byte[1];
+        System.arraycopy(hashs, 22, sign, 0, 1);
+
+        if (xor != hashs[22]) {
+            throw new RuntimeException();
+        }
+    }
+
     public static boolean validHash(String hash) {
-        if (isBlank(hash)) return false;
-        if (hash.length() > 73) return false;
+        if (isBlank(hash)){
+            return false;
+        }
+        if (hash.length() != 70) {
+            return false;
+        }
         return true;
     }
 
@@ -95,4 +133,18 @@ public class StringUtils {
         }
         return xor;
     }
+
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("[1-9]\\d*|0");
+    public static boolean isNonNegativeInteger(String str) {
+        if(StringUtils.isBlank(str)){
+            return false;
+        }
+        Matcher isNum = NUMBER_PATTERN.matcher(str);
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+
 }

@@ -47,6 +47,13 @@ public class RpcClientResult {
         this.msg = msg;
     }
 
+    public RpcClientResult(boolean success, String code, String msg, Object data) {
+        this.success = success;
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
+    }
+
     public RpcClientResult(boolean success, ErrorCode errorCode) {
         this.success = success;
         this.code = errorCode.getCode();

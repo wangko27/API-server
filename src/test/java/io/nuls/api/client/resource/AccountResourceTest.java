@@ -27,7 +27,7 @@ public class AccountResourceTest {
 
     @Test
     public void accountTest(){
-        RpcClientResult result = this.util.get("/account/2CW2BDqPPba3BDCsiocEDsTHqqqcwFN", null);
+        RpcClientResult result = this.util.get("/account/2CVxEw3XJXwc2H5Ue7FYn82XDEJ2Wbm", null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }

@@ -32,11 +32,11 @@ public class AccountResource {
         try{
             result = RestFulUtils.getInstance().get("/account/" + address, null);
             if(!result.isSuccess()){
-                return result;
+                return RpcClientResult.getFailed();
             }
             RpcClientResult resultBalance = RestFulUtils.getInstance().get("/account/balance/" + address, null);
             if(!resultBalance.isSuccess()){
-                return result;
+                return RpcClientResult.getFailed();
             }
             Map map = (Map)result.getData();
             map.putAll((Map)resultBalance.getData());
