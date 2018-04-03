@@ -8,6 +8,8 @@ public class RpcClientSearchResult extends RpcClientResult {
 
     private byte type;
 
+    public RpcClientSearchResult(){}
+
     public RpcClientSearchResult(RpcClientResult rcr, byte type){
         super(rcr.isSuccess(), rcr.getCode(), rcr.getMsg(), rcr.getData());
         this.type = type;
