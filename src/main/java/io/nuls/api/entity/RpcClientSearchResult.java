@@ -11,7 +11,7 @@ public class RpcClientSearchResult extends RpcClientResult {
     public RpcClientSearchResult(){}
 
     public RpcClientSearchResult(RpcClientResult rcr, byte type){
-        super(rcr.isSuccess(), rcr.getCode(), rcr.getMsg(), rcr.getData());
+        super(rcr.isSuccess(), rcr.getCode(), rcr.getMsg());
         this.type = type;
     }
 
