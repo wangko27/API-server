@@ -1,6 +1,6 @@
 package io.nuls.api.client.resource;
 
-import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.entity.RpcClientSearchResult;
 import io.nuls.api.utils.RestFulUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -24,8 +24,8 @@ public class SearchResourceTest {
 
     @Test
     public void searchTest(){
-        String keyword = "0000200999dd070a99fb9710688786b411d4dd058301c7663f20bd9dbce1c44a755e92";
-        RpcClientResult result = this.util.get("/search/" + keyword, null);
+        String keyword = "2CVxEw3XJXwc2H5Ue7FYn82XDEJ2Wbm";
+        RpcClientSearchResult result = (RpcClientSearchResult) this.util.get("/search/" + keyword, null);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }

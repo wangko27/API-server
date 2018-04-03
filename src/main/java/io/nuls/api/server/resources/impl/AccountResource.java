@@ -30,17 +30,16 @@ public class AccountResource {
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         try{
-            result = RestFulUtils.getInstance().get("/account/" + address, null);
+            result = RestFulUtils.getInstance().get("/account/balance/" + address, null);
             if(!result.isSuccess()){
                 return RpcClientResult.getFailed();
             }
-            RpcClientResult resultBalance = RestFulUtils.getInstance().get("/account/balance/" + address, null);
-            if(!resultBalance.isSuccess()){
-                return RpcClientResult.getFailed();
+            RpcClientResult resultTemp = RestFulUtils.getInstance().get("/account/" + address, null);
+            if(resultTemp.isSuccess() && null != resultTemp.getData()) {
+                Map map = (Map) result.getData();
+                map.putAll((Map)resultTemp.getData());
+                resultTemp.setData(map);
             }
-            Map map = (Map)result.getData();
-            map.putAll((Map)resultBalance.getData());
-            result.setData(map);
         }catch (Exception e){
             result = RpcClientResult.getFailed();
             Log.error(e);

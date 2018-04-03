@@ -4,6 +4,7 @@ import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.SearchCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.RpcClientSearchResult;
+import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
@@ -23,28 +24,25 @@ public class SearchResource {
     @GET
     @Path("/{keyword}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult search(@PathParam("keyword") String keyword){
+    public RpcClientSearchResult search(@PathParam("keyword") String keyword){
         RpcClientResult resultTemp;
-        RpcClientResult result;
+        RpcClientSearchResult result;
         try {
             if(StringUtils.isNonNegativeInteger(keyword)){
-                //数字
                 resultTemp = RestFulUtils.getInstance().get("/block/height/" + keyword, null);
                 result = new RpcClientSearchResult(resultTemp, SearchCode.HEADER_HEIGHT.getCode());
             } else if (StringUtils.validAddress(keyword)){
-                //地址
+                RpcClientResult resultInfo = RestFulUtils.getInstance().get("/account/balance/" + keyword, null);
+                if(!resultInfo.isSuccess()){
+                    return (RpcClientSearchResult)RpcClientResult.getFailed();
+                }
                 resultTemp = RestFulUtils.getInstance().get("/account/" + keyword, null);
-                if(!resultTemp.isSuccess()){
-                    return RpcClientResult.getFailed();
+                if(resultTemp.isSuccess() && null != resultTemp.getData()) {
+                    Map map = (Map) resultInfo.getData();
+                    map.putAll((Map)resultTemp.getData());
+                    resultInfo.setData(map);
                 }
-                RpcClientResult resultBalance = RestFulUtils.getInstance().get("/account/balance/" + keyword, null);
-                if(!resultBalance.isSuccess()){
-                    return RpcClientResult.getFailed();
-                }
-                Map map = (Map)resultTemp.getData();
-                map.putAll((Map)resultBalance.getData());
-                resultTemp.setData(map);
-                result = new RpcClientSearchResult(resultTemp, SearchCode.ACCOUNT_ADDRESS.getCode());
+                result = new RpcClientSearchResult(resultInfo, SearchCode.ACCOUNT_ADDRESS.getCode());
             } else if(StringUtils.validHash(keyword)){
                 resultTemp =  RestFulUtils.getInstance().get("/tx/hash/"+keyword, null);
                 if(resultTemp.isSuccess()){
@@ -54,14 +52,14 @@ public class SearchResource {
                     if(resultTemp.isSuccess()){
                         result = new RpcClientSearchResult(resultTemp, SearchCode.HEADER_HASH.getCode());
                     }else{
-                        result = RpcClientResult.getFailed();
+                        result = (RpcClientSearchResult)RpcClientResult.getFailed();
                     }
                 }
             } else {
-                result = RpcClientResult.getFailed();
+                result = (RpcClientSearchResult)RpcClientSearchResult.getFailed();
             }
         } catch (Exception e) {
-            result = RpcClientResult.getFailed();
+            result = (RpcClientSearchResult)RpcClientResult.getFailed();
             Log.error(e);
         }
         return result;
