@@ -78,6 +78,19 @@ public class RestFulUtils {
         return target.request(APPLICATION_JSON).get(RpcClientResult.class);
     }
 
+    public <T> T get(String path, Map<String, String> params, Class<T> t) {
+        if (null == serverUri) {
+            throw new RuntimeException("service url is null");
+        }
+        WebTarget target = client.target(serverUri).path(path);
+        if (null != params && !params.isEmpty()) {
+            for (String key : params.keySet()) {
+                target = target.queryParam(key, params.get(key));
+            }
+        }
+        return target.request(APPLICATION_JSON).get(t);
+    }
+
     public RpcClientResult post(String path, Map<String, String> paramsMap) {
         try {
             return post(path, JSONUtils.obj2json(paramsMap));
