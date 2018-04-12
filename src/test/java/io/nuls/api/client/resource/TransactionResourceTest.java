@@ -30,6 +30,19 @@ public class TransactionResourceTest {
     }
 
     @Test
+    public void spentTest(){
+        String txHash="000020b1939128abe321e132f57813a87ed662c8d5c8e9cc3e526586b19965ee5b04cd";
+        String index = "we1";
+        Map<String, String> params = new HashMap<>(2);
+        params.put("txHash", txHash);
+        params.put("index", String.valueOf(index));
+        RpcClientResult result = this.util.get("/tx/hash/spent",params);
+        System.out.println(result.toString());
+        Assert.assertTrue(result.isSuccess());
+    }
+
+
+    @Test
     public void listTest(){
         Integer pageSize = 10;
         Integer pageNumber = 1;

@@ -28,6 +28,7 @@ import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
+import jdk.nashorn.internal.objects.annotations.Getter;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
@@ -59,6 +60,32 @@ public class TransactionResource {
         }
         return result;
     }
+
+    @GET
+    @Path("/hash/spent")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult spent(@QueryParam("txHash") String txHash, @QueryParam("index") int index){
+        RpcClientResult result;
+        if (!StringUtils.validHash(txHash)) {
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (index < 0) {
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        Map<String, String> params = new HashMap<>(2);
+        params.put("txHash", txHash);
+        params.put("index", String.valueOf(index));
+        try {
+            //result = RestFulUtils.getInstance().get("/tx/hash/spent", params);
+            //测试
+            result = load(txHash);
+        } catch (Exception e) {
+            result = RpcClientResult.getFailed();
+            Log.error(e);
+        }
+        return result;
+    }
+
 
     @GET
     @Path("/list")
