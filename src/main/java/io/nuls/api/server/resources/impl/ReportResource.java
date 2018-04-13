@@ -145,15 +145,19 @@ public class ReportResource {
             try {
                 RpcClientResult status = RestFulUtils.getInstance().get("/consensus/agent/status", null);
                 Map<String, String> statusMap = (Map<String, String>) status.getData();
-                if(statusMap != null) {
-                    //Map<String, String> statusMap = statusList.stream() .collect(Collectors.toMap(map -> map.get("address"), map -> map.get("consensusStatus")));
-                    list.stream().forEach(minedTop -> {
-                        String _status = statusMap.get(minedTop.getConsensusAddress());
+
+                //Map<String, String> statusMap = statusList.stream().collect(Collectors.toMap(map -> map.get("address"), map -> map.get("consensusStatus")));
+
+                list.stream().forEach(minedTop -> {
+                    String _status = "0";
+                    if(statusMap != null) {
+                        _status = statusMap.get(minedTop.getConsensusAddress());
                         if(_status == null)
                             _status = "0";
-                        minedTop.setConsensusStatus(_status);
-                    });
-                }
+                    }
+                    minedTop.setConsensusStatus(_status);
+                });
+
             } catch (Exception e) {
                 Log.warn("can not get consensus status list.", e);
                 // skip
