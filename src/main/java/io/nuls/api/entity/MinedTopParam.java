@@ -310,6 +310,76 @@ public class MinedTopParam {
             return (Criteria) this;
         }
 
+        public Criteria andAgentAddressIsNull() {
+            addCriterion("agent_address is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressIsNotNull() {
+            addCriterion("agent_address is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressEqualTo(String value) {
+            addCriterion("agent_address =", value, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressNotEqualTo(String value) {
+            addCriterion("agent_address <>", value, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressGreaterThan(String value) {
+            addCriterion("agent_address >", value, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressGreaterThanOrEqualTo(String value) {
+            addCriterion("agent_address >=", value, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressLessThan(String value) {
+            addCriterion("agent_address <", value, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressLessThanOrEqualTo(String value) {
+            addCriterion("agent_address <=", value, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressLike(String value) {
+            addCriterion("agent_address like", value, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressNotLike(String value) {
+            addCriterion("agent_address not like", value, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressIn(List<String> values) {
+            addCriterion("agent_address in", values, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressNotIn(List<String> values) {
+            addCriterion("agent_address not in", values, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressBetween(String value1, String value2) {
+            addCriterion("agent_address between", value1, value2, "agentAddress");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressNotBetween(String value1, String value2) {
+            addCriterion("agent_address not between", value1, value2, "agentAddress");
+            return (Criteria) this;
+        }
+
         public Criteria andConsensusAddressIsNull() {
             addCriterion("consensus_address is null");
             return (Criteria) this;
@@ -617,6 +687,11 @@ public class MinedTopParam {
 
         public Criteria andCreateTimeNotBetween(Long value1, Long value2) {
             addCriterion("create_time not between", value1, value2, "createTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andAgentAddressLikeInsensitive(String value) {
+            addCriterion("upper(agent_address) like", value.toUpperCase(), "agentAddress");
             return (Criteria) this;
         }
 

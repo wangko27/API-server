@@ -29,7 +29,7 @@ public class MinedTopBusiness implements CounterInterface<MinedTopParam>{
      *
      * @mbggenerated
      */
-    @Autowired 
+    @Autowired
     private MinedTopMapper minedTopMapper;
 
     /**

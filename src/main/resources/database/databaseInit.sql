@@ -1,7 +1,7 @@
 
-CREATE DATABASE IF NOT EXISTS `nuls` DEFAULT CHARACTER SET utf8 ;
+CREATE DATABASE IF NOT EXISTS `api-server` DEFAULT CHARACTER SET utf8 ;
 
-USE `nuls`;
+USE `api-server`;
 
 CREATE TABLE IF NOT EXISTS `account` (
   `address` varchar(40) NOT NULL,
@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS `punish_log` (
   `address` varchar(40) NOT NULL,
   `type` int(1) NOT NULL,
   `height` bigint(14) NOT NULL,
+  `round_index` bigint(14) NOT NULL,
   `time` bigint(14) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -44,9 +45,11 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `id` varchar(70) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
   `agent_name` varchar(50) NOT NULL,
+  `block_height` bigint(18) NOT NULL,
   `packing_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `remark` varchar(255) NOT NULL,
+  `del_height` bigint(18) DEFAULT 0,
   `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
@@ -59,6 +62,7 @@ CREATE TABLE IF NOT EXISTS `deposit` (
   `agent_id` varchar(70) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `status` int(1) DEFAULT NULL,
+  `del_height` bigint(18) DEFAULT 0,
   `time` bigint(14) DEFAULT NULL,
   `block_height` bigint(14) DEFAULT NULL,
   `tx_hash` varchar(70) NOT NULL,
@@ -115,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
   PRIMARY KEY (`hash`),
- -- KEY `block_height_idx` (`block_height`)
+  KEY `block_height_idx` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `transaction_local` (
@@ -131,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
   PRIMARY KEY (`hash`),
---  KEY `block_height_id` (`block_height`)
+  KEY `block_height_id` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (
@@ -158,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `utxo_output` (
   `script` varbinary(1024) NOT NULL,
   `address` varchar(40) NOT NULL,
   PRIMARY KEY (`tx_hash`,`out_index`),
- -- KEY `addres_idx` (`address`)
+  KEY `addres_idx` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `alias` (
@@ -169,11 +173,7 @@ CREATE TABLE IF NOT EXISTS `alias` (
   UNIQUE KEY `alias_address_idx` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-create index IF NOT EXISTS block_height_idx on transaction(block_height);
-create index IF NOT EXISTS block_height_idx on transaction_local(block_height);
-create index IF NOT EXISTS addres_idx on utxo_output(address);
-
-create table IF NOT EXISTS balance_top (
+create table IF NOT EXISTS `balance_top` (
     id bigint not null AUTO_INCREMENT,
     address varchar(40) comment '地址',
     balance bigint comment '余额',
@@ -182,14 +182,15 @@ create table IF NOT EXISTS balance_top (
     primary key (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-create table IF NOT EXISTS balance_top_temp (
+create table IF NOT EXISTS `balance_top_temp` (
     address varchar(40),
     balance bigint,
     tx_count int 
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-create table IF NOT EXISTS mined_top (
+create table IF NOT EXISTS `mined_top` (
     id bigint not null AUTO_INCREMENT,
+    agent_address varchar(40) comment '代理地址',
     consensus_address varchar(40) comment '出块地址',
     mined_count int comment '出块数量',
     reward bigint comment '总收益',
@@ -198,14 +199,15 @@ create table IF NOT EXISTS mined_top (
     primary key (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-create table IF NOT EXISTS mined_top_temp (
+create table IF NOT EXISTS `mined_top_temp` (
+    agent_address varchar(40),
     consensus_address varchar(40),
     mined_count int,
     reward bigint,
     last_height bigint 
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-create table IF NOT EXISTS tx_history (
+create table IF NOT EXISTS `tx_history` (
     id bigint not null AUTO_INCREMENT,
     tx_date varchar(8) comment '交易日期',
     tx_count int comment '交易数量',

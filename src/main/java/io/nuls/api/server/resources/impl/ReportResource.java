@@ -151,7 +151,7 @@ public class ReportResource {
                 list.stream().forEach(minedTop -> {
                     String _status = "0";
                     if(statusMap != null) {
-                        _status = statusMap.get(minedTop.getConsensusAddress());
+                        _status = statusMap.get(minedTop.getAgentAddress());
                         if(_status == null)
                             _status = "0";
                     }
