@@ -62,7 +62,7 @@ public class TransactionResource {
     }
 
     @GET
-    @Path("/bySpent")
+    @Path("/hash/spent")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult spent(@QueryParam("txHash") String txHash, @QueryParam("index") int index){
         RpcClientResult result;

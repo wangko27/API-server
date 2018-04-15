@@ -36,7 +36,7 @@ public class TransactionResourceTest {
         Map<String, String> params = new HashMap<>(2);
         params.put("txHash", txHash);
         params.put("index", String.valueOf(index));
-        RpcClientResult result = this.util.get("/tx/bySpent",params);
+        RpcClientResult result = this.util.get("/tx/hash/spent",params);
         System.out.println(result.toString());
         Assert.assertTrue(result.isSuccess());
     }
