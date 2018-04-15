@@ -62,7 +62,7 @@ public class TransactionResource {
     }
 
     @GET
-    @Path("/hash/spent")
+    @Path("/bySpent")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult spent(@QueryParam("txHash") String txHash, @QueryParam("index") int index){
         RpcClientResult result;
@@ -72,13 +72,8 @@ public class TransactionResource {
         if (index < 0) {
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        Map<String, String> params = new HashMap<>(2);
-        params.put("txHash", txHash);
-        params.put("index", String.valueOf(index));
         try {
-            //result = RestFulUtils.getInstance().get("/tx/hash/spent", params);
-            //测试
-            result = load(txHash);
+            result = RestFulUtils.getInstance().get("/tx/bySpent/" + txHash +"/" + String.valueOf(index) , null);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
