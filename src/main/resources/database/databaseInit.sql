@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `del_height` bigint(18) DEFAULT 0,
   `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
+   `tx_hash` varchar(70) NOT NULL,
   `commission_rate` decimal(14) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -132,8 +133,10 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `fee` bigint(19) NOT NULL,
   `transferType` int(1) DEFAULT NULL,
   `txData` varbinary(1024) DEFAULT NULL,
+  `coinData` varbinary(1024) DEFAULT NULL,
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`hash`),
   KEY `block_height_id` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
