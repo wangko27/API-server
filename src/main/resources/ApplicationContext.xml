@@ -46,9 +46,7 @@
 
 	<!-- 懒加载数据源，在使用的时候才初始化连接 -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
-		<property name="targetDataSource">
-			<ref local="mainDataSource" />
-		</property>
+		<property name="targetDataSource" ref="mainDataSource" />
 	</bean>
 
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
