@@ -16,7 +16,7 @@ public class ReportDAO {
     @Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
     public void balance() {
         String deleteTempSQL = "DELETE FROM balance_top_temp";
-        String executeSQL = "INSERT INTO balance_top_temp( ADDRESS, BALANCE, TX_COUNT) SELECT O.ADDRESS, SUM(O.VALUE), (SELECT COUNT(*) FROM tx_account_relation TX WHERE TX.ADDRESS = O.ADDRESS) FROM utxo_output O WHERE O.STATUS = 0 GROUP BY O.ADDRESS";
+        String executeSQL = "INSERT INTO balance_top_temp( ADDRESS, BALANCE, TX_COUNT) SELECT O.ADDRESS, SUM(O.VALUE), (SELECT COUNT(*) FROM tx_account_relation TX WHERE TX.ADDRESS = O.ADDRESS) FROM utxo_output O WHERE O.STATUS = 0 OR O.STATUS = 1 GROUP BY O.ADDRESS";
         String deteleSQL = "DELETE FROM balance_top";
         String insertSQL = "INSERT INTO balance_top(ADDRESS, BALANCE, TX_COUNT, CREATE_TIME) SELECT ADDRESS, BALANCE, TX_COUNT, ROUND(UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', CURTIME(4))) * 1000) FROM balance_top_temp ORDER BY BALANCE DESC ";
         jdbcTemplate.batchUpdate(deleteTempSQL, executeSQL);
