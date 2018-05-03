@@ -6,6 +6,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.nuls.api.utils.log.Log;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,5 +33,13 @@ public class RequestCounter {
 
     public static int decrement(String ip) throws ExecutionException {
         return IP_COUNTER_CACHE.get(ip).decrementAndGet();
+    }
+
+    public static String getRemoteIp(HttpServletRequest request) {
+        String forwardedIp = request.getHeader("x-forwarded-for");
+        if (forwardedIp == null) {
+            return request.getRemoteAddr();
+        }
+        return forwardedIp;
     }
 }

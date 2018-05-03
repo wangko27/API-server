@@ -50,7 +50,7 @@ public class ApiServerFilter implements ContainerRequestFilter, ContainerRespons
     @Override
     public void filter(ContainerRequestContext requestContext) {
         requestContext.setProperty("start", System.currentTimeMillis());
-        String remoteIP = request.getRemoteAddr();
+        String remoteIP = RequestCounter.getRemoteIp(request);
         int count = 0;
         try {
             count = RequestCounter.increment(remoteIP);
@@ -68,9 +68,9 @@ public class ApiServerFilter implements ContainerRequestFilter, ContainerRespons
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         Log.info(
                 //"url:{},Remote_IP:{},useTime:{}, params:{},result:{}",
-                //requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), request.getRemoteAddr(), (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
+                //requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), RequestCounter.getRemoteIp(request), (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
                 "url:{},Remote_IP:{},useTime:{}, params:{}",
-                requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), request.getRemoteAddr(), (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null);
+                requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), RequestCounter.getRemoteIp(request), (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null);
     }
 
     @Override
