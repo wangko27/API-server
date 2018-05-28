@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.TransactionMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Transaction" >
+    <id column="hash" property="hash" jdbcType="VARCHAR" />
+    <result column="tx_index" property="txIndex" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="fee" property="fee" jdbcType="BIGINT" />
+    <result column="size" property="size" jdbcType="INTEGER" />
+    <result column="amount" property="amount" jdbcType="BIGINT" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="io.nuls.api.entity.Transaction" extends="BaseResultMap" >
+    <result column="extend" property="extend" jdbcType="LONGVARBINARY" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    hash, tx_index, type, create_time, block_height, remark, fee, size, amount
+  </sql>
+  <sql id="Blob_Column_List" >
+    extend
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from transaction
+    where hash = #{hash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from transaction
+    where hash = #{hash,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.Transaction" >
+    insert into transaction (hash, tx_index, type, 
+      create_time, block_height, remark, 
+      fee, size, amount, extend
+      )
+    values (#{hash,jdbcType=VARCHAR}, #{txIndex,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{remark,jdbcType=VARCHAR}, 
+      #{fee,jdbcType=BIGINT}, #{size,jdbcType=INTEGER}, #{amount,jdbcType=BIGINT}, #{extend,jdbcType=LONGVARBINARY}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.Transaction" >
+    insert into transaction
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="hash != null" >
+        hash,
+      </if>
+      <if test="txIndex != null" >
+        tx_index,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="blockHeight != null" >
+        block_height,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="fee != null" >
+        fee,
+      </if>
+      <if test="size != null" >
+        size,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="extend != null" >
+        extend,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="hash != null" >
+        #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="txIndex != null" >
+        #{txIndex,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="fee != null" >
+        #{fee,jdbcType=BIGINT},
+      </if>
+      <if test="size != null" >
+        #{size,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="extend != null" >
+        #{extend,jdbcType=LONGVARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Transaction" >
+    update transaction
+    <set >
+      <if test="txIndex != null" >
+        tx_index = #{txIndex,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        block_height = #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="fee != null" >
+        fee = #{fee,jdbcType=BIGINT},
+      </if>
+      <if test="size != null" >
+        size = #{size,jdbcType=INTEGER},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="extend != null" >
+        extend = #{extend,jdbcType=LONGVARBINARY},
+      </if>
+    </set>
+    where hash = #{hash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.api.entity.Transaction" >
+    update transaction
+    set tx_index = #{txIndex,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=BIGINT},
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      remark = #{remark,jdbcType=VARCHAR},
+      fee = #{fee,jdbcType=BIGINT},
+      size = #{size,jdbcType=INTEGER},
+      amount = #{amount,jdbcType=BIGINT},
+      extend = #{extend,jdbcType=LONGVARBINARY}
+    where hash = #{hash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Transaction" >
+    update transaction
+    set tx_index = #{txIndex,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=BIGINT},
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      remark = #{remark,jdbcType=VARCHAR},
+      fee = #{fee,jdbcType=BIGINT},
+      size = #{size,jdbcType=INTEGER},
+      amount = #{amount,jdbcType=BIGINT}
+    where hash = #{hash,jdbcType=VARCHAR}
+  </update>
+</mapper>

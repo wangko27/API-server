@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.PunishLogMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.PunishLog" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="time" property="time" jdbcType="BIGINT" />
+    <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
+    <result column="round_index" property="roundIndex" jdbcType="INTEGER" />
+    <result column="reason" property="reason" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="io.nuls.api.entity.PunishLog" extends="BaseResultMap" >
+    <result column="evidence" property="evidence" jdbcType="LONGVARBINARY" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, type, address, time, block_height, round_index, reason
+  </sql>
+  <sql id="Blob_Column_List" >
+    evidence
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from punish_log
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from punish_log
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.PunishLog" >
+    insert into punish_log (id, type, address, 
+      time, block_height, round_index, 
+      reason, evidence)
+    values (#{id,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{address,jdbcType=VARCHAR}, 
+      #{time,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{roundIndex,jdbcType=INTEGER}, 
+      #{reason,jdbcType=VARCHAR}, #{evidence,jdbcType=LONGVARBINARY})
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.PunishLog" >
+    insert into punish_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="time != null" >
+        time,
+      </if>
+      <if test="blockHeight != null" >
+        block_height,
+      </if>
+      <if test="roundIndex != null" >
+        round_index,
+      </if>
+      <if test="reason != null" >
+        reason,
+      </if>
+      <if test="evidence != null" >
+        evidence,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        #{time,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="roundIndex != null" >
+        #{roundIndex,jdbcType=INTEGER},
+      </if>
+      <if test="reason != null" >
+        #{reason,jdbcType=VARCHAR},
+      </if>
+      <if test="evidence != null" >
+        #{evidence,jdbcType=LONGVARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.PunishLog" >
+    update punish_log
+    <set >
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        time = #{time,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        block_height = #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="roundIndex != null" >
+        round_index = #{roundIndex,jdbcType=INTEGER},
+      </if>
+      <if test="reason != null" >
+        reason = #{reason,jdbcType=VARCHAR},
+      </if>
+      <if test="evidence != null" >
+        evidence = #{evidence,jdbcType=LONGVARBINARY},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.api.entity.PunishLog" >
+    update punish_log
+    set type = #{type,jdbcType=INTEGER},
+      address = #{address,jdbcType=VARCHAR},
+      time = #{time,jdbcType=BIGINT},
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      round_index = #{roundIndex,jdbcType=INTEGER},
+      reason = #{reason,jdbcType=VARCHAR},
+      evidence = #{evidence,jdbcType=LONGVARBINARY}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.PunishLog" >
+    update punish_log
+    set type = #{type,jdbcType=INTEGER},
+      address = #{address,jdbcType=VARCHAR},
+      time = #{time,jdbcType=BIGINT},
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      round_index = #{roundIndex,jdbcType=INTEGER},
+      reason = #{reason,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

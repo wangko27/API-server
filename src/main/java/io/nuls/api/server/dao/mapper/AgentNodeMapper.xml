@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.AgentNodeMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.AgentNode" >
+    <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+    <result column="agent_address" property="agentAddress" jdbcType="VARCHAR" />
+    <result column="packing_address" property="packingAddress" jdbcType="VARCHAR" />
+    <result column="reward_address" property="rewardAddress" jdbcType="VARCHAR" />
+    <result column="deposit" property="deposit" jdbcType="BIGINT" />
+    <result column="commission_rate" property="commissionRate" jdbcType="DECIMAL" />
+    <result column="agent_name" property="agentName" jdbcType="VARCHAR" />
+    <result column="introduction" property="introduction" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="total_deposit" property="totalDeposit" jdbcType="BIGINT" />
+    <result column="deposit_count" property="depositCount" jdbcType="INTEGER" />
+    <result column="credit_value" property="creditValue" jdbcType="DECIMAL" />
+    <result column="total_packing_count" property="totalPackingCount" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate, 
+    agent_name, introduction, create_time, block_height, status, total_deposit, deposit_count, 
+    credit_value, total_packing_count
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from agent_node
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from agent_node
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.AgentNode" >
+    insert into agent_node (tx_hash, agent_address, packing_address, 
+      reward_address, deposit, commission_rate, 
+      agent_name, introduction, create_time, 
+      block_height, status, total_deposit, 
+      deposit_count, credit_value, total_packing_count
+      )
+    values (#{txHash,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR}, #{packingAddress,jdbcType=VARCHAR}, 
+      #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL}, 
+      #{agentName,jdbcType=VARCHAR}, #{introduction,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
+      #{blockHeight,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{totalDeposit,jdbcType=BIGINT}, 
+      #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL}, #{totalPackingCount,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
+    insert into agent_node
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        tx_hash,
+      </if>
+      <if test="agentAddress != null" >
+        agent_address,
+      </if>
+      <if test="packingAddress != null" >
+        packing_address,
+      </if>
+      <if test="rewardAddress != null" >
+        reward_address,
+      </if>
+      <if test="deposit != null" >
+        deposit,
+      </if>
+      <if test="commissionRate != null" >
+        commission_rate,
+      </if>
+      <if test="agentName != null" >
+        agent_name,
+      </if>
+      <if test="introduction != null" >
+        introduction,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="blockHeight != null" >
+        block_height,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="totalDeposit != null" >
+        total_deposit,
+      </if>
+      <if test="depositCount != null" >
+        deposit_count,
+      </if>
+      <if test="creditValue != null" >
+        credit_value,
+      </if>
+      <if test="totalPackingCount != null" >
+        total_packing_count,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        #{txHash,jdbcType=VARCHAR},
+      </if>
+      <if test="agentAddress != null" >
+        #{agentAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="packingAddress != null" >
+        #{packingAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="rewardAddress != null" >
+        #{rewardAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="deposit != null" >
+        #{deposit,jdbcType=BIGINT},
+      </if>
+      <if test="commissionRate != null" >
+        #{commissionRate,jdbcType=DECIMAL},
+      </if>
+      <if test="agentName != null" >
+        #{agentName,jdbcType=VARCHAR},
+      </if>
+      <if test="introduction != null" >
+        #{introduction,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="totalDeposit != null" >
+        #{totalDeposit,jdbcType=BIGINT},
+      </if>
+      <if test="depositCount != null" >
+        #{depositCount,jdbcType=INTEGER},
+      </if>
+      <if test="creditValue != null" >
+        #{creditValue,jdbcType=DECIMAL},
+      </if>
+      <if test="totalPackingCount != null" >
+        #{totalPackingCount,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.AgentNode" >
+    update agent_node
+    <set >
+      <if test="agentAddress != null" >
+        agent_address = #{agentAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="packingAddress != null" >
+        packing_address = #{packingAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="rewardAddress != null" >
+        reward_address = #{rewardAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="deposit != null" >
+        deposit = #{deposit,jdbcType=BIGINT},
+      </if>
+      <if test="commissionRate != null" >
+        commission_rate = #{commissionRate,jdbcType=DECIMAL},
+      </if>
+      <if test="agentName != null" >
+        agent_name = #{agentName,jdbcType=VARCHAR},
+      </if>
+      <if test="introduction != null" >
+        introduction = #{introduction,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        block_height = #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="totalDeposit != null" >
+        total_deposit = #{totalDeposit,jdbcType=BIGINT},
+      </if>
+      <if test="depositCount != null" >
+        deposit_count = #{depositCount,jdbcType=INTEGER},
+      </if>
+      <if test="creditValue != null" >
+        credit_value = #{creditValue,jdbcType=DECIMAL},
+      </if>
+      <if test="totalPackingCount != null" >
+        total_packing_count = #{totalPackingCount,jdbcType=BIGINT},
+      </if>
+    </set>
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.AgentNode" >
+    update agent_node
+    set agent_address = #{agentAddress,jdbcType=VARCHAR},
+      packing_address = #{packingAddress,jdbcType=VARCHAR},
+      reward_address = #{rewardAddress,jdbcType=VARCHAR},
+      deposit = #{deposit,jdbcType=BIGINT},
+      commission_rate = #{commissionRate,jdbcType=DECIMAL},
+      agent_name = #{agentName,jdbcType=VARCHAR},
+      introduction = #{introduction,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=BIGINT},
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      status = #{status,jdbcType=INTEGER},
+      total_deposit = #{totalDeposit,jdbcType=BIGINT},
+      deposit_count = #{depositCount,jdbcType=INTEGER},
+      credit_value = #{creditValue,jdbcType=DECIMAL},
+      total_packing_count = #{totalPackingCount,jdbcType=BIGINT}
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+</mapper>
