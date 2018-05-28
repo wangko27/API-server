@@ -6,7 +6,7 @@ import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.plugin2.os.windows.SECURITY_ATTRIBUTES;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,6 +29,7 @@ public class BlockBusiness {
         return blockHeaderMapper.selectBySearchable(searchable);
     }
 
+    @Transactional
     public void saveBlock(BlockHeader blockHeader) {
         blockHeaderMapper.insert(blockHeader);
     }
@@ -38,6 +39,28 @@ public class BlockBusiness {
         searchable.addCondition("height", SearchOperator.gte, beginHeight);
         searchable.addCondition("height", SearchOperator.lte, endHeight);
         return blockHeaderMapper.selectList(searchable);
+    }
+
+    /**
+     * 根据最新传入的区块信息，验证当前区块和前一区块的连续性
+     *
+     * @param blockHeader
+     * @return
+     */
+    public boolean validatePreBlock(BlockHeader blockHeader) {
+        BlockHeader preBlock = getBlockByHash(blockHeader.getPrevHash());
+        if (preBlock == null) {
+            return false;
+        }
+        if (preBlock.getHeight() != blockHeader.getHeight() - 1) {
+            return false;
+        }
+        return true;
+    }
+
+    @Transactional
+    public int deleteBlock(String hash) {
+        return blockHeaderMapper.deleteByPrimaryKey(hash);
     }
 
 }
