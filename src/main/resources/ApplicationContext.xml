@@ -85,6 +85,8 @@
         <property name="basePackage" value="io.nuls.api.server.dao.mapper" />
     </bean>
 
+	<!--
     <import resource="classpath:Quartz.xml" />
+     -->
 
 </beans>

@@ -1,8 +1,6 @@
 package io.nuls.api.server.task;
 
-import io.nuls.api.counter.QueryCounter;
 import io.nuls.api.server.dao.ReportDAO;
-import io.nuls.api.server.resources.QueryHelper;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
