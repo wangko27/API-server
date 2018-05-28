@@ -3,16 +3,7 @@ package io.nuls.api.server.dao.mapper;
 
 import io.nuls.api.entity.Alias;
 
-public interface AliasMapper {
-    int deleteByPrimaryKey(String alias);
+@MyBatisMapper
+public interface AliasMapper extends BaseMapper<Alias, String>{
 
-    int insert(Alias record);
-
-    int insertSelective(Alias record);
-
-    Alias selectByPrimaryKey(String alias);
-
-    int updateByPrimaryKeySelective(Alias record);
-
-    int updateByPrimaryKey(Alias record);
 }
