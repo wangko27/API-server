@@ -1,6 +1,7 @@
 package io.nuls.api.server.task;
 
 import io.nuls.api.server.business.BlockBusiness;
+import io.nuls.api.server.resources.SyncDataHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,8 @@ public class BlockSyncTask {
 
     @Autowired
     private BlockBusiness blockBusiness;
+    @Autowired
+    private SyncDataHandler syncDataHandler;
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

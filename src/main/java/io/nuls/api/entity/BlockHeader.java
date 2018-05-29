@@ -1,6 +1,9 @@
 package io.nuls.api.entity;
 
+import java.util.List;
+
 public class BlockHeader {
+
     private String hash;
 
     private Long height;
@@ -28,6 +31,11 @@ public class BlockHeader {
     private Long roundStartTime;
 
     private byte[] extend;
+
+    /**
+     *
+     */
+    private List<String> txList;
 
     public String getHash() {
         return hash;
@@ -139,5 +147,13 @@ public class BlockHeader {
 
     public void setExtend(byte[] extend) {
         this.extend = extend;
+    }
+
+    public List<String> getTxList() {
+        return txList;
+    }
+
+    public void setTxList(List<String> txList) {
+        this.txList = txList;
     }
 }

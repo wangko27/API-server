@@ -3,9 +3,13 @@ package io.nuls.api.server.resources;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.utils.JSONUtils;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.utils.RestFulUtils;
+import io.nuls.api.utils.RpcTransferUtil;
+import io.nuls.api.utils.log.Log;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * 同步底层数据的处理器
@@ -21,17 +25,30 @@ public class SyncDataHandler {
      * @param height
      * @return
      */
-    public RpcClientResult getBlockHeader(long height) {
+    public RpcClientResult<BlockHeader> getBlockHeader(long height) {
         RpcClientResult result = restFulUtils.get("/block/height/" + height, null);
-        if (!result.isSuccess()) {
+        if (result.isFaild()) {
             return result;
         }
         try {
-            String json = JSONUtils.obj2json(result.getData());
-            BlockHeader blockHeader = JSONUtils.json2pojo(json, BlockHeader.class);
+            BlockHeader blockHeader = RpcTransferUtil.toBlockHeader((Map<String, Object>) result.getData());
+            result.setData(blockHeader);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
+            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
         }
         return result;
+    }
+
+
+    public RpcClientResult<Transaction> getTransaction(String hash) {
+        RpcClientResult result = restFulUtils.get("/tx/hash/" + hash, null);
+        if(result.isFaild()) {
+            return result;
+        }
+//        try {
+//            Transaction transaction = RpcTransferUtil.t()
+//        }
+        return null;
     }
 }
