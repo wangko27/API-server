@@ -9,6 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
+import java.util.Scanner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:ApplicationContext.xml")
@@ -55,5 +56,11 @@ public class MybatisTest {
         long end = 100;
         List<BlockHeader> blockHeaderList = blockBusiness.getBlockList(begin,end);
 
+    }
+
+    @Test
+    public void testTask() {
+        Scanner scan = new Scanner(System.in);
+        scan.next();
     }
 }
