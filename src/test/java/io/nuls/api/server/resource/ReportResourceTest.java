@@ -1,6 +1,8 @@
-package io.nuls.api.server.Resource;
+package io.nuls.api.server.resource;
 
+import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.log.Log;
 import org.junit.Assert;
@@ -15,10 +17,26 @@ import java.util.Map;
  */
 public class ReportResourceTest {
 
+    private static RestFulUtils restFulUtils;
+
     @BeforeClass
     public static void init() {
-        String serverUri = "http://127.0.0.1:8765/nuls";
-        RestFulUtils.getInstance().init(serverUri);
+        String serverUri = "http://127.0.0.1:8001";
+        restFulUtils = RestFulUtils.getInstance();
+        restFulUtils.init(serverUri);
+    }
+
+    @Test
+    public void blockTest() {
+        long height = 0;
+        RpcClientResult result = restFulUtils.get("/block/header/height/" + height, null);
+        try {
+            String json = JSONUtils.obj2json(result.getData());
+            System.out.println(json);
+            BlockHeader blockHeader = JSONUtils.json2pojo(json, BlockHeader.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

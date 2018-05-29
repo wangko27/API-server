@@ -11,7 +11,7 @@ public class BlockDto {
 
     private Long height;
 
-    private String prevHash;
+    private String preHash;
 
     private String merkleHash;
 
@@ -42,7 +42,7 @@ public class BlockDto {
     public BlockDto(BlockHeader header) {
         this.hash = header.getHash();
         this.height = header.getHeight();
-        this.prevHash = header.getPrevHash();
+        this.preHash = header.getPreHash();
         this.merkleHash = header.getMerkleHash();
         this.createTime = header.getCreateTime();
         this.consensusAddress = header.getConsensusAddress();
@@ -80,12 +80,12 @@ public class BlockDto {
         this.height = height;
     }
 
-    public String getPrevHash() {
-        return prevHash;
+    public String getPreHash() {
+        return preHash;
     }
 
-    public void setPrevHash(String prevHash) {
-        this.prevHash = prevHash;
+    public void setPreHash(String prevHash) {
+        this.preHash = prevHash;
     }
 
     public String getMerkleHash() {

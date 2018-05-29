@@ -26,7 +26,7 @@ public class MybatisTest {
         blockHeader.setCreateTime(System.currentTimeMillis());
         blockHeader.setHeight(100L);
         blockHeader.setMerkleHash("bbbbb");
-        blockHeader.setPrevHash("00000");
+        blockHeader.setPreHash("00000");
         blockHeader.setPackingIndexOfRound(100);
         blockHeader.setReward(999L);
         blockHeader.setRoundStartTime(System.currentTimeMillis());

@@ -5,7 +5,7 @@ public class BlockHeader {
 
     private Long height;
 
-    private String prevHash;
+    private String preHash;
 
     private String merkleHash;
 
@@ -45,12 +45,12 @@ public class BlockHeader {
         this.height = height;
     }
 
-    public String getPrevHash() {
-        return prevHash;
+    public String getPreHash() {
+        return preHash;
     }
 
-    public void setPrevHash(String prevHash) {
-        this.prevHash = prevHash == null ? null : prevHash.trim();
+    public void setPreHash(String prevHash) {
+        this.preHash = prevHash == null ? null : prevHash.trim();
     }
 
     public String getMerkleHash() {

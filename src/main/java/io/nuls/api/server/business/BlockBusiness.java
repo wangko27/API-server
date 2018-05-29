@@ -48,7 +48,7 @@ public class BlockBusiness {
      * @return
      */
     public boolean validatePreBlock(BlockHeader blockHeader) {
-        BlockHeader preBlock = getBlockByHash(blockHeader.getPrevHash());
+        BlockHeader preBlock = getBlockByHash(blockHeader.getPreHash());
         if (preBlock == null) {
             return false;
         }

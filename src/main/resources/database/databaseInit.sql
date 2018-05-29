@@ -93,7 +93,7 @@ DROP TABLE IF EXISTS `block_header`;
 CREATE TABLE `block_header` (
   `hash` varchar(70) NOT NULL COMMENT 'hash',
   `height` bigint(14) NOT NULL COMMENT '高度',
-  `prev_hash` varchar(70) DEFAULT NULL COMMENT '上一个区块hash',
+  `pre_hash` varchar(70) DEFAULT NULL COMMENT '上一个区块hash',
   `merkle_hash` varchar(70) NOT NULL COMMENT 'merkle_hash',
   `create_time` bigint(15) NOT NULL COMMENT '出块时间',
   `consensus_address` varchar(40) DEFAULT NULL COMMENT '共识地址',
