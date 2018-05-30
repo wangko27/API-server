@@ -36,11 +36,25 @@ public class BlockBusiness {
 
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("height", SearchOperator.gte, beginHeight);
-        searchable.addCondition("height", SearchOperator.lte, endHeight);
+        if(beginHeight >= 0){
+            searchable.addCondition("height", SearchOperator.gte, beginHeight);
+        }
+        if(endHeight > 0){
+            searchable.addCondition("height", SearchOperator.lte, endHeight);
+        }
+        return blockHeaderMapper.selectList(searchable);
+    }
+    public List<BlockHeader> getList() {
+        Searchable searchable = new Searchable();
         return blockHeaderMapper.selectList(searchable);
     }
 
+
+    public List<BlockHeader> getNewest() {
+        //todo
+        Searchable searchable = new Searchable();
+        return blockHeaderMapper.selectList(searchable);
+    }
     /**
      * 根据最新传入的区块信息，验证当前区块和前一区块的连续性
      *

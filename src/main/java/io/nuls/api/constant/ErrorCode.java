@@ -57,6 +57,7 @@ public enum ErrorCode {
     DATA_NOT_FOUND("SYS019", 10019),
     FILE_BROKEN("SYS020", 20020),
     SIGNATURE_ERROR("SYS021", 20021),
+    ADDRESS_ERROR("SYS022", 20022),
     /**
      * ----------  Consensus Network code   ---------
      */
