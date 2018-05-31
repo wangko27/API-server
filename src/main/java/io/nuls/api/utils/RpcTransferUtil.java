@@ -1,7 +1,9 @@
 package io.nuls.api.utils;
 
 import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.Utxo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +30,7 @@ public class RpcTransferUtil {
 
         String scriptSign = (String) map.get("scriptSig");
         String extend = (String) map.get("extend");
-        Map<String, String> dataMap = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("scriptSign", scriptSign);
         dataMap.put("data", extend);
 
@@ -49,7 +51,47 @@ public class RpcTransferUtil {
 
 
     public static Transaction toTransaction(Map<String, Object> map) throws Exception {
-        Transaction transaction = new Transaction();
-        return transaction;
+        Transaction tx = new Transaction();
+        tx.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
+        tx.setHash((String) map.get("hash"));
+        tx.setFee(Long.parseLong(map.get("fee").toString()));
+        tx.setRemark(map.get("remark").toString());
+        tx.setSize((Integer) map.get("size"));
+        tx.setType((Integer) map.get("type"));
+        tx.setCreateTime((Long) map.get("time"));
+
+        Map<String, Object> dataMap = new HashMap<>();
+        List<Map<String, Object>> inputMaps = (List<Map<String, Object>>) map.get("inputs");
+
+        dataMap.put("inputs", inputMaps);
+        dataMap.put("scriptSign", map.get("scriptSig").toString());
+        tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
+
+        List<Input> inputs = new ArrayList<>();
+        for (int i = 0; i < inputMaps.size(); i++) {
+            Input input = new Input();
+            dataMap = inputMaps.get(i);
+            input.setAddress((String) dataMap.get("address"));
+            input.setFromHash((String) dataMap.get("fromHash"));
+            input.setValue(Long.parseLong((String) dataMap.get("value")));
+            input.setFromIndex((Integer) dataMap.get("fromIndex"));
+            inputs.add(input);
+        }
+        tx.setInputs(inputs);
+
+        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) map.get("outputs");
+        List<Utxo> outputs = new ArrayList<>();
+        for (int i = 0; i < outputMaps.size(); i++) {
+            Utxo output = new Utxo();
+            dataMap = outputMaps.get(i);
+            output.setTxHash((String) dataMap.get("txHash"));
+            output.setTxIndex((Integer) dataMap.get("index"));
+            output.setAddress((String) dataMap.get("address"));
+            output.setLockTime(Long.parseLong((String) dataMap.get("lockTime")));
+            output.setAmount(Long.parseLong((String) dataMap.get("value")));
+            outputs.add(output);
+        }
+
+        return tx;
     }
 }

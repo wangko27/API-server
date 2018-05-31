@@ -7,9 +7,10 @@
     <result column="locked" property="locked" jdbcType="BIGINT" />
     <result column="usable" property="usable" jdbcType="BIGINT" />
     <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
+    <result column="assets_code" property="assetsCode" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    address, id, locked, usable, block_height
+    address, id, locked, usable, block_height, assets_code
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -23,9 +24,11 @@
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.Balance" >
     insert into balance (address, id, locked, 
-      usable, block_height)
+      usable, block_height, assets_code
+      )
     values (#{address,jdbcType=VARCHAR}, #{id,jdbcType=BIGINT}, #{locked,jdbcType=BIGINT}, 
-      #{usable,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT})
+      #{usable,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{assetsCode,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Balance" >
     insert into balance
@@ -45,6 +48,9 @@
       <if test="blockHeight != null" >
         block_height,
       </if>
+      <if test="assetsCode != null" >
+        assets_code,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="address != null" >
@@ -61,6 +67,9 @@
       </if>
       <if test="blockHeight != null" >
         #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="assetsCode != null" >
+        #{assetsCode,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -79,6 +88,9 @@
       <if test="blockHeight != null" >
         block_height = #{blockHeight,jdbcType=BIGINT},
       </if>
+      <if test="assetsCode != null" >
+        assets_code = #{assetsCode,jdbcType=VARCHAR},
+      </if>
     </set>
     where address = #{address,jdbcType=VARCHAR}
   </update>
@@ -87,7 +99,8 @@
     set id = #{id,jdbcType=BIGINT},
       locked = #{locked,jdbcType=BIGINT},
       usable = #{usable,jdbcType=BIGINT},
-      block_height = #{blockHeight,jdbcType=BIGINT}
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      assets_code = #{assetsCode,jdbcType=VARCHAR}
     where address = #{address,jdbcType=VARCHAR}
   </update>
 </mapper>
