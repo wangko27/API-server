@@ -4,6 +4,7 @@ import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.RestFulUtils;
+import io.nuls.api.utils.RpcTransferUtil;
 import io.nuls.api.utils.log.Log;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -31,9 +32,8 @@ public class ReportResourceTest {
         long height = 0;
         RpcClientResult result = restFulUtils.get("/block/header/height/" + height, null);
         try {
-            String json = JSONUtils.obj2json(result.getData());
-            System.out.println(json);
-            BlockHeader blockHeader = JSONUtils.json2pojo(json, BlockHeader.class);
+            BlockHeader blockHeader = RpcTransferUtil.toBlockHeader((Map<String, Object>) result.getData());
+            System.out.println(blockHeader.getHeight());
         } catch (Exception e) {
             e.printStackTrace();
         }
