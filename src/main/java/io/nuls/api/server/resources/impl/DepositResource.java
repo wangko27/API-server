@@ -46,7 +46,7 @@ public class DepositResource {
             return result;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(depositBusiness.getList(address));
+        result.setData(depositBusiness.getList(address,pageNumber,pageSize));
         return result;
     }
 }

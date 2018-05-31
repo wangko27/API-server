@@ -47,7 +47,7 @@ public class AddressRewardDetailResource {
             return result;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(addressRewardDetailBusiness.getList(address));
+        result.setData(addressRewardDetailBusiness.getList(address,pageNumber,pageSize));
         return result;
     }
 }

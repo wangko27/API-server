@@ -41,7 +41,7 @@ public class AgentNodeResource {
     @GET
     @Path("/agent/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("agentAddress") String agentAddress){
+    public RpcClientResult getConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("agentName") String agentName){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -55,12 +55,8 @@ public class AgentNodeResource {
         } else if (pageSize > 100) {
             pageSize = 100;
         }
-        if(StringUtils.validAddress(agentAddress)){
-            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
-            return result;
-        }
         result = RpcClientResult.getSuccess();
-        result.setData(agentNodeBusiness.getList(agentAddress));
+        result.setData(agentNodeBusiness.getList(agentName,pageNumber,pageSize));
         return result;
     }
 
