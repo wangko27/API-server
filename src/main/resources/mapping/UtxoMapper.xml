@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.UtxoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Utxo" >
+    <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+    <id column="tx_index" property="txIndex" jdbcType="BIGINT" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="BIGINT" />
+    <result column="lock_time" property="lockTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    tx_hash, tx_index, address, amount, lock_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="io.nuls.api.entity.UtxoKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from utxo
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+      and tx_index = #{txIndex,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="io.nuls.api.entity.UtxoKey" >
+    delete from utxo
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+      and tx_index = #{txIndex,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.Utxo" >
+    insert into utxo (tx_hash, tx_index, address, 
+      amount, lock_time)
+    values (#{txHash,jdbcType=VARCHAR}, #{txIndex,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR}, 
+      #{amount,jdbcType=BIGINT}, #{lockTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.Utxo" >
+    insert into utxo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        tx_hash,
+      </if>
+      <if test="txIndex != null" >
+        tx_index,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="lockTime != null" >
+        lock_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        #{txHash,jdbcType=VARCHAR},
+      </if>
+      <if test="txIndex != null" >
+        #{txIndex,jdbcType=BIGINT},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="lockTime != null" >
+        #{lockTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Utxo" >
+    update utxo
+    <set >
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="lockTime != null" >
+        lock_time = #{lockTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+      and tx_index = #{txIndex,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Utxo" >
+    update utxo
+    set address = #{address,jdbcType=VARCHAR},
+      amount = #{amount,jdbcType=BIGINT},
+      lock_time = #{lockTime,jdbcType=BIGINT}
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+      and tx_index = #{txIndex,jdbcType=BIGINT}
+  </update>
+</mapper>
