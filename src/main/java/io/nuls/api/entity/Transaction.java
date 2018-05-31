@@ -1,6 +1,9 @@
 package io.nuls.api.entity;
 
+import java.util.List;
+
 public class Transaction {
+
     private String hash;
 
     private Integer txIndex;
@@ -20,6 +23,10 @@ public class Transaction {
     private Long amount;
 
     private byte[] extend;
+
+    private List<Input> inputs;
+
+    private List<Utxo> outputs;
 
     public String getHash() {
         return hash;
@@ -99,5 +106,21 @@ public class Transaction {
 
     public void setExtend(byte[] extend) {
         this.extend = extend;
+    }
+
+    public List<Input> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(List<Input> inputs) {
+        this.inputs = inputs;
+    }
+
+    public List<Utxo> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<Utxo> outputs) {
+        this.outputs = outputs;
     }
 }

@@ -3,6 +3,7 @@ package io.nuls.api.entity;
 import java.math.BigDecimal;
 
 public class AgentNode {
+
     private String txHash;
 
     private String agentAddress;
@@ -32,6 +33,8 @@ public class AgentNode {
     private BigDecimal creditValue;
 
     private Long totalPackingCount;
+
+    private Long lastRewardHeight;
 
     public String getTxHash() {
         return txHash;
@@ -151,5 +154,13 @@ public class AgentNode {
 
     public void setTotalPackingCount(Long totalPackingCount) {
         this.totalPackingCount = totalPackingCount;
+    }
+
+    public Long getLastRewardHeight() {
+        return lastRewardHeight;
+    }
+
+    public void setLastRewardHeight(Long lastRewardHeight) {
+        this.lastRewardHeight = lastRewardHeight;
     }
 }

@@ -17,11 +17,12 @@
     <result column="deposit_count" property="depositCount" jdbcType="INTEGER" />
     <result column="credit_value" property="creditValue" jdbcType="DECIMAL" />
     <result column="total_packing_count" property="totalPackingCount" jdbcType="BIGINT" />
+    <result column="last_reward_height" property="lastRewardHeight" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
     tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate, 
     agent_name, introduction, create_time, block_height, status, total_deposit, deposit_count, 
-    credit_value, total_packing_count
+    credit_value, total_packing_count, last_reward_height
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -38,14 +39,14 @@
       reward_address, deposit, commission_rate, 
       agent_name, introduction, create_time, 
       block_height, status, total_deposit, 
-      deposit_count, credit_value, total_packing_count
-      )
+      deposit_count, credit_value, total_packing_count, 
+      last_reward_height)
     values (#{txHash,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR}, #{packingAddress,jdbcType=VARCHAR}, 
       #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL}, 
       #{agentName,jdbcType=VARCHAR}, #{introduction,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
       #{blockHeight,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{totalDeposit,jdbcType=BIGINT}, 
-      #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL}, #{totalPackingCount,jdbcType=BIGINT}
-      )
+      #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL}, #{totalPackingCount,jdbcType=BIGINT}, 
+      #{lastRewardHeight,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
     insert into agent_node
@@ -95,6 +96,9 @@
       <if test="totalPackingCount != null" >
         total_packing_count,
       </if>
+      <if test="lastRewardHeight != null" >
+        last_reward_height,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -141,6 +145,9 @@
       </if>
       <if test="totalPackingCount != null" >
         #{totalPackingCount,jdbcType=BIGINT},
+      </if>
+      <if test="lastRewardHeight != null" >
+        #{lastRewardHeight,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -189,6 +196,9 @@
       <if test="totalPackingCount != null" >
         total_packing_count = #{totalPackingCount,jdbcType=BIGINT},
       </if>
+      <if test="lastRewardHeight != null" >
+        last_reward_height = #{lastRewardHeight,jdbcType=BIGINT},
+      </if>
     </set>
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
@@ -207,7 +217,8 @@
       total_deposit = #{totalDeposit,jdbcType=BIGINT},
       deposit_count = #{depositCount,jdbcType=INTEGER},
       credit_value = #{creditValue,jdbcType=DECIMAL},
-      total_packing_count = #{totalPackingCount,jdbcType=BIGINT}
+      total_packing_count = #{totalPackingCount,jdbcType=BIGINT},
+      last_reward_height = #{lastRewardHeight,jdbcType=BIGINT}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
 </mapper>

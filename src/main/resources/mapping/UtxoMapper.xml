@@ -7,9 +7,10 @@
     <result column="address" property="address" jdbcType="VARCHAR" />
     <result column="amount" property="amount" jdbcType="BIGINT" />
     <result column="lock_time" property="lockTime" jdbcType="BIGINT" />
+    <result column="spend_tx_hash" property="spendTxHash" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    tx_hash, tx_index, address, amount, lock_time
+    tx_hash, tx_index, address, amount, lock_time, spend_tx_hash
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="io.nuls.api.entity.UtxoKey" >
     select 
@@ -25,9 +26,11 @@
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.Utxo" >
     insert into utxo (tx_hash, tx_index, address, 
-      amount, lock_time)
+      amount, lock_time, spend_tx_hash
+      )
     values (#{txHash,jdbcType=VARCHAR}, #{txIndex,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR}, 
-      #{amount,jdbcType=BIGINT}, #{lockTime,jdbcType=BIGINT})
+      #{amount,jdbcType=BIGINT}, #{lockTime,jdbcType=BIGINT}, #{spendTxHash,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Utxo" >
     insert into utxo
@@ -47,6 +50,9 @@
       <if test="lockTime != null" >
         lock_time,
       </if>
+      <if test="spendTxHash != null" >
+        spend_tx_hash,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -64,6 +70,9 @@
       <if test="lockTime != null" >
         #{lockTime,jdbcType=BIGINT},
       </if>
+      <if test="spendTxHash != null" >
+        #{spendTxHash,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Utxo" >
@@ -78,6 +87,9 @@
       <if test="lockTime != null" >
         lock_time = #{lockTime,jdbcType=BIGINT},
       </if>
+      <if test="spendTxHash != null" >
+        spend_tx_hash = #{spendTxHash,jdbcType=VARCHAR},
+      </if>
     </set>
     where tx_hash = #{txHash,jdbcType=VARCHAR}
       and tx_index = #{txIndex,jdbcType=BIGINT}
@@ -86,7 +98,8 @@
     update utxo
     set address = #{address,jdbcType=VARCHAR},
       amount = #{amount,jdbcType=BIGINT},
-      lock_time = #{lockTime,jdbcType=BIGINT}
+      lock_time = #{lockTime,jdbcType=BIGINT},
+      spend_tx_hash = #{spendTxHash,jdbcType=VARCHAR}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
       and tx_index = #{txIndex,jdbcType=BIGINT}
   </update>

@@ -7,6 +7,8 @@ public class Utxo extends UtxoKey {
 
     private Long lockTime;
 
+    private String spendTxHash;
+
     public String getAddress() {
         return address;
     }
@@ -29,5 +31,13 @@ public class Utxo extends UtxoKey {
 
     public void setLockTime(Long lockTime) {
         this.lockTime = lockTime;
+    }
+
+    public String getSpendTxHash() {
+        return spendTxHash;
+    }
+
+    public void setSpendTxHash(String spendTxHash) {
+        this.spendTxHash = spendTxHash == null ? null : spendTxHash.trim();
     }
 }

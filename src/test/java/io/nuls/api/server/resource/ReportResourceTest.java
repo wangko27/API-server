@@ -2,6 +2,7 @@ package io.nuls.api.server.resource;
 
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.RpcTransferUtil;
@@ -10,7 +11,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,30 +43,34 @@ public class ReportResourceTest {
     }
 
     @Test
-    public void balanceTest() {
-        Map<String, String> map = new HashMap<>();
-        map.put("pageNumber", "1");
-        map.put("pageSize", "101");
-        RpcClientResult result = RestFulUtils.getInstance().get("/address/balancelist", map);
+    public void txTest() {
+        String hash = "0020e818656009c55b5a13408731c77f2c11554ae68ea651d05c4a4d09f358548c73";
+        RpcClientResult result = RestFulUtils.getInstance().get("/tx/hash/" + hash, null);
         Log.debug(result.toString());
         Assert.assertEquals("SYS000", result.getCode());
+        try {
+            Transaction tx = RpcTransferUtil.toTransaction((Map<String, Object>) result.getData());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
-    public void minedTest() {
-        Map<String, String> map = new HashMap<>();
-        map.put("pageNumber", "2");
-        map.put("pageSize", "30");
-        RpcClientResult result = RestFulUtils.getInstance().get("/address/minedlist", map);
-        Log.debug(result.toString());
-        Assert.assertEquals("SYS000", result.getCode());
+    public void testMapToJson() throws Exception {
+        Map<String,Object> map = new HashMap<>();
+        map.put("aaa","aaa");
+        map.put("bbb", 1);
+
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        list.add(4);
+        list.add(5);
+        list.add(6);
+        map.put("list",list);
+        System.out.println(JSONUtils.obj2json(map));
     }
 
-    @Test
-    public void txHistoryTest() {
-        RpcClientResult result = RestFulUtils.getInstance().get("/txhistory", null);
-        Log.debug(result.toString());
-        Assert.assertEquals("SYS000", result.getCode());
-    }
 }
 

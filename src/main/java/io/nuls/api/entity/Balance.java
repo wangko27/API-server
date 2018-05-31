@@ -11,6 +11,8 @@ public class Balance {
 
     private Long blockHeight;
 
+    private String assetsCode;
+
     public String getAddress() {
         return address;
     }
@@ -49,5 +51,13 @@ public class Balance {
 
     public void setBlockHeight(Long blockHeight) {
         this.blockHeight = blockHeight;
+    }
+
+    public String getAssetsCode() {
+        return assetsCode;
+    }
+
+    public void setAssetsCode(String assetsCode) {
+        this.assetsCode = assetsCode == null ? null : assetsCode.trim();
     }
 }

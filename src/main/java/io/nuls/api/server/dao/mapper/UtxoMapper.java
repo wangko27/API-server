@@ -5,6 +5,7 @@ import io.nuls.api.entity.UtxoKey;
 
 @MyBatisMapper
 public interface UtxoMapper {
+
     int deleteByPrimaryKey(UtxoKey key);
 
     int insert(Utxo record);
