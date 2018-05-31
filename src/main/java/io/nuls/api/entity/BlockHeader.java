@@ -33,7 +33,7 @@ public class BlockHeader {
     private byte[] extend;
 
     /**
-     *
+     * 冗余字段，存储当前块所有交易的hash
      */
     private List<String> txList;
 

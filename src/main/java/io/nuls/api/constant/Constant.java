@@ -64,10 +64,17 @@ public interface Constant {
     String STRING = "java.lang.String";
 
 
+    int INT48_VALUE_LENGTH = 6;
 
     String CFG_RPC_SECTION = "api";
 
     String CFG_RPC_REQUEST_WHITE_SHEET="request.white.sheet";
 
     String WHITE_SHEET_SPLIT = ",";
+
+    /**
+     * 空值占位符
+     * Null placeholder.
+     */
+    byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
 }
