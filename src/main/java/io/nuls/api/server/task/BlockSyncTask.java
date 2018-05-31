@@ -17,8 +17,11 @@ public class BlockSyncTask {
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    /**
+     * 同步区块
+     */
     public void execute() {
-        System.out.println("-----------------------time:" + sdf.format(System.currentTimeMillis()));
+
         try {
             Thread.sleep(15000);
         } catch (InterruptedException e) {

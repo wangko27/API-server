@@ -73,7 +73,7 @@ public class RpcTransferUtil {
             dataMap = inputMaps.get(i);
             input.setAddress((String) dataMap.get("address"));
             input.setFromHash((String) dataMap.get("fromHash"));
-            input.setValue(Long.parseLong((String) dataMap.get("value")));
+            input.setValue(Long.parseLong(dataMap.get("value").toString()));
             input.setFromIndex((Integer) dataMap.get("fromIndex"));
             inputs.add(input);
         }
@@ -87,8 +87,8 @@ public class RpcTransferUtil {
             output.setTxHash((String) dataMap.get("txHash"));
             output.setTxIndex((Integer) dataMap.get("index"));
             output.setAddress((String) dataMap.get("address"));
-            output.setLockTime(Long.parseLong((String) dataMap.get("lockTime")));
-            output.setAmount(Long.parseLong((String) dataMap.get("value")));
+            output.setLockTime(Long.parseLong(dataMap.get("lockTime").toString()));
+            output.setAmount(Long.parseLong(dataMap.get("value").toString()));
             outputs.add(output);
         }
 

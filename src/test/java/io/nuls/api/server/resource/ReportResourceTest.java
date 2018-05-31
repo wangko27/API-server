@@ -44,7 +44,7 @@ public class ReportResourceTest {
 
     @Test
     public void txTest() {
-        String hash = "0020e818656009c55b5a13408731c77f2c11554ae68ea651d05c4a4d09f358548c73";
+        String hash = "0020272a4790d6284e71d4f708e1ea5e15bce6b74635fdb160c9561908fff0c6c54d";
         RpcClientResult result = RestFulUtils.getInstance().get("/tx/hash/" + hash, null);
         Log.debug(result.toString());
         Assert.assertEquals("SYS000", result.getCode());
