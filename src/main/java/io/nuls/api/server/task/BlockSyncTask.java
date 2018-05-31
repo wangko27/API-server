@@ -1,5 +1,7 @@
 package io.nuls.api.server.task;
 
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.resources.SyncDataHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,19 @@ public class BlockSyncTask {
      * 同步区块
      */
     public void execute() {
+        //查询本地已保存的最新块
+        BlockHeader best = blockBusiness.getNewest();
+        long bestHeight = -1;
+        if (best != null) {
+            bestHeight = best.getHeight();
+        }
+
+        //获取网络的下一块
+        bestHeight += 1;
+        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(bestHeight);
+        if(result.isFaild()) {
+           // if(result.)
+        }
 
         try {
             Thread.sleep(15000);

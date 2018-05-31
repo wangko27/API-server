@@ -237,4 +237,13 @@
     from block_header
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+
+  <select id="getBestBlock" resultMap="ResultMapWithBLOBs" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from block_header
+    where height = (SELECT height from block_header ORDER BY height desc limit 1)
+  </select>
 </mapper>

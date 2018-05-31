@@ -39,24 +39,22 @@ public class BlockBusiness {
 
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {
         Searchable searchable = new Searchable();
-        if(beginHeight >= 0){
+        if (beginHeight >= 0) {
             searchable.addCondition("height", SearchOperator.gte, beginHeight);
         }
-        if(endHeight > 0){
+        if (endHeight > 0) {
             searchable.addCondition("height", SearchOperator.lte, endHeight);
         }
         return blockHeaderMapper.selectList(searchable);
     }
+
     public List<BlockHeader> getList() {
         Searchable searchable = new Searchable();
         return blockHeaderMapper.selectList(searchable);
     }
 
-
-    public List<BlockHeader> getNewest() {
-        //todo
-        Searchable searchable = new Searchable();
-        return blockHeaderMapper.selectList(searchable);
+    public BlockHeader getNewest() {
+        return blockHeaderMapper.getBestBlock();
     }
 
 
