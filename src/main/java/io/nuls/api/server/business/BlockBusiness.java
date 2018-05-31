@@ -1,5 +1,8 @@
 package io.nuls.api.server.business;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -39,6 +42,15 @@ public class BlockBusiness {
         searchable.addCondition("height", SearchOperator.gte, beginHeight);
         searchable.addCondition("height", SearchOperator.lte, endHeight);
         return blockHeaderMapper.selectList(searchable);
+    }
+
+
+    public PageInfo<BlockHeader> getBlockPage(int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        List<BlockHeader> list = blockHeaderMapper.selectList(searchable);
+        PageInfo<BlockHeader> page = new PageInfo<>(list);
+        return page;
     }
 
     /**

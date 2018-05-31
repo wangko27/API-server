@@ -43,12 +43,16 @@ public class SyncDataHandler {
 
     public RpcClientResult<Transaction> getTransaction(String hash) {
         RpcClientResult result = restFulUtils.get("/tx/hash/" + hash, null);
-        if(result.isFaild()) {
+        if (result.isFaild()) {
             return result;
         }
-//        try {
-//            Transaction transaction = RpcTransferUtil.t()
-//        }
-        return null;
+        try {
+            Transaction tx = RpcTransferUtil.toTransaction((Map<String, Object>) result.getData());
+            result.setData(tx);
+        } catch (Exception e) {
+            Log.error(e);
+            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
+        }
+        return result;
     }
 }
