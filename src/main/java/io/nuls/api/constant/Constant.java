@@ -29,6 +29,7 @@ package io.nuls.api.constant;
  * @date 2017/10/9
  */
 public interface Constant {
+    short DEFAULT_CHAIN_ID = 1;
     //version
     int RPC_MODULE_VERSION = 1111;
     //Minimum version supported
