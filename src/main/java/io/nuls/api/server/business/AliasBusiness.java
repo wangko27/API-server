@@ -50,7 +50,7 @@ public class AliasBusiness {
      * @param height 区块高度
      * @return 0，设置失败，1设置成功，2已经设置过别名了，3别名已经被设置了
      */
-    public int saveAliasDetail(String address,String alias,Long height){
+    public int insert(String address,String alias,Long height){
         if(getAliasByAddress(address)!=null){
             return 2;
         }

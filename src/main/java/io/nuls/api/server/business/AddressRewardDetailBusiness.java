@@ -36,11 +36,10 @@ public class AddressRewardDetailBusiness {
 
     /**
      * 新增奖励
-     * @param entity 需要新增的实体，除了时间之外，其他字段都需要值，否则会保存失败
+     * @param entity 需要新增的实体
      * @return 新增结果 1成功，其他失败
      */
-    public int add(AddressRewardDetail entity){
-        entity.setTime(System.currentTimeMillis());
+    public int insert(AddressRewardDetail entity){
         return addressRewardDetailMapper.insert(entity);
     }
 

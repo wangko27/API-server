@@ -27,7 +27,8 @@ CREATE TABLE `address_reward_detail` (
   `amount` bigint(19) DEFAULT NULL COMMENT '奖励金额',
   `tx_hash` varchar(70) DEFAULT NULL COMMENT '交易hash',
   `time` bigint(15) DEFAULT NULL COMMENT '时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `height_idx` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='账户奖励明细表';
 
 /*Data for the table `address_reward_detail` */
@@ -38,20 +39,21 @@ DROP TABLE IF EXISTS `agent_node`;
 
 CREATE TABLE `agent_node` (
   `tx_hash` varchar(70) NOT NULL COMMENT '创建节点 交易hash',
-  `agent_address` varchar(35) DEFAULT NULL COMMENT '创建地址',
-  `packing_address` varchar(35) DEFAULT NULL COMMENT '出块地址',
-  `reward_address` varchar(35) DEFAULT NULL COMMENT '奖励地址',
+  `agent_address` varchar(40) DEFAULT NULL COMMENT '创建地址',
+  `packing_address` varchar(40) DEFAULT NULL COMMENT '出块地址',
+  `reward_address` varchar(40) DEFAULT NULL COMMENT '奖励地址',
   `deposit` bigint(19) DEFAULT NULL COMMENT '保证金金额',
   `commission_rate` decimal(5,2) DEFAULT NULL COMMENT '佣金比例',
   `agent_name` varchar(70) DEFAULT NULL COMMENT '节点名称',
   `introduction` varchar(255) DEFAULT NULL COMMENT '节点说明',
   `create_time` bigint(15) DEFAULT NULL COMMENT '创建时间',
   `block_height` bigint(15) DEFAULT NULL COMMENT '创建高度',
-  `status` int(1) DEFAULT NULL COMMENT '节点状态',
+  `status` int(1) DEFAULT NULL COMMENT '节点状态(0待共识，1共识中)',
   `total_deposit` bigint(19) DEFAULT NULL COMMENT '委托总金额',
   `deposit_count` int(5) DEFAULT NULL COMMENT '委托数量',
   `credit_value` decimal(9,8) DEFAULT NULL COMMENT '信用值',
   `total_packing_count` bigint(14) DEFAULT NULL COMMENT '累计出块数量',
+  `last_reward_height` bigint(15) DEFAULT NULL COMMENT '最后收益区块高度',
   PRIMARY KEY (`tx_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='所有的节点列表';
 
@@ -81,7 +83,9 @@ CREATE TABLE `balance` (
   `locked` bigint(19) NOT NULL COMMENT '冻结金额',
   `usable` bigint(19) NOT NULL COMMENT '可用金额',
   `block_height` bigint(15) DEFAULT NULL COMMENT '块高度',
-  PRIMARY KEY (`address`)
+  `assets_code` varchar(10) DEFAULT NULL COMMENT '资产(nuls、blo)',
+  PRIMARY KEY (`address`),
+  KEY `address_idx` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='账户资产表';
 
 /*Data for the table `balance` */
@@ -93,7 +97,7 @@ DROP TABLE IF EXISTS `block_header`;
 CREATE TABLE `block_header` (
   `hash` varchar(70) NOT NULL COMMENT 'hash',
   `height` bigint(14) NOT NULL COMMENT '高度',
-  `pre_hash` varchar(70) DEFAULT NULL COMMENT '上一个区块hash',
+  `prev_hash` varchar(70) DEFAULT NULL COMMENT '上一个区块hash',
   `merkle_hash` varchar(70) NOT NULL COMMENT 'merkle_hash',
   `create_time` bigint(15) NOT NULL COMMENT '出块时间',
   `consensus_address` varchar(40) DEFAULT NULL COMMENT '共识地址',
@@ -103,9 +107,10 @@ CREATE TABLE `block_header` (
   `reward` bigint(19) NOT NULL COMMENT '奖励',
   `extend` blob NOT NULL COMMENT 'sign+block data',
   `size` int(9) DEFAULT NULL COMMENT '大小',
-  `packing_index_of_round` int(15) DEFAULT NULL COMMENT 'packing_index_of_round',
+  `packing_index_of_round` bigint(15) DEFAULT NULL COMMENT 'packing_index_of_round',
   `round_start_time` bigint(15) DEFAULT NULL COMMENT 'round_start_time',
-  PRIMARY KEY (`hash`)
+  PRIMARY KEY (`hash`),
+  UNIQUE KEY `height_idx` (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='区块头';
 
 /*Data for the table `block_header` */
@@ -166,6 +171,18 @@ CREATE TABLE `transaction` (
 
 /*Data for the table `transaction` */
 
+/*Table structure for table `transaction_relation` */
+
+DROP TABLE IF EXISTS `transaction_relation`;
+
+CREATE TABLE `transaction_relation` (
+  `address` varchar(35) NOT NULL COMMENT 'address',
+  `tx_hash` varchar(70) NOT NULL COMMENT 'tx_hash',
+  PRIMARY KEY (`address`,`tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+/*Data for the table `transaction_relation` */
+
 /*Table structure for table `utxo` */
 
 DROP TABLE IF EXISTS `utxo`;
@@ -173,9 +190,10 @@ DROP TABLE IF EXISTS `utxo`;
 CREATE TABLE `utxo` (
   `tx_hash` varchar(70) NOT NULL COMMENT 'tx_hash',
   `tx_index` bigint(15) NOT NULL COMMENT 'tx_index',
-  `address` varchar(60) DEFAULT NULL COMMENT '地址',
+  `address` varchar(40) DEFAULT NULL COMMENT '地址',
   `amount` bigint(19) DEFAULT NULL COMMENT '金额',
   `lock_time` bigint(15) DEFAULT NULL COMMENT '锁定时间',
+  `spend_tx_hash` varchar(70) DEFAULT NULL COMMENT '已花费的txhash',
   PRIMARY KEY (`tx_hash`,`tx_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='UTXO';
 

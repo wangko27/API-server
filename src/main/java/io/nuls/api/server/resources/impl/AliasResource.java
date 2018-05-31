@@ -34,7 +34,7 @@ public class AliasResource {
         }
         try {
             result = RpcClientResult.getSuccess();
-            result.setData(aliasBusiness.getAliasDetail(address));
+            result.setData(aliasBusiness.getAliasByAddress(address));
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

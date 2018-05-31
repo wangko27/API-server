@@ -48,7 +48,7 @@ public class PunishLogResource {
             return result;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(punishLogBusiness.getList(address));
+        result.setData(punishLogBusiness.getList(address,pageNumber,pageSize));
         return result;
     }
 }

@@ -1,13 +1,13 @@
 package io.nuls.api.server.business;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.Deposit;
 import io.nuls.api.server.dao.mapper.DepositMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Description: 委托
@@ -25,10 +25,50 @@ public class DepositBusiness {
      * @param address 账户地址
      * @return
      */
-    public List<Deposit> getList(String address) {
+    public PageInfo<Deposit> getList(String address,int pageNumber,int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
-        return depositMapper.selectList(searchable);
+        PageInfo<Deposit> page = new PageInfo<>(depositMapper.selectList(searchable));
+        return page;
+    }
+
+    /**
+     * 新增委托 检查被委托的节点是否已被委托满
+     * @param entity
+     * @return
+     */
+    public int insert(Deposit entity){
+        return depositMapper.insert(entity);
+    }
+
+    /**
+     * 根据主键查询详情
+     * @param txHash 主键
+     * @return
+     */
+    public Deposit getDetail(String txHash){
+        return depositMapper.selectByPrimaryKey(txHash);
+    }
+
+    /**
+     * 根据主键删除
+     * @param txHash 主键
+     * @return
+     */
+    public int deleteById(String txHash){
+        return depositMapper.deleteByPrimaryKey(txHash);
+    }
+
+    /**
+     * 根据高度删除
+     * @param height 高度
+     * @return
+     */
+    public int deleteByHeight(Long height){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("block_height", SearchOperator.eq, height);
+        return depositMapper.deleteBySearchable(searchable);
     }
 
 }

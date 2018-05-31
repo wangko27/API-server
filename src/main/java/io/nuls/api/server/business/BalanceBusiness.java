@@ -48,7 +48,7 @@ public class BalanceBusiness {
      * @param entity
      * @return 1新增成功，其他失败
      */
-    public int save(Balance entity){
+    public int insert(Balance entity){
         return balanceMapper.insert(entity);
     }
 
@@ -72,7 +72,6 @@ public class BalanceBusiness {
             entity.setUsable(usable);
         }
         return balanceMapper.updateByPrimaryKey(entity);
-
     }
 
 }

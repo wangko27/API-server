@@ -58,13 +58,11 @@ public class AgentNodeBusiness{
     }
 
     /**
-     * 根据id查询
-     * @param entity 创建节点的实体，除了status和time其他的都需要传
-     * @return
+     * 保存
+     * @param entity 实体
+     * @return 1成功，其他失败
      */
-    public int save(AgentNode entity) {
-        entity.setCreateTime(System.currentTimeMillis());
-        entity.setStatus(EntityConstant.CONSENSUS_STATUS_WAIT);
+    public int insert(AgentNode entity) {
         return agentNodeMapper.insert(entity);
     }
 
