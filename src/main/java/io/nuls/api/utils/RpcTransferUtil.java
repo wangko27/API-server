@@ -3,6 +3,7 @@ package io.nuls.api.utils;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.Utxo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,9 +62,8 @@ public class RpcTransferUtil {
 
         Map<String, Object> dataMap = new HashMap<>();
         List<Map<String, Object>> inputMaps = (List<Map<String, Object>>) map.get("inputs");
-        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) map.get("outputs");
+
         dataMap.put("inputs", inputMaps);
-        dataMap.put("outputs", outputMaps);
         dataMap.put("scriptSign", map.get("scriptSig").toString());
         tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
 
@@ -75,8 +75,23 @@ public class RpcTransferUtil {
             input.setFromHash((String) dataMap.get("fromHash"));
             input.setValue(Long.parseLong((String) dataMap.get("value")));
             input.setFromIndex((Integer) dataMap.get("fromIndex"));
-
+            inputs.add(input);
         }
+        tx.setInputs(inputs);
+
+        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) map.get("outputs");
+        List<Utxo> outputs = new ArrayList<>();
+        for (int i = 0; i < outputMaps.size(); i++) {
+            Utxo output = new Utxo();
+            dataMap = outputMaps.get(i);
+            output.setTxHash((String) dataMap.get("txHash"));
+            output.setTxIndex((Integer) dataMap.get("index"));
+            output.setAddress((String) dataMap.get("address"));
+            output.setLockTime(Long.parseLong((String) dataMap.get("lockTime")));
+            output.setAmount(Long.parseLong((String) dataMap.get("value")));
+            outputs.add(output);
+        }
+
         return tx;
     }
 }

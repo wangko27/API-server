@@ -3,7 +3,7 @@ package io.nuls.api.entity;
 public class UtxoKey {
     private String txHash;
 
-    private Long txIndex;
+    private Integer txIndex;
 
     public String getTxHash() {
         return txHash;
@@ -13,11 +13,11 @@ public class UtxoKey {
         this.txHash = txHash == null ? null : txHash.trim();
     }
 
-    public Long getTxIndex() {
+    public Integer getTxIndex() {
         return txIndex;
     }
 
-    public void setTxIndex(Long txIndex) {
+    public void setTxIndex(Integer txIndex) {
         this.txIndex = txIndex;
     }
 }
