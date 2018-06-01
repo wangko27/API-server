@@ -32,11 +32,6 @@ public class BlockHeader {
 
     private byte[] extend;
 
-    /**
-     * 冗余字段，存储当前块所有交易的hash
-     */
-    private List<String> txList;
-
     public String getHash() {
         return hash;
     }
@@ -149,11 +144,4 @@ public class BlockHeader {
         this.extend = extend;
     }
 
-    public List<String> getTxList() {
-        return txList;
-    }
-
-    public void setTxList(List<String> txList) {
-        this.txList = txList;
-    }
 }
