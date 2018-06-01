@@ -22,9 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.api.utils;
-
-import io.nuls.api.crypto.Sha256Hash;
+package io.nuls.api.crypto;
 
 import java.math.BigInteger;
 import java.util.Arrays;
