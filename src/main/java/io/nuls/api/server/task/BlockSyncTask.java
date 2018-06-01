@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class SyncDataTask {
+public class BlockSyncTask {
 
     @Autowired
     private BlockBusiness blockBusiness;

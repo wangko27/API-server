@@ -43,13 +43,13 @@ public class SyncDataBusiness {
     private List<Transaction> syncTransaction(BlockHeader block) throws NulsException {
         List<Transaction> txList = new ArrayList<>();
         RpcClientResult<Transaction> result;
-        for (String txHash : block.getTxList()) {
-            result = syncDataHandler.getTransaction(txHash);
-            if (result.isFaild()) {
-                throw new NulsException(result.getCode(), result.getMsg());
-            }
-            txList.add(result.getData());
-        }
+//        for (String txHash : block.getTxList()) {
+//            result = syncDataHandler.getTransaction(txHash);
+//            if (result.isFaild()) {
+//                throw new NulsException(result.getCode(), result.getMsg());
+//            }
+//            txList.add(result.getData());
+//        }
         return txList;
     }
 }

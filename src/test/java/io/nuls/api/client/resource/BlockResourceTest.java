@@ -1,9 +1,11 @@
 package io.nuls.api.client.resource;
 
+import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.Block;
 import io.nuls.api.utils.RestFulUtils;
+import org.apache.ibatis.annotations.Param;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,7 +39,7 @@ public class BlockResourceTest {
         assertTrue(true);
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target("http://127.0.0.1:8001/").path("/block/bytes");
-        target = target.queryParam("height", 1);
+        target = target.queryParam("height", 272);
         byte[] response = target.request(APPLICATION_JSON).get(byte[].class);
         System.out.println(response.length);
         Block block = new Block();
@@ -56,9 +58,18 @@ public class BlockResourceTest {
     }
 
     @Test
-    public void getBlockTest() {
-        RpcClientResult result = RestFulUtils.getInstance().get("/block/height/5", null);
+    public void getBlockByteTest() {
+        Map<String,String> param = new HashMap<>();
+        param.put("hash","002001fb72a6caeb8c67d3cfd58325d14e3348e5b79e303a27786e9a8e93eeb3bef0");
+        RpcClientResult result = RestFulUtils.getInstance().get("/block/bytes", param);
         System.out.println(result.toString());
+        byte[] data = Hex.decode(result.getData().toString());
+        Block block = new Block();
+        try {
+            block.parse(data);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
         Assert.assertTrue(result.isSuccess());
     }
 

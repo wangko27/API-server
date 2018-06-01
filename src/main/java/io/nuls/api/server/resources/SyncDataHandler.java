@@ -1,6 +1,7 @@
 package io.nuls.api.server.resources;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Transaction;
@@ -26,13 +27,28 @@ public class SyncDataHandler {
      * @return
      */
     public RpcClientResult<BlockHeader> getBlockHeader(long height) {
-        RpcClientResult result = restFulUtils.get("/block/height/" + height, null);
+        RpcClientResult result = restFulUtils.get("/block/header/height/" + height, null);
         if (result.isFaild()) {
             return result;
         }
         try {
             BlockHeader blockHeader = RpcTransferUtil.toBlockHeader((Map<String, Object>) result.getData());
             result.setData(blockHeader);
+        } catch (Exception e) {
+            Log.error(e);
+            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
+        }
+        return result;
+    }
+
+    public RpcClientResult<Block> getBlock(String hash) {
+        RpcClientResult result = restFulUtils.get("/block/hash/" + hash, null);
+        if (result.isFaild()) {
+            return result;
+        }
+        try {
+            Block block = RpcTransferUtil.toBlock((String) result.getData());
+            result.setData(block);
         } catch (Exception e) {
             Log.error(e);
             result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);

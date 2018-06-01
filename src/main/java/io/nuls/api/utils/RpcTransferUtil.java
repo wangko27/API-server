@@ -1,10 +1,15 @@
 package io.nuls.api.utils;
 
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.constant.Constant;
+import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.crypto.Hex;
+import io.nuls.api.entity.*;
+import io.nuls.api.exception.NulsException;
+import io.nuls.api.model.Coin;
+import io.nuls.api.model.NulsDigestData;
+import io.nuls.api.model.tx.CoinBaseTransaction;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,20 +38,70 @@ public class RpcTransferUtil {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("scriptSign", scriptSign);
         dataMap.put("data", extend);
-
         blockHeader.setExtend(JSONUtils.obj2json(dataMap).getBytes());
+        return blockHeader;
+    }
 
-        List<String> txList = new ArrayList<>();
-        List<Map<String, Object>> txInfoList = (List<Map<String, Object>>) map.get("txList");
-        Map<String, Object> txMap;
-        if (txInfoList != null && !txInfoList.isEmpty()) {
-            for (int i = 0; i < txInfoList.size(); i++) {
-                txMap = txInfoList.get(i);
-                txList.add((String) txMap.get("hash"));
+    public static Block toBlock(String hexBlock) throws Exception {
+        byte[] data = Hex.decode(hexBlock);
+        io.nuls.api.model.Block blockModel = new io.nuls.api.model.Block();
+        blockModel.parse(data);
+
+        Block block = new Block();
+        BlockHeader header = new BlockHeader();
+        header.setHash(blockModel.getHeader().getHash().getDigestHex());
+        header.setSize(blockModel.size());
+
+        for (int i = 0; i < blockModel.getTxs().size(); i++) {
+            io.nuls.api.model.Transaction txModel = blockModel.getTxs().get(i);
+
+
+        }
+
+        return block;
+    }
+
+    public static Transaction toTransaction(io.nuls.api.model.Transaction txModel) {
+        Transaction tx = null;
+        if (txModel.getType() == TransactionConstant.TX_TYPE_COINBASE) {
+            CoinBaseTransaction coinBase = (CoinBaseTransaction) txModel;
+
+        }
+        return tx;
+    }
+
+    private static Transaction transferTx(io.nuls.api.model.Transaction txModel) throws Exception {
+        Transaction tx = new Transaction();
+        tx.setHash(txModel.getHash().getDigestHex());
+        tx.setBlockHeight(txModel.getBlockHeight());
+        tx.setFee(txModel.getFee().getValue());
+        if (tx.getRemark() != null) {
+            try {
+                tx.setRemark(new String(txModel.getRemark(), Constant.DEFAULT_ENCODING));
+            } catch (UnsupportedEncodingException e) {
+                tx.setRemark(Hex.encode(txModel.getRemark()));
             }
         }
-        blockHeader.setTxList(txList);
-        return blockHeader;
+        tx.setSize(txModel.getSize());
+        tx.setType(txModel.getType());
+        tx.setCreateTime(txModel.getTime());
+
+        List<Input> inputs = new ArrayList<>();
+        byte[] fromHash;
+        int fromIndex;
+        for (Coin coin : txModel.getCoinData().getFrom()) {
+            fromHash = LedgerUtil.getTxHashBytes(coin.getOwner());
+            fromIndex = LedgerUtil.getIndex(coin.getOwner());
+            Input input = new Input();
+            NulsDigestData hash = new NulsDigestData();
+            hash.parse(fromHash);
+            input.setFromHash(hash.getDigestHex());
+            input.setFromIndex(fromIndex);
+            inputs.add(input);
+        }
+
+
+        return tx;
     }
 
 

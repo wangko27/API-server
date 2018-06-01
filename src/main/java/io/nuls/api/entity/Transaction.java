@@ -28,6 +28,8 @@ public class Transaction {
 
     private List<Utxo> outputs;
 
+    private String scriptSign;
+
     public String getHash() {
         return hash;
     }
