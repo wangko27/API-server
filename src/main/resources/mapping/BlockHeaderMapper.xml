@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="io.nuls.api.entity.BlockHeader" >
     <id column="hash" property="hash" jdbcType="VARCHAR" />
     <result column="height" property="height" jdbcType="BIGINT" />
-    <result column="pre_hash" property="preHash" jdbcType="VARCHAR" />
+    <result column="prev_hash" property="preHash" jdbcType="VARCHAR" />
     <result column="merkle_hash" property="merkleHash" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
     <result column="consensus_address" property="consensusAddress" jdbcType="VARCHAR" />
@@ -20,7 +20,7 @@
     <result column="extend" property="extend" jdbcType="LONGVARBINARY" />
   </resultMap>
   <sql id="Base_Column_List" >
-    hash, height, pre_hash, merkle_hash, create_time, consensus_address, tx_count, round_index, 
+    hash, height, prev_hash, merkle_hash, create_time, consensus_address, tx_count, round_index, 
     total_fee, reward, size, packing_index_of_round, round_start_time
   </sql>
   <sql id="Blob_Column_List" >
@@ -39,7 +39,7 @@
     where hash = #{hash,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.BlockHeader" >
-    insert into block_header (hash, height, pre_hash, 
+    insert into block_header (hash, height, prev_hash, 
       merkle_hash, create_time, consensus_address, 
       tx_count, round_index, total_fee, 
       reward, size, packing_index_of_round, 
@@ -60,7 +60,7 @@
         height,
       </if>
       <if test="preHash != null" >
-        pre_hash,
+        prev_hash,
       </if>
       <if test="merkleHash != null" >
         merkle_hash,
@@ -148,7 +148,7 @@
         height = #{height,jdbcType=BIGINT},
       </if>
       <if test="preHash != null" >
-        pre_hash = #{preHash,jdbcType=VARCHAR},
+        prev_hash = #{preHash,jdbcType=VARCHAR},
       </if>
       <if test="merkleHash != null" >
         merkle_hash = #{merkleHash,jdbcType=VARCHAR},
@@ -189,7 +189,7 @@
   <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.api.entity.BlockHeader" >
     update block_header
     set height = #{height,jdbcType=BIGINT},
-      pre_hash = #{preHash,jdbcType=VARCHAR},
+      prev_hash = #{preHash,jdbcType=VARCHAR},
       merkle_hash = #{merkleHash,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=BIGINT},
       consensus_address = #{consensusAddress,jdbcType=VARCHAR},
@@ -206,7 +206,7 @@
   <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.BlockHeader" >
     update block_header
     set height = #{height,jdbcType=BIGINT},
-      pre_hash = #{preHash,jdbcType=VARCHAR},
+      prev_hash = #{preHash,jdbcType=VARCHAR},
       merkle_hash = #{merkleHash,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=BIGINT},
       consensus_address = #{consensusAddress,jdbcType=VARCHAR},

@@ -41,7 +41,7 @@ public class BlockResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(blockBusiness.getList());
+        result.setData(blockBusiness.getList(pageNumber,pageSize));
         return result;
     }
 

@@ -49,7 +49,7 @@ public class TransactionResource {
     @GET
     @Path("/tx/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getBlockByHeight(@PathParam("hash") String hash){
+    public RpcClientResult getDetailByHash(@PathParam("hash") String hash){
         RpcClientResult result;
         if (!StringUtils.validHash(hash)) {
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);

@@ -1,7 +1,7 @@
 package io.nuls.api.constant;
 
 /**
- * Description:
+ * Description: 实体类里面的状态字段表示的值
  * Author: zsj
  * Date:  2018/5/31 0031
  */
