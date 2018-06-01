@@ -5,9 +5,13 @@ import io.nuls.api.constant.TransactionConstant;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
+import io.nuls.api.model.Address;
+import io.nuls.api.model.Agent;
 import io.nuls.api.model.Coin;
 import io.nuls.api.model.NulsDigestData;
+import io.nuls.api.model.tx.AliasTransaction;
 import io.nuls.api.model.tx.CoinBaseTransaction;
+import io.nuls.api.model.tx.CreateAgentTransaction;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -61,10 +65,14 @@ public class RpcTransferUtil {
         return block;
     }
 
-    public static Transaction toTransaction(io.nuls.api.model.Transaction txModel) {
-        Transaction tx = null;
-        if (txModel.getType() == TransactionConstant.TX_TYPE_COINBASE) {
-            CoinBaseTransaction coinBase = (CoinBaseTransaction) txModel;
+    public static Transaction toTransaction(io.nuls.api.model.Transaction txModel) throws Exception {
+        Transaction tx = transferTx(txModel);
+        if (txModel.getType() == TransactionConstant.TX_TYPE_ACCOUNT_ALIAS) {
+            AliasTransaction aliasTransaction = (AliasTransaction) txModel;
+            tx.setTxData(toAlias(aliasTransaction));
+        } else if (txModel.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+            CreateAgentTransaction createAgentTransaction = (CreateAgentTransaction) txModel;
+            Agent agent = createAgentTransaction.getTxData();
 
         }
         return tx;
@@ -85,23 +93,51 @@ public class RpcTransferUtil {
         tx.setSize(txModel.getSize());
         tx.setType(txModel.getType());
         tx.setCreateTime(txModel.getTime());
-
+        tx.setScriptSign(Hex.encode(txModel.getScriptSig()));
         List<Input> inputs = new ArrayList<>();
-        byte[] fromHash;
-        int fromIndex;
-        for (Coin coin : txModel.getCoinData().getFrom()) {
-            fromHash = LedgerUtil.getTxHashBytes(coin.getOwner());
-            fromIndex = LedgerUtil.getIndex(coin.getOwner());
-            Input input = new Input();
-            NulsDigestData hash = new NulsDigestData();
-            hash.parse(fromHash);
-            input.setFromHash(hash.getDigestHex());
-            input.setFromIndex(fromIndex);
-            inputs.add(input);
+        byte[] hashByte;
+        int index;
+        if (txModel.getCoinData().getFrom() != null) {
+            for (Coin coin : txModel.getCoinData().getFrom()) {
+                hashByte = LedgerUtil.getTxHashBytes(coin.getOwner());
+                index = LedgerUtil.getIndex(coin.getOwner());
+
+                Input input = new Input();
+                NulsDigestData hash = new NulsDigestData();
+                hash.parse(hashByte);
+                input.setFromHash(hash.getDigestHex());
+                input.setFromIndex(index);
+                inputs.add(input);
+            }
         }
 
+        List<Utxo> outputs = new ArrayList<>();
+        if (txModel.getCoinData().getTo() != null) {
+            for (Coin coin : txModel.getCoinData().getTo()) {
+                hashByte = LedgerUtil.getTxHashBytes(coin.getOwner());
+                index = LedgerUtil.getIndex(coin.getOwner());
 
+                Utxo utxo = new Utxo();
+                NulsDigestData hash = new NulsDigestData();
+                hash.parse(hashByte);
+                utxo.setTxHash(hash.getDigestHex());
+                utxo.setTxIndex(index);
+                utxo.setAmount(coin.getNa().getValue());
+                utxo.setAddress(AddressTool.getAddressBase58(coin.getOwner()));
+                outputs.add(utxo);
+            }
+        }
+        tx.setOutputs(outputs);
         return tx;
+    }
+
+    private static Alias toAlias(AliasTransaction tx) {
+        io.nuls.api.model.Alias aliasModel = tx.getTxData();
+        Alias alias = new Alias();
+        alias.setAddress(AddressTool.getAddressBase58(aliasModel.getAddress()));
+        alias.setAlias(aliasModel.getAlias());
+        alias.setBlockHeight(tx.getBlockHeight());
+        return alias;
     }
 
 

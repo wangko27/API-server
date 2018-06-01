@@ -30,6 +30,8 @@ public class Transaction {
 
     private String scriptSign;
 
+    private TxData txData;
+
     public String getHash() {
         return hash;
     }
@@ -124,5 +126,21 @@ public class Transaction {
 
     public void setOutputs(List<Utxo> outputs) {
         this.outputs = outputs;
+    }
+
+    public String getScriptSign() {
+        return scriptSign;
+    }
+
+    public void setScriptSign(String scriptSign) {
+        this.scriptSign = scriptSign;
+    }
+
+    public TxData getTxData() {
+        return txData;
+    }
+
+    public void setTxData(TxData txData) {
+        this.txData = txData;
     }
 }
