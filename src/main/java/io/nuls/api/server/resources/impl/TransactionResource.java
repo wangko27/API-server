@@ -42,7 +42,7 @@ public class TransactionResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(transactionBusiness.getList(address,height,type));
+        result.setData(transactionBusiness.getList(height,type,address,pageNumber,pageSize));
         return result;
     }
 

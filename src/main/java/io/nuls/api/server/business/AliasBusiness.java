@@ -9,6 +9,7 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class AliasBusiness {
      * @param height 区块高度
      * @return 0，设置失败，1设置成功，2已经设置过别名了，3别名已经被设置了
      */
+    @Transactional
     public int insert(String address,String alias,Long height){
         if(getAliasByAddress(address)!=null){
             return 2;
@@ -69,6 +71,7 @@ public class AliasBusiness {
      * @param address 账户地址
      * @return
      */
+    @Transactional
     public int deleteAliasById(String address){
         return aliasMapper.deleteByPrimaryKey(address);
     }
@@ -78,6 +81,7 @@ public class AliasBusiness {
      * @param height
      * @return
      */
+    @Transactional
     public int deleteAliasByHeight(Long height){
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);

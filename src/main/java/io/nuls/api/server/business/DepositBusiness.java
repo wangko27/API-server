@@ -8,6 +8,7 @@ import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Description: 委托
@@ -38,6 +39,7 @@ public class DepositBusiness {
      * @param entity
      * @return
      */
+    @Transactional
     public int insert(Deposit entity){
         return depositMapper.insert(entity);
     }
@@ -56,6 +58,7 @@ public class DepositBusiness {
      * @param txHash 主键
      * @return
      */
+    @Transactional
     public int deleteById(String txHash){
         return depositMapper.deleteByPrimaryKey(txHash);
     }
@@ -65,6 +68,7 @@ public class DepositBusiness {
      * @param height 高度
      * @return
      */
+    @Transactional
     public int deleteByHeight(Long height){
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);

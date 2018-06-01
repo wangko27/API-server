@@ -7,6 +7,7 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -48,6 +49,7 @@ public class BalanceBusiness {
      * @param entity
      * @return 1新增成功，其他失败
      */
+    @Transactional
     public int insert(Balance entity){
         return balanceMapper.insert(entity);
     }
@@ -59,6 +61,7 @@ public class BalanceBusiness {
      * @param usable 可用金额
      * @return 1操作成功，2id不存在，0修改失败
      */
+    @Transactional
     public int update(Long id,String address,long locked,long usable){
         Balance entity = getDetail(id);
         if(null == entity){

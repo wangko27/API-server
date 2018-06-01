@@ -57,7 +57,6 @@ public class BlockBusiness {
         return blockHeaderMapper.getBestBlock();
     }
 
-
     public PageInfo<BlockHeader> getBlockPage(int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
@@ -68,7 +67,6 @@ public class BlockBusiness {
 
     /**
      * 根据最新传入的区块信息，验证当前区块和前一区块的连续性
-     *
      * @param blockHeader
      * @return
      */
