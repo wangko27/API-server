@@ -1,9 +1,10 @@
 package io.nuls.api.entity;
 
 public class Balance {
-    private String address;
 
     private Long id;
+
+    private String address;
 
     private Long locked;
 

@@ -4,6 +4,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.AddressRewardDetail;
 import io.nuls.api.entity.Balance;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.Utxo;
+import io.nuls.api.model.Coin;
 import io.nuls.api.server.dao.mapper.BalanceMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
@@ -27,13 +30,14 @@ public class BalanceBusiness {
 
     /**
      * 查询账户资产列表
+     *
      * @param address 用户账户
      * @return
      */
     public PageInfo<Balance> getList(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(address)){
+        if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
         }
         PageInfo<Balance> page = new PageInfo<>(balanceMapper.selectList(searchable));
@@ -42,6 +46,7 @@ public class BalanceBusiness {
 
     /**
      * 根据id查询
+     *
      * @param id
      * @return
      */
@@ -51,34 +56,71 @@ public class BalanceBusiness {
 
     /**
      * 新增资产
+     *
      * @param entity
      * @return 1新增成功，其他失败
      */
     @Transactional
-    public int insert(Balance entity){
+    public int insert(Balance entity) {
         return balanceMapper.insert(entity);
     }
 
     /**
      * 修改资产
+     *
      * @param locked 锁定金额
      * @param usable 可用金额
      * @return 1操作成功，2id不存在，0修改失败
      */
     @Transactional
-    public int update(Long id,long locked,long usable){
+    public int update(Long id, long locked, long usable) {
         Balance entity = getDetail(id);
-        if(null == entity){
+        if (null == entity) {
             return 2;
         }
         entity.setId(id);
-        if(locked > 0){
+        if (locked > 0) {
             entity.setLocked(locked);
         }
-        if(usable > 0){
+        if (usable > 0) {
             entity.setUsable(usable);
         }
         return balanceMapper.updateByPrimaryKey(entity);
+    }
+
+    /**
+     * 根据每一个输入计算余额
+     *
+     * @param from
+     * @return
+     */
+    @Transactional
+    public int updateByFrom(Utxo from) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, from.getAddress());
+        Balance balance = balanceMapper.selectBySearchable(searchable);
+        balance.setUsable(balance.getUsable() - from.getAmount());
+        return balanceMapper.updateByPrimaryKey(balance);
+    }
+
+    /**
+     * 根据交易生成的每一个utxo计算余额
+     *
+     * @param utxo
+     * @return
+     */
+    @Transactional
+    public int updateByTo(Utxo utxo, Transaction tx) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, utxo.getAddress());
+        Balance balance = balanceMapper.selectBySearchable(searchable);
+        if(balance == null) {
+            balance = new Balance();
+            balance.setAddress(utxo.getAddress());
+            balance.setAssetsCode("nuls");  //暂时写死为nuls
+
+        }
+        return 0;
     }
 
 }

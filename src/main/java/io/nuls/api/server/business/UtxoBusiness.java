@@ -3,10 +3,7 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.ErrorCode;
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.Utxo;
-import io.nuls.api.entity.UtxoKey;
+import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -25,8 +22,12 @@ import java.util.List;
  */
 @Service
 public class UtxoBusiness {
+
     @Autowired
     private UtxoMapper utxoMapper;
+
+    @Autowired
+    private BalanceBusiness balanceBusiness;
 
     /**
      * 获取列表
@@ -84,6 +85,7 @@ public class UtxoBusiness {
     public void updateByFrom(Transaction tx) throws NulsException {
         UtxoKey key = new UtxoKey();
         Utxo utxo;
+
         for (Input input : tx.getInputs()) {
             key.setTxHash(input.getFromHash());
             key.setTxIndex(input.getFromIndex());
@@ -96,6 +98,7 @@ public class UtxoBusiness {
             //在这里查询出utxo后，记得给每一个input赋值address
             input.setAddress(utxo.getAddress());
             utxoMapper.updateByPrimaryKey(utxo);
+            balanceBusiness.updateByFrom(utxo);
         }
     }
 
