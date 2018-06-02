@@ -14,5 +14,9 @@ public interface TransactionConstant {
     int TX_TYPE_YELLOW_PUNISH = 93;
     int TX_TYPE_RED_PUNISH = 94;
 
+    int PUBLISH_YELLOW = 1;
+    int PUTLISH_RED = 2;
+
+
     Na ALIAS_NA = Na.parseNuls(1);
 }

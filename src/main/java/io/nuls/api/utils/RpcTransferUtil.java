@@ -4,16 +4,17 @@ import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.TransactionConstant;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.*;
+import io.nuls.api.entity.Alias;
+import io.nuls.api.entity.Block;
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.Deposit;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.exception.NulsException;
-import io.nuls.api.model.Address;
-import io.nuls.api.model.Agent;
-import io.nuls.api.model.Coin;
-import io.nuls.api.model.NulsDigestData;
-import io.nuls.api.model.tx.AliasTransaction;
-import io.nuls.api.model.tx.CoinBaseTransaction;
-import io.nuls.api.model.tx.CreateAgentTransaction;
+import io.nuls.api.model.*;
+import io.nuls.api.model.tx.*;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,34 +47,53 @@ public class RpcTransferUtil {
         return blockHeader;
     }
 
-    public static Block toBlock(String hexBlock) throws Exception {
+    public static Block toBlock(String hexBlock, BlockHeader header) throws Exception {
         byte[] data = Hex.decode(hexBlock);
         io.nuls.api.model.Block blockModel = new io.nuls.api.model.Block();
         blockModel.parse(data);
 
         Block block = new Block();
-        BlockHeader header = new BlockHeader();
-        header.setHash(blockModel.getHeader().getHash().getDigestHex());
         header.setSize(blockModel.size());
 
+        List<Transaction> txList = new ArrayList<>();
         for (int i = 0; i < blockModel.getTxs().size(); i++) {
             io.nuls.api.model.Transaction txModel = blockModel.getTxs().get(i);
-
-
+            Transaction tx = toTransaction(txModel, header);
+            txList.add(tx);
         }
-
+        block.setTxList(txList);
         return block;
     }
 
-    public static Transaction toTransaction(io.nuls.api.model.Transaction txModel) throws Exception {
+    public static Transaction toTransaction(io.nuls.api.model.Transaction txModel, BlockHeader header) throws Exception {
         Transaction tx = transferTx(txModel);
         if (txModel.getType() == TransactionConstant.TX_TYPE_ACCOUNT_ALIAS) {
-            AliasTransaction aliasTransaction = (AliasTransaction) txModel;
-            tx.setTxData(toAlias(aliasTransaction));
+            AliasTransaction aliasTx = (AliasTransaction) txModel;
+            tx.setTxData(toAlias(aliasTx));
         } else if (txModel.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
-            CreateAgentTransaction createAgentTransaction = (CreateAgentTransaction) txModel;
-            Agent agent = createAgentTransaction.getTxData();
-
+            CreateAgentTransaction createAgentTx = (CreateAgentTransaction) txModel;
+            AgentNode agentNode = toAgentNode(createAgentTx);
+            tx.setTxData(agentNode);
+        } else if (txModel.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
+            DepositTransaction depositTx = (DepositTransaction) txModel;
+            Deposit deposit = toDeposit(depositTx);
+            tx.setTxData(deposit);
+        } else if (txModel.getType() == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
+            CancelDepositTransaction cancelDepositTx = (CancelDepositTransaction) txModel;
+            Deposit deposit = toCancelDeposit(cancelDepositTx);
+            tx.setTxData(deposit);
+        } else if (txModel.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
+            StopAgentTransaction stopAgentTx = (StopAgentTransaction) txModel;
+            AgentNode agentNode = toStopAgent(stopAgentTx);
+            tx.setTxData(agentNode);
+        } else if (txModel.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
+            YellowPunishTransaction yellowPunishTx = (YellowPunishTransaction) txModel;
+            List<TxData> punishLogList = toYellowPunishLog(yellowPunishTx, header);
+            tx.setTxDataList(punishLogList);
+        } else if (txModel.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
+            RedPunishTransaction redPunishTx = (RedPunishTransaction) txModel;
+            PunishLog log = toRedPublishLog(redPunishTx, header);
+            tx.setTxData(log);
         }
         return tx;
     }
@@ -132,12 +152,94 @@ public class RpcTransferUtil {
     }
 
     private static Alias toAlias(AliasTransaction tx) {
-        io.nuls.api.model.Alias aliasModel = tx.getTxData();
+        io.nuls.api.model.Alias model = tx.getTxData();
         Alias alias = new Alias();
-        alias.setAddress(AddressTool.getAddressBase58(aliasModel.getAddress()));
-        alias.setAlias(aliasModel.getAlias());
+        alias.setAddress(AddressTool.getAddressBase58(model.getAddress()));
+        alias.setAlias(model.getAlias());
         alias.setBlockHeight(tx.getBlockHeight());
         return alias;
+    }
+
+    private static AgentNode toAgentNode(CreateAgentTransaction tx) throws UnsupportedEncodingException {
+        Agent model = tx.getTxData();
+
+        AgentNode agent = new AgentNode();
+        agent.setTxHash(model.getTxHash().getDigestHex());
+        agent.setAgentAddress(AddressTool.getAddressBase58(model.getAgentAddress()));
+        agent.setPackingAddress(AddressTool.getAddressBase58(model.getPackingAddress()));
+        agent.setRewardAddress(AddressTool.getAddressBase58(model.getRewardAddress()));
+        agent.setDeposit(model.getDeposit().getValue());
+        agent.setCommissionRate(new BigDecimal(model.getCommissionRate()));
+        agent.setAgentName(new String(model.getAgentName(), Constant.DEFAULT_ENCODING));
+        agent.setIntroduction(new String(model.getIntroduction(), Constant.DEFAULT_ENCODING));
+        agent.setCreateTime(model.getTime());
+        agent.setBlockHeight(tx.getBlockHeight());
+        agent.setStatus(model.getStatus());
+        agent.setDepositCount(model.getMemberCount());
+        agent.setCreditValue(new BigDecimal(model.getCreditVal()));
+
+        return agent;
+    }
+
+    private static Deposit toDeposit(DepositTransaction tx) {
+        io.nuls.api.model.Deposit model = tx.getTxData();
+
+        Deposit deposit = new Deposit();
+        deposit.setTxHash(model.getTxHash().getDigestHex());
+        deposit.setAmount(model.getDeposit().getValue());
+        deposit.setAgentHash(model.getAgentHash().getDigestHex());
+        //deposit.setAgentName(model.geta);
+        deposit.setAddress(AddressTool.getAddressBase58(model.getAddress()));
+        deposit.setCreateTime(model.getTime());
+        deposit.setBlockHeight(tx.getBlockHeight());
+
+        return deposit;
+    }
+
+    private static Deposit toCancelDeposit(CancelDepositTransaction tx) {
+        CancelDeposit cancelDeposit = tx.getTxData();
+        Deposit deposit = new Deposit();
+        deposit.setTxHash(cancelDeposit.getJoinTxHash().getDigestHex());
+        return deposit;
+    }
+
+    private static AgentNode toStopAgent(StopAgentTransaction tx) {
+        StopAgent stopAgent = tx.getTxData();
+        AgentNode agentNode = new AgentNode();
+        agentNode.setTxHash(stopAgent.getCreateTxHash().getDigestHex());
+        return agentNode;
+    }
+
+    private static List<TxData> toYellowPunishLog(YellowPunishTransaction tx, BlockHeader header) {
+        YellowPunishData model = tx.getTxData();
+
+        List<TxData> logList = new ArrayList<>();
+        for (byte[] address : model.getAddressList()) {
+            PunishLog log = new PunishLog();
+            log.setAddress(AddressTool.getAddressBase58(address));
+            log.setBlockHeight(tx.getBlockHeight());
+            log.setTime(tx.getTime());
+            log.setType(TransactionConstant.PUBLISH_YELLOW);
+            log.setRoundIndex(header.getRoundIndex());
+            log.setReason("The packing block is too late");
+            logList.add(log);
+        }
+        return logList;
+    }
+
+    private static PunishLog toRedPublishLog(RedPunishTransaction tx, BlockHeader header) {
+        RedPunishData model = tx.getTxData();
+
+        PunishLog punishLog = new PunishLog();
+        punishLog.setType(TransactionConstant.PUTLISH_RED);
+        punishLog.setAddress(AddressTool.getAddressBase58(model.getAddress()));
+        punishLog.setEvidence(model.getEvidence());
+        punishLog.setBlockHeight(tx.getBlockHeight());
+        punishLog.setTime(tx.getTime());
+        punishLog.setRoundIndex(header.getRoundIndex());
+        //        punishLog.setReason(new String (model.get);
+        return punishLog;
+
     }
 
 

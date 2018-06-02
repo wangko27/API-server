@@ -1,6 +1,7 @@
 package io.nuls.api.server.task;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Transaction;
@@ -9,6 +10,7 @@ import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.SyncDataBusiness;
 import io.nuls.api.server.resources.SyncDataHandler;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +38,8 @@ public class BlockSyncTask {
         boolean downloading = true;
         while (downloading) {
             //查询本地已保存的最新块
+            BlockHeader localBest = blockBusiness.getNewest();
             try {
-                BlockHeader localBest = blockBusiness.getNewest();
                 long bestHeight = -1;
                 if (localBest != null) {
                     bestHeight = localBest.getHeight();
@@ -53,21 +55,36 @@ public class BlockSyncTask {
                 } else {
                     BlockHeader newest = result.getData();
                     if (checkBlockContinuity(localBest, newest)) {
-                        syncDataBusiness.syncData(newest);
+                        RpcClientResult<Block> blockResult = syncDataHandler.getBlock(newest);
+                        if (blockResult.isFaild()) {
+                            throw new NulsException(blockResult.getCode(), blockResult.getMsg());
+                        }
+                        syncDataBusiness.syncData(blockResult.getData());
                     } else {
                         syncDataBusiness.rollback(localBest);
                     }
                 }
             } catch (NulsException ne) {
-
+                Log.error(ne.getMsg(), ne);
+                if (localBest != null) {
+                    try {
+                        syncDataBusiness.rollback(localBest);
+                    } catch (NulsException e) {
+                        e.printStackTrace();
+                    }
+                }
             } catch (Exception e) {
-
+                Log.error(e);
+                if (localBest != null) {
+                    try {
+                        syncDataBusiness.rollback(localBest);
+                    } catch (NulsException ne) {
+                        ne.printStackTrace();
+                    }
+                }
             }
-
-
         }
     }
-
 
 
     /**

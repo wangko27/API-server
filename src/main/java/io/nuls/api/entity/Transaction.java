@@ -32,6 +32,8 @@ public class Transaction {
 
     private TxData txData;
 
+    private List<TxData> txDataList;
+
     public String getHash() {
         return hash;
     }
@@ -142,5 +144,13 @@ public class Transaction {
 
     public void setTxData(TxData txData) {
         this.txData = txData;
+    }
+
+    public List<TxData> getTxDataList() {
+        return txDataList;
+    }
+
+    public void setTxDataList(List<TxData> txDataList) {
+        this.txDataList = txDataList;
     }
 }
