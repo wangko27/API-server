@@ -1,9 +1,13 @@
 package io.nuls.api.server.business;
 
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.entity.UtxoKey;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
+import io.nuls.api.server.dao.util.SearchOperator;
+import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +28,14 @@ public class UtxoBusiness {
      * @param pageSize
      * @return
      */
-    public PageInfo<Utxo> getList(int pageNumber, int pageSize) {
-        /*PageHelper.startPage(pageNumber, pageSize);
+    public PageInfo<Utxo> getList(String address,int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        PageInfo<Utxo> page = new PageInfo<>(utxoMapper);*/
-        //todo
-        return null;
+        if(StringUtils.isNotBlank(address)){
+            searchable.addCondition("address", SearchOperator.eq, address);
+        }
+        PageInfo<Utxo> page = new PageInfo<>(utxoMapper.selectList(searchable));
+        return page;
     }
 
     /**
