@@ -2,8 +2,12 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.entity.Input;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.entity.UtxoKey;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
@@ -11,6 +15,8 @@ import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Description: UTXO
@@ -24,14 +30,15 @@ public class UtxoBusiness {
 
     /**
      * 获取列表
+     *
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<Utxo> getList(String address,int pageNumber, int pageSize) {
+    public PageInfo<Utxo> getList(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(address)){
+        if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
         }
         PageInfo<Utxo> page = new PageInfo<>(utxoMapper.selectList(searchable));
@@ -40,35 +47,74 @@ public class UtxoBusiness {
 
     /**
      * 根据主键获取详情
+     *
      * @param txHash
      * @param txIndex
      * @return
      */
-    public Utxo getDetail(String txHash,int txIndex){
-        UtxoKey key = new UtxoKey();
-        key.setTxHash(txHash);
-        key.setTxIndex(txIndex);
+    public Utxo getByKey(String txHash, int txIndex) {
+        UtxoKey key = new UtxoKey(txHash, txIndex);
         return utxoMapper.selectByPrimaryKey(key);
     }
 
     /**
      * 新增
+     *
      * @param entity
      * @return 1操作成功，其他失败
      */
     @Transactional
-    public int insert(Utxo entity){
+    public int save(Utxo entity) {
         return utxoMapper.insert(entity);
+    }
+
+
+    @Transactional
+    public int update(Utxo entity) {
+        return utxoMapper.updateByPrimaryKey(entity);
+    }
+
+    /**
+     * 根据每一条交易的输入，改变对应的utxo状态
+     *
+     * @param tx
+     * @return
+     */
+    @Transactional
+    public void updateByFrom(Transaction tx) throws NulsException {
+        UtxoKey key = new UtxoKey();
+        Utxo utxo;
+        for (Input input : tx.getInputs()) {
+            key.setTxHash(input.getFromHash());
+            key.setTxIndex(input.getFromIndex());
+            utxo = utxoMapper.selectByPrimaryKey(key);
+            if (utxo == null) {
+                throw new NulsException(ErrorCode.DB_DATA_ERROR);
+            }
+            utxo.setSpendTxHash(tx.getHash());
+
+            //在这里查询出utxo后，记得给每一个input赋值address
+            input.setAddress(utxo.getAddress());
+            utxoMapper.updateByPrimaryKey(utxo);
+        }
     }
 
     /**
      * 根据主键删除
-     * @param key
+     *
+     * @param txHash
      * @return
      */
     @Transactional
-    public int deleteById(UtxoKey key){
+    public int delete(String txHash, Integer index) {
+        UtxoKey key = new UtxoKey(txHash, index);
         return utxoMapper.deleteByPrimaryKey(key);
     }
 
+    @Transactional
+    public void saveTo(Transaction tx) {
+        for (Utxo utxo : tx.getOutputs()) {
+            utxoMapper.insert(utxo);
+        }
+    }
 }

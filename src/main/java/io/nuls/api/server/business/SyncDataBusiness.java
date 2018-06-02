@@ -21,7 +21,10 @@ public class SyncDataBusiness {
     private SyncDataHandler syncDataHandler;
     @Autowired
     private BlockHeaderMapper blockHeaderMapper;
-
+    @Autowired
+    private UtxoBusiness utxoBusiness;
+    @Autowired
+    private TransactionBusiness transactionBusiness;
     /**
      * 同步最新块数据
      *
@@ -31,8 +34,12 @@ public class SyncDataBusiness {
     public void syncData(Block block) throws NulsException {
         blockHeaderMapper.insert(block.getHeader());
 
-        for (Transaction tx : block.getTxList()) {
-            
+        for (int i = 0; i < block.getTxList().size(); i++) {
+            Transaction tx = block.getTxList().get(i);
+            utxoBusiness.updateByFrom(tx);
+            utxoBusiness.saveTo(tx);
+
+            transactionBusiness.insert(tx);
         }
     }
 
