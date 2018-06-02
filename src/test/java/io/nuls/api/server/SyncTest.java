@@ -1,7 +1,9 @@
 package io.nuls.api.server;
 
+import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.RestFulUtils;
 import org.junit.Before;
@@ -26,8 +28,12 @@ public class SyncTest {
 
     @Test
     public void testGetBlock() {
-        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(1);
-
-        System.out.println(result.getData().getPreHash());
+        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(4388);
+        BlockHeader header = result.getData();
+        try {
+            RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
     }
 }

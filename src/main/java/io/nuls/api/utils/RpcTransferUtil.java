@@ -113,14 +113,18 @@ public class RpcTransferUtil {
         tx.setSize(txModel.getSize());
         tx.setType(txModel.getType());
         tx.setCreateTime(txModel.getTime());
-        tx.setScriptSign(Hex.encode(txModel.getScriptSig()));
+        if (txModel.getScriptSig() != null) {
+            tx.setScriptSign(Hex.encode(txModel.getScriptSig()));
+        }
+
         List<Input> inputs = new ArrayList<>();
-        byte[] hashByte;
+        byte[] hashByte, owner;
         int index;
         if (txModel.getCoinData().getFrom() != null) {
             for (Coin coin : txModel.getCoinData().getFrom()) {
-                hashByte = LedgerUtil.getTxHashBytes(coin.getOwner());
-                index = LedgerUtil.getIndex(coin.getOwner());
+                owner = coin.getOwner();
+                hashByte = LedgerUtil.getTxHashBytes(owner);
+                index = LedgerUtil.getIndex(owner);
 
                 Input input = new Input();
                 NulsDigestData hash = new NulsDigestData();
@@ -133,15 +137,11 @@ public class RpcTransferUtil {
 
         List<Utxo> outputs = new ArrayList<>();
         if (txModel.getCoinData().getTo() != null) {
-            for (Coin coin : txModel.getCoinData().getTo()) {
-                hashByte = LedgerUtil.getTxHashBytes(coin.getOwner());
-                index = LedgerUtil.getIndex(coin.getOwner());
-
+            for (int i = 0; i < txModel.getCoinData().getTo().size(); i++) {
+                Coin coin = txModel.getCoinData().getTo().get(i);
                 Utxo utxo = new Utxo();
-                NulsDigestData hash = new NulsDigestData();
-                hash.parse(hashByte);
-                utxo.setTxHash(hash.getDigestHex());
-                utxo.setTxIndex(index);
+                utxo.setTxHash(tx.getHash());
+                utxo.setTxIndex(i);
                 utxo.setAmount(coin.getNa().getValue());
                 utxo.setAddress(AddressTool.getAddressBase58(coin.getOwner()));
                 outputs.add(utxo);
@@ -164,7 +164,7 @@ public class RpcTransferUtil {
         Agent model = tx.getTxData();
 
         AgentNode agent = new AgentNode();
-        agent.setTxHash(model.getTxHash().getDigestHex());
+        agent.setTxHash(tx.getHash().getDigestHex());
         agent.setAgentAddress(AddressTool.getAddressBase58(model.getAgentAddress()));
         agent.setPackingAddress(AddressTool.getAddressBase58(model.getPackingAddress()));
         agent.setRewardAddress(AddressTool.getAddressBase58(model.getRewardAddress()));
@@ -185,7 +185,7 @@ public class RpcTransferUtil {
         io.nuls.api.model.Deposit model = tx.getTxData();
 
         Deposit deposit = new Deposit();
-        deposit.setTxHash(model.getTxHash().getDigestHex());
+        deposit.setTxHash(tx.getHash().getDigestHex());
         deposit.setAmount(model.getDeposit().getValue());
         deposit.setAgentHash(model.getAgentHash().getDigestHex());
         //deposit.setAgentName(model.geta);

@@ -31,13 +31,16 @@ public class TransactionBusiness {
      * @param type 交易类型
      * @return
      */
-    public PageInfo<Transaction> getList(Long height,int type,int pageNumber, int pageSize) {
+    public PageInfo<Transaction> getList(Long height, int type, String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if(height >= 0){
+        /*if(StringUtils.isNotBlank(address)){
+            searchable.addCondition("address", SearchOperator.eq, address);
+        }*/
+        if (height >= 0) {
             searchable.addCondition("block_height", SearchOperator.eq, height);
         }
-        if(type > 0){
+        if (type > 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
         PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
@@ -59,12 +62,13 @@ public class TransactionBusiness {
 
     /**
      * 根据交易hash查交易详情
+     *
      * @param hash 交易hash
      * @return
      */
     public Transaction getTransactionDetail(String hash) {
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(hash)){
+        if (StringUtils.isNotBlank(hash)) {
             searchable.addCondition("hash", SearchOperator.eq, hash);
         }
         return transactionMapper.selectBySearchable(searchable);
@@ -72,21 +76,27 @@ public class TransactionBusiness {
 
     /**
      * 新增
-     * @param entity
+     *
+     * @param tx
      * @return 1成功，其他失败
      */
     @Transactional
-    public int insert(Transaction entity){
-        return transactionMapper.insert(entity);
+    public void insert(Transaction tx) {
+        transactionMapper.insert(tx);
+        if (tx.getType() == TransactionConstant.TX_TYPE_ACCOUNT_ALIAS) {
+            Alias alias = (Alias) tx.getTxData();
+//            aliasBusiness.
+        }
     }
 
     /**
      * 根据主键删除
+     *
      * @param hash 主键
      * @return 1成功，其他失败
      */
     @Transactional
-    public int deleteById(String hash){
+    public int deleteById(String hash) {
         return transactionMapper.deleteByPrimaryKey(hash);
     }
 
@@ -96,7 +106,7 @@ public class TransactionBusiness {
      * @return
      */
     @Transactional
-    public int deleteByHeight(Long height){
+    public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return transactionMapper.deleteBySearchable(searchable);

@@ -5,4 +5,5 @@ import io.nuls.api.entity.UtxoKey;
 
 @MyBatisMapper
 public interface UtxoMapper extends BaseMapper<Utxo, UtxoKey>{
+
 }
