@@ -1,6 +1,5 @@
 package io.nuls.api.server.business;
 
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.BlockHeader;
@@ -48,15 +47,22 @@ public class BlockBusiness {
         return blockHeaderMapper.selectList(searchable);
     }
 
-    public List<BlockHeader> getList() {
+    /**
+     * 获取块列表
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<BlockHeader> getList(int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        return blockHeaderMapper.selectList(searchable);
+        PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderMapper.selectList(searchable));
+        return page;
     }
 
     public BlockHeader getNewest() {
         return blockHeaderMapper.getBestBlock();
     }
-
 
     public PageInfo<BlockHeader> getBlockPage(int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
@@ -68,7 +74,6 @@ public class BlockBusiness {
 
     /**
      * 根据最新传入的区块信息，验证当前区块和前一区块的连续性
-     *
      * @param blockHeader
      * @return
      */

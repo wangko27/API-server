@@ -10,6 +10,7 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Description: 节点
@@ -62,6 +63,7 @@ public class AgentNodeBusiness{
      * @param entity 实体
      * @return 1成功，其他失败
      */
+    @Transactional
     public int insert(AgentNode entity) {
         return agentNodeMapper.insert(entity);
     }
@@ -71,6 +73,7 @@ public class AgentNodeBusiness{
      * @param txHash  主键 txhash
      * @return
      */
+    @Transactional
     public int deleteById(String txHash){
         return agentNodeMapper.deleteByPrimaryKey(txHash);
     }
@@ -80,6 +83,7 @@ public class AgentNodeBusiness{
      * @param height  高度
      * @return
      */
+    @Transactional
     public int deleteByHeight(Long height){
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);

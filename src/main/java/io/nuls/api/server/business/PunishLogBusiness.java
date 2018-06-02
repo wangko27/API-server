@@ -8,6 +8,7 @@ import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Description: 处罚日志
@@ -38,6 +39,7 @@ public class PunishLogBusiness {
      * @param entity 实体
      * @return 1成功，其他失败
      */
+    @Transactional
     public int insert(PunishLog entity){
         return punishLogMapper.insert(entity);
     }
@@ -56,10 +58,17 @@ public class PunishLogBusiness {
      * @param id
      * @return 1成功，其他失败
      */
+    @Transactional
     public int deleteById(String id){
         return punishLogMapper.deleteByPrimaryKey(id);
     }
 
+    /**
+     * 根据高度删除
+     * @param height 高度
+     * @return 1成功，其他失败
+     */
+    @Transactional
     public int deleteByHeight(Long height){
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);

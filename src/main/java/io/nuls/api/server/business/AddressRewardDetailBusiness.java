@@ -9,6 +9,7 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Description: 账户奖励
@@ -39,6 +40,7 @@ public class AddressRewardDetailBusiness {
      * @param entity 需要新增的实体
      * @return 新增结果 1成功，其他失败
      */
+    @Transactional
     public int insert(AddressRewardDetail entity){
         return addressRewardDetailMapper.insert(entity);
     }
@@ -57,6 +59,7 @@ public class AddressRewardDetailBusiness {
      * @param id
      * @return
      */
+    @Transactional
     public int deleteById(Long id){
         return addressRewardDetailMapper.deleteByPrimaryKey(id);
     }
@@ -66,6 +69,7 @@ public class AddressRewardDetailBusiness {
      * @param height
      * @return
      */
+    @Transactional
     public int deleteByHeight(Long height){
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);

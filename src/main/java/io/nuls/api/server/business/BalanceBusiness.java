@@ -1,5 +1,8 @@
 package io.nuls.api.server.business;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import io.nuls.api.entity.AddressRewardDetail;
 import io.nuls.api.entity.Balance;
 import io.nuls.api.server.dao.mapper.BalanceMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -7,6 +10,7 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,12 +30,14 @@ public class BalanceBusiness {
      * @param address 用户账户
      * @return
      */
-    public List<Balance> getList(String address) {
+    public PageInfo<Balance> getList(String address, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if(StringUtils.isNotBlank(address)){
             searchable.addCondition("address", SearchOperator.eq, address);
         }
-        return balanceMapper.selectList(searchable);
+        PageInfo<Balance> page = new PageInfo<>(balanceMapper.selectList(searchable));
+        return page;
     }
 
     /**
@@ -48,18 +54,19 @@ public class BalanceBusiness {
      * @param entity
      * @return 1新增成功，其他失败
      */
+    @Transactional
     public int insert(Balance entity){
         return balanceMapper.insert(entity);
     }
 
     /**
      * 修改资产
-     * @param address 地址
      * @param locked 锁定金额
      * @param usable 可用金额
      * @return 1操作成功，2id不存在，0修改失败
      */
-    public int update(Long id,String address,long locked,long usable){
+    @Transactional
+    public int update(Long id,long locked,long usable){
         Balance entity = getDetail(id);
         if(null == entity){
             return 2;

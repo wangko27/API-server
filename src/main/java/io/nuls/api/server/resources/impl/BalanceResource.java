@@ -42,7 +42,7 @@ public class BalanceResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(balanceBusiness.getList(address));
+        result.setData(balanceBusiness.getList(address,pageNumber,pageSize));
         return result;
     }
 }

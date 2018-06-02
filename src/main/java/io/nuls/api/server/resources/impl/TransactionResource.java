@@ -42,14 +42,14 @@ public class TransactionResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(transactionBusiness.getList(address,height,type));
+        result.setData(transactionBusiness.getList(height,type,address,pageNumber,pageSize));
         return result;
     }
 
     @GET
     @Path("/tx/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getBlockByHeight(@PathParam("hash") String hash){
+    public RpcClientResult getDetailByHash(@PathParam("hash") String hash){
         RpcClientResult result;
         if (!StringUtils.validHash(hash)) {
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
