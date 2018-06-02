@@ -25,7 +25,7 @@
 package io.nuls.api.model.tx;
 
 import io.nuls.api.constant.Constant;
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.Coin;
 import io.nuls.api.model.Transaction;
@@ -42,7 +42,7 @@ import java.util.Arrays;
 public class TransferTransaction extends Transaction {
 
     public TransferTransaction() {
-        this(TransactionConstant.TX_TYPE_TRANSFER);
+        this(EntityConstant.TX_TYPE_TRANSFER);
     }
 
     protected TransferTransaction(int type) {

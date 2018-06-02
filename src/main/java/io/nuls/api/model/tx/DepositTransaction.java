@@ -26,7 +26,7 @@
 package io.nuls.api.model.tx;
 
 
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.Deposit;
@@ -40,7 +40,7 @@ import io.nuls.api.utils.NulsByteBuffer;
 public class DepositTransaction extends Transaction<Deposit> {
 
     public DepositTransaction() {
-        super(TransactionConstant.TX_TYPE_JOIN_CONSENSUS);
+        super(EntityConstant.TX_TYPE_JOIN_CONSENSUS);
     }
 
     @Override

@@ -25,7 +25,7 @@
 package io.nuls.api.model.tx;
 
 import io.nuls.api.constant.Constant;
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.Coin;
 import io.nuls.api.model.Na;
@@ -43,7 +43,7 @@ import java.util.Arrays;
 public class CoinBaseTransaction extends Transaction {
 
     public CoinBaseTransaction() {
-        this(TransactionConstant.TX_TYPE_COINBASE);
+        this(EntityConstant.TX_TYPE_COINBASE);
     }
 
     @Override

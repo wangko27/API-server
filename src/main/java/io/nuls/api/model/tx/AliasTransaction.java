@@ -1,6 +1,6 @@
 package io.nuls.api.model.tx;
 
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.Alias;
 import io.nuls.api.model.Transaction;
@@ -13,7 +13,7 @@ import io.nuls.api.utils.NulsByteBuffer;
 public class AliasTransaction extends Transaction<Alias> {
 
     public AliasTransaction() {
-        super(TransactionConstant.TX_TYPE_ACCOUNT_ALIAS);
+        super(EntityConstant.TX_TYPE_ACCOUNT_ALIAS);
     }
 
     protected AliasTransaction(int type) {
@@ -22,7 +22,7 @@ public class AliasTransaction extends Transaction<Alias> {
 
     @Override
     public String getInfo(byte[] address) {
-        return "-" + TransactionConstant.ALIAS_NA.toCoinString();
+        return "-" + EntityConstant.ALIAS_NA.toCoinString();
     }
 
     @Override

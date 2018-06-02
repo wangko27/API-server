@@ -1,5 +1,7 @@
 package io.nuls.api.constant;
 
+import io.nuls.api.model.Na;
+
 /**
  * Description: 实体类里面的状态字段表示的值
  * Author: zsj
@@ -9,10 +11,61 @@ public class EntityConstant {
     /**
      * 等待共识
      */
-    public static int CONSENSUS_STATUS_WAIT=0;
+    public static final int CONSENSUS_STATUS_WAIT = 0;
     /**
      * 共识中
      */
-    public static int CONSENSUS_STATUS_CONSENSUSING=1;
+    public static final int CONSENSUS_STATUS_CONSENSUSING = 1;
+
+    /**
+     * 共识奖励
+     */
+    public static final int TX_TYPE_COINBASE = 1;
+    /**
+     * 转账交易
+     */
+    public static final int TX_TYPE_TRANSFER = 2;
+    /**
+     * 设置别名交易
+     */
+    public static final int TX_TYPE_ACCOUNT_ALIAS = 51;
+    /**
+     * 创建共识节点交易
+     */
+    public static final int TX_TYPE_REGISTER_AGENT = 90;
+    /**
+     * 加入共识交易
+     */
+    public static final int TX_TYPE_JOIN_CONSENSUS = 91;
+    /**
+     * 退出共识交易
+     */
+    public static final int TX_TYPE_CANCEL_DEPOSIT = 92;
+    /**
+     * 删除共识节点交易
+     */
+    public static final int TX_TYPE_STOP_AGENT = 95;
+    /**
+     * 黄牌交易
+     */
+    public static final int TX_TYPE_YELLOW_PUNISH = 93;
+    /**
+     * 红牌交易
+     */
+    public static final int TX_TYPE_RED_PUNISH = 94;
+
+    /**
+     * 黄牌惩罚
+     */
+    public static final int PUBLISH_YELLOW = 1;
+    /**
+     * 红牌惩罚
+     */
+    public static final int PUTLISH_RED = 2;
+
+    /**
+     * 设置别名费用
+     */
+    public static final Na ALIAS_NA = Na.parseNuls(1);
 
 }

@@ -25,7 +25,7 @@
  */
 package io.nuls.api.model.tx;
 
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.CancelDeposit;
 import io.nuls.api.model.CoinData;
@@ -39,11 +39,11 @@ import io.nuls.api.utils.NulsByteBuffer;
 public class CancelDepositTransaction extends Transaction<CancelDeposit> {
 
     public CancelDepositTransaction() {
-        super(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT);
+        super(EntityConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
     public CancelDepositTransaction(CoinData coinData) {
-        super(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT);
+        super(EntityConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
     @Override

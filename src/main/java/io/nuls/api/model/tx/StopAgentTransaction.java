@@ -25,7 +25,7 @@
  */
 package io.nuls.api.model.tx;
 
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.CoinData;
 import io.nuls.api.model.StopAgent;
@@ -39,11 +39,11 @@ import io.nuls.api.utils.NulsByteBuffer;
 public class StopAgentTransaction extends Transaction<StopAgent> {
 
     public StopAgentTransaction() {
-        super(TransactionConstant.TX_TYPE_STOP_AGENT);
+        super(EntityConstant.TX_TYPE_STOP_AGENT);
     }
 
     public StopAgentTransaction(CoinData coinData) throws NulsException {
-        super(TransactionConstant.TX_TYPE_STOP_AGENT);
+        super(EntityConstant.TX_TYPE_STOP_AGENT);
     }
 
     @Override

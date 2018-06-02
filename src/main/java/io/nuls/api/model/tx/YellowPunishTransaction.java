@@ -24,7 +24,7 @@
  */
 package io.nuls.api.model.tx;
 
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.Transaction;
 import io.nuls.api.model.YellowPunishData;
@@ -36,7 +36,7 @@ import io.nuls.api.utils.NulsByteBuffer;
  */
 public class YellowPunishTransaction extends Transaction<YellowPunishData> {
     public YellowPunishTransaction() {
-        super(TransactionConstant.TX_TYPE_YELLOW_PUNISH);
+        super(EntityConstant.TX_TYPE_YELLOW_PUNISH);
     }
 
     @Override
