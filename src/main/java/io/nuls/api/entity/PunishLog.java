@@ -1,6 +1,6 @@
 package io.nuls.api.entity;
 
-public class PunishLog {
+public class PunishLog extends TxData {
     private Long id;
 
     private Integer type;
@@ -11,7 +11,7 @@ public class PunishLog {
 
     private Long blockHeight;
 
-    private Integer roundIndex;
+    private Long roundIndex;
 
     private String reason;
 
@@ -57,11 +57,11 @@ public class PunishLog {
         this.blockHeight = blockHeight;
     }
 
-    public Integer getRoundIndex() {
+    public Long getRoundIndex() {
         return roundIndex;
     }
 
-    public void setRoundIndex(Integer roundIndex) {
+    public void setRoundIndex(Long roundIndex) {
         this.roundIndex = roundIndex;
     }
 

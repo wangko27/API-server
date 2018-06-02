@@ -1,6 +1,6 @@
 package io.nuls.api.entity;
 
-public class Alias {
+public class Alias extends TxData {
     private String alias;
 
     private String address;

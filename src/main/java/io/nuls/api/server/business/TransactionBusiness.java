@@ -33,12 +33,9 @@ public class TransactionBusiness implements BaseService<Transaction,String> {
      * @param type 交易类型
      * @return
      */
-    public PageInfo<Transaction> getList(Long height, int type, String address, int pageNumber, int pageSize) {
+    public PageInfo<Transaction> getList(Long height, int type, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        /*if(StringUtils.isNotBlank(address)){
-            searchable.addCondition("address", SearchOperator.eq, address);
-        }*/
         if (height >= 0) {
             searchable.addCondition("block_height", SearchOperator.eq, height);
         }

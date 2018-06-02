@@ -1,6 +1,6 @@
 package io.nuls.api.entity;
 
-public class Input {
+public class Input extends TxData {
 
     private String address;
 

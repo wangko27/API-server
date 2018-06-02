@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="andy.dao.BalanceMapper" >
-  <resultMap id="BaseResultMap" type="andy.model.Balance" >
+<mapper namespace="io.nuls.api.server.dao.mapper.BalanceMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Balance" >
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="address" property="address" jdbcType="VARCHAR" />
     <result column="locked" property="locked" jdbcType="BIGINT" />
@@ -22,7 +22,7 @@
     delete from balance
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="andy.model.Balance" >
+  <insert id="insert" parameterType="io.nuls.api.entity.Balance" >
     insert into balance (id, address, locked, 
       usable, block_height, assets_code
       )
@@ -30,7 +30,7 @@
       #{usable,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{assetsCode,jdbcType=VARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="andy.model.Balance" >
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.Balance" >
     insert into balance
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -73,7 +73,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="andy.model.Balance" >
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Balance" >
     update balance
     <set >
       <if test="address != null" >
@@ -94,7 +94,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="andy.model.Balance" >
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Balance" >
     update balance
     set address = #{address,jdbcType=VARCHAR},
       locked = #{locked,jdbcType=BIGINT},

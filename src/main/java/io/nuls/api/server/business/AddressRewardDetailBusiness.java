@@ -58,7 +58,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
     }
 
     /**
-     * 修改
+     * 根据主键修改
      * @param addressRewardDetail
      * @return
      */
@@ -79,6 +79,11 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
         return addressRewardDetailMapper.deleteByPrimaryKey(id);
     }
 
+    /**
+     * 根据主键查询数据
+     * @param id
+     * @return
+     */
     @Override
     public AddressRewardDetail getByKey(Long id) {
         return addressRewardDetailMapper.selectByPrimaryKey(id);

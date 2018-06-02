@@ -99,6 +99,16 @@ public class BalanceBusiness implements BaseService<Balance,Long> {
         return balanceMapper.updateByPrimaryKey(balance);
     }
 
+    @Override
+    public int deleteBykey(Long aLong) {
+        return balanceMapper.deleteByPrimaryKey(aLong);
+    }
+
+    @Override
+    public Balance getByKey(Long aLong) {
+        return balanceMapper.selectByPrimaryKey(aLong);
+    }
+
     /**
      * 新增资产
      * @param balance
@@ -108,16 +118,5 @@ public class BalanceBusiness implements BaseService<Balance,Long> {
     @Override
     public int save(Balance balance) {
         return balanceMapper.insert(balance);
-    }
-
-    @Transactional
-    @Override
-    public int deleteBykey(Long id) {
-        return balanceMapper.deleteByPrimaryKey(id);
-    }
-
-    @Override
-    public Balance getByKey(Long id) {
-        return balanceMapper.selectByPrimaryKey(id);
     }
 }

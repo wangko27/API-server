@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="andy.dao.UtxoMapper" >
-  <resultMap id="BaseResultMap" type="andy.model.Utxo" >
+<mapper namespace="io.nuls.api.server.dao.mapper.UtxoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Utxo" >
     <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
     <id column="tx_index" property="txIndex" jdbcType="INTEGER" />
     <result column="address" property="address" jdbcType="VARCHAR" />
@@ -12,19 +12,19 @@
   <sql id="Base_Column_List" >
     tx_hash, tx_index, address, amount, lock_time, spend_tx_hash
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="andy.model.UtxoKey" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="io.nuls.api.entity.UtxoKey" >
     select 
     <include refid="Base_Column_List" />
     from utxo
     where tx_hash = #{txHash,jdbcType=VARCHAR}
       and tx_index = #{txIndex,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="andy.model.UtxoKey" >
+  <delete id="deleteByPrimaryKey" parameterType="io.nuls.api.entity.UtxoKey" >
     delete from utxo
     where tx_hash = #{txHash,jdbcType=VARCHAR}
       and tx_index = #{txIndex,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="andy.model.Utxo" >
+  <insert id="insert" parameterType="io.nuls.api.entity.Utxo" >
     insert into utxo (tx_hash, tx_index, address, 
       amount, lock_time, spend_tx_hash
       )
@@ -32,7 +32,7 @@
       #{amount,jdbcType=BIGINT}, #{lockTime,jdbcType=BIGINT}, #{spendTxHash,jdbcType=VARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="andy.model.Utxo" >
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.Utxo" >
     insert into utxo
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -75,7 +75,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="andy.model.Utxo" >
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Utxo" >
     update utxo
     <set >
       <if test="address != null" >
@@ -94,7 +94,7 @@
     where tx_hash = #{txHash,jdbcType=VARCHAR}
       and tx_index = #{txIndex,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="andy.model.Utxo" >
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Utxo" >
     update utxo
     set address = #{address,jdbcType=VARCHAR},
       amount = #{amount,jdbcType=BIGINT},

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="andy.dao.BlockHeaderMapper" >
-  <resultMap id="BaseResultMap" type="andy.model.BlockHeader" >
+<mapper namespace="io.nuls.api.server.dao.mapper.BlockHeaderMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.BlockHeader" >
     <id column="hash" property="hash" jdbcType="VARCHAR" />
     <result column="height" property="height" jdbcType="BIGINT" />
     <result column="pre_hash" property="preHash" jdbcType="VARCHAR" />
@@ -9,14 +9,14 @@
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
     <result column="consensus_address" property="consensusAddress" jdbcType="VARCHAR" />
     <result column="tx_count" property="txCount" jdbcType="INTEGER" />
-    <result column="round_index" property="roundIndex" jdbcType="INTEGER" />
+    <result column="round_index" property="roundIndex" jdbcType="BIGINT" />
     <result column="total_fee" property="totalFee" jdbcType="BIGINT" />
     <result column="reward" property="reward" jdbcType="BIGINT" />
     <result column="size" property="size" jdbcType="INTEGER" />
-    <result column="packing_index_of_round" property="packingIndexOfRound" jdbcType="BIGINT" />
+    <result column="packing_index_of_round" property="packingIndexOfRound" jdbcType="INTEGER" />
     <result column="round_start_time" property="roundStartTime" jdbcType="BIGINT" />
   </resultMap>
-  <resultMap id="ResultMapWithBLOBs" type="andy.model.BlockHeader" extends="BaseResultMap" >
+  <resultMap id="ResultMapWithBLOBs" type="io.nuls.api.entity.BlockHeader" extends="BaseResultMap" >
     <result column="extend" property="extend" jdbcType="LONGVARBINARY" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -38,7 +38,7 @@
     delete from block_header
     where hash = #{hash,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="andy.model.BlockHeader" >
+  <insert id="insert" parameterType="io.nuls.api.entity.BlockHeader" >
     insert into block_header (hash, height, pre_hash, 
       merkle_hash, create_time, consensus_address, 
       tx_count, round_index, total_fee, 
@@ -46,11 +46,11 @@
       round_start_time, extend)
     values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{preHash,jdbcType=VARCHAR}, 
       #{merkleHash,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, #{consensusAddress,jdbcType=VARCHAR}, 
-      #{txCount,jdbcType=INTEGER}, #{roundIndex,jdbcType=INTEGER}, #{totalFee,jdbcType=BIGINT}, 
-      #{reward,jdbcType=BIGINT}, #{size,jdbcType=INTEGER}, #{packingIndexOfRound,jdbcType=BIGINT}, 
+      #{txCount,jdbcType=INTEGER}, #{roundIndex,jdbcType=BIGINT}, #{totalFee,jdbcType=BIGINT}, 
+      #{reward,jdbcType=BIGINT}, #{size,jdbcType=INTEGER}, #{packingIndexOfRound,jdbcType=INTEGER}, 
       #{roundStartTime,jdbcType=BIGINT}, #{extend,jdbcType=LONGVARBINARY})
   </insert>
-  <insert id="insertSelective" parameterType="andy.model.BlockHeader" >
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.BlockHeader" >
     insert into block_header
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="hash != null" >
@@ -119,7 +119,7 @@
         #{txCount,jdbcType=INTEGER},
       </if>
       <if test="roundIndex != null" >
-        #{roundIndex,jdbcType=INTEGER},
+        #{roundIndex,jdbcType=BIGINT},
       </if>
       <if test="totalFee != null" >
         #{totalFee,jdbcType=BIGINT},
@@ -131,7 +131,7 @@
         #{size,jdbcType=INTEGER},
       </if>
       <if test="packingIndexOfRound != null" >
-        #{packingIndexOfRound,jdbcType=BIGINT},
+        #{packingIndexOfRound,jdbcType=INTEGER},
       </if>
       <if test="roundStartTime != null" >
         #{roundStartTime,jdbcType=BIGINT},
@@ -141,7 +141,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="andy.model.BlockHeader" >
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.BlockHeader" >
     update block_header
     <set >
       <if test="height != null" >
@@ -163,7 +163,7 @@
         tx_count = #{txCount,jdbcType=INTEGER},
       </if>
       <if test="roundIndex != null" >
-        round_index = #{roundIndex,jdbcType=INTEGER},
+        round_index = #{roundIndex,jdbcType=BIGINT},
       </if>
       <if test="totalFee != null" >
         total_fee = #{totalFee,jdbcType=BIGINT},
@@ -175,7 +175,7 @@
         size = #{size,jdbcType=INTEGER},
       </if>
       <if test="packingIndexOfRound != null" >
-        packing_index_of_round = #{packingIndexOfRound,jdbcType=BIGINT},
+        packing_index_of_round = #{packingIndexOfRound,jdbcType=INTEGER},
       </if>
       <if test="roundStartTime != null" >
         round_start_time = #{roundStartTime,jdbcType=BIGINT},
@@ -186,7 +186,7 @@
     </set>
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKeyWithBLOBs" parameterType="andy.model.BlockHeader" >
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.api.entity.BlockHeader" >
     update block_header
     set height = #{height,jdbcType=BIGINT},
       pre_hash = #{preHash,jdbcType=VARCHAR},
@@ -194,16 +194,16 @@
       create_time = #{createTime,jdbcType=BIGINT},
       consensus_address = #{consensusAddress,jdbcType=VARCHAR},
       tx_count = #{txCount,jdbcType=INTEGER},
-      round_index = #{roundIndex,jdbcType=INTEGER},
+      round_index = #{roundIndex,jdbcType=BIGINT},
       total_fee = #{totalFee,jdbcType=BIGINT},
       reward = #{reward,jdbcType=BIGINT},
       size = #{size,jdbcType=INTEGER},
-      packing_index_of_round = #{packingIndexOfRound,jdbcType=BIGINT},
+      packing_index_of_round = #{packingIndexOfRound,jdbcType=INTEGER},
       round_start_time = #{roundStartTime,jdbcType=BIGINT},
       extend = #{extend,jdbcType=LONGVARBINARY}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="andy.model.BlockHeader" >
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.BlockHeader" >
     update block_header
     set height = #{height,jdbcType=BIGINT},
       pre_hash = #{preHash,jdbcType=VARCHAR},
@@ -211,15 +211,14 @@
       create_time = #{createTime,jdbcType=BIGINT},
       consensus_address = #{consensusAddress,jdbcType=VARCHAR},
       tx_count = #{txCount,jdbcType=INTEGER},
-      round_index = #{roundIndex,jdbcType=INTEGER},
+      round_index = #{roundIndex,jdbcType=BIGINT},
       total_fee = #{totalFee,jdbcType=BIGINT},
       reward = #{reward,jdbcType=BIGINT},
       size = #{size,jdbcType=INTEGER},
-      packing_index_of_round = #{packingIndexOfRound,jdbcType=BIGINT},
+      packing_index_of_round = #{packingIndexOfRound,jdbcType=INTEGER},
       round_start_time = #{roundStartTime,jdbcType=BIGINT}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
-
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithBLOBs">
     select
     <include refid="Base_Column_List" />

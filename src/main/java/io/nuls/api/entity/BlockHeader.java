@@ -15,7 +15,7 @@ public class BlockHeader {
 
     private Integer txCount;
 
-    private Integer roundIndex;
+    private Long roundIndex;
 
     private Long totalFee;
 
@@ -23,7 +23,7 @@ public class BlockHeader {
 
     private Integer size;
 
-    private Long packingIndexOfRound;
+    private Integer packingIndexOfRound;
 
     private Long roundStartTime;
 
@@ -85,11 +85,11 @@ public class BlockHeader {
         this.txCount = txCount;
     }
 
-    public Integer getRoundIndex() {
+    public Long getRoundIndex() {
         return roundIndex;
     }
 
-    public void setRoundIndex(Integer roundIndex) {
+    public void setRoundIndex(Long roundIndex) {
         this.roundIndex = roundIndex;
     }
 
@@ -117,11 +117,11 @@ public class BlockHeader {
         this.size = size;
     }
 
-    public Long getPackingIndexOfRound() {
+    public Integer getPackingIndexOfRound() {
         return packingIndexOfRound;
     }
 
-    public void setPackingIndexOfRound(Long packingIndexOfRound) {
+    public void setPackingIndexOfRound(Integer packingIndexOfRound) {
         this.packingIndexOfRound = packingIndexOfRound;
     }
 

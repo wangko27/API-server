@@ -21,7 +21,7 @@ public class BlockDto {
 
     private Integer txCount;
 
-    private Integer roundIndex;
+    private Long roundIndex;
 
     private Long totalFee;
 
@@ -120,11 +120,11 @@ public class BlockDto {
         this.txCount = txCount;
     }
 
-    public Integer getRoundIndex() {
+    public Long getRoundIndex() {
         return roundIndex;
     }
 
-    public void setRoundIndex(Integer roundIndex) {
+    public void setRoundIndex(Long roundIndex) {
         this.roundIndex = roundIndex;
     }
 

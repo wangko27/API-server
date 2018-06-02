@@ -50,7 +50,7 @@ public class PunishLogBusiness implements BaseService<PunishLog,Long> {
      * @param id
      * @return
      */
-    public PunishLog getDetail(String id){
+    public PunishLog getDetail(Long id){
         return punishLogMapper.selectByPrimaryKey(id);
     }
 
@@ -60,7 +60,7 @@ public class PunishLogBusiness implements BaseService<PunishLog,Long> {
      * @return 1成功，其他失败
      */
     @Transactional
-    public int deleteById(String id){
+    public int deleteById(Long id){
         return punishLogMapper.deleteByPrimaryKey(id);
     }
 
@@ -90,12 +90,12 @@ public class PunishLogBusiness implements BaseService<PunishLog,Long> {
 
     @Transactional
     @Override
-    public int deleteBykey(Long aLong) {
-        return punishLogMapper.deleteByPrimaryKey(aLong);
+    public int deleteBykey(Long id) {
+        return punishLogMapper.deleteByPrimaryKey(id);
     }
 
     @Override
-    public PunishLog getByKey(Long aLong) {
-        return punishLogMapper.selectByPrimaryKey(aLong);
+    public PunishLog getByKey(Long id) {
+        return punishLogMapper.selectByPrimaryKey(id);
     }
 }

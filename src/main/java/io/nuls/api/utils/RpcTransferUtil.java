@@ -31,7 +31,7 @@ public class RpcTransferUtil {
         blockHeader.setHeight(Long.parseLong(map.get("height").toString()));
         blockHeader.setPackingIndexOfRound((Integer) map.get("packingIndexOfRound"));
         blockHeader.setReward(Long.parseLong(map.get("reward").toString()));
-        blockHeader.setRoundIndex((Integer) map.get("roundIndex"));
+        blockHeader.setRoundIndex(Long.parseLong(map.get("roundIndex").toString()));
         blockHeader.setTotalFee(Long.parseLong(map.get("fee").toString()));
         blockHeader.setRoundStartTime((Long) map.get("roundStartTime"));
         blockHeader.setCreateTime((Long) map.get("time"));
