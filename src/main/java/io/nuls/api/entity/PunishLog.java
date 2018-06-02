@@ -1,6 +1,6 @@
 package io.nuls.api.entity;
 
-public class PunishLog {
+public class PunishLog extends TxData{
     private String id;
 
     private Integer type;

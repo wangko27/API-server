@@ -1,6 +1,9 @@
 package io.nuls.api.entity;
 
-public class UtxoKey {
+import java.io.Serializable;
+
+public class UtxoKey implements Serializable{
+
     private String txHash;
 
     private Integer txIndex;

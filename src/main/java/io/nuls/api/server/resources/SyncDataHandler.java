@@ -5,6 +5,7 @@ import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.RpcTransferUtil;
 import io.nuls.api.utils.log.Log;
@@ -41,17 +42,16 @@ public class SyncDataHandler {
         return result;
     }
 
-    public RpcClientResult<Block> getBlock(String hash) {
-        RpcClientResult result = restFulUtils.get("/block/hash/" + hash, null);
+    public RpcClientResult<Block> getBlock(BlockHeader header) throws NulsException {
+        RpcClientResult result = restFulUtils.get("/block/hash/" + header.getHash(), null);
         if (result.isFaild()) {
             return result;
         }
         try {
-            Block block = RpcTransferUtil.toBlock((String) result.getData());
+            Block block = RpcTransferUtil.toBlock((String) result.getData(), header);
             result.setData(block);
         } catch (Exception e) {
-            Log.error(e);
-            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
+            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
         }
         return result;
     }
