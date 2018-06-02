@@ -1,7 +1,7 @@
 package io.nuls.api.utils;
 
 import io.nuls.api.constant.Constant;
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.*;
 import io.nuls.api.entity.Alias;
@@ -9,7 +9,6 @@ import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Deposit;
 import io.nuls.api.entity.Transaction;
-import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.*;
 import io.nuls.api.model.tx.*;
 
@@ -67,30 +66,30 @@ public class RpcTransferUtil {
 
     public static Transaction toTransaction(io.nuls.api.model.Transaction txModel, BlockHeader header) throws Exception {
         Transaction tx = transferTx(txModel);
-        if (txModel.getType() == TransactionConstant.TX_TYPE_ACCOUNT_ALIAS) {
+        if (txModel.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
             AliasTransaction aliasTx = (AliasTransaction) txModel;
             tx.setTxData(toAlias(aliasTx));
-        } else if (txModel.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT) {
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
             CreateAgentTransaction createAgentTx = (CreateAgentTransaction) txModel;
             AgentNode agentNode = toAgentNode(createAgentTx);
             tx.setTxData(agentNode);
-        } else if (txModel.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
             DepositTransaction depositTx = (DepositTransaction) txModel;
             Deposit deposit = toDeposit(depositTx);
             tx.setTxData(deposit);
-        } else if (txModel.getType() == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
             CancelDepositTransaction cancelDepositTx = (CancelDepositTransaction) txModel;
             Deposit deposit = toCancelDeposit(cancelDepositTx);
             tx.setTxData(deposit);
-        } else if (txModel.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             StopAgentTransaction stopAgentTx = (StopAgentTransaction) txModel;
             AgentNode agentNode = toStopAgent(stopAgentTx);
             tx.setTxData(agentNode);
-        } else if (txModel.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
             YellowPunishTransaction yellowPunishTx = (YellowPunishTransaction) txModel;
             List<TxData> punishLogList = toYellowPunishLog(yellowPunishTx, header);
             tx.setTxDataList(punishLogList);
-        } else if (txModel.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
             RedPunishTransaction redPunishTx = (RedPunishTransaction) txModel;
             PunishLog log = toRedPublishLog(redPunishTx, header);
             tx.setTxData(log);
@@ -219,7 +218,7 @@ public class RpcTransferUtil {
             log.setAddress(AddressTool.getAddressBase58(address));
             log.setBlockHeight(tx.getBlockHeight());
             log.setTime(tx.getTime());
-            log.setType(TransactionConstant.PUBLISH_YELLOW);
+            log.setType(EntityConstant.PUBLISH_YELLOW);
             log.setRoundIndex(header.getRoundIndex());
             log.setReason("The packing block is too late");
             logList.add(log);
@@ -231,7 +230,7 @@ public class RpcTransferUtil {
         RedPunishData model = tx.getTxData();
 
         PunishLog punishLog = new PunishLog();
-        punishLog.setType(TransactionConstant.PUTLISH_RED);
+        punishLog.setType(EntityConstant.PUTLISH_RED);
         punishLog.setAddress(AddressTool.getAddressBase58(model.getAddress()));
         punishLog.setEvidence(model.getEvidence());
         punishLog.setBlockHeight(tx.getBlockHeight());

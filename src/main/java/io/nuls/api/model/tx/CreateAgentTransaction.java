@@ -25,7 +25,7 @@
  */
 package io.nuls.api.model.tx;
 
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.Agent;
@@ -39,7 +39,7 @@ import io.nuls.api.utils.NulsByteBuffer;
 public class CreateAgentTransaction extends Transaction<Agent> {
 
     public CreateAgentTransaction() {
-        super(TransactionConstant.TX_TYPE_REGISTER_AGENT);
+        super(EntityConstant.TX_TYPE_REGISTER_AGENT);
     }
 
     @Override

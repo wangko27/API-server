@@ -1,7 +1,7 @@
 package io.nuls.api.utils;
 
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.ErrorCode;
-import io.nuls.api.constant.TransactionConstant;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.Transaction;
 import io.nuls.api.model.tx.*;
@@ -17,15 +17,15 @@ public class TransactionManager {
 
     static {
 
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_COINBASE, CoinBaseTransaction.class);
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_TRANSFER, TransferTransaction.class);
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_ACCOUNT_ALIAS, AliasTransaction.class);
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_REGISTER_AGENT, CreateAgentTransaction.class);
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_JOIN_CONSENSUS, DepositTransaction.class);
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_CANCEL_DEPOSIT, CancelDepositTransaction.class);
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_STOP_AGENT, StopAgentTransaction.class);
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
-        TYPE_TX_MAP.put(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_COINBASE, CoinBaseTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_TRANSFER, TransferTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_ACCOUNT_ALIAS, AliasTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_REGISTER_AGENT, CreateAgentTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_JOIN_CONSENSUS, DepositTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_CANCEL_DEPOSIT, CancelDepositTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_STOP_AGENT, StopAgentTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
     }
 
 

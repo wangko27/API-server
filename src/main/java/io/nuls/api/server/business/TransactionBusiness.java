@@ -2,7 +2,8 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.constant.EntityConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
@@ -72,7 +73,7 @@ public class TransactionBusiness {
     @Transactional
     public void insert(Transaction tx) {
         transactionMapper.insert(tx);
-        if (tx.getType() == TransactionConstant.TX_TYPE_ACCOUNT_ALIAS) {
+        if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
             Alias alias = (Alias) tx.getTxData();
 //            aliasBusiness.
         }
