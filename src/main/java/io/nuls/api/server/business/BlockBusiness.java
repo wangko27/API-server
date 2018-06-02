@@ -6,6 +6,7 @@ import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,13 +50,17 @@ public class BlockBusiness {
 
     /**
      * 获取块列表
+     * @param address 共识地址
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<BlockHeader> getList(int pageNumber, int pageSize) {
+    public PageInfo<BlockHeader> getList(String address,int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
+        if(StringUtils.isNotBlank(address)){
+            searchable.addCondition("consensus_address", SearchOperator.eq, address);
+        }
         PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderMapper.selectList(searchable));
         return page;
     }

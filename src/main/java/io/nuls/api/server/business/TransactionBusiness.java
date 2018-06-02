@@ -31,18 +31,28 @@ public class TransactionBusiness {
      * @param type 交易类型
      * @return
      */
-    public PageInfo<Transaction> getList(Long height,int type,String address, int pageNumber, int pageSize) {
+    public PageInfo<Transaction> getList(Long height,int type,int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        /*if(StringUtils.isNotBlank(address)){
-            searchable.addCondition("address", SearchOperator.eq, address);
-        }*/
         if(height >= 0){
             searchable.addCondition("block_height", SearchOperator.eq, height);
         }
         if(type > 0){
             searchable.addCondition("type", SearchOperator.eq, type);
         }
+        PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
+        return page;
+    }
+
+    /**
+     * 查询某个地址的交易列表
+     * @param address 地址
+     * @return
+     */
+    public PageInfo<Transaction> getListByAddress(String address, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        //todo
         PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
         return page;
     }

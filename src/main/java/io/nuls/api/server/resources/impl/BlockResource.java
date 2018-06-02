@@ -41,7 +41,33 @@ public class BlockResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(blockBusiness.getList(pageNumber,pageSize));
+        result.setData(blockBusiness.getList(null,pageNumber,pageSize));
+        return result;
+    }
+
+    @GET
+    @Path("/list/address")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult listByAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("address") String address){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        if(StringUtils.validAddress(address)){
+            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            return result;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(blockBusiness.getList(address,pageNumber,pageSize));
         return result;
     }
 
