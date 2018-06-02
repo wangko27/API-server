@@ -24,7 +24,7 @@ import java.util.List;
  * Date:  2018/5/29 0029
  */
 @Service
-public class UtxoBusiness {
+public class UtxoBusiness implements BaseService<Utxo,UtxoKey> {
     @Autowired
     private UtxoMapper utxoMapper;
 
@@ -72,6 +72,17 @@ public class UtxoBusiness {
     @Transactional
     public int update(Utxo entity) {
         return utxoMapper.updateByPrimaryKey(entity);
+    }
+
+    @Transactional
+    @Override
+    public int deleteBykey(UtxoKey utxoKey) {
+        return utxoMapper.deleteByPrimaryKey(utxoKey);
+    }
+
+    @Override
+    public Utxo getByKey(UtxoKey utxoKey) {
+        return utxoMapper.selectByPrimaryKey(utxoKey);
     }
 
     /**

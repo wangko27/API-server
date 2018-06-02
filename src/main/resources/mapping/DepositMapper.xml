@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.DepositMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Deposit" >
+<mapper namespace="andy.dao.DepositMapper" >
+  <resultMap id="BaseResultMap" type="andy.model.Deposit" >
     <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
     <result column="amount" property="amount" jdbcType="BIGINT" />
     <result column="agent_hash" property="agentHash" jdbcType="VARCHAR" />
@@ -23,7 +23,7 @@
     delete from deposit
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="io.nuls.api.entity.Deposit" >
+  <insert id="insert" parameterType="andy.model.Deposit" >
     insert into deposit (tx_hash, amount, agent_hash, 
       agent_name, address, create_time, 
       block_height)
@@ -31,7 +31,7 @@
       #{agentName,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
       #{blockHeight,jdbcType=BIGINT})
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.api.entity.Deposit" >
+  <insert id="insertSelective" parameterType="andy.model.Deposit" >
     insert into deposit
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -80,7 +80,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Deposit" >
+  <update id="updateByPrimaryKeySelective" parameterType="andy.model.Deposit" >
     update deposit
     <set >
       <if test="amount != null" >
@@ -104,7 +104,7 @@
     </set>
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Deposit" >
+  <update id="updateByPrimaryKey" parameterType="andy.model.Deposit" >
     update deposit
     set amount = #{amount,jdbcType=BIGINT},
       agent_hash = #{agentHash,jdbcType=VARCHAR},

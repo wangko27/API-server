@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.AddressRewardDetailMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.api.entity.AddressRewardDetail" >
+<mapper namespace="andy.dao.AddressRewardDetailMapper" >
+  <resultMap id="BaseResultMap" type="andy.model.AddressRewardDetail" >
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
     <result column="address" property="address" jdbcType="VARCHAR" />
@@ -22,13 +22,13 @@
     delete from address_reward_detail
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="io.nuls.api.entity.AddressRewardDetail" >
+  <insert id="insert" parameterType="andy.model.AddressRewardDetail" >
     insert into address_reward_detail (id, block_height, address, 
       amount, tx_hash, time)
     values (#{id,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR}, 
       #{amount,jdbcType=BIGINT}, #{txHash,jdbcType=VARCHAR}, #{time,jdbcType=BIGINT})
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.api.entity.AddressRewardDetail" >
+  <insert id="insertSelective" parameterType="andy.model.AddressRewardDetail" >
     insert into address_reward_detail
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -71,7 +71,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.AddressRewardDetail" >
+  <update id="updateByPrimaryKeySelective" parameterType="andy.model.AddressRewardDetail" >
     update address_reward_detail
     <set >
       <if test="blockHeight != null" >
@@ -92,7 +92,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.AddressRewardDetail" >
+  <update id="updateByPrimaryKey" parameterType="andy.model.AddressRewardDetail" >
     update address_reward_detail
     set block_height = #{blockHeight,jdbcType=BIGINT},
       address = #{address,jdbcType=VARCHAR},

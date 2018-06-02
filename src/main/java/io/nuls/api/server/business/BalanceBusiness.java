@@ -20,7 +20,7 @@ import java.util.List;
  * Date:  2018/5/29 0029
  */
 @Service
-public class BalanceBusiness {
+public class BalanceBusiness implements BaseService<Balance,Long> {
 
     @Autowired
     private BalanceMapper balanceMapper;
@@ -40,34 +40,17 @@ public class BalanceBusiness {
         return page;
     }
 
-    /**
-     * 根据id查询
-     * @param id
-     * @return
-     */
-    public Balance getDetail(Long id) {
-        return balanceMapper.selectByPrimaryKey(id.toString());
-    }
-
-    /**
-     * 新增资产
-     * @param entity
-     * @return 1新增成功，其他失败
-     */
-    @Transactional
-    public int insert(Balance entity){
-        return balanceMapper.insert(entity);
-    }
 
     /**
      * 修改资产
+     * @param id 锁定金额
      * @param locked 锁定金额
      * @param usable 可用金额
      * @return 1操作成功，2id不存在，0修改失败
      */
     @Transactional
     public int update(Long id,long locked,long usable){
-        Balance entity = getDetail(id);
+        Balance entity = getByKey(id);
         if(null == entity){
             return 2;
         }
@@ -81,4 +64,60 @@ public class BalanceBusiness {
         return balanceMapper.updateByPrimaryKey(entity);
     }
 
+    /**
+     * 修改账户资产
+     * @param balance
+     * @return 1成功，0对象为空，2 主键为空，3高度错误，4地址错误，5锁定余额小于0,6可用余额小于0,7资产名称为空，8资产id错误
+     */
+    @Transactional
+    @Override
+    public int update(Balance balance){
+        if(null == balance){
+            return 0;
+        }
+        if(balance.getId() < 0){
+            return 2;
+        }
+        if(balance.getBlockHeight() < 0){
+            return 3;
+        }
+        if(StringUtils.validAddress(balance.getAddress())){
+            return 4;
+        }
+        if(balance.getLocked() < 0){
+            return 5;
+        }
+        if(balance.getUsable() < 0){
+            return 6;
+        }
+        if(StringUtils.isBlank(balance.getAssetsCode())){
+            return 7;
+        }
+        if(null == getByKey(balance.getId())){
+            return 8;
+        }
+        return balanceMapper.updateByPrimaryKey(balance);
+    }
+
+    /**
+     * 新增资产
+     * @param balance
+     * @return 1新增成功，其他失败
+     */
+    @Transactional
+    @Override
+    public int save(Balance balance) {
+        return balanceMapper.insert(balance);
+    }
+
+    @Transactional
+    @Override
+    public int deleteBykey(Long id) {
+        return balanceMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public Balance getByKey(Long id) {
+        return balanceMapper.selectByPrimaryKey(id);
+    }
 }

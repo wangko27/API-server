@@ -1,7 +1,6 @@
 package io.nuls.api.entity;
 
-public class Deposit extends TxData{
-
+public class Deposit {
     private String txHash;
 
     private Long amount;

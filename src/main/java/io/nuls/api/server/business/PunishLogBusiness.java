@@ -6,6 +6,7 @@ import io.nuls.api.entity.PunishLog;
 import io.nuls.api.server.dao.mapper.PunishLogMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import org.glassfish.grizzly.compression.lzma.impl.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Date:  2018/5/29 0029
  */
 @Service
-public class PunishLogBusiness {
+public class PunishLogBusiness implements BaseService<PunishLog,Long> {
 
     @Autowired
     private PunishLogMapper punishLogMapper;
@@ -75,4 +76,26 @@ public class PunishLogBusiness {
         return punishLogMapper.deleteBySearchable(searchable);
     }
 
+    @Transactional
+    @Override
+    public int save(PunishLog punishLog) {
+        return punishLogMapper.insert(punishLog);
+    }
+
+    @Transactional
+    @Override
+    public int update(PunishLog punishLog) {
+        return punishLogMapper.updateByPrimaryKey(punishLog);
+    }
+
+    @Transactional
+    @Override
+    public int deleteBykey(Long aLong) {
+        return punishLogMapper.deleteByPrimaryKey(aLong);
+    }
+
+    @Override
+    public PunishLog getByKey(Long aLong) {
+        return punishLogMapper.selectByPrimaryKey(aLong);
+    }
 }

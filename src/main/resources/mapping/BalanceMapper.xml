@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.BalanceMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Balance" >
-    <id column="address" property="address" jdbcType="VARCHAR" />
-    <result column="id" property="id" jdbcType="BIGINT" />
+<mapper namespace="andy.dao.BalanceMapper" >
+  <resultMap id="BaseResultMap" type="andy.model.Balance" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
     <result column="locked" property="locked" jdbcType="BIGINT" />
     <result column="usable" property="usable" jdbcType="BIGINT" />
     <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
     <result column="assets_code" property="assetsCode" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    address, id, locked, usable, block_height, assets_code
+    id, address, locked, usable, block_height, assets_code
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
     from balance
-    where address = #{address,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from balance
-    where address = #{address,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="io.nuls.api.entity.Balance" >
-    insert into balance (address, id, locked, 
+  <insert id="insert" parameterType="andy.model.Balance" >
+    insert into balance (id, address, locked, 
       usable, block_height, assets_code
       )
-    values (#{address,jdbcType=VARCHAR}, #{id,jdbcType=BIGINT}, #{locked,jdbcType=BIGINT}, 
+    values (#{id,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR}, #{locked,jdbcType=BIGINT}, 
       #{usable,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{assetsCode,jdbcType=VARCHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.api.entity.Balance" >
+  <insert id="insertSelective" parameterType="andy.model.Balance" >
     insert into balance
     <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="address != null" >
-        address,
-      </if>
       <if test="id != null" >
         id,
+      </if>
+      <if test="address != null" >
+        address,
       </if>
       <if test="locked != null" >
         locked,
@@ -53,11 +53,11 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="address != null" >
-        #{address,jdbcType=VARCHAR},
-      </if>
       <if test="id != null" >
         #{id,jdbcType=BIGINT},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
       </if>
       <if test="locked != null" >
         #{locked,jdbcType=BIGINT},
@@ -73,11 +73,11 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Balance" >
+  <update id="updateByPrimaryKeySelective" parameterType="andy.model.Balance" >
     update balance
     <set >
-      <if test="id != null" >
-        id = #{id,jdbcType=BIGINT},
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
       </if>
       <if test="locked != null" >
         locked = #{locked,jdbcType=BIGINT},
@@ -92,15 +92,15 @@
         assets_code = #{assetsCode,jdbcType=VARCHAR},
       </if>
     </set>
-    where address = #{address,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Balance" >
+  <update id="updateByPrimaryKey" parameterType="andy.model.Balance" >
     update balance
-    set id = #{id,jdbcType=BIGINT},
+    set address = #{address,jdbcType=VARCHAR},
       locked = #{locked,jdbcType=BIGINT},
       usable = #{usable,jdbcType=BIGINT},
       block_height = #{blockHeight,jdbcType=BIGINT},
       assets_code = #{assetsCode,jdbcType=VARCHAR}
-    where address = #{address,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

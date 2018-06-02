@@ -1,7 +1,7 @@
 package io.nuls.api.entity;
 
-public class PunishLog extends TxData{
-    private String id;
+public class PunishLog {
+    private Long id;
 
     private Integer type;
 
@@ -17,12 +17,12 @@ public class PunishLog extends TxData{
 
     private byte[] evidence;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id == null ? null : id.trim();
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Integer getType() {

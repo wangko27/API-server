@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.TransactionMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Transaction" >
+<mapper namespace="andy.dao.TransactionMapper" >
+  <resultMap id="BaseResultMap" type="andy.model.Transaction" >
     <id column="hash" property="hash" jdbcType="VARCHAR" />
     <result column="tx_index" property="txIndex" jdbcType="INTEGER" />
     <result column="type" property="type" jdbcType="INTEGER" />
@@ -12,7 +12,7 @@
     <result column="size" property="size" jdbcType="INTEGER" />
     <result column="amount" property="amount" jdbcType="BIGINT" />
   </resultMap>
-  <resultMap id="ResultMapWithBLOBs" type="io.nuls.api.entity.Transaction" extends="BaseResultMap" >
+  <resultMap id="ResultMapWithBLOBs" type="andy.model.Transaction" extends="BaseResultMap" >
     <result column="extend" property="extend" jdbcType="LONGVARBINARY" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -33,7 +33,7 @@
     delete from transaction
     where hash = #{hash,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="io.nuls.api.entity.Transaction" >
+  <insert id="insert" parameterType="andy.model.Transaction" >
     insert into transaction (hash, tx_index, type, 
       create_time, block_height, remark, 
       fee, size, amount, extend
@@ -43,7 +43,7 @@
       #{fee,jdbcType=BIGINT}, #{size,jdbcType=INTEGER}, #{amount,jdbcType=BIGINT}, #{extend,jdbcType=LONGVARBINARY}
       )
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.api.entity.Transaction" >
+  <insert id="insertSelective" parameterType="andy.model.Transaction" >
     insert into transaction
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="hash != null" >
@@ -110,7 +110,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Transaction" >
+  <update id="updateByPrimaryKeySelective" parameterType="andy.model.Transaction" >
     update transaction
     <set >
       <if test="txIndex != null" >
@@ -143,7 +143,7 @@
     </set>
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.api.entity.Transaction" >
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="andy.model.Transaction" >
     update transaction
     set tx_index = #{txIndex,jdbcType=INTEGER},
       type = #{type,jdbcType=INTEGER},
@@ -156,7 +156,7 @@
       extend = #{extend,jdbcType=LONGVARBINARY}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Transaction" >
+  <update id="updateByPrimaryKey" parameterType="andy.model.Transaction" >
     update transaction
     set tx_index = #{txIndex,jdbcType=INTEGER},
       type = #{type,jdbcType=INTEGER},

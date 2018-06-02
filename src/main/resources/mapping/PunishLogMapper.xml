@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.PunishLogMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.api.entity.PunishLog" >
-    <id column="id" property="id" jdbcType="VARCHAR" />
+<mapper namespace="andy.dao.PunishLogMapper" >
+  <resultMap id="BaseResultMap" type="andy.model.PunishLog" >
+    <id column="id" property="id" jdbcType="BIGINT" />
     <result column="type" property="type" jdbcType="INTEGER" />
     <result column="address" property="address" jdbcType="VARCHAR" />
     <result column="time" property="time" jdbcType="BIGINT" />
@@ -10,7 +10,7 @@
     <result column="round_index" property="roundIndex" jdbcType="INTEGER" />
     <result column="reason" property="reason" jdbcType="VARCHAR" />
   </resultMap>
-  <resultMap id="ResultMapWithBLOBs" type="io.nuls.api.entity.PunishLog" extends="BaseResultMap" >
+  <resultMap id="ResultMapWithBLOBs" type="andy.model.PunishLog" extends="BaseResultMap" >
     <result column="evidence" property="evidence" jdbcType="LONGVARBINARY" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -19,27 +19,27 @@
   <sql id="Blob_Column_List" >
     evidence
   </sql>
-  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
     from punish_log
-    where id = #{id,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from punish_log
-    where id = #{id,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="io.nuls.api.entity.PunishLog" >
+  <insert id="insert" parameterType="andy.model.PunishLog" >
     insert into punish_log (id, type, address, 
       time, block_height, round_index, 
       reason, evidence)
-    values (#{id,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{address,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=BIGINT}, #{type,jdbcType=INTEGER}, #{address,jdbcType=VARCHAR}, 
       #{time,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{roundIndex,jdbcType=INTEGER}, 
       #{reason,jdbcType=VARCHAR}, #{evidence,jdbcType=LONGVARBINARY})
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.api.entity.PunishLog" >
+  <insert id="insertSelective" parameterType="andy.model.PunishLog" >
     insert into punish_log
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -69,7 +69,7 @@
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
-        #{id,jdbcType=VARCHAR},
+        #{id,jdbcType=BIGINT},
       </if>
       <if test="type != null" >
         #{type,jdbcType=INTEGER},
@@ -94,7 +94,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.PunishLog" >
+  <update id="updateByPrimaryKeySelective" parameterType="andy.model.PunishLog" >
     update punish_log
     <set >
       <if test="type != null" >
@@ -119,9 +119,9 @@
         evidence = #{evidence,jdbcType=LONGVARBINARY},
       </if>
     </set>
-    where id = #{id,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.api.entity.PunishLog" >
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="andy.model.PunishLog" >
     update punish_log
     set type = #{type,jdbcType=INTEGER},
       address = #{address,jdbcType=VARCHAR},
@@ -130,9 +130,9 @@
       round_index = #{roundIndex,jdbcType=INTEGER},
       reason = #{reason,jdbcType=VARCHAR},
       evidence = #{evidence,jdbcType=LONGVARBINARY}
-    where id = #{id,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.PunishLog" >
+  <update id="updateByPrimaryKey" parameterType="andy.model.PunishLog" >
     update punish_log
     set type = #{type,jdbcType=INTEGER},
       address = #{address,jdbcType=VARCHAR},
@@ -140,6 +140,6 @@
       block_height = #{blockHeight,jdbcType=BIGINT},
       round_index = #{roundIndex,jdbcType=INTEGER},
       reason = #{reason,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

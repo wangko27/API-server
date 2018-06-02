@@ -17,7 +17,7 @@ import java.util.List;
  * 区块头处理器，包括区块的验证，回滚，查询与存储等
  */
 @Service
-public class BlockBusiness {
+public class BlockBusiness implements BaseService<BlockHeader,String> {
 
     @Autowired
     private BlockHeaderMapper blockHeaderMapper;
@@ -98,4 +98,26 @@ public class BlockBusiness {
         return blockHeaderMapper.deleteByPrimaryKey(hash);
     }
 
+    @Transactional
+    @Override
+    public int save(BlockHeader blockHeader) {
+        return blockHeaderMapper.insert(blockHeader);
+    }
+
+    @Transactional
+    @Override
+    public int update(BlockHeader blockHeader) {
+        return blockHeaderMapper.updateByPrimaryKey(blockHeader);
+    }
+
+    @Transactional
+    @Override
+    public int deleteBykey(String s) {
+        return blockHeaderMapper.deleteByPrimaryKey(s);
+    }
+
+    @Override
+    public BlockHeader getByKey(String s) {
+        return blockHeaderMapper.selectByPrimaryKey(s);
+    }
 }

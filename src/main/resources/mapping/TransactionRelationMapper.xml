@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.TransactionRelationMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.api.entity.TransactionRelationKey" >
+<mapper namespace="andy.dao.TransactionRelationMapper" >
+  <resultMap id="BaseResultMap" type="andy.model.TransactionRelationKey" >
     <id column="address" property="address" jdbcType="VARCHAR" />
     <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
   </resultMap>
-  <delete id="deleteByPrimaryKey" parameterType="io.nuls.api.entity.TransactionRelationKey" >
+  <delete id="deleteByPrimaryKey" parameterType="andy.model.TransactionRelationKey" >
     delete from transaction_relation
     where address = #{address,jdbcType=VARCHAR}
       and tx_hash = #{txHash,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="io.nuls.api.entity.TransactionRelationKey" >
+  <insert id="insert" parameterType="andy.model.TransactionRelationKey" >
     insert into transaction_relation (address, tx_hash)
     values (#{address,jdbcType=VARCHAR}, #{txHash,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.api.entity.TransactionRelationKey" >
+  <insert id="insertSelective" parameterType="andy.model.TransactionRelationKey" >
     insert into transaction_relation
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="address != null" >

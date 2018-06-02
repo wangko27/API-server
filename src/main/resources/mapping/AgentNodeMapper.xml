@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.AgentNodeMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.api.entity.AgentNode" >
+<mapper namespace="andy.dao.AgentNodeMapper" >
+  <resultMap id="BaseResultMap" type="andy.model.AgentNode" >
     <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
     <result column="agent_address" property="agentAddress" jdbcType="VARCHAR" />
     <result column="packing_address" property="packingAddress" jdbcType="VARCHAR" />
@@ -34,7 +34,7 @@
     delete from agent_node
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="io.nuls.api.entity.AgentNode" >
+  <insert id="insert" parameterType="andy.model.AgentNode" >
     insert into agent_node (tx_hash, agent_address, packing_address, 
       reward_address, deposit, commission_rate, 
       agent_name, introduction, create_time, 
@@ -48,7 +48,7 @@
       #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL}, #{totalPackingCount,jdbcType=BIGINT}, 
       #{lastRewardHeight,jdbcType=BIGINT})
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
+  <insert id="insertSelective" parameterType="andy.model.AgentNode" >
     insert into agent_node
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -151,7 +151,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.AgentNode" >
+  <update id="updateByPrimaryKeySelective" parameterType="andy.model.AgentNode" >
     update agent_node
     <set >
       <if test="agentAddress != null" >
@@ -202,7 +202,7 @@
     </set>
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.AgentNode" >
+  <update id="updateByPrimaryKey" parameterType="andy.model.AgentNode" >
     update agent_node
     set agent_address = #{agentAddress,jdbcType=VARCHAR},
       packing_address = #{packingAddress,jdbcType=VARCHAR},

@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Date:  2018/5/29 0029
  */
 @Service
-public class AgentNodeBusiness{
+public class AgentNodeBusiness implements  BaseService<AgentNode,String>{
 
     @Autowired
     private AgentNodeMapper agentNodeMapper;
@@ -50,35 +50,6 @@ public class AgentNodeBusiness{
     }
 
     /**
-     * 根据id查询
-     * @param txHash 创建地址
-     * @return
-     */
-    public AgentNode getDetail(String txHash) {
-        return agentNodeMapper.selectByPrimaryKey(txHash);
-    }
-
-    /**
-     * 保存
-     * @param entity 实体
-     * @return 1成功，其他失败
-     */
-    @Transactional
-    public int insert(AgentNode entity) {
-        return agentNodeMapper.insert(entity);
-    }
-
-    /**
-     * 根据主键删除节点
-     * @param txHash  主键 txhash
-     * @return
-     */
-    @Transactional
-    public int deleteById(String txHash){
-        return agentNodeMapper.deleteByPrimaryKey(txHash);
-    }
-
-    /**
      * 根据高度删除某高度所有节点
      * @param height  高度
      * @return
@@ -90,7 +61,40 @@ public class AgentNodeBusiness{
         return agentNodeMapper.deleteBySearchable(searchable);
     }
 
+    /**
+     * 保存
+     * @param agentNode 实体
+     * @return 1成功，其他失败
+     */
+    @Transactional
+    @Override
+    public int save(AgentNode agentNode) {
+        return agentNodeMapper.insert(agentNode);
+    }
 
+    @Transactional
+    @Override
+    public int update(AgentNode agentNode) {
+        return agentNodeMapper.updateByPrimaryKey(agentNode);
+    }
 
+    /**
+     * 根据主键删除节点
+     * @param id  主键 txhash
+     * @return
+     */
+    @Transactional
+    public int deleteBykey(String id) {
+        return agentNodeMapper.deleteByPrimaryKey(id);
+    }
 
+    /**
+     * 根据id查询
+     * @param id 创建地址
+     * @return
+     */
+    @Override
+    public AgentNode getByKey(String id) {
+        return agentNodeMapper.selectByPrimaryKey(id);
+    }
 }

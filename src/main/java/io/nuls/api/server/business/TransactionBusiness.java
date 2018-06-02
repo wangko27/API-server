@@ -2,16 +2,19 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.nuls.api.constant.TransactionConstant;
-import io.nuls.api.entity.Alias;
+import io.nuls.api.constant.EntityConstant;
+import io.nuls.api.entity.PunishLog;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
+import org.glassfish.grizzly.compression.lzma.impl.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Description: 交易
@@ -19,18 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
  * Date:  2018/5/29 0029
  */
 @Service
-public class TransactionBusiness {
+public class TransactionBusiness implements BaseService<Transaction,String> {
 
     @Autowired
     private TransactionMapper transactionMapper;
-    @Autowired
-    private AliasBusiness aliasBusiness;
 
     /**
      * 交易列表
-     *
-     * @param height 所属的区块
-     * @param type   交易类型
+     * @param height  所属的区块
+     * @param type 交易类型
      * @return
      */
     public PageInfo<Transaction> getList(Long height, int type, String address, int pageNumber, int pageSize) {
@@ -86,7 +86,7 @@ public class TransactionBusiness {
     public void insert(Transaction tx) {
         transactionMapper.insert(tx);
         if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
-            Alias alias = (Alias) tx.getTxData();
+
 //            aliasBusiness.
         }
     }
@@ -104,7 +104,6 @@ public class TransactionBusiness {
 
     /**
      * 根据高度删除
-     *
      * @param height 高度
      * @return
      */
@@ -116,4 +115,27 @@ public class TransactionBusiness {
     }
 
 
+    @Transactional
+    @Override
+    public int save(Transaction transaction) {
+        return transactionMapper.insert(transaction);
+    }
+
+    @Transactional
+    @Override
+    public int update(Transaction transaction) {
+        return transactionMapper.updateByPrimaryKey(transaction);
+    }
+
+    @Transactional
+    @Override
+    public int deleteBykey(String s) {
+        return transactionMapper.deleteByPrimaryKey(s);
+    }
+
+    @Transactional
+    @Override
+    public Transaction getByKey(String s) {
+        return transactionMapper.selectByPrimaryKey(s);
+    }
 }
