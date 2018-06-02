@@ -26,7 +26,8 @@ public class SyncTest {
 
     @Test
     public void testGetBlock() {
-        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(0);
+        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(1);
+
         System.out.println(result.getData().getPreHash());
     }
 }
