@@ -11,6 +11,7 @@ import io.nuls.api.utils.RpcTransferUtil;
 import io.nuls.api.utils.log.Log;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -43,7 +44,9 @@ public class SyncDataHandler {
     }
 
     public RpcClientResult<Block> getBlock(BlockHeader header) throws NulsException {
-        RpcClientResult result = restFulUtils.get("/block/hash/" + header.getHash(), null);
+        Map<String,String> param = new HashMap<>();
+        param.put("hash", header.getHash());
+        RpcClientResult result = restFulUtils.get("/block/bytes", param);
         if (result.isFaild()) {
             return result;
         }
