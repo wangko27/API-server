@@ -112,7 +112,7 @@ public class BlockBusiness implements BaseService<BlockHeader,String> {
 
     @Transactional
     @Override
-    public int deleteBykey(String s) {
+    public int deleteByKey(String s) {
         return blockHeaderMapper.deleteByPrimaryKey(s);
     }
 

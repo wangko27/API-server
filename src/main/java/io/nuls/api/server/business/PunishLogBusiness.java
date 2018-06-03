@@ -90,7 +90,7 @@ public class PunishLogBusiness implements BaseService<PunishLog,Long> {
 
     @Transactional
     @Override
-    public int deleteBykey(Long id) {
+    public int deleteByKey(Long id) {
         return punishLogMapper.deleteByPrimaryKey(id);
     }
 

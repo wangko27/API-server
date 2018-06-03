@@ -76,7 +76,7 @@ public class UtxoBusiness implements BaseService<Utxo,UtxoKey> {
 
     @Transactional
     @Override
-    public int deleteBykey(UtxoKey utxoKey) {
+    public int deleteByKey(UtxoKey utxoKey) {
         return utxoMapper.deleteByPrimaryKey(utxoKey);
     }
 

@@ -3,6 +3,8 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.AddressRewardDetail;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.AddressRewardDetailMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
@@ -16,17 +18,18 @@ import org.springframework.transaction.annotation.Transactional;
  * Date:  2018/5/29 0029
  */
 @Service
-public class AddressRewardDetailBusiness implements BaseService<AddressRewardDetail,Long> {
+public class AddressRewardDetailBusiness implements BaseService<AddressRewardDetail, Long> {
 
     @Autowired
     private AddressRewardDetailMapper addressRewardDetailMapper;
 
     /**
      * 获取列表
+     *
      * @param address 奖励的账户地址
      * @return
      */
-    public PageInfo<AddressRewardDetail> getList(String address,int pageNumber, int pageSize) {
+    public PageInfo<AddressRewardDetail> getList(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
@@ -36,11 +39,12 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
 
     /**
      * 根据高度删除某高度所有数据
+     *
      * @param height
      * @return
      */
     @Transactional
-    public int deleteByHeight(Long height){
+    public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return addressRewardDetailMapper.deleteBySearchable(searchable);
@@ -48,6 +52,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
 
     /**
      * 新增奖励
+     *
      * @param addressRewardDetail 需要新增的实体
      * @return 新增结果 1成功，其他失败
      */
@@ -57,8 +62,22 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
         return addressRewardDetailMapper.insert(addressRewardDetail);
     }
 
+    @Transactional
+    public void saveTxReward(Transaction tx) {
+        for (Utxo utxo : tx.getOutputs()) {
+            AddressRewardDetail detail = new AddressRewardDetail();
+            detail.setAddress(utxo.getAddress());
+            detail.setTime(tx.getCreateTime());
+            detail.setAmount(utxo.getAmount());
+            detail.setBlockHeight(tx.getBlockHeight());
+            detail.setTxHash(tx.getHash());
+            addressRewardDetailMapper.insert(detail);
+        }
+    }
+
     /**
      * 根据主键修改
+     *
      * @param addressRewardDetail
      * @return
      */
@@ -70,17 +89,19 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
 
     /**
      * 根据主键删除数据
+     *
      * @param id
      * @return
      */
     @Transactional
     @Override
-    public int deleteBykey(Long id) {
+    public int deleteByKey(Long id) {
         return addressRewardDetailMapper.deleteByPrimaryKey(id);
     }
 
     /**
      * 根据主键查询数据
+     *
      * @param id
      * @return
      */

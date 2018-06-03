@@ -2,7 +2,9 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Deposit;
+import io.nuls.api.server.dao.mapper.AgentNodeMapper;
 import io.nuls.api.server.dao.mapper.DepositMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
@@ -16,17 +18,20 @@ import org.springframework.transaction.annotation.Transactional;
  * Date:  2018/5/29 0029
  */
 @Service
-public class DepositBusiness implements BaseService<Deposit,String> {
+public class DepositBusiness implements BaseService<Deposit, String> {
 
     @Autowired
     private DepositMapper depositMapper;
+    @Autowired
+    private AgentNodeMapper agentNodeMapper;
 
     /**
      * 委托列表
+     *
      * @param address 账户地址
      * @return
      */
-    public PageInfo<Deposit> getList(String address,int pageNumber,int pageSize) {
+    public PageInfo<Deposit> getList(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
@@ -36,40 +41,33 @@ public class DepositBusiness implements BaseService<Deposit,String> {
 
     /**
      * 新增委托 检查被委托的节点是否已被委托满
+     *
      * @param entity
      * @return
      */
     @Transactional
-    public int insert(Deposit entity){
+    public int insert(Deposit entity) {
         return depositMapper.insert(entity);
     }
 
     /**
      * 根据主键查询详情
+     *
      * @param txHash 主键
      * @return
      */
-    public Deposit getDetail(String txHash){
+    public Deposit getDetail(String txHash) {
         return depositMapper.selectByPrimaryKey(txHash);
     }
 
     /**
-     * 根据主键删除
-     * @param txHash 主键
-     * @return
-     */
-    @Transactional
-    public int deleteById(String txHash){
-        return depositMapper.deleteByPrimaryKey(txHash);
-    }
-
-    /**
      * 根据高度删除
+     *
      * @param height 高度
      * @return
      */
     @Transactional
-    public int deleteByHeight(Long height){
+    public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return depositMapper.deleteBySearchable(searchable);
@@ -78,6 +76,10 @@ public class DepositBusiness implements BaseService<Deposit,String> {
     @Transactional
     @Override
     public int save(Deposit deposit) {
+        AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
+        agentNode.setTotalDeposit(agentNode.getDeposit() + deposit.getAmount());
+        agentNode.setDepositCount(agentNode.getDepositCount() + 1);
+        agentNodeMapper.updateByPrimaryKey(agentNode);
         return depositMapper.insert(deposit);
     }
 
@@ -89,8 +91,18 @@ public class DepositBusiness implements BaseService<Deposit,String> {
 
     @Transactional
     @Override
-    public int deleteBykey(String s) {
+    public int deleteByKey(String s) {
         return depositMapper.deleteByPrimaryKey(s);
+    }
+
+    @Transactional
+    public int delete(Deposit deposit) {
+        deposit = depositMapper.selectByPrimaryKey(deposit.getTxHash());
+        AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
+        agentNode.setTotalDeposit(agentNode.getDeposit() - deposit.getAmount());
+        agentNode.setDepositCount(agentNode.getDepositCount() - 1);
+        agentNodeMapper.updateByPrimaryKey(agentNode);
+        return depositMapper.deleteByPrimaryKey(deposit.getTxHash());
     }
 
     @Override

@@ -40,6 +40,7 @@ public class SyncDataBusiness {
             utxoBusiness.saveTo(tx);
 
             transactionBusiness.insert(tx);
+
         }
     }
 

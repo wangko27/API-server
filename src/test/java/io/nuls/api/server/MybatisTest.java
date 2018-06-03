@@ -35,7 +35,7 @@ public class MybatisTest {
         blockHeader.setTxCount(20);
         blockHeader.setTotalFee(3445L);
         blockHeader.setExtend(new byte[]{1,2,'a','b'});
-        blockHeader.setRoundIndex(7);
+        blockHeader.setRoundIndex(7L);
         blockBusiness.saveBlock(blockHeader);
     }
 

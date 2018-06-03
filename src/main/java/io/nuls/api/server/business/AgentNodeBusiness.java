@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.server.dao.mapper.AgentNodeMapper;
+import io.nuls.api.server.dao.mapper.DepositMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
@@ -18,20 +19,23 @@ import org.springframework.transaction.annotation.Transactional;
  * Date:  2018/5/29 0029
  */
 @Service
-public class AgentNodeBusiness implements  BaseService<AgentNode,String>{
+public class AgentNodeBusiness implements BaseService<AgentNode, String> {
 
     @Autowired
     private AgentNodeMapper agentNodeMapper;
+    @Autowired
+    private DepositMapper depositMapper;
 
     /**
      * 获取列表
+     *
      * @param agentName 节点名称 (搜索用)
      * @return
      */
     public PageInfo<AgentNode> getList(String agentName, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(agentName)){
+        if (StringUtils.isNotBlank(agentName)) {
             searchable.addCondition("agent_name", SearchOperator.like, agentName);
         }
         PageInfo<AgentNode> page = new PageInfo<>(agentNodeMapper.selectList(searchable));
@@ -40,6 +44,7 @@ public class AgentNodeBusiness implements  BaseService<AgentNode,String>{
 
     /**
      * 获取节点详情
+     *
      * @param agentAddress 创建地址
      * @return
      */
@@ -51,11 +56,12 @@ public class AgentNodeBusiness implements  BaseService<AgentNode,String>{
 
     /**
      * 根据高度删除某高度所有节点
-     * @param height  高度
+     *
+     * @param height 高度
      * @return
      */
     @Transactional
-    public int deleteByHeight(Long height){
+    public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return agentNodeMapper.deleteBySearchable(searchable);
@@ -63,6 +69,7 @@ public class AgentNodeBusiness implements  BaseService<AgentNode,String>{
 
     /**
      * 保存
+     *
      * @param agentNode 实体
      * @return 1成功，其他失败
      */
@@ -80,16 +87,20 @@ public class AgentNodeBusiness implements  BaseService<AgentNode,String>{
 
     /**
      * 根据主键删除节点
-     * @param id  主键 txhash
+     *
+     * @param id 主键 txhash
      * @return
      */
     @Transactional
-    public int deleteBykey(String id) {
+    public int deleteByKey(String id) {
+        depositMapper.deleteByAgentHash(id);
         return agentNodeMapper.deleteByPrimaryKey(id);
     }
 
+
     /**
      * 根据id查询
+     *
      * @param id 创建地址
      * @return
      */

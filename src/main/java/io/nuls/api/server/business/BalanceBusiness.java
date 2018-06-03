@@ -100,7 +100,7 @@ public class BalanceBusiness implements BaseService<Balance,Long> {
     }
 
     @Override
-    public int deleteBykey(Long aLong) {
+    public int deleteByKey(Long aLong) {
         return balanceMapper.deleteByPrimaryKey(aLong);
     }
 

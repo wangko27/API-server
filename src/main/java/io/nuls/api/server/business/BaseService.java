@@ -8,7 +8,7 @@ public interface BaseService<M, ID extends Serializable> {
 
     int update(M m);
 
-    int deleteBykey(ID id);
+    int deleteByKey(ID id);
 
     M getByKey(ID id);
 }
