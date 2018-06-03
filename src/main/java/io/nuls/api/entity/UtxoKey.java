@@ -2,8 +2,7 @@ package io.nuls.api.entity;
 
 import java.io.Serializable;
 
-public class UtxoKey implements Serializable {
-
+public class UtxoKey implements Serializable{
     private String txHash;
 
     private Integer txIndex;

@@ -3,7 +3,10 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.ErrorCode;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.Input;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.UtxoKey;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -21,13 +24,9 @@ import java.util.List;
  * Date:  2018/5/29 0029
  */
 @Service
-public class UtxoBusiness {
-
+public class UtxoBusiness implements BaseService<Utxo,UtxoKey> {
     @Autowired
     private UtxoMapper utxoMapper;
-
-    @Autowired
-    private BalanceBusiness balanceBusiness;
 
     /**
      * 获取列表
@@ -75,6 +74,17 @@ public class UtxoBusiness {
         return utxoMapper.updateByPrimaryKey(entity);
     }
 
+    @Transactional
+    @Override
+    public int deleteBykey(UtxoKey utxoKey) {
+        return utxoMapper.deleteByPrimaryKey(utxoKey);
+    }
+
+    @Override
+    public Utxo getByKey(UtxoKey utxoKey) {
+        return utxoMapper.selectByPrimaryKey(utxoKey);
+    }
+
     /**
      * 根据每一条交易的输入，改变对应的utxo状态
      *
@@ -85,7 +95,6 @@ public class UtxoBusiness {
     public void updateByFrom(Transaction tx) throws NulsException {
         UtxoKey key = new UtxoKey();
         Utxo utxo;
-
         for (Input input : tx.getInputs()) {
             key.setTxHash(input.getFromHash());
             key.setTxIndex(input.getFromIndex());
@@ -98,7 +107,6 @@ public class UtxoBusiness {
             //在这里查询出utxo后，记得给每一个input赋值address
             input.setAddress(utxo.getAddress());
             utxoMapper.updateByPrimaryKey(utxo);
-            balanceBusiness.updateByFrom(utxo);
         }
     }
 

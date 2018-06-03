@@ -19,7 +19,7 @@ import java.util.List;
  * Date:  2018/5/29 0029
  */
 @Service
-public class AliasBusiness {
+public class AliasBusiness implements BaseService<Alias,String> {
 
     @Autowired
     private AliasMapper aliasMapper;
@@ -35,46 +35,6 @@ public class AliasBusiness {
         return aliasMapper.selectBySearchable(searchable);
     }
 
-    /**
-     * 根据别名获取别名实体
-     * @param alias 别名
-     * @return
-     */
-    public Alias getAliasByAlias(String alias) {
-        return aliasMapper.selectByPrimaryKey(alias);
-    }
-
-    /**
-     * 验证该地址是否已经设置别名，并且别名是否没有重复然后设置别名
-     * @param address 账户地址
-     * @param alias 别名
-     * @param height 区块高度
-     * @return 0，设置失败，1设置成功，2已经设置过别名了，3别名已经被设置了
-     */
-    @Transactional
-    public int insert(String address,String alias,Long height){
-        if(getAliasByAddress(address)!=null){
-            return 2;
-        }
-        if(getAliasByAlias(alias)!=null){
-            return 3;
-        }
-        Alias entity = new Alias();
-        entity.setAddress(address);
-        entity.setAlias(alias);
-        entity.setBlockHeight(height);
-        return aliasMapper.insert(entity);
-    }
-
-    /**
-     * 删除别名，根据账户地址删除
-     * @param address 账户地址
-     * @return
-     */
-    @Transactional
-    public int deleteAliasById(String address){
-        return aliasMapper.deleteByPrimaryKey(address);
-    }
 
     /**
      * 删除别名，根据高度删除
@@ -88,4 +48,59 @@ public class AliasBusiness {
         return aliasMapper.deleteBySearchable(searchable);
     }
 
+    /**
+     * 验证该地址是否已经设置别名，并且别名是否没有重复然后设置别名
+     * @param alias 实体
+     * @return 0，设置失败，1设置成功，2实体为空,，3地址格式验证失败，4高度错误,5别名为空，6账户地址已经设置过别名了，7别名已经被设置过了
+     */
+    @Transactional
+    @Override
+    public int save(Alias alias){
+        if(null == alias){
+            return 2;
+        }
+        if(StringUtils.validAddress(alias.getAddress())){
+            return 3;
+        }
+        if(alias.getBlockHeight() < 0){
+            return 4;
+        }
+        if(StringUtils.isBlank(alias.getAlias())){
+            return 5;
+        }
+        if(getAliasByAddress(alias.getAddress())!=null){
+            return 6;
+        }
+        if(getByKey(alias.getAlias())!=null){
+            return 7;
+        }
+        return aliasMapper.insert(alias);
+    }
+
+    @Transactional
+    @Override
+    public int update(Alias alias) {
+        return aliasMapper.updateByPrimaryKey(alias);
+    }
+
+    /**
+     * 删除别名，根据账户地址删除
+     * @param id 账户地址
+     * @return
+     */
+    @Transactional
+    @Override
+    public int deleteBykey(String id) {
+        return aliasMapper.deleteByPrimaryKey(id);
+    }
+
+    /**
+     * 根据主键获取别名
+     * @param id
+     * @return
+     */
+    @Override
+    public Alias getByKey(String id) {
+        return aliasMapper.selectByPrimaryKey(id);
+    }
 }

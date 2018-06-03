@@ -1,9 +1,6 @@
 package io.nuls.api.entity;
 
-import java.util.List;
-
 public class BlockHeader {
-
     private String hash;
 
     private Long height;
@@ -18,7 +15,7 @@ public class BlockHeader {
 
     private Integer txCount;
 
-    private Integer roundIndex;
+    private Long roundIndex;
 
     private Long totalFee;
 
@@ -52,8 +49,8 @@ public class BlockHeader {
         return preHash;
     }
 
-    public void setPreHash(String prevHash) {
-        this.preHash = prevHash == null ? null : prevHash.trim();
+    public void setPreHash(String preHash) {
+        this.preHash = preHash == null ? null : preHash.trim();
     }
 
     public String getMerkleHash() {
@@ -88,11 +85,11 @@ public class BlockHeader {
         this.txCount = txCount;
     }
 
-    public Integer getRoundIndex() {
+    public Long getRoundIndex() {
         return roundIndex;
     }
 
-    public void setRoundIndex(Integer roundIndex) {
+    public void setRoundIndex(Long roundIndex) {
         this.roundIndex = roundIndex;
     }
 
@@ -143,5 +140,4 @@ public class BlockHeader {
     public void setExtend(byte[] extend) {
         this.extend = extend;
     }
-
 }

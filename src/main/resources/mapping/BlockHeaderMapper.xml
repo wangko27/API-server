@@ -9,7 +9,7 @@
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
     <result column="consensus_address" property="consensusAddress" jdbcType="VARCHAR" />
     <result column="tx_count" property="txCount" jdbcType="INTEGER" />
-    <result column="round_index" property="roundIndex" jdbcType="INTEGER" />
+    <result column="round_index" property="roundIndex" jdbcType="BIGINT" />
     <result column="total_fee" property="totalFee" jdbcType="BIGINT" />
     <result column="reward" property="reward" jdbcType="BIGINT" />
     <result column="size" property="size" jdbcType="INTEGER" />
@@ -46,7 +46,7 @@
       round_start_time, extend)
     values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{preHash,jdbcType=VARCHAR}, 
       #{merkleHash,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, #{consensusAddress,jdbcType=VARCHAR}, 
-      #{txCount,jdbcType=INTEGER}, #{roundIndex,jdbcType=INTEGER}, #{totalFee,jdbcType=BIGINT}, 
+      #{txCount,jdbcType=INTEGER}, #{roundIndex,jdbcType=BIGINT}, #{totalFee,jdbcType=BIGINT}, 
       #{reward,jdbcType=BIGINT}, #{size,jdbcType=INTEGER}, #{packingIndexOfRound,jdbcType=INTEGER}, 
       #{roundStartTime,jdbcType=BIGINT}, #{extend,jdbcType=LONGVARBINARY})
   </insert>
@@ -119,7 +119,7 @@
         #{txCount,jdbcType=INTEGER},
       </if>
       <if test="roundIndex != null" >
-        #{roundIndex,jdbcType=INTEGER},
+        #{roundIndex,jdbcType=BIGINT},
       </if>
       <if test="totalFee != null" >
         #{totalFee,jdbcType=BIGINT},
@@ -163,7 +163,7 @@
         tx_count = #{txCount,jdbcType=INTEGER},
       </if>
       <if test="roundIndex != null" >
-        round_index = #{roundIndex,jdbcType=INTEGER},
+        round_index = #{roundIndex,jdbcType=BIGINT},
       </if>
       <if test="totalFee != null" >
         total_fee = #{totalFee,jdbcType=BIGINT},
@@ -194,7 +194,7 @@
       create_time = #{createTime,jdbcType=BIGINT},
       consensus_address = #{consensusAddress,jdbcType=VARCHAR},
       tx_count = #{txCount,jdbcType=INTEGER},
-      round_index = #{roundIndex,jdbcType=INTEGER},
+      round_index = #{roundIndex,jdbcType=BIGINT},
       total_fee = #{totalFee,jdbcType=BIGINT},
       reward = #{reward,jdbcType=BIGINT},
       size = #{size,jdbcType=INTEGER},
@@ -211,7 +211,7 @@
       create_time = #{createTime,jdbcType=BIGINT},
       consensus_address = #{consensusAddress,jdbcType=VARCHAR},
       tx_count = #{txCount,jdbcType=INTEGER},
-      round_index = #{roundIndex,jdbcType=INTEGER},
+      round_index = #{roundIndex,jdbcType=BIGINT},
       total_fee = #{totalFee,jdbcType=BIGINT},
       reward = #{reward,jdbcType=BIGINT},
       size = #{size,jdbcType=INTEGER},
@@ -219,7 +219,6 @@
       round_start_time = #{roundStartTime,jdbcType=BIGINT}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
-
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithBLOBs">
     select
     <include refid="Base_Column_List" />

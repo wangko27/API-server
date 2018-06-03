@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Date:  2018/5/29 0029
  */
 @Service
-public class DepositBusiness {
+public class DepositBusiness implements BaseService<Deposit,String> {
 
     @Autowired
     private DepositMapper depositMapper;
@@ -75,4 +75,26 @@ public class DepositBusiness {
         return depositMapper.deleteBySearchable(searchable);
     }
 
+    @Transactional
+    @Override
+    public int save(Deposit deposit) {
+        return depositMapper.insert(deposit);
+    }
+
+    @Transactional
+    @Override
+    public int update(Deposit deposit) {
+        return depositMapper.updateByPrimaryKey(deposit);
+    }
+
+    @Transactional
+    @Override
+    public int deleteBykey(String s) {
+        return depositMapper.deleteByPrimaryKey(s);
+    }
+
+    @Override
+    public Deposit getByKey(String s) {
+        return depositMapper.selectByPrimaryKey(s);
+    }
 }

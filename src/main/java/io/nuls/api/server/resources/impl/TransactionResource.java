@@ -27,7 +27,7 @@ public class TransactionResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address,@QueryParam("height")Long height,@QueryParam("type")int type){
+    public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("height")Long height,@QueryParam("type")int type){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -42,7 +42,33 @@ public class TransactionResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(transactionBusiness.getList(height,type,address,pageNumber,pageSize));
+        result.setData(transactionBusiness.getList(height,type,pageNumber,pageSize));
+        return result;
+    }
+
+    @GET
+    @Path("/list/address")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        if(StringUtils.validAddress(address)){
+            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            return result;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(transactionBusiness.getListByAddress(address,pageNumber,pageSize));
         return result;
     }
 

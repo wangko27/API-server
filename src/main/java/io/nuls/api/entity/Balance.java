@@ -1,7 +1,6 @@
 package io.nuls.api.entity;
 
 public class Balance {
-
     private Long id;
 
     private String address;
@@ -14,20 +13,20 @@ public class Balance {
 
     private String assetsCode;
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address == null ? null : address.trim();
-    }
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address == null ? null : address.trim();
     }
 
     public Long getLocked() {

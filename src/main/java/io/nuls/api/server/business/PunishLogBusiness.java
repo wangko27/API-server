@@ -6,6 +6,7 @@ import io.nuls.api.entity.PunishLog;
 import io.nuls.api.server.dao.mapper.PunishLogMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import org.glassfish.grizzly.compression.lzma.impl.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Date:  2018/5/29 0029
  */
 @Service
-public class PunishLogBusiness {
+public class PunishLogBusiness implements BaseService<PunishLog,Long> {
 
     @Autowired
     private PunishLogMapper punishLogMapper;
@@ -49,7 +50,7 @@ public class PunishLogBusiness {
      * @param id
      * @return
      */
-    public PunishLog getDetail(String id){
+    public PunishLog getDetail(Long id){
         return punishLogMapper.selectByPrimaryKey(id);
     }
 
@@ -59,7 +60,7 @@ public class PunishLogBusiness {
      * @return 1成功，其他失败
      */
     @Transactional
-    public int deleteById(String id){
+    public int deleteById(Long id){
         return punishLogMapper.deleteByPrimaryKey(id);
     }
 
@@ -75,4 +76,26 @@ public class PunishLogBusiness {
         return punishLogMapper.deleteBySearchable(searchable);
     }
 
+    @Transactional
+    @Override
+    public int save(PunishLog punishLog) {
+        return punishLogMapper.insert(punishLog);
+    }
+
+    @Transactional
+    @Override
+    public int update(PunishLog punishLog) {
+        return punishLogMapper.updateByPrimaryKey(punishLog);
+    }
+
+    @Transactional
+    @Override
+    public int deleteBykey(Long id) {
+        return punishLogMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public PunishLog getByKey(Long id) {
+        return punishLogMapper.selectByPrimaryKey(id);
+    }
 }
