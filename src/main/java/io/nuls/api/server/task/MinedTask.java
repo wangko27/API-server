@@ -14,13 +14,13 @@ public class MinedTask {
     @Autowired
     private ReportDAO reportDAO;
 
-    @Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
+    /*@Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
     public void execute() {
         Log.debug("start to execute mined report");
         reportDAO.mined();
         TaskHelper.HELPER.queryReset(this);
         Log.debug("the mined report completed");
-    }
+    }*/
 }
 
 

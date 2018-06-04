@@ -14,10 +14,10 @@ public class TxHistoryTask {
     @Autowired
     private ReportDAO reportDAO;
 
-    @Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
+    /*@Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
     public void execute() {
         Log.debug("start to execute txHistory report");
         reportDAO.txHistory();
         Log.debug("the txHistory report completed");
-    }
+    }*/
 }

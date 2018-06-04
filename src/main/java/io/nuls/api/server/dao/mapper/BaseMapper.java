@@ -39,5 +39,4 @@ public interface BaseMapper<M, ID extends Serializable> {
     long exists(Searchable searchable);
 
     List<M> findAll();
-
 }

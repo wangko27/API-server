@@ -36,7 +36,7 @@ public class TransactionBusiness implements BaseService<Transaction,String> {
     public PageInfo<Transaction> getList(Long height, int type, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if (height >= 0) {
+        if (null != height) {
             searchable.addCondition("block_height", SearchOperator.eq, height);
         }
         if (type > 0) {
@@ -51,7 +51,7 @@ public class TransactionBusiness implements BaseService<Transaction,String> {
      * @param address 地址
      * @return
      */
-    public PageInfo<Transaction> getListByAddress(String address, int pageNumber, int pageSize) {
+    public PageInfo<Transaction> getListByAddress(String address,int type, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         //todo

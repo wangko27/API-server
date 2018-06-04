@@ -2,7 +2,6 @@ package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
@@ -29,6 +28,7 @@ public class TransactionResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("height")Long height,@QueryParam("type")int type){
         RpcClientResult result = null;
+        System.out.println(transactionBusiness);
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;
@@ -49,7 +49,7 @@ public class TransactionResource {
     @GET
     @Path("/list/address")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address){
+    public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address,@QueryParam("type")int type){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -68,12 +68,12 @@ public class TransactionResource {
             return result;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(transactionBusiness.getListByAddress(address,pageNumber,pageSize));
+        result.setData(transactionBusiness.getListByAddress(address,type,pageNumber,pageSize));
         return result;
     }
 
     @GET
-    @Path("/tx/hash/{hash}")
+    @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getDetailByHash(@PathParam("hash") String hash){
         RpcClientResult result;
