@@ -9,13 +9,16 @@ import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.StringUtils;
 import org.glassfish.grizzly.compression.lzma.impl.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Description: 交易
@@ -41,6 +44,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     private AddressRewardDetailBusiness rewardDetailBusiness;
 
 
+
     /**
      * 交易列表
      *
@@ -57,8 +61,16 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         if (type > 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
+        PageHelper.orderBy("tx_index asc");
         PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
         return page;
+    }
+
+    public List<Transaction> getList(Long blockHeight) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
+        PageHelper.orderBy("tx_index asc");
+        return transactionMapper.selectList(searchable);
     }
 
     /**
@@ -76,26 +88,13 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     }
 
     /**
-     * 根据交易hash查交易详情
-     *
-     * @param hash 交易hash
-     * @return
-     */
-    public Transaction getTransactionDetail(String hash) {
-        Searchable searchable = new Searchable();
-        if (StringUtils.isNotBlank(hash)) {
-            searchable.addCondition("hash", SearchOperator.eq, hash);
-        }
-        return transactionMapper.selectBySearchable(searchable);
-    }
-
-    /**
      * 新增
      *
      * @param tx
      */
     @Transactional
-    public void insert(Transaction tx) {
+    @Override
+    public int save(Transaction tx) {
         transactionMapper.insert(tx);
         relationBusiness.saveTxRelation(tx);
         if (tx.getType() == EntityConstant.TX_TYPE_COINBASE) {
@@ -111,21 +110,17 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             AgentNode agentNode = (AgentNode) tx.getTxData();
             agentNodeBusiness.deleteByKey(agentNode.getTxHash());
-        } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH ||
-                tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
-            punishLogBusiness.insert((PunishLog) tx.getTxData());
+        } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
+            punishLogBusiness.save((PunishLog) tx.getTxData());
+        } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
+            punishLogBusiness.saveList(tx.getTxDataList());
         }
+        return 1;
     }
 
-    /**
-     * 根据主键删除
-     *
-     * @param hash 主键
-     * @return 1成功，其他失败
-     */
     @Transactional
-    public int deleteById(String hash) {
-        return transactionMapper.deleteByPrimaryKey(hash);
+    public void rollback(Transaction tx) {
+
     }
 
     /**
@@ -139,13 +134,6 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return transactionMapper.deleteBySearchable(searchable);
-    }
-
-
-    @Transactional
-    @Override
-    public int save(Transaction transaction) {
-        return transactionMapper.insert(transaction);
     }
 
     @Transactional

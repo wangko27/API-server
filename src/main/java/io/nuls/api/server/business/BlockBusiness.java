@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -11,13 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 区块头处理器，包括区块的验证，回滚，查询与存储等
  */
 @Service
-public class BlockBusiness implements BaseService<BlockHeader,String> {
+public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     @Autowired
     private BlockHeaderMapper blockHeaderMapper;
@@ -50,15 +53,16 @@ public class BlockBusiness implements BaseService<BlockHeader,String> {
 
     /**
      * 获取块列表
-     * @param address 共识地址
+     *
+     * @param address    共识地址
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<BlockHeader> getList(String address,int pageNumber, int pageSize) {
+    public PageInfo<BlockHeader> getList(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(address)){
+        if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("consensus_address", SearchOperator.eq, address);
         }
         PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderMapper.selectList(searchable));
@@ -79,6 +83,7 @@ public class BlockBusiness implements BaseService<BlockHeader,String> {
 
     /**
      * 根据最新传入的区块信息，验证当前区块和前一区块的连续性
+     *
      * @param blockHeader
      * @return
      */

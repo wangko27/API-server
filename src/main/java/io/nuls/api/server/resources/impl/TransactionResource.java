@@ -82,7 +82,7 @@ public class TransactionResource {
         }
         try {
             result = RpcClientResult.getSuccess();
-            result.setData(transactionBusiness.getTransactionDetail(hash));
+            result.setData(transactionBusiness.getByKey(hash));
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

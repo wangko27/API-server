@@ -89,7 +89,7 @@
     </bean>
 
 
-    <import resource="classpath:Quartz.xml" />
+    <!--<import resource="classpath:Quartz.xml" />-->
  
 
 </beans>

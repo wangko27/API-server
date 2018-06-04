@@ -77,9 +77,10 @@ public class DepositBusiness implements BaseService<Deposit, String> {
     @Override
     public int save(Deposit deposit) {
         AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
-        agentNode.setTotalDeposit(agentNode.getDeposit() + deposit.getAmount());
+        agentNode.setTotalDeposit(agentNode.getTotalDeposit() + deposit.getAmount());
         agentNode.setDepositCount(agentNode.getDepositCount() + 1);
         agentNodeMapper.updateByPrimaryKey(agentNode);
+        deposit.setAgentName(agentNode.getAgentName());
         return depositMapper.insert(deposit);
     }
 
@@ -99,7 +100,7 @@ public class DepositBusiness implements BaseService<Deposit, String> {
     public int delete(Deposit deposit) {
         deposit = depositMapper.selectByPrimaryKey(deposit.getTxHash());
         AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
-        agentNode.setTotalDeposit(agentNode.getDeposit() - deposit.getAmount());
+        agentNode.setTotalDeposit(agentNode.getTotalDeposit() - deposit.getAmount());
         agentNode.setDepositCount(agentNode.getDepositCount() - 1);
         agentNodeMapper.updateByPrimaryKey(agentNode);
         return depositMapper.deleteByPrimaryKey(deposit.getTxHash());

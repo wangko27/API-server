@@ -124,6 +124,9 @@ public class AgentNode extends TxData {
     }
 
     public Long getTotalDeposit() {
+        if (totalDeposit == null) {
+            totalDeposit = 0L;
+        }
         return totalDeposit;
     }
 
@@ -132,6 +135,9 @@ public class AgentNode extends TxData {
     }
 
     public Integer getDepositCount() {
+        if(depositCount == null) {
+            depositCount = 0;
+        }
         return depositCount;
     }
 

@@ -6,11 +6,13 @@ import io.nuls.api.entity.TransactionRelationKey;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Service
 public class TransactionRelationBusiness implements BaseService<TransactionRelationKey, TransactionRelationKey> {
 
     @Autowired
@@ -39,13 +41,16 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
     @Transactional
     public void saveTxRelation(Transaction tx) {
         Set<String> addressSet = new HashSet<>();
-        for (Input input : tx.getInputs()) {
-            addressSet.add(input.getAddress());
+        if (tx.getInputs() != null) {
+            for (Input input : tx.getInputs()) {
+                addressSet.add(input.getAddress());
+            }
         }
-        for (Utxo utxo : tx.getOutputs()) {
-            addressSet.add(utxo.getAddress());
+        if (tx.getOutputs() != null) {
+            for (Utxo utxo : tx.getOutputs()) {
+                addressSet.add(utxo.getAddress());
+            }
         }
-
         for (String address : addressSet) {
             TransactionRelationKey key = new TransactionRelationKey(address, tx.getHash());
             relationMapper.insert(key);
