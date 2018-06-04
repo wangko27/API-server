@@ -32,12 +32,6 @@ public enum Main {
 
     public void startUp() throws Exception {
         String serverUri;
-        if (StringUtils.isBlank(ip) || StringUtils.isBlank(port)) {
-            entry.start(Constant.DEFAULT_IP, Constant.DEFAULT_PORT, Constant.DEFAULT_URL);
-        } else {
-            entry.start(ip, Integer.parseInt(port), moduleUrl);
-        }
-
         if (StringUtils.isBlank(remoteIp) || StringUtils.isBlank(remotePort)) {
             serverUri = Constant.DEFAULT_REMOTE_SERVER;
         } else {
@@ -47,11 +41,18 @@ public enum Main {
                 serverUri = Constant.HTTP + remoteIp + Constant.COLON + Integer.parseInt(remotePort) + Constant.URI_SEPARATOR + remoteModuleUrl;
             }
         }
+        System.out.println("---------------" +  serverUri);
         RestFulUtils.getInstance().init(serverUri);
         if(StringUtils.isBlank(language)) {
             language = Constant.DEFAULT_LANGUAGE;
         }
         I18nUtils.setLanguage(language);
+
+        if (StringUtils.isBlank(ip) || StringUtils.isBlank(port)) {
+            entry.start(Constant.DEFAULT_IP, Constant.DEFAULT_PORT, Constant.DEFAULT_URL);
+        } else {
+            entry.start(ip, Integer.parseInt(port), moduleUrl);
+        }
     }
 
     public static void main(String[] args) throws Exception {
