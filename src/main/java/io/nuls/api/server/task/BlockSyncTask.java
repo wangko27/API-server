@@ -40,8 +40,9 @@ public class BlockSyncTask {
         boolean downloading = true;
         while (downloading) {
             //查询本地已保存的最新块
-            BlockHeader localBest = blockBusiness.getNewest();
+            BlockHeader localBest = null;
             try {
+                localBest = blockBusiness.getNewest();
                 long bestHeight = -1;
                 if (localBest != null) {
                     bestHeight = localBest.getHeight();
@@ -67,7 +68,6 @@ public class BlockSyncTask {
                     }
                 }
             } catch (NulsException ne) {
-                ne.printStackTrace();
                 Log.error(ne.getMsg(), ne);
                 if (localBest != null) {
                     try {
@@ -77,8 +77,8 @@ public class BlockSyncTask {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                if(e instanceof ConnectException) {
+                Log.error(e);
+                if (e instanceof ConnectException) {
                     downloading = false;
                     return;
                 }

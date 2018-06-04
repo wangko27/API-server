@@ -74,6 +74,13 @@ public interface Constant {
     String WHITE_SHEET_SPLIT = ",";
 
     /**
+     * utxo锁定时间分界值
+     * 小于该值表示按照高度锁定
+     * 大于该值表示按照时间锁定
+     */
+    long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
+    
+    /**
      * 空值占位符
      * Null placeholder.
      */

@@ -18,11 +18,12 @@
     <result column="credit_value" property="creditValue" jdbcType="DECIMAL" />
     <result column="total_packing_count" property="totalPackingCount" jdbcType="BIGINT" />
     <result column="last_reward_height" property="lastRewardHeight" jdbcType="BIGINT" />
+    <result column="delete_height" property="deleteHeight" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
     tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate, 
     agent_name, introduction, create_time, block_height, status, total_deposit, deposit_count, 
-    credit_value, total_packing_count, last_reward_height
+    credit_value, total_packing_count, last_reward_height,delete_height
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -40,13 +41,13 @@
       agent_name, introduction, create_time, 
       block_height, status, total_deposit, 
       deposit_count, credit_value, total_packing_count, 
-      last_reward_height)
+      last_reward_height, delete_height)
     values (#{txHash,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR}, #{packingAddress,jdbcType=VARCHAR}, 
       #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL}, 
       #{agentName,jdbcType=VARCHAR}, #{introduction,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
       #{blockHeight,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{totalDeposit,jdbcType=BIGINT}, 
       #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL}, #{totalPackingCount,jdbcType=BIGINT}, 
-      #{lastRewardHeight,jdbcType=BIGINT})
+      #{lastRewardHeight,jdbcType=BIGINT},#{deleteHeight,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
     insert into agent_node
@@ -99,6 +100,9 @@
       <if test="lastRewardHeight != null" >
         last_reward_height,
       </if>
+      <if test="deleteHeight != null" >
+        delete_height,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -148,6 +152,9 @@
       </if>
       <if test="lastRewardHeight != null" >
         #{lastRewardHeight,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHeight != null" >
+        #{deleteHeight,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -199,6 +206,9 @@
       <if test="lastRewardHeight != null" >
         last_reward_height = #{lastRewardHeight,jdbcType=BIGINT},
       </if>
+      <if test="deleteHeight != null" >
+        delete_height = #{deleteHeight,jdbcType=BIGINT},
+      </if>
     </set>
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
@@ -218,7 +228,8 @@
       deposit_count = #{depositCount,jdbcType=INTEGER},
       credit_value = #{creditValue,jdbcType=DECIMAL},
       total_packing_count = #{totalPackingCount,jdbcType=BIGINT},
-      last_reward_height = #{lastRewardHeight,jdbcType=BIGINT}
+      last_reward_height = #{lastRewardHeight,jdbcType=BIGINT},
+      delete_height = #{deleteHeight,jdbcType=BIGINT}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">

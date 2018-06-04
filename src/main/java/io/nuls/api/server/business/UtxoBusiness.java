@@ -30,6 +30,7 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
     /**
      * 获取列表
+     *
      * @param pageNumber
      * @param pageSize
      * @return
@@ -47,6 +48,7 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
     /**
      * 根据地址获取该地址全部的utxo
+     *
      * @param address
      * @return
      */
@@ -55,7 +57,7 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         Searchable searchable = new Searchable();
         if (StringUtils.validAddress(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
-        }else{
+        } else {
             return null;
         }
         return utxoMapper.selectList(searchable);
@@ -101,6 +103,19 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         return utxoMapper.selectByPrimaryKey(utxoKey);
     }
 
+
+    /**
+     * 根据主键删除
+     *
+     * @param txHash
+     * @return
+     */
+    @Transactional
+    public int delete(String txHash, Integer index) {
+        UtxoKey key = new UtxoKey(txHash, index);
+        return utxoMapper.deleteByPrimaryKey(key);
+    }
+
     /**
      * 根据每一条交易的输入，改变对应的utxo状态
      *
@@ -130,16 +145,21 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         }
     }
 
-    /**
-     * 根据主键删除
-     *
-     * @param txHash
-     * @return
-     */
     @Transactional
-    public int delete(String txHash, Integer index) {
-        UtxoKey key = new UtxoKey(txHash, index);
-        return utxoMapper.deleteByPrimaryKey(key);
+    public void rollBackByFrom(Transaction tx) {
+        //删除当前交易生成的utxo
+        Searchable searchable = new Searchable();
+        searchable.addCondition("tx_hash", SearchOperator.eq, tx.getHash());
+        utxoMapper.deleteBySearchable(searchable);
+
+        //回滚每条被花费的输出
+        UtxoKey utxoKey;
+        for(Input input : tx.getInputs()) {
+            utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
+            Utxo utxo = utxoMapper.selectByPrimaryKey(utxoKey);
+            utxo.setSpendTxHash(null);
+            utxoMapper.updateByPrimaryKey(utxo);
+        }
     }
 
     @Transactional
@@ -148,4 +168,5 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
             utxoMapper.insert(utxo);
         }
     }
+
 }
