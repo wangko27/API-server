@@ -56,24 +56,24 @@ public class AliasBusiness implements BaseService<Alias,String> {
     @Transactional
     @Override
     public int save(Alias alias){
-        if(null == alias){
-            return 2;
-        }
-        if(StringUtils.validAddress(alias.getAddress())){
-            return 3;
-        }
-        if(alias.getBlockHeight() < 0){
-            return 4;
-        }
-        if(StringUtils.isBlank(alias.getAlias())){
-            return 5;
-        }
-        if(getAliasByAddress(alias.getAddress())!=null){
-            return 6;
-        }
-        if(getByKey(alias.getAlias())!=null){
-            return 7;
-        }
+//        if(null == alias){
+//            return 2;
+//        }
+//        if(StringUtils.validAddress(alias.getAddress())){
+//            return 3;
+//        }
+//        if(alias.getBlockHeight() < 0){
+//            return 4;
+//        }
+//        if(StringUtils.isBlank(alias.getAlias())){
+//            return 5;
+//        }
+//        if(getAliasByAddress(alias.getAddress())!=null){
+//            return 6;
+//        }
+//        if(getByKey(alias.getAlias())!=null){
+//            return 7;
+//        }
         return aliasMapper.insert(alias);
     }
 
@@ -90,7 +90,7 @@ public class AliasBusiness implements BaseService<Alias,String> {
      */
     @Transactional
     @Override
-    public int deleteBykey(String id) {
+    public int deleteByKey(String id) {
         return aliasMapper.deleteByPrimaryKey(id);
     }
 

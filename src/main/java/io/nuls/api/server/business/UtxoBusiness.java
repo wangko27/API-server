@@ -24,7 +24,7 @@ import java.util.List;
  * Date:  2018/5/29 0029
  */
 @Service
-public class UtxoBusiness implements BaseService<Utxo,UtxoKey> {
+public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     @Autowired
     private UtxoMapper utxoMapper;
 
@@ -76,7 +76,7 @@ public class UtxoBusiness implements BaseService<Utxo,UtxoKey> {
 
     @Transactional
     @Override
-    public int deleteBykey(UtxoKey utxoKey) {
+    public int deleteByKey(UtxoKey utxoKey) {
         return utxoMapper.deleteByPrimaryKey(utxoKey);
     }
 
@@ -92,20 +92,24 @@ public class UtxoBusiness implements BaseService<Utxo,UtxoKey> {
      * @return
      */
     @Transactional
-    public void updateByFrom(Transaction tx) throws NulsException {
+    public void updateByFrom(Transaction tx) {
+        //coinBase交易，红黄牌交易没有inputs
+        if (tx.getInputs() == null) {
+            return;
+        }
+
         UtxoKey key = new UtxoKey();
         Utxo utxo;
         for (Input input : tx.getInputs()) {
             key.setTxHash(input.getFromHash());
             key.setTxIndex(input.getFromIndex());
             utxo = utxoMapper.selectByPrimaryKey(key);
-            if (utxo == null) {
-                throw new NulsException(ErrorCode.DB_DATA_ERROR);
-            }
+
             utxo.setSpendTxHash(tx.getHash());
 
             //在这里查询出utxo后，记得给每一个input赋值address
             input.setAddress(utxo.getAddress());
+            input.setValue(utxo.getAmount());
             utxoMapper.updateByPrimaryKey(utxo);
         }
     }

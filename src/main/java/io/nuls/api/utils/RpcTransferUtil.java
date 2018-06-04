@@ -41,7 +41,7 @@ public class RpcTransferUtil {
         String extend = (String) map.get("extend");
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("scriptSign", scriptSign);
-        dataMap.put("data", extend);
+        dataMap.put("extend", extend);
         blockHeader.setExtend(JSONUtils.obj2json(dataMap).getBytes());
         return blockHeader;
     }
@@ -53,6 +53,7 @@ public class RpcTransferUtil {
 
         Block block = new Block();
         header.setSize(blockModel.size());
+        block.setHeader(header);
 
         List<Transaction> txList = new ArrayList<>();
         for (int i = 0; i < blockModel.getTxs().size(); i++) {
@@ -119,7 +120,7 @@ public class RpcTransferUtil {
         List<Input> inputs = new ArrayList<>();
         byte[] hashByte, owner;
         int index;
-        if (txModel.getCoinData().getFrom() != null) {
+        if (txModel.getCoinData() != null && txModel.getCoinData().getFrom() != null) {
             for (Coin coin : txModel.getCoinData().getFrom()) {
                 owner = coin.getOwner();
                 hashByte = LedgerUtil.getTxHashBytes(owner);
@@ -133,9 +134,10 @@ public class RpcTransferUtil {
                 inputs.add(input);
             }
         }
+        tx.setInputs(inputs);
 
         List<Utxo> outputs = new ArrayList<>();
-        if (txModel.getCoinData().getTo() != null) {
+        if (txModel.getCoinData() != null && txModel.getCoinData().getTo() != null) {
             for (int i = 0; i < txModel.getCoinData().getTo().size(); i++) {
                 Coin coin = txModel.getCoinData().getTo().get(i);
                 Utxo utxo = new Utxo();
@@ -143,6 +145,7 @@ public class RpcTransferUtil {
                 utxo.setTxIndex(i);
                 utxo.setAmount(coin.getNa().getValue());
                 utxo.setAddress(AddressTool.getAddressBase58(coin.getOwner()));
+                utxo.setLockTime(Long.parseLong(String.valueOf(coin.getLockTime())));
                 outputs.add(utxo);
             }
         }
@@ -171,12 +174,13 @@ public class RpcTransferUtil {
         agent.setCommissionRate(new BigDecimal(model.getCommissionRate()));
         agent.setAgentName(new String(model.getAgentName(), Constant.DEFAULT_ENCODING));
         agent.setIntroduction(new String(model.getIntroduction(), Constant.DEFAULT_ENCODING));
-        agent.setCreateTime(model.getTime());
+//        agent.setCreateTime(model.getTime());
         agent.setBlockHeight(tx.getBlockHeight());
         agent.setStatus(model.getStatus());
         agent.setDepositCount(model.getMemberCount());
         agent.setCreditValue(new BigDecimal(model.getCreditVal()));
-
+        agent.setCreateTime(tx.getTime());
+        agent.setTxHash(tx.getHash().getDigestHex());
         return agent;
     }
 
@@ -187,11 +191,11 @@ public class RpcTransferUtil {
         deposit.setTxHash(tx.getHash().getDigestHex());
         deposit.setAmount(model.getDeposit().getValue());
         deposit.setAgentHash(model.getAgentHash().getDigestHex());
-        //deposit.setAgentName(model.geta);
         deposit.setAddress(AddressTool.getAddressBase58(model.getAddress()));
-        deposit.setCreateTime(model.getTime());
+//        deposit.setCreateTime(model.getTime());
+        deposit.setTxHash(tx.getHash().getDigestHex());
         deposit.setBlockHeight(tx.getBlockHeight());
-
+        deposit.setCreateTime(tx.getTime());
         return deposit;
     }
 

@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.entity.Block;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
@@ -13,13 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 区块头处理器，包括区块的验证，回滚，查询与存储等
  */
 @Service
-public class BlockBusiness implements BaseService<BlockHeader,String> {
+public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     @Autowired
     private BlockHeaderMapper blockHeaderMapper;
@@ -85,6 +88,7 @@ public class BlockBusiness implements BaseService<BlockHeader,String> {
 
     /**
      * 根据最新传入的区块信息，验证当前区块和前一区块的连续性
+     *
      * @param blockHeader
      * @return
      */
