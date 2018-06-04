@@ -121,4 +121,20 @@
       block_height = #{blockHeight,jdbcType=BIGINT}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from deposit
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from deposit
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

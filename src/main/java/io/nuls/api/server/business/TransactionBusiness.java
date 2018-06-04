@@ -44,10 +44,8 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     private AddressRewardDetailBusiness rewardDetailBusiness;
 
 
-
     /**
      * 交易列表
-     *
      * @param height 所属的区块
      * @param type   交易类型
      * @return
@@ -82,7 +80,10 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     public PageInfo<Transaction> getListByAddress(String address,int type, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        //todo
+        searchable.addCondition("address", SearchOperator.eq, address);
+        if(type > 0){
+            searchable.addCondition("type", SearchOperator.eq, type);
+        }
         PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
         return page;
     }

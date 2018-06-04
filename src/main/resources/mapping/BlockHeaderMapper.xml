@@ -242,7 +242,7 @@
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
-    from block_header
-    where height = (SELECT height from block_header ORDER BY height desc limit 1)
+    from block_header ORDER BY height desc limit 1
+    where height = (SELECT MAX(height) from block_header)
   </select>
 </mapper>

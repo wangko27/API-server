@@ -184,4 +184,8 @@
     from transaction
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+  <select id="selectListByAddress" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    SELECT t2.* FROM `tx_account_relation` t1 LEFT JOIN `transaction` t2 ON t1.tx_hash = t2.hash
+      <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

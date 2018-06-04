@@ -30,7 +30,6 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
     /**
      * 获取列表
-     *
      * @param pageNumber
      * @param pageSize
      * @return
@@ -43,6 +42,23 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         }
         PageInfo<Utxo> page = new PageInfo<>(utxoMapper.selectList(searchable));
         return page;
+    }
+
+
+    /**
+     * 根据地址获取该地址全部的utxo
+     * @param address
+     * @return
+     */
+    public List<Utxo> getList(String address) {
+
+        Searchable searchable = new Searchable();
+        if (StringUtils.validAddress(address)) {
+            searchable.addCondition("address", SearchOperator.eq, address);
+        }else{
+            return null;
+        }
+        return utxoMapper.selectList(searchable);
     }
 
     /**
