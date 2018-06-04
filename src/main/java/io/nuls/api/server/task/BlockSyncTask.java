@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ public class BlockSyncTask {
      * 同步区块
      */
     public void execute() {
+        System.out.println("------------excute");
         boolean downloading = true;
         while (downloading) {
             //查询本地已保存的最新块
@@ -65,6 +67,7 @@ public class BlockSyncTask {
                     }
                 }
             } catch (NulsException ne) {
+                ne.printStackTrace();
                 Log.error(ne.getMsg(), ne);
                 if (localBest != null) {
                     try {
@@ -74,7 +77,11 @@ public class BlockSyncTask {
                     }
                 }
             } catch (Exception e) {
-                Log.error(e);
+                e.printStackTrace();
+                if(e instanceof ConnectException) {
+                    downloading = false;
+                    return;
+                }
                 if (localBest != null) {
                     try {
                         syncDataBusiness.rollback(localBest);

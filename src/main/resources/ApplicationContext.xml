@@ -88,8 +88,5 @@
 		<property name="annotationClass" value="io.nuls.api.server.dao.mapper.MyBatisMapper"/>
     </bean>
 
-
-    <!--<import resource="classpath:Quartz.xml" />-->
- 
-
+    <import resource="classpath:Quartz.xml" />
 </beans>
