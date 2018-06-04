@@ -122,7 +122,9 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
 
     @Transactional
     public void rollback(Transaction tx) {
-
+        //回滚未花费输出
+        utxoBusiness.rollBackByFrom(tx);
+        //如果交易是
     }
 
     /**

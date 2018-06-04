@@ -9,9 +9,10 @@
     <result column="address" property="address" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
     <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
+    <result column="delete_height" property="deleteHeight" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    tx_hash, amount, agent_hash, agent_name, address, create_time, block_height
+    tx_hash, amount, agent_hash, agent_name, address, create_time, block_height, delete_height
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -33,10 +34,10 @@
   <insert id="insert" parameterType="io.nuls.api.entity.Deposit" >
     insert into deposit (tx_hash, amount, agent_hash, 
       agent_name, address, create_time, 
-      block_height)
+      block_height, delete_height)
     values (#{txHash,jdbcType=VARCHAR}, #{amount,jdbcType=BIGINT}, #{agentHash,jdbcType=VARCHAR}, 
       #{agentName,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
-      #{blockHeight,jdbcType=BIGINT})
+      #{blockHeight,jdbcType=BIGINT}, #{deleteHeight,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Deposit" >
     insert into deposit
@@ -62,6 +63,9 @@
       <if test="blockHeight != null" >
         block_height,
       </if>
+      <if test="deleteHeight != null" >
+        block_height,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -84,6 +88,9 @@
       </if>
       <if test="blockHeight != null" >
         #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHeight != null" >
+        #{deleteHeight,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -108,6 +115,9 @@
       <if test="blockHeight != null" >
         block_height = #{blockHeight,jdbcType=BIGINT},
       </if>
+      <if test="deleteHeight != null" >
+        delete_height = #{deleteHeight,jdbcType=BIGINT},
+      </if>
     </set>
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
@@ -118,7 +128,8 @@
       agent_name = #{agentName,jdbcType=VARCHAR},
       address = #{address,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=BIGINT},
-      block_height = #{blockHeight,jdbcType=BIGINT}
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      delete_height = #{deleteHeight,jdbcType=BIGINT}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">

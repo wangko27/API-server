@@ -15,6 +15,8 @@ public class Deposit extends TxData {
 
     private Long blockHeight;
 
+    private Long deleteHeight;
+
     public String getTxHash() {
         return txHash;
     }
@@ -69,5 +71,13 @@ public class Deposit extends TxData {
 
     public void setBlockHeight(Long blockHeight) {
         this.blockHeight = blockHeight;
+    }
+
+    public Long getDeleteHeight() {
+        return deleteHeight;
+    }
+
+    public void setDeleteHeight(Long deleteHeight) {
+        this.deleteHeight = deleteHeight;
     }
 }
