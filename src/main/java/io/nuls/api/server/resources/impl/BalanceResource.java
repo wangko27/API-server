@@ -6,10 +6,7 @@ import io.nuls.api.server.business.BalanceBusiness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -25,24 +22,12 @@ public class BalanceResource {
     private BalanceBusiness balanceBusiness;
 
     @GET
-    @Path("/list")
+    @Path("/get/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address){
+    public RpcClientResult getBalance(@PathParam("address") String address){
         RpcClientResult result = null;
-        if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
-            return result;
-        }
-        if (pageNumber == 0) {
-            pageNumber = 1;
-        }
-        if (pageSize == 0) {
-            pageSize = 20;
-        } else if (pageSize > 100) {
-            pageSize = 100;
-        }
         result = RpcClientResult.getSuccess();
-        result.setData(balanceBusiness.getList(address,pageNumber,pageSize));
+        result.setData(balanceBusiness.getBalance(address));
         return result;
     }
 }

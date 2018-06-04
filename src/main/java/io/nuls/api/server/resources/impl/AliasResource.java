@@ -28,9 +28,10 @@ public class AliasResource {
     @Path("/get/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getAlias(@PathParam("address") String address){
-        RpcClientResult result;
+        RpcClientResult result = null;
         if (!StringUtils.validAddress(address)) {
-            return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            return result;
         }
         try {
             result = RpcClientResult.getSuccess();

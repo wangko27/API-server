@@ -42,7 +42,7 @@ public class AddressRewardDetailResource {
         } else if (pageSize > 100) {
             pageSize = 100;
         }
-        if(StringUtils.validAddress(address)){
+        if(!StringUtils.validAddress(address)){
             result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
             return result;
         }

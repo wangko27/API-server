@@ -8,6 +8,7 @@ import io.nuls.api.server.dao.mapper.AgentNodeMapper;
 import io.nuls.api.server.dao.mapper.DepositMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +32,15 @@ public class DepositBusiness implements BaseService<Deposit, String> {
      * @param address 账户地址
      * @return
      */
-    public PageInfo<Deposit> getList(String address, int pageNumber, int pageSize) {
+    public PageInfo<Deposit> getList(String address, String agentHash,int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
+        if(StringUtils.isNotBlank(agentHash)){
+            if(StringUtils.validHash(agentHash)){
+                searchable.addCondition("agent_hash", SearchOperator.eq, address);
+            }
+        }
         PageInfo<Deposit> page = new PageInfo<>(depositMapper.selectList(searchable));
         return page;
     }

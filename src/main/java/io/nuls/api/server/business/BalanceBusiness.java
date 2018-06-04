@@ -26,18 +26,19 @@ public class BalanceBusiness implements BaseService<Balance,Long> {
     private BalanceMapper balanceMapper;
 
     /**
-     * 查询账户资产列表
+     * 查询账户资产
      * @param address 用户账户
      * @return
      */
-    public PageInfo<Balance> getList(String address, int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
+    public Balance getBalance(String address) {
+
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(address)){
+        if(StringUtils.validAddress(address)){
             searchable.addCondition("address", SearchOperator.eq, address);
+            return balanceMapper.selectBySearchable(searchable);
         }
-        PageInfo<Balance> page = new PageInfo<>(balanceMapper.selectList(searchable));
-        return page;
+        return null;
+
     }
 
 
@@ -81,7 +82,7 @@ public class BalanceBusiness implements BaseService<Balance,Long> {
         if(balance.getBlockHeight() < 0){
             return 3;
         }
-        if(StringUtils.validAddress(balance.getAddress())){
+        if(!StringUtils.validAddress(balance.getAddress())){
             return 4;
         }
         if(balance.getLocked() < 0){

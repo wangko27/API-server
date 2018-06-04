@@ -7,6 +7,7 @@ import io.nuls.api.entity.TxData;
 import io.nuls.api.server.dao.mapper.PunishLogMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.StringUtils;
 import org.glassfish.grizzly.compression.lzma.impl.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class PunishLogBusiness implements BaseService<PunishLog, Long> {
     public PageInfo<PunishLog> getList(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
+        if(!StringUtils.validAddress(address)){
+            return null;
+        }
         searchable.addCondition("address", SearchOperator.eq, address);
         PageInfo<PunishLog> page = new PageInfo<>(punishLogMapper.selectList(searchable));
         return page;

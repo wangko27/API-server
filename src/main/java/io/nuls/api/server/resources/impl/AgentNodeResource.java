@@ -39,7 +39,7 @@ public class AgentNodeResource {
     }
 
     @GET
-    @Path("/agent/list")
+    @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("agentName") String agentName){
         RpcClientResult result = null;
@@ -61,11 +61,11 @@ public class AgentNodeResource {
     }
 
     @GET
-    @Path("/agent/{agentAddress}")
+    @Path("/list/agentAddress/{agentAddress}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getConsensusDetail(@PathParam("agentAddress") String agentAddress){
         RpcClientResult result = null;
-        if(StringUtils.validAddress(agentAddress)){
+        if(!StringUtils.validAddress(agentAddress)){
             result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
             return result;
         }

@@ -122,7 +122,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
 
     @Transactional
     public void rollback(Transaction tx) {
-
+        //todo
     }
 
     /**
