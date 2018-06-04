@@ -40,4 +40,13 @@ public class Utxo extends UtxoKey {
     public void setSpendTxHash(String spendTxHash) {
         this.spendTxHash = spendTxHash == null ? null : spendTxHash.trim();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        Utxo utxo = (Utxo) obj;
+        if (this.getTxHash().equals(utxo.getTxHash()) && this.getTxIndex() == utxo.getTxIndex()) {
+            return true;
+        }
+        return false;
+    }
 }
