@@ -108,7 +108,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
             depositBusiness.save((Deposit) tx.getTxData());
         } else if (tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
-            depositBusiness.delete((Deposit) tx.getTxData());
+            depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getBlockHeight());
         } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             AgentNode agentNode = (AgentNode) tx.getTxData();
             agentNodeBusiness.deleteByKey(agentNode.getTxHash());
