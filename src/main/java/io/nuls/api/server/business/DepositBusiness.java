@@ -103,13 +103,14 @@ public class DepositBusiness implements BaseService<Deposit, String> {
     }
 
     @Transactional
-    public int delete(Deposit deposit) {
+    public int cancelDeposit(Deposit deposit, Long deleteHeight) {
         deposit = depositMapper.selectByPrimaryKey(deposit.getTxHash());
         AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
         agentNode.setTotalDeposit(agentNode.getTotalDeposit() - deposit.getAmount());
         agentNode.setDepositCount(agentNode.getDepositCount() - 1);
         agentNodeMapper.updateByPrimaryKey(agentNode);
-        return depositMapper.deleteByPrimaryKey(deposit.getTxHash());
+        deposit.setDeleteHeight(deleteHeight);
+        return depositMapper.updateByPrimaryKey(deposit);
     }
 
     @Override

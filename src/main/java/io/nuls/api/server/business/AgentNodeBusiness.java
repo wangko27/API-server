@@ -98,6 +98,11 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     }
 
 
+    public void stopAgent(AgentNode agentNode) {
+
+    }
+
+
     /**
      * 根据id查询
      *
