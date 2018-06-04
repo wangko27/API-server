@@ -42,7 +42,8 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     private PunishLogBusiness punishLogBusiness;
     @Autowired
     private AddressRewardDetailBusiness rewardDetailBusiness;
-
+    @Autowired
+    private UtxoBusiness utxoBusiness;
 
 
     /**
