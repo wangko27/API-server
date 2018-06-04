@@ -3,7 +3,9 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.Block;
+import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
@@ -53,17 +55,20 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     /**
      * 获取块列表
-     *
-     * @param address    共识地址
+     * @param address 共识地址
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<BlockHeader> getList(String address, int pageNumber, int pageSize) {
+    public PageInfo<BlockHeader> getList(String address,int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if (StringUtils.isNotBlank(address)) {
-            searchable.addCondition("consensus_address", SearchOperator.eq, address);
+        if(StringUtils.isNotBlank(address)){
+            if(StringUtils.validAddress(address)){
+                searchable.addCondition("consensus_address", SearchOperator.eq, address);
+            }else{
+                return null;
+            }
         }
         PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderMapper.selectList(searchable));
         return page;

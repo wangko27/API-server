@@ -168,4 +168,24 @@
       amount = #{amount,jdbcType=BIGINT}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from transaction
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from transaction
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectListByAddress" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    SELECT t2.* FROM `tx_account_relation` t1 LEFT JOIN `transaction` t2 ON t1.tx_hash = t2.hash
+      <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>
