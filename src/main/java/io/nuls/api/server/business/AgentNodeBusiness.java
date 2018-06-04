@@ -93,13 +93,16 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      */
     @Transactional
     public int deleteByKey(String id) {
-        depositMapper.deleteByAgentHash(id);
+
         return agentNodeMapper.deleteByPrimaryKey(id);
     }
 
+    @Transactional
+    public void stopAgent(AgentNode agentNode, Long deleteHeight) {
+        agentNode = agentNodeMapper.selectByPrimaryKey(agentNode.getTxHash());
+        agentNode.setDeleteHeight(deleteHeight);
 
-    public void stopAgent(AgentNode agentNode) {
-
+        depositMapper.deleteByAgentHash(agentNode.getTxHash(), deleteHeight);
     }
 
 

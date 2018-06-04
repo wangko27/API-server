@@ -26,10 +26,11 @@
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </delete>
 
-  <delete id="deleteByAgentHash" parameterType="java.lang.String">
-    delete from deposit
+  <update id="deleteByAgentHash">
+    update deposit
+    set delete_height = #{deleteHeight,jdbcType=BIGINT}
     where agent_hash = #{agentHash,jdbcType=VARCHAR}
-  </delete>
+  </update>
 
   <insert id="insert" parameterType="io.nuls.api.entity.Deposit" >
     insert into deposit (tx_hash, amount, agent_hash, 

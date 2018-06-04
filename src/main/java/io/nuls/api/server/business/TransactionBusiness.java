@@ -47,6 +47,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
 
     /**
      * 交易列表
+     *
      * @param height 所属的区块
      * @param type   交易类型
      * @return
@@ -78,11 +79,11 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
      * @param address 地址
      * @return
      */
-    public PageInfo<Transaction> getListByAddress(String address,int type, int pageNumber, int pageSize) {
+    public PageInfo<Transaction> getListByAddress(String address, int type, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
-        if(type > 0){
+        if (type > 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
         PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
@@ -111,7 +112,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
             depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getBlockHeight());
         } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             AgentNode agentNode = (AgentNode) tx.getTxData();
-            agentNodeBusiness.deleteByKey(agentNode.getTxHash());
+            agentNodeBusiness.stopAgent(agentNode, tx.getBlockHeight());
         } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
             punishLogBusiness.save((PunishLog) tx.getTxData());
         } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
