@@ -70,7 +70,7 @@ public class AgentNodeResource {
             return result;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(agentNodeBusiness.getAgentDetail(agentAddress));
+        result.setData(agentNodeBusiness.getAgentByAddress(agentAddress));
         return result;
     }
 }

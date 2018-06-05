@@ -23,6 +23,8 @@
  */
 package io.nuls.api.constant;
 
+import io.nuls.api.entity.Na;
+
 /**
  *
  * @author Niels
@@ -85,4 +87,10 @@ public interface Constant {
      * Null placeholder.
      */
     byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
+
+    Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNuls(200000);
+    Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNuls(500000);
+    Na AGENT_DEPOSIT_LOWER_LIMIT = Na.parseNuls(20000);
+    Na AGENT_DEPOSIT_UPPER_LIMIT = Na.parseNuls(200000);
+    Na ENTRUSTER_DEPOSIT_LOWER_LIMIT = Na.parseNuls(2000);
 }

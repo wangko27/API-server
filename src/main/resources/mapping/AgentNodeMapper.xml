@@ -8,8 +8,6 @@
     <result column="reward_address" property="rewardAddress" jdbcType="VARCHAR" />
     <result column="deposit" property="deposit" jdbcType="BIGINT" />
     <result column="commission_rate" property="commissionRate" jdbcType="DECIMAL" />
-    <result column="agent_name" property="agentName" jdbcType="VARCHAR" />
-    <result column="introduction" property="introduction" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
     <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
     <result column="status" property="status" jdbcType="INTEGER" />
@@ -25,7 +23,7 @@
   </resultMap>
   <sql id="Base_Column_List" >
     tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate, 
-    agent_name, introduction, create_time, block_height, status, total_deposit, deposit_count, 
+    create_time, block_height, status, total_deposit, deposit_count,
     credit_value, total_packing_count, last_reward_height,delete_hash
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
@@ -40,14 +38,12 @@
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.AgentNode" >
     insert into agent_node (tx_hash, agent_address, packing_address, 
-      reward_address, deposit, commission_rate, 
-      agent_name, introduction, create_time, 
+      reward_address, deposit, commission_rate,create_time,
       block_height, status, total_deposit, 
       deposit_count, credit_value, total_packing_count, 
       last_reward_height, delete_hash)
     values (#{txHash,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR}, #{packingAddress,jdbcType=VARCHAR}, 
-      #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL}, 
-      #{agentName,jdbcType=VARCHAR}, #{introduction,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
+      #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL}, #{createTime,jdbcType=BIGINT},
       #{blockHeight,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{totalDeposit,jdbcType=BIGINT}, 
       #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL}, #{totalPackingCount,jdbcType=BIGINT}, 
       #{lastRewardHeight,jdbcType=BIGINT},#{deleteHash,jdbcType=VARCHAR})
@@ -72,12 +68,6 @@
       </if>
       <if test="commissionRate != null" >
         commission_rate,
-      </if>
-      <if test="agentName != null" >
-        agent_name,
-      </if>
-      <if test="introduction != null" >
-        introduction,
       </if>
       <if test="createTime != null" >
         create_time,
@@ -126,12 +116,6 @@
       <if test="commissionRate != null" >
         #{commissionRate,jdbcType=DECIMAL},
       </if>
-      <if test="agentName != null" >
-        #{agentName,jdbcType=VARCHAR},
-      </if>
-      <if test="introduction != null" >
-        #{introduction,jdbcType=VARCHAR},
-      </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=BIGINT},
       </if>
@@ -179,12 +163,6 @@
       <if test="commissionRate != null" >
         commission_rate = #{commissionRate,jdbcType=DECIMAL},
       </if>
-      <if test="agentName != null" >
-        agent_name = #{agentName,jdbcType=VARCHAR},
-      </if>
-      <if test="introduction != null" >
-        introduction = #{introduction,jdbcType=VARCHAR},
-      </if>
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=BIGINT},
       </if>
@@ -222,8 +200,6 @@
       reward_address = #{rewardAddress,jdbcType=VARCHAR},
       deposit = #{deposit,jdbcType=BIGINT},
       commission_rate = #{commissionRate,jdbcType=DECIMAL},
-      agent_name = #{agentName,jdbcType=VARCHAR},
-      introduction = #{introduction,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=BIGINT},
       block_height = #{blockHeight,jdbcType=BIGINT},
       status = #{status,jdbcType=INTEGER},
