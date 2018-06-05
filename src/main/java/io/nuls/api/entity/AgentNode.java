@@ -15,10 +15,6 @@ public class AgentNode extends TxData {
 
     private BigDecimal commissionRate;
 
-    private String agentName;
-
-    private String introduction;
-
     private Long createTime;
 
     private Long blockHeight;
@@ -83,22 +79,6 @@ public class AgentNode extends TxData {
 
     public void setCommissionRate(BigDecimal commissionRate) {
         this.commissionRate = commissionRate;
-    }
-
-    public String getAgentName() {
-        return agentName;
-    }
-
-    public void setAgentName(String agentName) {
-        this.agentName = agentName == null ? null : agentName.trim();
-    }
-
-    public String getIntroduction() {
-        return introduction;
-    }
-
-    public void setIntroduction(String introduction) {
-        this.introduction = introduction == null ? null : introduction.trim();
     }
 
     public Long getCreateTime() {

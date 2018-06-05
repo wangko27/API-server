@@ -172,9 +172,6 @@ public class RpcTransferUtil {
         agent.setRewardAddress(Base58.encode(model.getRewardAddress()));
         agent.setDeposit(model.getDeposit().getValue());
         agent.setCommissionRate(new BigDecimal(model.getCommissionRate()));
-        agent.setAgentName(new String(model.getAgentName(), Constant.DEFAULT_ENCODING));
-        agent.setIntroduction(new String(model.getIntroduction(), Constant.DEFAULT_ENCODING));
-//        agent.setCreateTime(model.getTime());
         agent.setBlockHeight(tx.getBlockHeight());
         agent.setStatus(model.getStatus());
         agent.setDepositCount(model.getMemberCount());
@@ -192,7 +189,6 @@ public class RpcTransferUtil {
         deposit.setAmount(model.getDeposit().getValue());
         deposit.setAgentHash(model.getAgentHash().getDigestHex());
         deposit.setAddress(Base58.encode(model.getAddress()));
-//        deposit.setCreateTime(model.getTime());
         deposit.setTxHash(tx.getHash().getDigestHex());
         deposit.setBlockHeight(tx.getBlockHeight());
         deposit.setCreateTime(tx.getTime());
