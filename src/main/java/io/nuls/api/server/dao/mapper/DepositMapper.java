@@ -7,5 +7,5 @@ import org.apache.ibatis.annotations.Param;
 @MyBatisMapper
 public interface DepositMapper extends BaseMapper<Deposit, String> {
 
-    void deleteByAgentHash(@Param("agentHash") String agentHash, @Param("deleteHeight") Long deleteHeight);
+    void deleteByAgentHash(@Param("agentHash") String agentHash, @Param("deleteHash") String deleteHash);
 }

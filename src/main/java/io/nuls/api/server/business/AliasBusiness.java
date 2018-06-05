@@ -19,13 +19,14 @@ import java.util.List;
  * Date:  2018/5/29 0029
  */
 @Service
-public class AliasBusiness implements BaseService<Alias,String> {
+public class AliasBusiness implements BaseService<Alias, String> {
 
     @Autowired
     private AliasMapper aliasMapper;
 
     /**
      * 根据地址获取别名
+     *
      * @param address 账户地址
      * @return
      */
@@ -35,27 +36,15 @@ public class AliasBusiness implements BaseService<Alias,String> {
         return aliasMapper.selectBySearchable(searchable);
     }
 
-
-    /**
-     * 删除别名，根据高度删除
-     * @param height
-     * @return
-     */
-    @Transactional
-    public int deleteAliasByHeight(Long height){
-        Searchable searchable = new Searchable();
-        searchable.addCondition("block_height", SearchOperator.eq, height);
-        return aliasMapper.deleteBySearchable(searchable);
-    }
-
     /**
      * 验证该地址是否已经设置别名，并且别名是否没有重复然后设置别名
+     *
      * @param alias 实体
      * @return 0，设置失败，1设置成功，2实体为空,，3地址格式验证失败，4高度错误,5别名为空，6账户地址已经设置过别名了，7别名已经被设置过了
      */
     @Transactional
     @Override
-    public int save(Alias alias){
+    public int save(Alias alias) {
 //        if(null == alias){
 //            return 2;
 //        }
@@ -85,6 +74,7 @@ public class AliasBusiness implements BaseService<Alias,String> {
 
     /**
      * 删除别名，根据账户地址删除
+     *
      * @param id 账户地址
      * @return
      */
@@ -96,11 +86,26 @@ public class AliasBusiness implements BaseService<Alias,String> {
 
     /**
      * 根据主键获取别名
+     *
      * @param id
      * @return
      */
     @Override
     public Alias getByKey(String id) {
         return aliasMapper.selectByPrimaryKey(id);
+    }
+
+
+    /**
+     * 删除别名，根据高度删除
+     *
+     * @param height
+     * @return
+     */
+    @Transactional
+    public void deleteByHeight(long height) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("block_height", SearchOperator.eq, height);
+        aliasMapper.deleteBySearchable(searchable);
     }
 }

@@ -72,7 +72,7 @@ public class BlockSyncTask {
                 if (localBest != null) {
                     try {
                         syncDataBusiness.rollback(localBest);
-                    } catch (NulsException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -85,7 +85,7 @@ public class BlockSyncTask {
                 if (localBest != null) {
                     try {
                         syncDataBusiness.rollback(localBest);
-                    } catch (NulsException ne) {
+                    } catch (Exception ne) {
                         ne.printStackTrace();
                     }
                 }

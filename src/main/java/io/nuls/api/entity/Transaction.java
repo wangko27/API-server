@@ -1,6 +1,10 @@
 package io.nuls.api.entity;
 
+import io.nuls.api.utils.JSONUtils;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Transaction {
 
@@ -152,5 +156,27 @@ public class Transaction {
 
     public void setTxDataList(List<TxData> txDataList) {
         this.txDataList = txDataList;
+    }
+
+    public void transferExtend() throws Exception {
+        String extend = new String(this.getExtend());
+        Map dataMap = JSONUtils.json2map(extend);
+        this.setScriptSign((String) dataMap.get("scriptSign"));
+        List<Map> mapList = (List<Map>) dataMap.get("inputs");
+
+        List<Input> inputs = new ArrayList<>();
+        for (Map map : mapList) {
+            Input input = new Input();
+            input.setFromHash((String) map.get("fromHash"));
+            input.setFromIndex((Integer) map.get("fromIndex"));
+            try {
+                input.setValue((Long) map.get("value"));
+            } catch (Exception e) {
+                input.setValue(Long.parseLong((String) map.get("value")));
+            }
+            input.setAddress((String) map.get("address"));
+            inputs.add(input);
+        }
+        this.inputs = inputs;
     }
 }

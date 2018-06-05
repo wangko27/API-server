@@ -116,6 +116,13 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         return utxoMapper.deleteByPrimaryKey(key);
     }
 
+    @Transactional
+    public void deleteByTxHash(String txHash) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
+        utxoMapper.deleteBySearchable(searchable);
+    }
+
     /**
      * 根据每一条交易的输入，改变对应的utxo状态
      *
@@ -139,6 +146,7 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
             utxo.setSpendTxHash(tx.getHash());
 
             //在这里查询出utxo后，记得给每一个input赋值address
+
             input.setAddress(utxo.getAddress());
             input.setValue(utxo.getAmount());
             utxoMapper.updateByPrimaryKey(utxo);
@@ -154,7 +162,7 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
         //回滚每条被花费的输出
         UtxoKey utxoKey;
-        for(Input input : tx.getInputs()) {
+        for (Input input : tx.getInputs()) {
             utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
             Utxo utxo = utxoMapper.selectByPrimaryKey(utxoKey);
             utxo.setSpendTxHash(null);

@@ -98,11 +98,11 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     }
 
     @Transactional
-    public void stopAgent(AgentNode agentNode, Long deleteHeight) {
+    public void stopAgent(AgentNode agentNode, String txHash) {
         agentNode = agentNodeMapper.selectByPrimaryKey(agentNode.getTxHash());
-        agentNode.setDeleteHeight(deleteHeight);
-
-        depositMapper.deleteByAgentHash(agentNode.getTxHash(), deleteHeight);
+        agentNode.setDeleteHash(txHash);
+        agentNodeMapper.updateByPrimaryKey(agentNode);
+        depositMapper.deleteByAgentHash(agentNode.getTxHash(), txHash);
     }
 
 
