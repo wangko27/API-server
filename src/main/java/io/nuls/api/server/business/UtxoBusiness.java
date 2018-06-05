@@ -48,17 +48,22 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
     /**
      * 根据地址获取该地址全部的utxo
-     *
      * @param address
+     * @param type 1查询全部 2查询未花费 3查询已花费
      * @return
      */
-    public List<Utxo> getList(String address) {
+    public List<Utxo> getList(String address,int type) {
 
         Searchable searchable = new Searchable();
         if (StringUtils.validAddress(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
-        } else {
-            return null;
+        }
+        if(type > 0){
+            if(type == 2){
+                searchable.addCondition("spend_tx_hash", SearchOperator.isNull,null);
+            }else if(type == 3){
+                searchable.addCondition("spend_tx_hash", SearchOperator.isNotNull,null);
+            }
         }
         return utxoMapper.selectList(searchable);
     }

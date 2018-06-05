@@ -25,9 +25,9 @@ public class DepositResource {
     private DepositBusiness depositBusiness;
 
     @GET
-    @Path("/agent/list")
+    @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getDepositList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("address") String address){
+    public RpcClientResult getDepositList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("address") String address, @QueryParam("agentHash") String agentHash){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -41,12 +41,12 @@ public class DepositResource {
         } else if (pageSize > 100) {
             pageSize = 100;
         }
-        if(StringUtils.validAddress(address)){
+        if(!StringUtils.validAddress(address)){
             result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
             return result;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(depositBusiness.getList(address,pageNumber,pageSize));
+        result.setData(depositBusiness.getList(address,agentHash,pageNumber,pageSize));
         return result;
     }
 }

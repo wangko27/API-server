@@ -4,14 +4,19 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.entity.AgentNode;
+import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.dao.mapper.AgentNodeMapper;
 import io.nuls.api.server.dao.mapper.DepositMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Description: 节点
@@ -32,14 +37,22 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @param agentName 节点名称 (搜索用)
      * @return
      */
-    public PageInfo<AgentNode> getList(String agentName, int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
+    public RpcClientResult getList(String agentName, int pageNumber, int pageSize) {
+        /*PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (StringUtils.isNotBlank(agentName)) {
             searchable.addCondition("agent_name", SearchOperator.like, agentName);
         }
         PageInfo<AgentNode> page = new PageInfo<>(agentNodeMapper.selectList(searchable));
-        return page;
+        return page;*/
+        ///consensus/agent/list
+        Map<String,String> param = new HashMap<>();
+        if (StringUtils.isNotBlank(agentName)) {
+            param.put("keyword", agentName);
+        }
+        param.put("pageNumber", pageNumber+"");
+        param.put("pageSize", pageSize+"");
+        return RestFulUtils.getInstance().get("/consensus/agent/list", param);
     }
 
     /**

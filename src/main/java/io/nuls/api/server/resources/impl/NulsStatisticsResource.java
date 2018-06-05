@@ -34,4 +34,38 @@ public class NulsStatisticsResource {
         result.setData(data);
         return result;
     }
+
+    @GET
+    @Path("/balancelist")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult balancelist(){
+        //todo
+        RpcClientResult result = null;
+        List<HashMap<String,String>> data = new ArrayList<>();
+        HashMap<String,String> attr = new HashMap<String,String>();
+        attr.put("id","50");
+        attr.put("date","20180114");
+        attr.put("txCount","12548");
+        data.add(attr);
+        result = RpcClientResult.getSuccess();
+        result.setData(data);
+        return result;
+    }
+
+    @GET
+    @Path("/minedlist")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult minedlist(){
+        //todo
+        RpcClientResult result = null;
+        List<HashMap<String,String>> data = new ArrayList<>();
+        HashMap<String,String> attr = new HashMap<String,String>();
+        attr.put("id","50");
+        attr.put("date","20180114");
+        attr.put("txCount","12548");
+        data.add(attr);
+        result = RpcClientResult.getSuccess();
+        result.setData(data);
+        return result;
+    }
 }
