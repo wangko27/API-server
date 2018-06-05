@@ -1,13 +1,13 @@
 package io.nuls.api.server.business;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import io.nuls.api.entity.AddressRewardDetail;
-import io.nuls.api.entity.Balance;
+import io.nuls.api.constant.Constant;
+import io.nuls.api.context.UtxoContext;
+import io.nuls.api.entity.*;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.BalanceMapper;
-import io.nuls.api.server.dao.util.SearchOperator;
-import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.resources.impl.BlockResource;
 import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,9 +21,13 @@ import java.util.List;
  */
 @Service
 public class BalanceBusiness implements BaseService<Balance,Long> {
+    @Autowired
+    private BlockResource blockResource;
 
     @Autowired
     private BalanceMapper balanceMapper;
+
+
 
     /**
      * 查询账户资产
@@ -31,14 +35,48 @@ public class BalanceBusiness implements BaseService<Balance,Long> {
      * @return
      */
     public Balance getBalance(String address) {
+        RpcClientResult rpcClientResult = blockResource.newest();
+        Long height = 0L;
+        if(rpcClientResult.isSuccess()){
+            BlockHeader blockHeader = (BlockHeader)rpcClientResult.getData();
+            height = blockHeader.getHeight();
+        }
 
-        Searchable searchable = new Searchable();
+        /*Searchable searchable = new Searchable();
         if(StringUtils.validAddress(address)){
             searchable.addCondition("address", SearchOperator.eq, address);
             return balanceMapper.selectBySearchable(searchable);
         }
-        return null;
-
+        return null;*/
+        Balance balance = new Balance();
+        Long usable = 0L;
+        Long locked = 0L;
+        if(StringUtils.validAddress(address)){
+            List<Utxo> utxolist =UtxoContext.get(address);
+            for(Utxo utxo : utxolist){
+                if(null != utxo){
+                    if(utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE){
+                        //根据时间锁定
+                        if(System.currentTimeMillis() >= utxo.getLockTime()){
+                            usable += utxo.getAmount();
+                        }else{
+                            locked += utxo.getAmount();
+                        }
+                    }else{
+                        //根据高度锁定
+                        if(height > utxo.getLockTime()){
+                            usable += utxo.getAmount();
+                        }else{
+                            locked += utxo.getAmount();
+                        }
+                    }
+                }
+            }
+        }
+        balance.setAddress(address);
+        balance.setUsable(usable);
+        balance.setLocked(locked);
+        return balance;
     }
 
 
