@@ -109,10 +109,10 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
             depositBusiness.save((Deposit) tx.getTxData());
         } else if (tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
-            depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getBlockHeight());
+            depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getHash());
         } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             AgentNode agentNode = (AgentNode) tx.getTxData();
-            agentNodeBusiness.stopAgent(agentNode, tx.getBlockHeight());
+            agentNodeBusiness.stopAgent(agentNode, tx.getHash());
         } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
             punishLogBusiness.save((PunishLog) tx.getTxData());
         } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
@@ -122,10 +122,25 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     }
 
     @Transactional
-    public void rollback(Transaction tx) {
+    public void rollback(Transaction tx) throws Exception {
+        tx.transferExtend();
+        //回滚交易新生成的utxo
+        utxoBusiness.deleteByTxHash(tx.getHash());
         //回滚未花费输出
         utxoBusiness.rollBackByFrom(tx);
-        //如果交易是
+        //删除关系表
+        relationBusiness.deleteByTxHash(tx.getHash());
+        //根据交易类型回滚其他表数据
+        if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
+            agentNodeBusiness.deleteByKey(tx.getHash());
+        }else if(tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
+            depositBusiness.deleteByKey(tx.getHash());
+        }else if(tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
+            depositBusiness.rollbackCancelDeposit(tx.getHash());
+        }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
+            agentNodeBusiness.rollbackStopAgent(tx.getHash());
+        }
+        transactionMapper.deleteByPrimaryKey(tx.getHash());
     }
 
     /**

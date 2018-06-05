@@ -32,12 +32,12 @@ public class DepositBusiness implements BaseService<Deposit, String> {
      * @param address 账户地址
      * @return
      */
-    public PageInfo<Deposit> getList(String address, String agentHash,int pageNumber, int pageSize) {
+    public PageInfo<Deposit> getList(String address, String agentHash, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
-        if(StringUtils.isNotBlank(agentHash)){
-            if(StringUtils.validHash(agentHash)){
+        if (StringUtils.isNotBlank(agentHash)) {
+            if (StringUtils.validHash(agentHash)) {
                 searchable.addCondition("agent_hash", SearchOperator.eq, address);
             }
         }
@@ -99,22 +99,41 @@ public class DepositBusiness implements BaseService<Deposit, String> {
     @Transactional
     @Override
     public int deleteByKey(String s) {
+        Deposit deposit = depositMapper.selectByPrimaryKey(s);
+        AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
+        agentNode.setTotalDeposit(agentNode.getTotalDeposit() - deposit.getAmount());
+        agentNode.setDepositCount(agentNode.getDepositCount() - 1);
+        agentNodeMapper.updateByPrimaryKey(agentNode);
         return depositMapper.deleteByPrimaryKey(s);
     }
 
     @Transactional
-    public int cancelDeposit(Deposit deposit, Long deleteHeight) {
+    public int cancelDeposit(Deposit deposit, String deleteHash) {
         deposit = depositMapper.selectByPrimaryKey(deposit.getTxHash());
         AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
         agentNode.setTotalDeposit(agentNode.getTotalDeposit() - deposit.getAmount());
         agentNode.setDepositCount(agentNode.getDepositCount() - 1);
         agentNodeMapper.updateByPrimaryKey(agentNode);
-        deposit.setDeleteHeight(deleteHeight);
+        deposit.setDeleteHash(deleteHash);
         return depositMapper.updateByPrimaryKey(deposit);
     }
 
     @Override
     public Deposit getByKey(String s) {
         return depositMapper.selectByPrimaryKey(s);
+    }
+
+    @Transactional
+    public void rollbackCancelDeposit(String deleteHash) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("delete_hash", SearchOperator.eq, deleteHash);
+        Deposit deposit = depositMapper.selectBySearchable(searchable);
+        deposit.setDeleteHash(null);
+        depositMapper.updateByPrimaryKey(deposit);
+
+        AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
+        agentNode.setTotalDeposit(agentNode.getTotalDeposit() + deposit.getAmount());
+        agentNode.setDepositCount(agentNode.getDepositCount() + 1);
+        agentNodeMapper.updateByPrimaryKey(agentNode);
     }
 }

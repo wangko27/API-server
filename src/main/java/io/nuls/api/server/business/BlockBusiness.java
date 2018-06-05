@@ -9,7 +9,6 @@ import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
-import io.nuls.api.server.dto.BlockDto;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +51,10 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         searchable.addCondition("create_time", SearchOperator.gte, startTime);
         searchable.addCondition("create_time", SearchOperator.lt, endTime);
         return  blockHeaderMapper.getBlockSumTxcount(searchable);
+    @Transactional
+    public void saveBlock(BlockHeader blockHeader) {
+        blockHeaderMapper.insert(blockHeader);
+
     }
 
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {

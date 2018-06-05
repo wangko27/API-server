@@ -35,7 +35,7 @@ public class AgentNode extends TxData {
 
     private Long lastRewardHeight;
 
-    private Long deleteHeight;
+    private String deleteHash;
 
     public String getTxHash() {
         return txHash;
@@ -171,11 +171,11 @@ public class AgentNode extends TxData {
         this.lastRewardHeight = lastRewardHeight;
     }
 
-    public Long getDeleteHeight() {
-        return deleteHeight;
+    public String getDeleteHash() {
+        return deleteHash;
     }
 
-    public void setDeleteHeight(Long deleteHeight) {
-        this.deleteHeight = deleteHeight;
+    public void setDeleteHash(String deleteHash) {
+        this.deleteHash = deleteHash;
     }
 }

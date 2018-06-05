@@ -5,6 +5,8 @@ import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.TransactionRelationKey;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
+import io.nuls.api.server.dao.util.SearchOperator;
+import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,5 +57,12 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
             TransactionRelationKey key = new TransactionRelationKey(address, tx.getHash());
             relationMapper.insert(key);
         }
+    }
+
+    @Transactional
+    public void deleteByTxHash(String txHash) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
+        relationMapper.deleteByTxHash(txHash);
     }
 }

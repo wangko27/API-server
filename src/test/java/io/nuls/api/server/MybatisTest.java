@@ -2,7 +2,9 @@ package io.nuls.api.server;
 
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.business.BlockBusiness;
+import io.nuls.api.server.business.TransactionBusiness;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,9 @@ import java.util.Scanner;
 public class MybatisTest {
 
     @Autowired
-    BlockBusiness blockBusiness;
+    private BlockBusiness blockBusiness;
+    @Autowired
+    private TransactionBusiness transactionBusiness;
 
     @Test
     public void insertBlock() {
@@ -72,5 +76,12 @@ public class MybatisTest {
     public void testTask() {
         Scanner scan = new Scanner(System.in);
         scan.next();
+    }
+
+    @Test
+    public void testTx() throws Exception {
+        String hash = "0020197be4df20c0f405d611303efc1dedd952d0b2f224e3dd8cb461c1a800a99f50";
+        Transaction tx = transactionBusiness.getByKey(hash);
+        tx.transferExtend();
     }
 }
