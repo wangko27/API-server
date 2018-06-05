@@ -30,7 +30,8 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
     @PostConstruct
     public void init() {
-        System.out.println("--------------------utxo init");
+        List<Utxo> list = utxoMapper.selectList(new Searchable());
+        System.out.println("------------------------" +  list.size());
     }
     /**
      * 获取列表

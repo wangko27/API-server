@@ -51,6 +51,8 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         searchable.addCondition("create_time", SearchOperator.gte, startTime);
         searchable.addCondition("create_time", SearchOperator.lt, endTime);
         return  blockHeaderMapper.getBlockSumTxcount(searchable);
+
+    }
     @Transactional
     public void saveBlock(BlockHeader blockHeader) {
         blockHeaderMapper.insert(blockHeader);
