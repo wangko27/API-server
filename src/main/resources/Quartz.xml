@@ -16,7 +16,13 @@
         <property name="jobDetail" ref="nulsMinedTask" />
         <property name="cronExpression" value="0 45 0 * * ? *" />
     </bean>-->
-
+    <bean id="initUtxoSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="initUtxo"/>
+        </property>
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" />
+    </bean>
     <bean id="blockSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject">
             <ref bean="blockSyncTask"/>
@@ -24,18 +30,49 @@
         <property name="targetMethod" value="execute" />
         <property name="concurrent" value="false" /><!-- 作业不并发调度 -->
     </bean>
+    <bean id="transactionHistoryTaskSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="transactionHistoryTask"/>
+        </property>
+        <property name="targetMethod">
+            <value>execute</value>
+        </property>
+    </bean>
 
+    <bean id="transactionHistoryTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="transactionHistoryTaskSync" />
+        <property name="cronExpression" value="0 0 0 * * ?" />
+    </bean>
     <bean id="blockSyncTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="blockSync" />
-        <property name="startDelay" value="0" /><!-- 调度工厂实例化后，经过0秒开始执行调度 -->
+        <property name="startDelay" value="10000" /><!-- 调度工厂实例化后，经过10秒开始执行调度 -->
         <property name="repeatInterval" value="10000" /><!-- 每10秒调度一次 -->
     </bean>
+    <bean id="utxoInitTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="initUtxoSync" />
+        <property name="startDelay" value="0" />
+        <property name="repeatInterval" value="0" />
+        <property name="repeatCount" value="0" />
+    </bean>
+    <bean id="transactionHistoryTaskOneTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="transactionHistoryTaskSync" />
+        <property name="startDelay" value="0" />
+        <property name="repeatInterval" value="0" />
+        <property name="repeatCount" value="0" />
+    </bean>
+    <!--<bean id="transactionHistoryTaskTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="transactionHistoryTaskSync" />
+        <property name="cronExpression" value="0 0 23 * * ?" />
+    </bean>-->
 
 
     <bean id="SpringJobSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
+                <ref bean="utxoInitTrigger"/>
                 <ref bean="blockSyncTrigger"/>
+                <ref bean="transactionHistoryTaskTrigger"/>
+                <ref bean="transactionHistoryTaskOneTrigger"/>
             </list>
         </property>
     </bean>

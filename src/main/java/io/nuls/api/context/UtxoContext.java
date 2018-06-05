@@ -16,7 +16,9 @@ public class UtxoContext {
     public static List<Utxo> get(String address) {
         return utxoMap.get(address);
     }
-
+    public static int getSize(){
+        return utxoMap.size();
+    }
     public static void put(Utxo utxo) {
         List<Utxo> list = utxoMap.get(utxo.getAddress());
         if (list == null) {
