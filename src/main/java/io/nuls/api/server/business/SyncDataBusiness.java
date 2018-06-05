@@ -50,7 +50,9 @@ public class SyncDataBusiness {
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("scriptSign", tx.getScriptSign());
             dataMap.put("inputs", tx.getInputs());
+            dataMap.put("outputs", tx.getOutputList());
             tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
+
             transactionBusiness.save(tx);
         }
 

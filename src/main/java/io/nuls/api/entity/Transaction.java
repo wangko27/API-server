@@ -30,6 +30,8 @@ public class Transaction {
 
     private List<Input> inputs;
 
+    private List<Output> outputList;
+
     private List<Utxo> outputs;
 
     private String scriptSign;
@@ -177,6 +179,29 @@ public class Transaction {
             input.setAddress((String) map.get("address"));
             inputs.add(input);
         }
+
+        List<Output> outputList = new ArrayList<>();
+        mapList = (List<Map>) dataMap.get("outputs");
+        for (Map map : mapList) {
+            Output output = new Output();
+            output.setTxHash((String) map.get("txHash"));
+            output.setAddress((String) map.get("address"));
+            try {
+                output.setValue((Long) map.get("value"));
+            } catch (Exception e) {
+                output.setValue(Long.parseLong((String) map.get("value")));
+            }
+            outputList.add(output);
+        }
         this.inputs = inputs;
+        this.setOutputList(outputList);
+    }
+
+    public List<Output> getOutputList() {
+        return outputList;
+    }
+
+    public void setOutputList(List<Output> outputList) {
+        this.outputList = outputList;
     }
 }
