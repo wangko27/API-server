@@ -1,16 +1,19 @@
 package io.nuls.api.server.task;
 
-import io.nuls.api.context.HistoryContext;
+import io.nuls.api.context.BalanceListContext;
+import io.nuls.api.context.PackingAddressContext;
+import io.nuls.api.server.business.AgentNodeBusiness;
 import io.nuls.api.server.business.BlockBusiness;
+import io.nuls.api.server.business.UtxoBusiness;
+import io.nuls.api.server.dto.AgentNodeDto;
+import io.nuls.api.server.dto.UtxoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
+import java.util.List;
 
 /**
- * Description:
+ * Description: 统计，每天凌晨12点统计一次
  * Author: zsj
  * Date:  2018/6/5 0005
  */
@@ -19,25 +22,21 @@ public class TransactionHistoryTask {
 
     @Autowired
     private BlockBusiness blockBusiness;
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    @Autowired
+    private UtxoBusiness utxoBusiness;
+    @Autowired
+    private AgentNodeBusiness agentNodeBusiness;
 
     public void execute(){
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DATE, cal.get(Calendar.DATE));
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        long time = cal.getTime().getTime();
-        for(int i = 1; i <= 14; i++){
-            Integer count = blockBusiness.getTxcountByTime(time-86400000,time);
-            time = time - 86400000;
-            if(null == count){
-                continue;
-            }
-            HashMap<String,String> arr = new HashMap<>();
-            arr.put("value",count+"");
-            arr.put("date",time+"");
-            HistoryContext.add(arr);
-        }
+        /*14天交易历史*/
+        blockBusiness.initHistory();
+        /*加载持币账户排行榜*/
+        List<UtxoDto> blockDtoList = utxoBusiness.getBlockSumTxamount();
+        BalanceListContext.reset(blockDtoList);
+
+        /*加载出块账户排行榜*/
+        List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
+        PackingAddressContext.reset(agentNodeDtoList);
+
     }
 }

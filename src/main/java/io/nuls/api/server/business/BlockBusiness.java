@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.context.HistoryContext;
 import io.nuls.api.entity.Block;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.BlockHeader;
@@ -14,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 区块头处理器，包括区块的验证，回滚，查询与存储等
@@ -146,5 +145,30 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
     @Override
     public BlockHeader getByKey(String s) {
         return blockHeaderMapper.selectByPrimaryKey(s);
+    }
+
+    /**
+     * 统计出块历史
+     */
+    public void initHistory(){
+        List<HashMap<String,String>> historyList = new ArrayList<>(14);
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DATE, cal.get(Calendar.DATE));
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        long time = cal.getTime().getTime();
+        for(int i = 1; i <= 14; i++){
+            Integer count = getTxcountByTime(time-86400000,time);
+            time = time - 86400000;
+            if(null == count){
+                continue;
+            }
+            HashMap<String,String> arr = new HashMap<>();
+            arr.put("value",count+"");
+            arr.put("date",time+"");
+            historyList.add(arr);
+        }
+        HistoryContext.reset(historyList);
     }
 }

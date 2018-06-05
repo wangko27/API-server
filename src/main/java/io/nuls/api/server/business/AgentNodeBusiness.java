@@ -9,6 +9,7 @@ import io.nuls.api.server.dao.mapper.AgentNodeMapper;
 import io.nuls.api.server.dao.mapper.DepositMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -133,5 +135,13 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     @Override
     public AgentNode getByKey(String id) {
         return agentNodeMapper.selectByPrimaryKey(id);
+    }
+
+    /**
+     * 统计出块排名
+     * @return
+     */
+    public List<AgentNodeDto> selectTotalpackingCount(){
+        return agentNodeMapper.selectTotalpackingCount(new Searchable());
     }
 }

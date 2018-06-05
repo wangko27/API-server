@@ -27,12 +27,6 @@ import java.util.List;
 public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     @Autowired
     private UtxoMapper utxoMapper;
-
-    @PostConstruct
-    public void init() {
-        List<Utxo> list = utxoMapper.selectList(new Searchable());
-        System.out.println("------------------------" +  list.size());
-    }
     /**
      * 获取列表
      *

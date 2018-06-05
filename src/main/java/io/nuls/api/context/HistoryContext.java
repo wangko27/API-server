@@ -26,4 +26,9 @@ public class HistoryContext {
         return historyList;
     }
 
+    public static void reset(List<HashMap<String,String>> list){
+        clear();
+        historyList = list;
+    }
+
 }

@@ -20,6 +20,9 @@
     <result column="last_reward_height" property="lastRewardHeight" jdbcType="BIGINT" />
     <result column="delete_hash" property="deleteHash" jdbcType="VARCHAR" />
   </resultMap>
+  <resultMap id="ResultMapDto" type="io.nuls.api.server.dto.AgentNodeDto" extends="BaseResultMap" >
+    <result column="totalPackingCount" property="totalPackingCount" jdbcType="BIGINT" />
+  </resultMap>
   <sql id="Base_Column_List" >
     tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate, 
     agent_name, introduction, create_time, block_height, status, total_deposit, deposit_count, 
@@ -250,4 +253,8 @@
     set delete_hash = NULL
     where delete_hash = #{deleteHash,jdbcType=VARCHAR}
   </update>
+  <select id="selectTotalpackingCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapDto">
+    SELECT *,SUM(total_packing_count) totalPackingCount FROM agent_node GROUP BY agent_address
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>
