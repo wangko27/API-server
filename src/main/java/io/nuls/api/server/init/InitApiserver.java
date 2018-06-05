@@ -31,6 +31,7 @@ public class InitApiserver {
 
     @PostConstruct
     public void init() {
+        System.out.println("---init---");
         /*加载utxo*/
         List<Utxo> utxoList = utxoBusiness.getList(null,2);
         for(Utxo utxo:utxoList){

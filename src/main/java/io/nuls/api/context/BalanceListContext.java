@@ -27,10 +27,5 @@ public class BalanceListContext {
     public static void reset(List<UtxoDto> list){
         clear();
         blockDtos = list;
-        for(UtxoDto dto:blockDtos){
-            System.out.println(dto.getAddress());
-            System.out.println(dto.getTotal());
-            System.out.println("-----------");
-        }
     }
 }

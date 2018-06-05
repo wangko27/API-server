@@ -28,10 +28,5 @@ public class PackingAddressContext {
     public static void reset(List<AgentNodeDto> list){
         clear();
         agentNodeList = list;
-        for(AgentNodeDto dto:agentNodeList){
-            System.out.println(dto.getTotalPackingCount());
-            System.out.println(dto.getTxHash());
-            System.out.println("-----------");
-        }
     }
 }
