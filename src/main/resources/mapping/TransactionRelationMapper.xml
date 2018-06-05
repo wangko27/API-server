@@ -33,4 +33,9 @@
       </if>
     </trim>
   </insert>
+
+  <delete id="deleteByTxHash" parameterType="java.lang.String">
+    delete from transaction_relation
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </delete>
 </mapper>

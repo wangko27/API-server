@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -28,6 +29,10 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     @Autowired
     private UtxoMapper utxoMapper;
 
+    @PostConstruct
+    public void init() {
+        System.out.println("--------------------utxo init");
+    }
     /**
      * 获取列表
      *

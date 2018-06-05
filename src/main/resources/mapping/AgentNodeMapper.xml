@@ -244,4 +244,10 @@
     from agent_node
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+
+  <update id="rollbackStopAgent" parameterType="java.lang.String">
+    update agent_node
+    set delete_hash = NULL
+    where delete_hash = #{deleteHash,jdbcType=VARCHAR}
+  </update>
 </mapper>

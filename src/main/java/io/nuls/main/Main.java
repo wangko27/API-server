@@ -6,6 +6,7 @@ import io.nuls.api.server.ApiApplication;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.utils.PropertiesUtils;
 import io.nuls.api.utils.StringUtils;
+import org.springframework.context.ApplicationContext;
 
 public enum Main {
     MAIN;

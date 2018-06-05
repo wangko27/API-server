@@ -118,6 +118,11 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         depositMapper.deleteByAgentHash(agentNode.getTxHash(), txHash);
     }
 
+    @Transactional
+    public void rollbackStopAgent(String deleteHash) {
+        agentNodeMapper.rollbackStopAgent(deleteHash);
+        depositMapper.rollbackStopAgent(deleteHash);
+    }
 
     /**
      * 根据id查询

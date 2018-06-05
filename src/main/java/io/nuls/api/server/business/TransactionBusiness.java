@@ -128,7 +128,18 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         utxoBusiness.deleteByTxHash(tx.getHash());
         //回滚未花费输出
         utxoBusiness.rollBackByFrom(tx);
-
+        //删除关系表
+        relationBusiness.deleteByTxHash(tx.getHash());
+        //根据交易类型回滚其他表数据
+        if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
+            agentNodeBusiness.deleteByKey(tx.getHash());
+        }else if(tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
+            depositBusiness.deleteByKey(tx.getHash());
+        }else if(tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
+            depositBusiness.rollbackCancelDeposit(tx.getHash());
+        }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
+            agentNodeBusiness.rollbackStopAgent(tx.getHash());
+        }
     }
 
     /**

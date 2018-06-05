@@ -8,4 +8,6 @@ import org.apache.ibatis.annotations.Param;
 public interface DepositMapper extends BaseMapper<Deposit, String> {
 
     void deleteByAgentHash(@Param("agentHash") String agentHash, @Param("deleteHash") String deleteHash);
+
+    void rollbackStopAgent(@Param("deleteHash") String deleteHash);
 }

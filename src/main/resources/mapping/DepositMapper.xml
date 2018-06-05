@@ -15,7 +15,7 @@
     tx_hash, amount, agent_hash, agent_name, address, create_time, block_height, delete_hash
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from deposit
     where tx_hash = #{txHash,jdbcType=VARCHAR}
@@ -145,4 +145,10 @@
     from deposit
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+
+  <update id="rollbackStopAgent" parameterType="java.lang.String">
+    update deposit
+    set delete_hash = NULL
+    where delete_hash = #{deleteHash,jdbcType=VARCHAR}
+  </update>
 </mapper>

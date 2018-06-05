@@ -18,8 +18,6 @@ import java.util.Map;
 public class SyncDataBusiness {
 
     @Autowired
-    private SyncDataHandler syncDataHandler;
-    @Autowired
     private BlockBusiness blockBusiness;
     @Autowired
     private UtxoBusiness utxoBusiness;
@@ -27,6 +25,8 @@ public class SyncDataBusiness {
     private TransactionBusiness transactionBusiness;
     @Autowired
     private AliasBusiness aliasBusiness;
+    @Autowired
+    private PunishLogBusiness punishLogBusiness;
 
     /**
      * 同步最新块数据
@@ -64,8 +64,8 @@ public class SyncDataBusiness {
         }
         //回滚别名
         aliasBusiness.deleteByHeight(block.getHeight());
-        //回滚删除节点
-
+        //回滚惩罚记录
+        punishLogBusiness.deleteByHeight(block.getHeight());
     }
 
 }
