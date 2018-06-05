@@ -9,6 +9,9 @@
     <result column="lock_time" property="lockTime" jdbcType="BIGINT" />
     <result column="spend_tx_hash" property="spendTxHash" jdbcType="VARCHAR" />
   </resultMap>
+  <resultMap id="ResultMapWithAmount" type="io.nuls.api.server.dto.UtxoDto" extends="BaseResultMap" >
+    <result column="total" property="total" jdbcType="BIGINT" />
+  </resultMap>
   <sql id="Base_Column_List" >
     tx_hash, tx_index, address, amount, lock_time, spend_tx_hash
   </sql>
@@ -120,4 +123,7 @@
     DELETE from utxo
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </delete>
+  <select id="getBlockSumTxamount" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithAmount" >
+    SELECT *,SUM(amount) total FROM utxo WHERE spend_tx_hash IS NULL GROUP BY address ORDER BY total DESC limit 100
+  </select>
 </mapper>

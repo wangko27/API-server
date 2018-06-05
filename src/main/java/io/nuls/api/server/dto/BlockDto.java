@@ -35,6 +35,8 @@ public class BlockDto {
 
     private String scriptSign;
 
+    private Long total;
+
     public BlockDto() {
 
     }
@@ -174,5 +176,13 @@ public class BlockDto {
 
     public void setScriptSign(String scriptSign) {
         this.scriptSign = scriptSign;
+    }
+
+    public Long getTotal() {
+        return total;
+    }
+
+    public void setTotal(Long total) {
+        this.total = total;
     }
 }

@@ -59,7 +59,6 @@ public enum ApiApplication {
         config.setDefaultQueryEncoding(Charsets.UTF8_CHARSET);
 
         webappContext.deploy(server);
-
         try {
             server.start();
             serverUri = Constant.HTTP + ip + Constant.COLON + port + Constant.URI_SEPARATOR + moduleUrl;

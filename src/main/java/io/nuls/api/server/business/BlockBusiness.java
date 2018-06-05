@@ -9,6 +9,7 @@ import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.BlockDto;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,9 +38,20 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         return blockHeaderMapper.selectBySearchable(searchable);
     }
 
-    @Transactional
-    public void saveBlock(BlockHeader blockHeader) {
-        blockHeaderMapper.insert(blockHeader);
+    /**
+     * 查询某时间段内的交易笔数
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public Integer getTxcountByTime(Long startTime,Long endTime){
+        if(startTime < 0 || endTime < 0){
+            return 0;
+        }
+        Searchable searchable = new Searchable();
+        searchable.addCondition("create_time", SearchOperator.gte, startTime);
+        searchable.addCondition("create_time", SearchOperator.lt, endTime);
+        return  blockHeaderMapper.getBlockSumTxcount(searchable);
     }
 
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {

@@ -245,4 +245,10 @@
     from block_header
     WHERE height = (SELECT height FROM block_header ORDER BY height DESC LIMIT 1)
   </select>
+  <select id="getBlockSumTxcount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT SUM(tx_count) FROM `block_header`
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+
 </mapper>

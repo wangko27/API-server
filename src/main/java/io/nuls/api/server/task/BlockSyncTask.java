@@ -2,22 +2,19 @@ package io.nuls.api.server.task;
 
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.UtxoContext;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.Block;
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.exception.NulsException;
-import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.SyncDataBusiness;
-import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.net.ConnectException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class BlockSyncTask {
@@ -27,8 +24,6 @@ public class BlockSyncTask {
     @Autowired
     private SyncDataBusiness syncDataBusiness;
     @Autowired
-    private UtxoBusiness utxoBusiness;
-    @Autowired
     private SyncDataHandler syncDataHandler;
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -37,15 +32,15 @@ public class BlockSyncTask {
      * 同步区块
      */
     public void execute() {
-        List<Utxo> utxoList = utxoBusiness.getList(null,2);
-        for(Utxo utxo:utxoList){
-            UtxoContext.put(utxo);
+        //查询本地已保存的最新块
+        BlockHeader localBest = blockBusiness.getNewest();
+        if(UtxoContext.getSize()==0 && null != localBest){
+            return;
         }
         System.out.println("------------excute------------");
         boolean downloading = true;
         while (downloading) {
-            //查询本地已保存的最新块
-            BlockHeader localBest = null;
+
             try {
                 localBest = blockBusiness.getNewest();
                 long bestHeight = -1;

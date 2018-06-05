@@ -1,5 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.context.BalanceListContext;
+import io.nuls.api.context.HistoryContext;
 import io.nuls.api.entity.RpcClientResult;
 import org.springframework.stereotype.Component;
 
@@ -23,15 +25,8 @@ public class NulsStatisticsResource {
     @Path("/history")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult history(){
-        RpcClientResult result = null;
-        List<HashMap<String,String>> data = new ArrayList<>();
-        HashMap<String,String> attr = new HashMap<String,String>();
-        attr.put("id","50");
-        attr.put("date","20180114");
-        attr.put("txCount","12548");
-        data.add(attr);
-        result = RpcClientResult.getSuccess();
-        result.setData(data);
+        RpcClientResult result = RpcClientResult.getSuccess();
+        result.setData(HistoryContext.getAll());
         return result;
     }
 
@@ -39,16 +34,8 @@ public class NulsStatisticsResource {
     @Path("/balancelist")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult balancelist(){
-        //todo
-        RpcClientResult result = null;
-        List<HashMap<String,String>> data = new ArrayList<>();
-        HashMap<String,String> attr = new HashMap<String,String>();
-        attr.put("id","50");
-        attr.put("date","20180114");
-        attr.put("txCount","12548");
-        data.add(attr);
-        result = RpcClientResult.getSuccess();
-        result.setData(data);
+        RpcClientResult result = RpcClientResult.getSuccess();
+        result.setData(BalanceListContext.getAll());
         return result;
     }
 

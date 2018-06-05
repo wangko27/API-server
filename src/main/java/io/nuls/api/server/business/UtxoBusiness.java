@@ -2,15 +2,14 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.entity.UtxoKey;
-import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -174,4 +173,11 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         }
     }
 
+    /**
+     * 统计持币账户
+     * @return
+     */
+    public List<UtxoDto> getBlockSumTxamount(){
+        return  utxoMapper.getBlockSumTxamount();
+    }
 }
