@@ -86,7 +86,6 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         agentNode.setTotalDeposit(agentNode.getTotalDeposit() + deposit.getAmount());
         agentNode.setDepositCount(agentNode.getDepositCount() + 1);
         agentNodeMapper.updateByPrimaryKey(agentNode);
-        deposit.setAgentName(agentNode.getAgentName());
         return depositMapper.insert(deposit);
     }
 

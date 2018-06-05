@@ -136,6 +136,9 @@ public class AgentNode extends TxData {
     }
 
     public Long getTotalPackingCount() {
+        if(totalPackingCount == null) {
+            totalPackingCount = 0L;
+        }
         return totalPackingCount;
     }
 

@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Block;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.BlockHeader;
@@ -26,6 +27,8 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     @Autowired
     private BlockHeaderMapper blockHeaderMapper;
+    @Autowired
+    private AgentNodeBusiness agentNodeBusiness;
 
     public BlockHeader getBlockByHash(String hash) {
         return blockHeaderMapper.selectByPrimaryKey(hash);
@@ -39,24 +42,31 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     /**
      * 查询某时间段内的交易笔数
+     *
      * @param startTime
      * @param endTime
      * @return
      */
-    public Integer getTxcountByTime(Long startTime,Long endTime){
-        if(startTime < 0 || endTime < 0){
+    public Integer getTxcountByTime(Long startTime, Long endTime) {
+        if (startTime < 0 || endTime < 0) {
             return 0;
         }
         Searchable searchable = new Searchable();
         searchable.addCondition("create_time", SearchOperator.gte, startTime);
         searchable.addCondition("create_time", SearchOperator.lt, endTime);
-        return  blockHeaderMapper.getBlockSumTxcount(searchable);
+        return blockHeaderMapper.getBlockSumTxcount(searchable);
 
     }
+
     @Transactional
     public void saveBlock(BlockHeader blockHeader) {
         blockHeaderMapper.insert(blockHeader);
-
+        AgentNode agentNode = agentNodeBusiness.getAgentByAddress(blockHeader.getConsensusAddress());
+        if (agentNode != null) {
+            agentNode.setLastRewardHeight(blockHeader.getHeight());
+            agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() + 1);
+            agentNodeBusiness.update(agentNode);
+        }
     }
 
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {
@@ -72,18 +82,19 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     /**
      * 获取块列表
-     * @param address 共识地址
+     *
+     * @param address    共识地址
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<BlockHeader> getList(String address,int pageNumber, int pageSize) {
+    public PageInfo<BlockHeader> getList(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(address)){
-            if(StringUtils.validAddress(address)){
+        if (StringUtils.isNotBlank(address)) {
+            if (StringUtils.validAddress(address)) {
                 searchable.addCondition("consensus_address", SearchOperator.eq, address);
-            }else{
+            } else {
                 return null;
             }
         }
