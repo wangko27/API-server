@@ -40,6 +40,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
     @Transactional
     public void saveBlock(BlockHeader blockHeader) {
         blockHeaderMapper.insert(blockHeader);
+
     }
 
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {

@@ -140,6 +140,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             agentNodeBusiness.rollbackStopAgent(tx.getHash());
         }
+        transactionMapper.deleteByPrimaryKey(tx.getHash());
     }
 
     /**

@@ -60,4 +60,15 @@ public class SyncTest {
             }
         }
     }
+
+    @Test
+    public void testRollback() {
+        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(4450);
+        BlockHeader header = result.getData();
+        try {
+            syncDataBusiness.rollback(header);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
