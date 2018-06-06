@@ -29,6 +29,8 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
     private BlockHeaderMapper blockHeaderMapper;
     @Autowired
     private AgentNodeBusiness agentNodeBusiness;
+    @Autowired
+    private AddressRewardDetailBusiness rewardDetailBusiness;
 
     public BlockHeader getBlockByHash(String hash) {
         return blockHeaderMapper.selectByPrimaryKey(hash);
@@ -42,6 +44,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     /**
      * 查询某时间段内的交易笔数
+     *
      * @param startTime
      * @param endTime
      * @return
@@ -56,6 +59,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         return blockHeaderMapper.getBlockSumTxcount(searchable);
 
     }
+
     @Transactional
     public void saveBlock(BlockHeader blockHeader) {
         blockHeaderMapper.insert(blockHeader);
@@ -149,6 +153,14 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
     @Transactional
     @Override
     public int deleteByKey(String s) {
+        BlockHeader header = blockHeaderMapper.selectByPrimaryKey(s);
+        AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
+        if (agentNode != null) {
+            Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
+            agentNode.setLastRewardHeight(height);
+            agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
+            agentNodeBusiness.update(agentNode);
+        }
         return blockHeaderMapper.deleteByPrimaryKey(s);
     }
 

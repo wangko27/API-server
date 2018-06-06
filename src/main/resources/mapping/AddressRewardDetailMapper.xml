@@ -122,4 +122,9 @@
     SELECT SUM(amount) total FROM `address_reward_detail`
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+
+  <select id="getLastRewardHeight" parameterType="io.nuls.api.server.dao.util.Searchable">
+    select max(block_height) as height from address_reward_detail
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

@@ -61,7 +61,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      */
     public AgentNode getAgentByAddress(String agentAddress) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("agent_address", SearchOperator.eq, agentAddress);
+        searchable.addCondition("packing_address", SearchOperator.eq, agentAddress);
         return agentNodeMapper.selectBySearchable(searchable);
     }
 

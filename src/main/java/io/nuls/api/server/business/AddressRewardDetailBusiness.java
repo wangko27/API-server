@@ -136,4 +136,9 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
         return addressRewardDetailMapper.selectSumReward(searchable);
     }
 
+    public Long getLastRewardHeight(String address) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, address);
+        return addressRewardDetailMapper.getLastRewardHeight(searchable);
+    }
 }
