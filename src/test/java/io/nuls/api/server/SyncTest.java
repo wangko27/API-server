@@ -5,6 +5,7 @@ import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.model.NulsDigestData;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.SyncDataBusiness;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -63,12 +64,13 @@ public class SyncTest {
 
     @Test
     public void testRollback() {
-        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(4450);
-        BlockHeader header = result.getData();
-        try {
-            syncDataBusiness.rollback(header);
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (int i = 1120; i >= 0; i--) {
+            BlockHeader blockHeader = blockBusiness.getBlockByHeight(i);
+            try {
+                syncDataBusiness.rollback(blockHeader);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

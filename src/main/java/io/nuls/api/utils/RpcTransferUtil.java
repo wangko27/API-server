@@ -12,6 +12,7 @@ import io.nuls.api.entity.Transaction;
 import io.nuls.api.model.*;
 import io.nuls.api.model.tx.*;
 
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -137,6 +138,7 @@ public class RpcTransferUtil {
         tx.setInputs(inputs);
 
         List<Utxo> outputs = new ArrayList<>();
+        List<Output> outputList = new ArrayList<>();
         if (txModel.getCoinData() != null && txModel.getCoinData().getTo() != null) {
             for (int i = 0; i < txModel.getCoinData().getTo().size(); i++) {
                 Coin coin = txModel.getCoinData().getTo().get(i);
@@ -147,9 +149,13 @@ public class RpcTransferUtil {
                 utxo.setAddress(Base58.encode(coin.getOwner()));
                 utxo.setLockTime(Long.parseLong(String.valueOf(coin.getLockTime())));
                 outputs.add(utxo);
+
+                Output output = new Output(utxo.getTxHash(), utxo.getAddress(), utxo.getAmount());
+                outputList.add(output);
             }
         }
         tx.setOutputs(outputs);
+        tx.setOutputList(outputList);
         return tx;
     }
 
