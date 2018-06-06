@@ -2,6 +2,7 @@ package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.context.BalanceListContext;
 import io.nuls.api.context.HistoryContext;
+import io.nuls.api.context.PackingAddressContext;
 import io.nuls.api.entity.RpcClientResult;
 import org.springframework.stereotype.Component;
 
@@ -43,16 +44,8 @@ public class NulsStatisticsResource {
     @Path("/minedlist")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult minedlist(){
-        //todo
-        RpcClientResult result = null;
-        List<HashMap<String,String>> data = new ArrayList<>();
-        HashMap<String,String> attr = new HashMap<String,String>();
-        attr.put("id","50");
-        attr.put("date","20180114");
-        attr.put("txCount","12548");
-        data.add(attr);
-        result = RpcClientResult.getSuccess();
-        result.setData(data);
+        RpcClientResult result = RpcClientResult.getSuccess();
+        result.setData(PackingAddressContext.getAll());
         return result;
     }
 }

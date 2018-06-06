@@ -151,4 +151,13 @@
     set delete_hash = NULL
     where delete_hash = #{deleteHash,jdbcType=VARCHAR}
   </update>
+  <select id="selectTotalCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM deposit
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectTotalAmount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Long">
+    SELECT sum(amount) FROM deposit
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
 </mapper>

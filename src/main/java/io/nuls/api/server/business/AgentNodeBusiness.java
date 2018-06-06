@@ -31,8 +31,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     private DepositMapper depositMapper;
 
     /**
-     * 获取列表
-     *
+     * 根据页数查询节点列表，由于信用值没办法及时获取，只能每次调用都去链上查询
      * @param agentName 节点名称 (搜索用)
      * @return
      */
@@ -140,5 +139,13 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      */
     public List<AgentNodeDto> selectTotalpackingCount(){
         return agentNodeMapper.selectTotalpackingCount(new Searchable());
+    }
+
+    /**
+     * 根据Searchable 查询数据条数
+     * @return
+     */
+    public Integer selectTotalCount(){
+        return agentNodeMapper.selectTotalCount(new Searchable());
     }
 }

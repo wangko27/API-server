@@ -10,6 +10,7 @@ import java.util.List;
  * Date:  2018/6/5 0005
  */
 public class HistoryContext {
+    public static Long rewardofday = 0L;
     private static List<HashMap<String,String>> historyList = new ArrayList<>(14);
 
     public static void add(HashMap<String,String> map){historyList.add(map);}
