@@ -46,7 +46,7 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
     public List<Utxo> getList(String txHash) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("txHash", SearchOperator.eq, txHash);
+        searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
         return utxoMapper.selectList(searchable);
     }
 
