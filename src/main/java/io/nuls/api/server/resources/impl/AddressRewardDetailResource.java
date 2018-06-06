@@ -1,18 +1,17 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
-import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.AddressRewardDetailBusiness;
-import io.nuls.api.server.business.AgentNodeBusiness;
-import io.nuls.api.server.business.BalanceBusiness;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.HashMap;
 
 /**
  * Description: 奖励
@@ -25,10 +24,6 @@ public class AddressRewardDetailResource {
 
     @Autowired
     private AddressRewardDetailBusiness addressRewardDetailBusiness;
-    @Autowired
-    private AgentNodeBusiness agentNodeBusiness;
-    @Autowired
-    private BalanceBusiness balanceBusiness;
 
     @GET
     @Path("/list")

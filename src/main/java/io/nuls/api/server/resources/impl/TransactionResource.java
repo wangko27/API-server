@@ -2,6 +2,7 @@ package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.utils.StringUtils;
@@ -85,7 +86,13 @@ public class TransactionResource {
         }
         try {
             result = RpcClientResult.getSuccess();
-            result.setData(transactionBusiness.getByKey(hash));
+            Transaction transaction = transactionBusiness.getByKey(hash);
+            if(null == transaction){
+                return RpcClientResult.getFailed(ErrorCode.DATA_NOT_FOUND);
+            }
+            transaction.transferExtend();
+            transaction.setOutputs(utxoBusiness.getList(hash));
+            result.setData(transaction);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
