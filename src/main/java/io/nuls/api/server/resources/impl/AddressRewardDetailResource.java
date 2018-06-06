@@ -55,27 +55,5 @@ public class AddressRewardDetailResource {
         result.setData(addressRewardDetailBusiness.getList(address,pageNumber,pageSize));
         return result;
     }
-    @GET
-    @Path("/address/{address}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getConsensusDetail(@PathParam("address") String address){
-        RpcClientResult result = null;
-        if(!StringUtils.validAddress(address)){
-            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
-            return result;
-        }
-        result = RpcClientResult.getSuccess();
-        HashMap<String,String> attr = new HashMap<>();
-        attr.put("reward",addressRewardDetailBusiness.selectSumReward(address).toString());
-        AgentNode agentNode = agentNodeBusiness.getAgentByAddress(address);
-        if(null != agentNode){
-            attr.put("totalDeposit",agentNode.getTotalDeposit().toString());
-        }else{
-            attr.put("totalDeposit","0");
-        }
-        //todo 可用余额
-        result.setData(attr);
-        return result;
-    }
 
 }

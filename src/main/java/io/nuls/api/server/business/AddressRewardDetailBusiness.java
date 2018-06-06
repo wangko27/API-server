@@ -124,5 +124,15 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
             return 0L;
         }
     }
+    /**
+     * 统计某地址总的奖励 （根据时间统计）
+     * @return
+     */
+    public Long selectDayofReward(Long time){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("time", SearchOperator.gte, time);
+        searchable.addCondition("time", SearchOperator.lt, time+86400000);
+        return addressRewardDetailMapper.selectSumReward(searchable);
+    }
 
 }

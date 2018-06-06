@@ -1,9 +1,11 @@
 package io.nuls.api.server.init;
 
 import io.nuls.api.context.BalanceListContext;
+import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.PackingAddressContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.Utxo;
+import io.nuls.api.server.business.AddressRewardDetailBusiness;
 import io.nuls.api.server.business.AgentNodeBusiness;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -28,6 +31,8 @@ public class InitApiserver {
     private AgentNodeBusiness agentNodeBusiness;
     @Autowired
     private BlockBusiness blockBusiness;
+    @Autowired
+    private AddressRewardDetailBusiness addressRewardDetailBusiness;
 
     @PostConstruct
     public void init() {
@@ -47,5 +52,15 @@ public class InitApiserver {
         /*加载出块账户排行榜*/
         List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
         PackingAddressContext.reset(agentNodeDtoList);
+
+        /*加载24小时奖励*/
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DATE, cal.get(Calendar.DATE));
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        long time = cal.getTime().getTime();
+        HistoryContext.rewardofday = addressRewardDetailBusiness.selectDayofReward(time);
+
     }
 }

@@ -233,4 +233,8 @@
     SELECT *,SUM(total_packing_count) totalPackingCount FROM agent_node GROUP BY agent_address
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+  <select id="selectTotalCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT count(1) FROM agent_node
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

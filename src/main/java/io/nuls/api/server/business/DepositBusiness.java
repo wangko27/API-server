@@ -135,4 +135,20 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         agentNode.setDepositCount(agentNode.getDepositCount() + 1);
         agentNodeMapper.updateByPrimaryKey(agentNode);
     }
+
+    /**
+     * 根据Searchable 查询数据条数
+     * @return
+     */
+    public Integer selectTotalCount(){
+        return depositMapper.selectTotalCount(new Searchable());
+    }
+
+    /**
+     * 查询总委托金额
+     * @return
+     */
+    public Long selectTotalAmount(){
+        return depositMapper.selectTotalAmount(new Searchable());
+    }
 }
