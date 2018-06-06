@@ -118,4 +118,8 @@
     DELETE from address_reward_detail
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </delete>
+  <select id="selectSumReward" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Long">
+    SELECT SUM(amount) total FROM `address_reward_detail`
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

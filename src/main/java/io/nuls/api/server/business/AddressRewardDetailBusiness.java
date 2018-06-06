@@ -8,6 +8,7 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.AddressRewardDetailMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,4 +110,19 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
     public AddressRewardDetail getByKey(Long id) {
         return addressRewardDetailMapper.selectByPrimaryKey(id);
     }
+
+    /**
+     * 统计某地址总的奖励
+     * @return
+     */
+    public Long selectSumReward(String address){
+        if(StringUtils.validAddress(address)){
+            Searchable searchable = new Searchable();
+            searchable.addCondition("address", SearchOperator.eq, address);
+            return addressRewardDetailMapper.selectSumReward(searchable);
+        }else{
+            return 0L;
+        }
+    }
+
 }

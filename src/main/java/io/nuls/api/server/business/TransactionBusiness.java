@@ -62,7 +62,15 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
         PageHelper.orderBy("tx_index asc");
-        PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
+        List<Transaction> transactionList = transactionMapper.selectList(searchable);
+        for(Transaction transaction : transactionList){
+            try {
+                transaction.transferExtend();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        PageInfo<Transaction> page = new PageInfo<>(transactionList);
         return page;
     }
 

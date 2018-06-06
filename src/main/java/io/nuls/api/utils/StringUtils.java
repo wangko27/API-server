@@ -116,7 +116,13 @@ public class StringUtils {
         if (isBlank(hash)){
             return false;
         }
+        /*修改于2018-06-05 因为新版本的hash长度为68位，现在的判断是
         if (hash.length() != 70) {
+            return false;
+        }
+        导致验证不过，此处改成长度小于100即可
+        */
+        if (hash.length() > 100) {
             return false;
         }
         return true;

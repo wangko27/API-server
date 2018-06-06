@@ -67,9 +67,10 @@ public class BlockResource {
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getBlockByHash(@PathParam("hash") String hash){
-        RpcClientResult result;
+        RpcClientResult result = null;
         if (!StringUtils.validHash(hash)) {
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return result;
         }
         try {
             result = RpcClientResult.getSuccess();

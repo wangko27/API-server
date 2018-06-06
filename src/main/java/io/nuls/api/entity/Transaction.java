@@ -163,7 +163,6 @@ public class Transaction {
         Map dataMap = JSONUtils.json2map(extend);
         this.setScriptSign((String) dataMap.get("scriptSign"));
         List<Map> mapList = (List<Map>) dataMap.get("inputs");
-
         List<Input> inputs = new ArrayList<>();
         for (Map map : mapList) {
             Input input = new Input();
