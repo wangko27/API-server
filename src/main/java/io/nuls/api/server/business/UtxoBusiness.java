@@ -2,7 +2,6 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -53,31 +51,6 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     }
 
     /**
-     * 根据hash和id查询已经花费的utxo的详情
-     * @param hash
-     * @param index
-     * @return
-     */
-    public String getUtxoBySpentHash(String hash,Integer index){
-        if (!StringUtils.validHash(hash)) {
-            return null;
-        }
-        if(index < 0){
-            return null;
-        }
-        UtxoKey utxoKey = new UtxoKey();
-        utxoKey.setTxIndex(index);
-        utxoKey.setTxHash(hash);
-        Utxo utxo = utxoMapper.selectByPrimaryKey(utxoKey);
-        if(null != utxo){
-            return utxo.getSpendTxHash();
-        }
-        return null;
-
-    }
-
-
-    /**
      * 根据地址获取该地址全部的utxo
      *
      * @param address
@@ -98,6 +71,29 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
             }
         }
         return utxoMapper.selectList(searchable);
+    }
+
+    /**
+     * 根据hash和id查询已经花费的utxo的详情
+     * @param hash
+     * @param index
+     * @return
+     */
+    public String getUtxoBySpentHash(String hash,Integer index){
+        if (!StringUtils.validHash(hash)) {
+            return null;
+        }
+        if(index < 0){
+            return null;
+        }
+        UtxoKey utxoKey = new UtxoKey();
+        utxoKey.setTxIndex(index);
+        utxoKey.setTxHash(hash);
+        Utxo utxo = utxoMapper.selectByPrimaryKey(utxoKey);
+        if(null != utxo){
+            return utxo.getSpendTxHash();
+        }
+        return null;
     }
 
     /**
@@ -139,7 +135,6 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     public Utxo getByKey(UtxoKey utxoKey) {
         return utxoMapper.selectByPrimaryKey(utxoKey);
     }
-
 
     /**
      * 根据主键删除
@@ -186,8 +181,6 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
             input.setAddress(utxo.getAddress());
             input.setValue(utxo.getAmount());
             utxoMapper.updateByPrimaryKey(utxo);
-
-            UtxoContext.remove(utxo);
         }
     }
 
@@ -212,7 +205,6 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     public void saveTo(Transaction tx) {
         for (Utxo utxo : tx.getOutputs()) {
             utxoMapper.insert(utxo);
-            UtxoContext.put(utxo);
         }
     }
 
