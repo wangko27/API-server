@@ -17,9 +17,6 @@ public class HistoryContext {
     public static void clear(){historyList.clear();}
 
     public static int getSize(){
-        for(HashMap<String,String> maps: historyList){
-            System.out.println(maps);
-        }
         return historyList.size();
     }
 

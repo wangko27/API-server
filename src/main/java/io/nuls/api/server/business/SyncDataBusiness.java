@@ -70,7 +70,6 @@ public class SyncDataBusiness {
                 }
             }
         }
-        System.out.println("----------------save block:" + block.getHeader().getHeight());
     }
 
     /**
@@ -111,7 +110,6 @@ public class SyncDataBusiness {
                 }
             }
         }
-        System.out.println("----------------roll block:" + header.getHeight());
     }
 
 }

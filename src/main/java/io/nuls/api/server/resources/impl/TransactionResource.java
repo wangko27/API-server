@@ -32,7 +32,6 @@ public class TransactionResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("height")Long height,@QueryParam("type")int type){
         RpcClientResult result = null;
-        System.out.println(transactionBusiness);
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             return result;

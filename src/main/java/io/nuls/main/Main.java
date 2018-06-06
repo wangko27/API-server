@@ -43,7 +43,6 @@ public enum Main {
             }
         }
         serverUri += "/api";
-        System.out.println("---------------" +  serverUri);
 
         RestFulUtils.getInstance().init(serverUri);
         if(StringUtils.isBlank(language)) {
