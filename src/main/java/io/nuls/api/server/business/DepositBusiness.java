@@ -41,6 +41,7 @@ public class DepositBusiness implements BaseService<Deposit, String> {
                 searchable.addCondition("agent_hash", SearchOperator.eq, address);
             }
         }
+        searchable.addCondition("delete_hash", SearchOperator.isNull,null);
         PageInfo<Deposit> page = new PageInfo<>(depositMapper.selectList(searchable));
         return page;
     }
