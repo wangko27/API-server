@@ -34,8 +34,8 @@ public class RpcTransferUtil {
         blockHeader.setReward(Long.parseLong(map.get("reward").toString()));
         blockHeader.setRoundIndex(Long.parseLong(map.get("roundIndex").toString()));
         blockHeader.setTotalFee(Long.parseLong(map.get("fee").toString()));
-        blockHeader.setRoundStartTime((Long) map.get("roundStartTime"));
-        blockHeader.setCreateTime((Long) map.get("time"));
+        blockHeader.setRoundStartTime(Long.parseLong(map.get("roundStartTime").toString()));
+        blockHeader.setCreateTime(Long.parseLong(map.get("time").toString()));
         blockHeader.setConsensusAddress((String) map.get("packingAddress"));
 
         String scriptSign = (String) map.get("scriptSig");
@@ -147,7 +147,7 @@ public class RpcTransferUtil {
                 utxo.setTxIndex(i);
                 utxo.setAmount(coin.getNa().getValue());
                 utxo.setAddress(Base58.encode(coin.getOwner()));
-                utxo.setLockTime(Long.parseLong(String.valueOf(coin.getLockTime())));
+                utxo.setLockTime(coin.getLockTime());
                 outputs.add(utxo);
 
                 Output output = new Output(utxo.getTxHash(), utxo.getAddress(), utxo.getAmount());
@@ -256,7 +256,7 @@ public class RpcTransferUtil {
         tx.setRemark(map.get("remark").toString());
         tx.setSize((Integer) map.get("size"));
         tx.setType((Integer) map.get("type"));
-        tx.setCreateTime((Long) map.get("time"));
+        tx.setCreateTime(Long.parseLong(map.get("time").toString()));
 
         Map<String, Object> dataMap = new HashMap<>();
         List<Map<String, Object>> inputMaps = (List<Map<String, Object>>) map.get("inputs");

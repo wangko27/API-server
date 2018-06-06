@@ -170,11 +170,7 @@ public class Transaction {
             Input input = new Input();
             input.setFromHash((String) map.get("fromHash"));
             input.setFromIndex((Integer) map.get("fromIndex"));
-            try {
-                input.setValue((Long) map.get("value"));
-            } catch (Exception e) {
-                input.setValue(Long.parseLong((String) map.get("value")));
-            }
+            input.setValue(Long.parseLong(map.get("value").toString()));
             input.setAddress((String) map.get("address"));
             inputs.add(input);
         }
@@ -185,11 +181,7 @@ public class Transaction {
             Output output = new Output();
             output.setTxHash((String) map.get("txHash"));
             output.setAddress((String) map.get("address"));
-            try {
-                output.setValue((Long) map.get("value"));
-            } catch (Exception e) {
-                output.setValue(Long.parseLong((String) map.get("value")));
-            }
+            output.setValue(Long.parseLong(map.get("value").toString()));
             outputList.add(output);
         }
         this.inputs = inputs;
