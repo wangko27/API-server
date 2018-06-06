@@ -53,25 +53,28 @@ public class BalanceBusiness implements BaseService<Balance,Long> {
         Long locked = 0L;
         if(StringUtils.validAddress(address)){
             List<Utxo> utxolist =UtxoContext.get(address);
-            for(Utxo utxo : utxolist){
-                if(null != utxo){
-                    if(utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE){
-                        //根据时间锁定
-                        if(System.currentTimeMillis() >= utxo.getLockTime()){
-                            usable += utxo.getAmount();
+            if(null != utxolist){
+                for(Utxo utxo : utxolist){
+                    if(null != utxo){
+                        if(utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE){
+                            //根据时间锁定
+                            if(System.currentTimeMillis() >= utxo.getLockTime()){
+                                usable += utxo.getAmount();
+                            }else{
+                                locked += utxo.getAmount();
+                            }
                         }else{
-                            locked += utxo.getAmount();
-                        }
-                    }else{
-                        //根据高度锁定
-                        if(height > utxo.getLockTime()){
-                            usable += utxo.getAmount();
-                        }else{
-                            locked += utxo.getAmount();
+                            //根据高度锁定
+                            if(height > utxo.getLockTime()){
+                                usable += utxo.getAmount();
+                            }else{
+                                locked += utxo.getAmount();
+                            }
                         }
                     }
                 }
             }
+
         }
         balance.setAddress(address);
         balance.setUsable(usable);

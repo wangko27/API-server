@@ -1,8 +1,6 @@
 package io.nuls.api.context;
 
-import io.nuls.api.entity.AgentNode;
 import io.nuls.api.server.dto.AgentNodeDto;
-import io.nuls.api.server.dto.UtxoDto;
 
 import java.util.ArrayList;
 import java.util.List;

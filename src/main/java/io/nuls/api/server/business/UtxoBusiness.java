@@ -44,6 +44,30 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         return page;
     }
 
+    /**
+     * 根据hash和id查询已经花费的utxo的详情
+     * @param hash
+     * @param index
+     * @return
+     */
+    public String getUtxoBySpentHash(String hash,Integer index){
+        if (!StringUtils.validHash(hash)) {
+            return null;
+        }
+        if(index < 0){
+            return null;
+        }
+        UtxoKey utxoKey = new UtxoKey();
+        utxoKey.setTxIndex(index);
+        utxoKey.setTxHash(hash);
+        Utxo utxo = utxoMapper.selectByPrimaryKey(utxoKey);
+        if(null != utxo){
+            return utxo.getSpendTxHash();
+        }
+        return null;
+
+    }
+
 
     /**
      * 根据地址获取该地址全部的utxo

@@ -3,6 +3,7 @@ package io.nuls.api.server.resources.impl;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.TransactionBusiness;
+import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import javax.ws.rs.core.MediaType;
 @Component
 public class TransactionResource {
 
+    @Autowired
+    private UtxoBusiness utxoBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
 
@@ -83,6 +86,27 @@ public class TransactionResource {
         try {
             result = RpcClientResult.getSuccess();
             result.setData(transactionBusiness.getByKey(hash));
+        } catch (Exception e) {
+            result = RpcClientResult.getFailed();
+            Log.error(e);
+        }
+        return result;
+    }
+
+    @GET
+    @Path("/hash/spent")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getDetailBySpentHash(@QueryParam("hash") String hash,@QueryParam("index") Integer index){
+        RpcClientResult result;
+        if (!StringUtils.validHash(hash)) {
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (null == index || index < 0) {
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        try {
+            result = RpcClientResult.getSuccess();
+            result.setData(utxoBusiness.getUtxoBySpentHash(hash,index));
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

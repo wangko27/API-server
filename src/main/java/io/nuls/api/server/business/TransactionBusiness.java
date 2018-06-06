@@ -4,21 +4,15 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.entity.*;
-import io.nuls.api.server.dao.mapper.AgentNodeMapper;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
-import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
-import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.StringUtils;
-import org.glassfish.grizzly.compression.lzma.impl.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Description: 交易
@@ -63,22 +57,21 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         }
         PageHelper.orderBy("tx_index asc");
         List<Transaction> transactionList = transactionMapper.selectList(searchable);
-        for(Transaction transaction : transactionList){
-            try {
-                transaction.transferExtend();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        formatTransaction(transactionList);
         PageInfo<Transaction> page = new PageInfo<>(transactionList);
         return page;
     }
 
     public List<Transaction> getList(Long blockHeight) {
         Searchable searchable = new Searchable();
+        if(null == blockHeight){
+            return null;
+        }
         searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
         PageHelper.orderBy("tx_index asc");
-        return transactionMapper.selectList(searchable);
+        List<Transaction> transactionList = transactionMapper.selectList(searchable);
+        formatTransaction(transactionList);
+        return transactionList;
     }
 
     /**
@@ -90,11 +83,16 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     public PageInfo<Transaction> getListByAddress(String address, int type, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
+        if(!StringUtils.validAddress(address)){
+            return null;
+        }
         searchable.addCondition("address", SearchOperator.eq, address);
         if (type > 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
-        PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
+        List<Transaction> transactionList = transactionMapper.selectListByAddress(searchable);
+        formatTransaction(transactionList);
+        PageInfo<Transaction> page = new PageInfo<>(transactionList);
         return page;
     }
 
@@ -180,5 +178,16 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     @Override
     public Transaction getByKey(String s) {
         return transactionMapper.selectByPrimaryKey(s);
+    }
+
+    private List<Transaction> formatTransaction(List<Transaction> transactionList){
+        for (Transaction trans:transactionList) {
+            try {
+                trans.transferExtend();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return transactionList;
     }
 }
