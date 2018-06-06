@@ -26,24 +26,16 @@ public class BlockSyncTask {
     @Autowired
     private SyncDataHandler syncDataHandler;
 
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     /**
      * 同步区块
      */
     public void execute() {
         //查询本地已保存的最新块
-        BlockHeader localBest = blockBusiness.getNewest();
-        if(UtxoContext.getSize()==0 && null != localBest){
-            return;
-        }
-        System.out.println("------------excute------------");
-        boolean downloading = true;
-        while (downloading) {
-
+        BlockHeader localBest = null;
+        long bestHeight = -1;
+        while (true) {
             try {
                 localBest = blockBusiness.getNewest();
-                long bestHeight = -1;
                 if (localBest != null) {
                     bestHeight = localBest.getHeight();
                 }
@@ -53,7 +45,7 @@ public class BlockSyncTask {
                 if (result.isFaild()) {
                     //没有新区块，跳出循环，等待下次轮询
                     if (result.getCode().equals(ErrorCode.DATA_NOT_FOUND.getCode())) {
-                        downloading = false;
+                        return;
                     }
                 } else {
                     BlockHeader newest = result.getData();
@@ -68,25 +60,26 @@ public class BlockSyncTask {
                     }
                 }
             } catch (NulsException ne) {
+                Log.error("------------ sync block exception , block height is--------------" + bestHeight);
                 Log.error(ne.getMsg(), ne);
                 if (localBest != null) {
                     try {
                         syncDataBusiness.rollback(localBest);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.error(e);
                     }
                 }
             } catch (Exception e) {
-                Log.error(e);
                 if (e instanceof ConnectException) {
-                    downloading = false;
                     return;
                 }
+                Log.error("------------ sync block exception , block height is--------------" + bestHeight);
+                Log.error(e);
                 if (localBest != null) {
                     try {
                         syncDataBusiness.rollback(localBest);
                     } catch (Exception ne) {
-                        ne.printStackTrace();
+                        Log.error(ne);
                     }
                 }
             }
