@@ -80,8 +80,9 @@ public class MybatisTest {
 
     @Test
     public void testTx() throws Exception {
-        String hash = "00208cf5f3a268198b2936469c5b7b2860743d1015ed53d22b2e17d0c67b5845d6c0";
+        String hash = "0020864d686fded11ea491a83e5d184fb9365c5e24c95ea266e99930c4e431579299";
         Transaction tx = transactionBusiness.getByKey(hash);
         tx.transferExtend();
+        tx.toString();
     }
 }

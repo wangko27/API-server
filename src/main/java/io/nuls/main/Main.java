@@ -42,7 +42,9 @@ public enum Main {
                 serverUri = Constant.HTTP + remoteIp + Constant.COLON + Integer.parseInt(remotePort) + Constant.URI_SEPARATOR + remoteModuleUrl;
             }
         }
+        serverUri += "/api";
         System.out.println("---------------" +  serverUri);
+
         RestFulUtils.getInstance().init(serverUri);
         if(StringUtils.isBlank(language)) {
             language = Constant.DEFAULT_LANGUAGE;
