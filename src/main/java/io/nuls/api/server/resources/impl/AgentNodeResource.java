@@ -35,6 +35,10 @@ public class AgentNodeResource {
     @Autowired
     private DepositBusiness depositBusiness;
 
+    /**
+     * 统计全网共识信息
+     * @return
+     */
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -75,6 +79,11 @@ public class AgentNodeResource {
         return agentNodeBusiness.getList(agentName,pageNumber,pageSize);
     }
 
+    /**
+     * 根据agentAddress获取节点详情
+     * @param agentAddress
+     * @return
+     */
     @GET
     @Path("/list/agentAddress/{agentAddress}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -88,6 +97,12 @@ public class AgentNodeResource {
         result.setData(agentNodeBusiness.getAgentByAddress(agentAddress));
         return result;
     }
+
+    /**
+     * 某个地址的个人共识信息
+     * @param address
+     * @return
+     */
     @GET
     @Path("/address/{address}")
     @Produces(MediaType.APPLICATION_JSON)
