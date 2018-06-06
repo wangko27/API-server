@@ -28,6 +28,8 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
     private BlockHeaderMapper blockHeaderMapper;
     @Autowired
     private AgentNodeBusiness agentNodeBusiness;
+    @Autowired
+    private AddressRewardDetailBusiness rewardDetailBusiness;
 
     public BlockHeader getBlockByHash(String hash) {
         return blockHeaderMapper.selectByPrimaryKey(hash);
@@ -41,6 +43,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     /**
      * 查询某时间段内的交易笔数
+     *
      * @param startTime
      * @param endTime
      * @return
@@ -55,6 +58,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         return blockHeaderMapper.getBlockSumTxcount(searchable);
 
     }
+
     @Transactional
     public void saveBlock(BlockHeader blockHeader) {
         blockHeaderMapper.insert(blockHeader);
@@ -148,6 +152,14 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
     @Transactional
     @Override
     public int deleteByKey(String s) {
+        BlockHeader header = blockHeaderMapper.selectByPrimaryKey(s);
+        AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
+        if (agentNode != null) {
+            Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
+            agentNode.setLastRewardHeight(height);
+            agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
+            agentNodeBusiness.update(agentNode);
+        }
         return blockHeaderMapper.deleteByPrimaryKey(s);
     }
 
@@ -159,23 +171,23 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
     /**
      * 统计出块历史
      */
-    public void initHistory(){
-        List<HashMap<String,String>> historyList = new ArrayList<>(14);
+    public void initHistory() {
+        List<HashMap<String, String>> historyList = new ArrayList<>(14);
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DATE, cal.get(Calendar.DATE));
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         long time = cal.getTime().getTime();
-        for(int i = 1; i <= 14; i++){
-            Integer count = getTxcountByTime(time-86400000,time);
+        for (int i = 1; i <= 14; i++) {
+            Integer count = getTxcountByTime(time - 86400000, time);
             time = time - 86400000;
-            if(null == count){
+            if (null == count) {
                 continue;
             }
-            HashMap<String,String> arr = new HashMap<>();
-            arr.put("value",count+"");
-            arr.put("date",time+"");
+            HashMap<String, String> arr = new HashMap<>();
+            arr.put("value", count + "");
+            arr.put("date", time + "");
             historyList.add(arr);
         }
         HistoryContext.reset(historyList);

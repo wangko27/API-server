@@ -12,4 +12,6 @@ public interface AddressRewardDetailMapper extends BaseMapper<AddressRewardDetai
      * @return
      */
     Long selectSumReward(Searchable searchable);
+
+    Long getLastRewardHeight(Searchable searchable);
 }
