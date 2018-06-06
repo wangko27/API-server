@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.AddressRewardDetail;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
@@ -131,7 +132,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
     public Long selectDayofReward(Long time){
         Searchable searchable = new Searchable();
         searchable.addCondition("time", SearchOperator.gte, time);
-        searchable.addCondition("time", SearchOperator.lt, time+86400000);
+        searchable.addCondition("time", SearchOperator.lt, time+ Constant.MILLISECONDS_TIME_DAY);
         return addressRewardDetailMapper.selectSumReward(searchable);
     }
 

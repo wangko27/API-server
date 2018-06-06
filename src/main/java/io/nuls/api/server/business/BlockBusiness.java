@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.constant.Constant;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.BlockHeader;
@@ -168,8 +169,8 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         cal.set(Calendar.SECOND, 0);
         long time = cal.getTime().getTime();
         for(int i = 1; i <= 14; i++){
-            Integer count = getTxcountByTime(time-86400000,time);
-            time = time - 86400000;
+            Integer count = getTxcountByTime(time-Constant.MILLISECONDS_TIME_DAY,time);
+            time = time - Constant.MILLISECONDS_TIME_DAY;
             if(null == count){
                 continue;
             }
