@@ -132,6 +132,9 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     @Transactional
     public void rollback(Transaction tx) throws Exception {
         tx.transferExtend();
+        //查询出交易生成的utxo，回滚缓存时使用
+        List<Utxo> utxoList = utxoBusiness.getList(tx.getHash());
+        tx.setOutputs(utxoList);
         //回滚交易新生成的utxo
         utxoBusiness.deleteByTxHash(tx.getHash());
         //回滚未花费输出

@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
@@ -27,6 +28,7 @@ import java.util.List;
 public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     @Autowired
     private UtxoMapper utxoMapper;
+
     /**
      * 获取列表
      *
@@ -44,24 +46,31 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         return page;
     }
 
+    public List<Utxo> getList(String txHash) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("txHash", SearchOperator.eq, txHash);
+        return utxoMapper.selectList(searchable);
+    }
+
 
     /**
      * 根据地址获取该地址全部的utxo
+     *
      * @param address
-     * @param type 1查询全部 2查询未花费 3查询已花费
+     * @param type    1查询全部 2查询未花费 3查询已花费
      * @return
      */
-    public List<Utxo> getList(String address,int type) {
+    public List<Utxo> getList(String address, int type) {
 
         Searchable searchable = new Searchable();
         if (StringUtils.validAddress(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
         }
-        if(type > 0){
-            if(type == 2){
-                searchable.addCondition("spend_tx_hash", SearchOperator.isNull,null);
-            }else if(type == 3){
-                searchable.addCondition("spend_tx_hash", SearchOperator.isNotNull,null);
+        if (type > 0) {
+            if (type == 2) {
+                searchable.addCondition("spend_tx_hash", SearchOperator.isNull, null);
+            } else if (type == 3) {
+                searchable.addCondition("spend_tx_hash", SearchOperator.isNotNull, null);
             }
         }
         return utxoMapper.selectList(searchable);
@@ -150,10 +159,11 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
             utxo.setSpendTxHash(tx.getHash());
 
             //在这里查询出utxo后，记得给每一个input赋值address
-
             input.setAddress(utxo.getAddress());
             input.setValue(utxo.getAmount());
             utxoMapper.updateByPrimaryKey(utxo);
+
+            UtxoContext.remove(utxo);
         }
     }
 
@@ -178,14 +188,16 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     public void saveTo(Transaction tx) {
         for (Utxo utxo : tx.getOutputs()) {
             utxoMapper.insert(utxo);
+            UtxoContext.put(utxo);
         }
     }
 
     /**
      * 统计持币账户
+     *
      * @return
      */
-    public List<UtxoDto> getBlockSumTxamount(){
-        return  utxoMapper.getBlockSumTxamount();
+    public List<UtxoDto> getBlockSumTxamount() {
+        return utxoMapper.getBlockSumTxamount();
     }
 }

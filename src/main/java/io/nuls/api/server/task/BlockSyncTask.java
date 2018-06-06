@@ -39,9 +39,8 @@ public class BlockSyncTask {
                 if (localBest != null) {
                     bestHeight = localBest.getHeight();
                 }
-                //获取网络的下一块
-                bestHeight += 1;
-                RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(bestHeight);
+
+                RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(bestHeight + 1);
                 if (result.isFaild()) {
                     //没有新区块，跳出循环，等待下次轮询
                     if (result.getCode().equals(ErrorCode.DATA_NOT_FOUND.getCode())) {
@@ -60,7 +59,7 @@ public class BlockSyncTask {
                     }
                 }
             } catch (NulsException ne) {
-                Log.error("------------ sync block exception , block height is--------------" + bestHeight);
+                Log.error("------------ sync block exception , block height is:" + bestHeight);
                 Log.error(ne.getMsg(), ne);
                 if (localBest != null) {
                     try {
@@ -73,7 +72,7 @@ public class BlockSyncTask {
                 if (e instanceof ConnectException) {
                     return;
                 }
-                Log.error("------------ sync block exception , block height is--------------" + bestHeight);
+                Log.error("------------ sync block exception , block height is:" + bestHeight);
                 Log.error(e);
                 if (localBest != null) {
                     try {

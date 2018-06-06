@@ -1,9 +1,7 @@
 package io.nuls.api.server.business;
 
-import io.nuls.api.constant.EntityConstant;
-import io.nuls.api.entity.Block;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.Transaction;
+import io.nuls.api.context.UtxoContext;
+import io.nuls.api.entity.*;
 import io.nuls.api.utils.JSONUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,10 +38,6 @@ public class SyncDataBusiness {
         for (int i = 0; i < block.getTxList().size(); i++) {
             Transaction tx = block.getTxList().get(i);
             tx.setTxIndex(i);
-            if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
-                System.out.println(tx.getType());
-            }
-
             utxoBusiness.updateByFrom(tx);
             utxoBusiness.saveTo(tx);
 
@@ -56,6 +50,26 @@ public class SyncDataBusiness {
             transactionBusiness.save(tx);
         }
 
+        //所有数据保存成功后，更新utxo缓存
+        UtxoKey key = new UtxoKey();
+        Utxo utxo;
+        for (int i = 0; i < block.getTxList().size(); i++) {
+            Transaction tx = block.getTxList().get(i);
+            if (tx.getInputs() != null) {
+                for (int j = 0; j < tx.getInputs().size(); j++) {
+                    Input input = tx.getInputs().get(j);
+                    key.setTxHash(input.getFromHash());
+                    key.setTxIndex(input.getFromIndex());
+                    utxo = utxoBusiness.getByKey(key);
+                    UtxoContext.remove(utxo);
+                }
+            }
+            if (tx.getOutputs() != null) {
+                for (int j = 0; j < tx.getOutputs().size(); j++) {
+                    UtxoContext.put(tx.getOutputs().get(j));
+                }
+            }
+        }
         System.out.println("----------------save block:" + block.getHeader().getHeight());
     }
 
@@ -77,7 +91,27 @@ public class SyncDataBusiness {
         detailBusiness.deleteByHeight(header.getHeight());
         //回滚块
         blockBusiness.deleteByKey(header.getHash());
-        System.out.println("----------------save block:" + header.getHeight());
+
+        //回滚缓存
+        for (int i = txList.size() - 1; i >= 0; i--) {
+            Transaction tx = txList.get(i);
+            if (tx.getOutputs() != null) {
+                for (int j = tx.getOutputs().size() - 1; j >= 0; j--) {
+                    UtxoContext.remove(tx.getOutputs().get(j));
+                }
+            }
+            UtxoKey utxoKey;
+            Utxo utxo;
+            if (tx.getInputs() != null) {
+                for (int j = tx.getInputs().size() - 1; j >= 0; j--) {
+                    Input input = tx.getInputs().get(j);
+                    utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
+                    utxo = utxoBusiness.getByKey(utxoKey);
+                    UtxoContext.put(utxo);
+                }
+            }
+        }
+        System.out.println("----------------roll block:" + header.getHeight());
     }
 
 }

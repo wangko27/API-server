@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
  * Author: zsj
  * Date:  2018/5/29 0029
  */
-@Path("balance")
+@Path("/balance")
 @Component
 public class BalanceResource {
 
