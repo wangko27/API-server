@@ -67,6 +67,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         if (agentNode != null) {
             agentNode.setLastRewardHeight(blockHeader.getHeight());
             agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() + 1);
+            agentNode.setTotalReward(agentNode.getTotalReward() + blockHeader.getReward());
             agentNodeBusiness.update(agentNode);
         }
     }
@@ -159,7 +160,9 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
             Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
             agentNode.setLastRewardHeight(height);
             agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
+            agentNode.setTotalReward(agentNode.getTotalReward() - header.getReward());
             agentNodeBusiness.update(agentNode);
+
         }
         return blockHeaderMapper.deleteByPrimaryKey(s);
     }
@@ -172,23 +175,23 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
     /**
      * 统计出块历史
      */
-    public void initHistory(){
-        List<HashMap<String,String>> historyList = new ArrayList<>(14);
+    public void initHistory() {
+        List<HashMap<String, String>> historyList = new ArrayList<>(14);
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DATE, cal.get(Calendar.DATE));
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         long time = cal.getTime().getTime();
-        for(int i = 1; i <= 14; i++){
-            Integer count = getTxcountByTime(time-Constant.MILLISECONDS_TIME_DAY,time);
+        for (int i = 1; i <= 14; i++) {
+            Integer count = getTxcountByTime(time - Constant.MILLISECONDS_TIME_DAY, time);
             time = time - Constant.MILLISECONDS_TIME_DAY;
-            if(null == count){
+            if (null == count) {
                 continue;
             }
-            HashMap<String,String> arr = new HashMap<>();
-            arr.put("value",count+"");
-            arr.put("date",time+"");
+            HashMap<String, String> arr = new HashMap<>();
+            arr.put("value", count + "");
+            arr.put("date", time + "");
             historyList.add(arr);
         }
         HistoryContext.reset(historyList);

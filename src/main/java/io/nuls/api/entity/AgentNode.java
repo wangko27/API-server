@@ -33,6 +33,9 @@ public class AgentNode extends TxData {
 
     private String deleteHash;
 
+
+    private Long totalReward;
+
     public String getTxHash() {
         return txHash;
     }
@@ -160,5 +163,16 @@ public class AgentNode extends TxData {
 
     public void setDeleteHash(String deleteHash) {
         this.deleteHash = deleteHash;
+    }
+
+    public Long getTotalReward() {
+        if(totalReward == null) {
+            totalReward = 0L;
+        }
+        return totalReward;
+    }
+
+    public void setTotalReward(Long totalReward) {
+        this.totalReward = totalReward;
     }
 }
