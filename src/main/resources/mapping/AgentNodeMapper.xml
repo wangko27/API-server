@@ -16,6 +16,7 @@
     <result column="credit_value" property="creditValue" jdbcType="DECIMAL" />
     <result column="total_packing_count" property="totalPackingCount" jdbcType="BIGINT" />
     <result column="last_reward_height" property="lastRewardHeight" jdbcType="BIGINT" />
+    <result column="total_reward" property="totalReward" jdbcType="BIGINT" />
     <result column="delete_hash" property="deleteHash" jdbcType="VARCHAR" />
   </resultMap>
   <resultMap id="ResultMapDto" type="io.nuls.api.server.dto.AgentNodeDto" extends="BaseResultMap" >
@@ -24,7 +25,7 @@
   <sql id="Base_Column_List" >
     tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate, 
     create_time, block_height, status, total_deposit, deposit_count,
-    credit_value, total_packing_count, last_reward_height,delete_hash
+    credit_value, total_packing_count, last_reward_height,delete_hash, total_reward
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -41,12 +42,12 @@
       reward_address, deposit, commission_rate,create_time,
       block_height, status, total_deposit, 
       deposit_count, credit_value, total_packing_count, 
-      last_reward_height, delete_hash)
+      last_reward_height, total_reward, delete_hash)
     values (#{txHash,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR}, #{packingAddress,jdbcType=VARCHAR}, 
       #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL}, #{createTime,jdbcType=BIGINT},
       #{blockHeight,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{totalDeposit,jdbcType=BIGINT}, 
       #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL}, #{totalPackingCount,jdbcType=BIGINT}, 
-      #{lastRewardHeight,jdbcType=BIGINT},#{deleteHash,jdbcType=VARCHAR})
+      #{lastRewardHeight,jdbcType=BIGINT},#{totalReward,jdbcType=BIGINT},#{deleteHash,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
     insert into agent_node
@@ -96,55 +97,13 @@
       <if test="deleteHash != null" >
         delete_hash,
       </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="txHash != null" >
-        #{txHash,jdbcType=VARCHAR},
-      </if>
-      <if test="agentAddress != null" >
-        #{agentAddress,jdbcType=VARCHAR},
-      </if>
-      <if test="packingAddress != null" >
-        #{packingAddress,jdbcType=VARCHAR},
-      </if>
-      <if test="rewardAddress != null" >
-        #{rewardAddress,jdbcType=VARCHAR},
-      </if>
-      <if test="deposit != null" >
-        #{deposit,jdbcType=BIGINT},
-      </if>
-      <if test="commissionRate != null" >
-        #{commissionRate,jdbcType=DECIMAL},
-      </if>
-      <if test="createTime != null" >
-        #{createTime,jdbcType=BIGINT},
-      </if>
-      <if test="blockHeight != null" >
-        #{blockHeight,jdbcType=BIGINT},
-      </if>
-      <if test="status != null" >
-        #{status,jdbcType=INTEGER},
-      </if>
-      <if test="totalDeposit != null" >
-        #{totalDeposit,jdbcType=BIGINT},
-      </if>
-      <if test="depositCount != null" >
-        #{depositCount,jdbcType=INTEGER},
-      </if>
-      <if test="creditValue != null" >
-        #{creditValue,jdbcType=DECIMAL},
-      </if>
-      <if test="totalPackingCount != null" >
-        #{totalPackingCount,jdbcType=BIGINT},
-      </if>
-      <if test="lastRewardHeight != null" >
-        #{lastRewardHeight,jdbcType=BIGINT},
-      </if>
-      <if test="deleteHash != null" >
-        #{deleteHash,jdbcType=VARCHAR},
+      <if test="totalReward != null" >
+        total_reward,
       </if>
     </trim>
   </insert>
+
+
   <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.AgentNode" >
     update agent_node
     <set >
@@ -187,6 +146,9 @@
       <if test="lastRewardHeight != null" >
         last_reward_height = #{lastRewardHeight,jdbcType=BIGINT},
       </if>
+      <if test="totalReward != null">
+        total_reward = #{totalReward,jdbcType=BIGINT},
+      </if>
       <if test="deleteHash != null" >
         delete_hash = #{deleteHash,jdbcType=VARCHAR},
       </if>
@@ -208,6 +170,7 @@
       credit_value = #{creditValue,jdbcType=DECIMAL},
       total_packing_count = #{totalPackingCount,jdbcType=BIGINT},
       last_reward_height = #{lastRewardHeight,jdbcType=BIGINT},
+      total_reward = #{totalReward,jdbcType=BIGINT},
       delete_hash = #{deleteHash,jdbcType=VARCHAR}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
