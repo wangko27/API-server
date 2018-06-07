@@ -18,7 +18,19 @@
             <value>execute</value>
         </property>
     </bean>
+    <bean id="balanceTaskSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="balanceTask"/>
+        </property>
+        <property name="targetMethod">
+            <value>execute</value>
+        </property>
+    </bean>
 
+    <bean id="balanceTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="balanceTaskSync" />
+        <property name="cronExpression" value="0 0 * * * ?" />
+    </bean>
     <bean id="transactionHistoryTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="transactionHistoryTaskSync" />
         <property name="cronExpression" value="0 0 0 * * ?" />
@@ -34,6 +46,7 @@
         <property name="triggers">
             <list>
                 <ref bean="blockSyncTrigger"/>
+                <ref bean="balanceTaskTrigger"/>
                 <ref bean="transactionHistoryTaskTrigger"/>
             </list>
         </property>

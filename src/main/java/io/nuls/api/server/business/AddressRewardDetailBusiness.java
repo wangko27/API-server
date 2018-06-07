@@ -131,8 +131,8 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      */
     public Long selectDayofReward(Long time){
         Searchable searchable = new Searchable();
-        searchable.addCondition("time", SearchOperator.gte, time);
-        searchable.addCondition("time", SearchOperator.lt, time+ Constant.MILLISECONDS_TIME_DAY);
+        searchable.addCondition("time", SearchOperator.gte,time-Constant.MILLISECONDS_TIME_DAY);
+        searchable.addCondition("time", SearchOperator.lt, time);
         return addressRewardDetailMapper.selectSumReward(searchable);
     }
 

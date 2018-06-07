@@ -1,9 +1,5 @@
 package io.nuls.api.context;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 /**
  * Description: 14天交易历史统计
  * Author: zsj
@@ -11,22 +7,16 @@ import java.util.List;
  */
 public class HistoryContext {
     public static Long rewardofday = 0L;
-    private static List<HashMap<String,String>> historyList = new ArrayList<>(14);
+    private static String[] historyList = new String[14];
 
-    public static void add(HashMap<String,String> map){historyList.add(map);}
-    public static void clear(){historyList.clear();}
+    public static void add(String data,int index){historyList[index]=data;}
 
-    public static int getSize(){
-        return historyList.size();
-    }
-
-    public static List<HashMap<String,String>> getAll(){
+    public static String[] getAll(){
         return historyList;
     }
 
-    public static void reset(List<HashMap<String,String>> list){
-        clear();
-        historyList = list;
+    public static void reset(String[] args){
+        historyList = args;
     }
 
 }
