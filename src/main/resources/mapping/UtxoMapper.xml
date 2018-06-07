@@ -124,6 +124,6 @@
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </delete>
   <select id="getBlockSumTxamount" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithAmount" >
-    SELECT *,SUM(amount) total FROM utxo WHERE spend_tx_hash IS NULL GROUP BY address ORDER BY total DESC limit 100
+    SELECT *,SUM(amount) total FROM utxo WHERE spend_tx_hash IS NULL GROUP BY address ORDER BY total DESC
   </select>
 </mapper>
