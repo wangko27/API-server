@@ -41,12 +41,12 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
 
     /**
      * 交易列表
-     *
+     * @param orderType 1 tx_index asc,2 create_time desc,3 block_height desc
      * @param height 所属的区块
      * @param type   交易类型
      * @return
      */
-    public PageInfo<Transaction> getList(Long height, int type, int pageNumber, int pageSize) {
+    public PageInfo<Transaction> getList(Long height, int type, int pageNumber, int pageSize,int orderType) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (null != height) {
@@ -55,7 +55,13 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         if (type > 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
-        PageHelper.orderBy("tx_index asc");
+        if(orderType == 2) {
+            PageHelper.orderBy("create_time desc");
+        }else if(orderType == 3){
+            PageHelper.orderBy("block_height desc");
+        }else {
+            PageHelper.orderBy("tx_index asc");
+        }
         List<Transaction> transactionList = transactionMapper.selectList(searchable);
         formatTransaction(transactionList);
         PageInfo<Transaction> page = new PageInfo<>(transactionList);
@@ -90,6 +96,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         if (type > 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
+        PageHelper.orderBy("block_height desc");
         List<Transaction> transactionList = transactionMapper.selectListByAddress(searchable);
         formatTransaction(transactionList);
         PageInfo<Transaction> page = new PageInfo<>(transactionList);

@@ -1,5 +1,6 @@
 package io.nuls.api.server.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Page<T> {
@@ -74,4 +75,17 @@ public class Page<T> {
     public int getStart(){
         return (pageNumber - 1) * pageSize;
     }
+
+    public void setPageList(){
+        int start = (pageNumber-1)*pageSize;
+        int end = pageNumber*pageSize;
+        if(start > list.size()){
+            this.list.clear();
+            return;
+        }else if(end > list.size()){
+            end = list.size();
+        }
+        list = list.subList(start,end);
+    }
+
 }

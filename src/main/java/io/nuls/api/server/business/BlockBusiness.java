@@ -100,6 +100,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
                 return null;
             }
         }
+        PageHelper.orderBy("height desc");
         PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderMapper.selectList(searchable));
         return page;
     }
