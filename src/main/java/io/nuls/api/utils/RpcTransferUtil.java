@@ -15,10 +15,7 @@ import io.nuls.api.model.tx.*;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RpcTransferUtil {
 
@@ -48,7 +45,7 @@ public class RpcTransferUtil {
     }
 
     public static Block toBlock(String hexBlock, BlockHeader header) throws Exception {
-        byte[] data = Hex.decode(hexBlock);
+        byte[] data = Base64.getDecoder().decode(hexBlock);
         io.nuls.api.model.Block blockModel = new io.nuls.api.model.Block();
         blockModel.parse(data);
 
