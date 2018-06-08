@@ -1,12 +1,10 @@
 package io.nuls.api.server.business;
 
+import io.nuls.api.context.AliasContext;
 import io.nuls.api.entity.Alias;
-import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.dao.mapper.AliasMapper;
-import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
-import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +35,15 @@ public class AliasBusiness implements BaseService<Alias, String> {
     }
 
     /**
+     * 获取别名列表，全查询
+     *
+     * @return
+     */
+    public List<Alias> getList() {
+        return aliasMapper.selectList(new Searchable());
+    }
+
+    /**
      * 验证该地址是否已经设置别名，并且别名是否没有重复然后设置别名
      *
      * @param alias 实体
@@ -63,7 +70,13 @@ public class AliasBusiness implements BaseService<Alias, String> {
 //        if(getByKey(alias.getAlias())!=null){
 //            return 7;
 //        }
-        return aliasMapper.insert(alias);
+
+        int result = aliasMapper.insert(alias);
+        if(result == 1){
+            //保存成功后，同步别名到静态缓存中
+            AliasContext.put(alias);
+        }
+        return result;
     }
 
     @Transactional
@@ -106,6 +119,8 @@ public class AliasBusiness implements BaseService<Alias, String> {
     public void deleteByHeight(long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
+        //删除缓存中的别名
+        AliasContext.removeByHeight(height);
         aliasMapper.deleteBySearchable(searchable);
     }
 }

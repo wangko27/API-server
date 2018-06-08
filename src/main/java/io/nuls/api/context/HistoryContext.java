@@ -6,7 +6,11 @@ package io.nuls.api.context;
  * Date:  2018/6/5 0005
  */
 public class HistoryContext {
+    /**
+     * 24小时奖励
+     */
     public static Long rewardofday = 0L;
+
     private static String[] historyList = new String[14];
 
     public static void add(String data,int index){historyList[index]=data;}

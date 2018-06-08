@@ -1,14 +1,9 @@
 package io.nuls.api.server.init;
 
-import io.nuls.api.context.BalanceListContext;
-import io.nuls.api.context.HistoryContext;
-import io.nuls.api.context.PackingAddressContext;
-import io.nuls.api.context.UtxoContext;
+import io.nuls.api.context.*;
+import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.Utxo;
-import io.nuls.api.server.business.AddressRewardDetailBusiness;
-import io.nuls.api.server.business.AgentNodeBusiness;
-import io.nuls.api.server.business.BlockBusiness;
-import io.nuls.api.server.business.UtxoBusiness;
+import io.nuls.api.server.business.*;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +28,8 @@ public class InitApiserver {
     private BlockBusiness blockBusiness;
     @Autowired
     private AddressRewardDetailBusiness addressRewardDetailBusiness;
+    @Autowired
+    private AliasBusiness aliasBusiness;
 
     @PostConstruct
     public void init() {
@@ -61,5 +58,11 @@ public class InitApiserver {
         long time = cal.getTime().getTime();
         HistoryContext.rewardofday = addressRewardDetailBusiness.selectDayofReward(time);
 
+        /*加载别名到缓存*/
+        //AliasContext
+        List<Alias> aliasList = aliasBusiness.getList();
+        for(Alias alias : aliasList){
+            AliasContext.put(alias);
+        }
     }
 }
