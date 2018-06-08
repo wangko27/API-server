@@ -1,24 +1,34 @@
 package io.nuls.api.server.task;
 
-import io.nuls.api.server.dao.ReportDAO;
-import io.nuls.api.utils.log.Log;
+import io.nuls.api.context.BalanceListContext;
+import io.nuls.api.context.PackingAddressContext;
+import io.nuls.api.server.business.AgentNodeBusiness;
+import io.nuls.api.server.business.UtxoBusiness;
+import io.nuls.api.server.dto.AgentNodeDto;
+import io.nuls.api.server.dto.UtxoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+/**
+ * 统计出块排行和持币账户排行，现在每一个小时统计一次
+ */
 @Component
 public class BalanceTask {
 
     @Autowired
-    private ReportDAO reportDAO;
+    private UtxoBusiness utxoBusiness;
+    @Autowired
+    private AgentNodeBusiness agentNodeBusiness;
 
-    /*@Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
     public void execute() {
-        Log.debug("start to execute balance report");
-        reportDAO.balance();
-        TaskHelper.HELPER.queryReset(this);
-        Log.debug("the balance report completed");
-    }*/
+        /*加载持币账户排行榜*/
+        List<UtxoDto> blockDtoList = utxoBusiness.getBlockSumTxamount();
+        BalanceListContext.reset(blockDtoList);
+
+        /*加载出块账户排行榜*/
+        List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
+        PackingAddressContext.reset(agentNodeDtoList);
+    }
 }

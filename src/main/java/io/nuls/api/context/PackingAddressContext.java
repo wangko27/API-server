@@ -16,6 +16,9 @@ public class PackingAddressContext {
         agentNodeList.add(block);
     }
 
+    public static Integer getSize(){
+        return agentNodeList.size();
+    }
     public static List<AgentNodeDto> getAll(){
         return agentNodeList;
     }

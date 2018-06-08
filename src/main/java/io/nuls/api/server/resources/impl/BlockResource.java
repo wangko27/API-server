@@ -1,8 +1,11 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.entity.Block;
+import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.BlockBusiness;
+import io.nuls.api.server.dto.BlockHeaderDto;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +58,19 @@ public class BlockResource {
         }
         try {
             result = RpcClientResult.getSuccess();
-            result.setData(blockBusiness.getBlockByHeight(height));
+            //加载最新块，计算确认次数
+            BlockHeader localBest = blockBusiness.getNewest();
+            BlockHeader requestBlock = blockBusiness.getBlockByHeight(height);
+
+            if(null == localBest){
+                return RpcClientResult.getFailed(ErrorCode.FAILED);
+            }
+            if(null == requestBlock){
+                return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            }
+            BlockHeaderDto blockHeaderDto = new BlockHeaderDto(requestBlock);
+            blockHeaderDto.setConfirmCount(localBest.getHeight()-requestBlock.getHeight());
+            result.setData(blockHeaderDto);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
@@ -74,7 +89,20 @@ public class BlockResource {
         }
         try {
             result = RpcClientResult.getSuccess();
-            result.setData(blockBusiness.getBlockByHash(hash));
+
+            //加载最新块，计算确认次数
+            BlockHeader localBest = blockBusiness.getNewest();
+            BlockHeader requestBlock = blockBusiness.getBlockByHash(hash);
+
+            if(null == localBest){
+                return RpcClientResult.getFailed(ErrorCode.FAILED);
+            }
+            if(null == requestBlock){
+                return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            }
+            BlockHeaderDto blockHeaderDto = new BlockHeaderDto(requestBlock);
+            blockHeaderDto.setConfirmCount(localBest.getHeight()-requestBlock.getHeight());
+            result.setData(blockHeaderDto);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

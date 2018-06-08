@@ -1,5 +1,6 @@
 package io.nuls.api.server.business;
 
+import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.dao.mapper.AgentNodeMapper;
@@ -53,15 +54,25 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         return RestFulUtils.getInstance().get("/consensus/agent/list", param);
     }
 
+
+    /**
+     * 根据agentHash查询某个节点的详细信息（加载某信息的信用值、是否正在共识，这些信息只能去链上查询）
+     * @param agentHash
+     * @return
+     */
+    public RpcClientResult getAgentByAddressWithRpc(String agentHash) {
+        return RestFulUtils.getInstance().get("/consensus/agent/"+agentHash,null);
+    }
+
     /**
      * 获取节点详情
      *
-     * @param agentAddress 创建地址
+     * @param address
      * @return
      */
-    public AgentNode getAgentByAddress(String agentAddress) {
+    public AgentNode getAgentByAddress(String address) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("packing_address", SearchOperator.eq, agentAddress);
+        searchable.addCondition("packing_address", SearchOperator.eq, address);
         searchable.addCondition("delete_hash", SearchOperator.isNull,null);
         return agentNodeMapper.selectBySearchable(searchable);
     }
@@ -139,7 +150,17 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @return
      */
     public List<AgentNodeDto> selectTotalpackingCount(){
-        return agentNodeMapper.selectTotalpackingCount(new Searchable());
+        //getDetailByAgentAddress
+        List<AgentNodeDto> agentNodeDtoList = agentNodeMapper.selectTotalpackingCount(new Searchable());
+        /*for(AgentNode agentNode:agentNodeDtoList){
+            RpcClientResult result = getDetailByAgentAddress(agentNode.getAgentAddress());
+            if(result.isSuccess()){
+                HashMap<String,Object> data = (HashMap)result.getData();
+                Integer.parseInt(data.get("status")+"");
+            }
+        }*/
+        //todo 如何统计当前节点状态等信息
+        return agentNodeDtoList;
     }
 
     /**

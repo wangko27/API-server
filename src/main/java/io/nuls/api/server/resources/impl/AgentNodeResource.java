@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Description:
@@ -80,22 +81,35 @@ public class AgentNodeResource {
     }
 
     /**
-     * 根据agentAddress获取节点详情
-     * @param agentAddress
+     * 根据agentAddress获取节点详情(由于需要展示共识状态等信息，需要链上直接查询加上本地查询)
+     * @param address
      * @return
      */
     @GET
-    @Path("/list/agentAddress/{agentAddress}")
+    @Path("/agent/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getConsensusDetail(@PathParam("agentAddress") String agentAddress){
+    public RpcClientResult getConsensusDetail(@PathParam("address") String address){
         RpcClientResult result = null;
-        if(!StringUtils.validAddress(agentAddress)){
-            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
-            return result;
+
+        if(!StringUtils.validAddress(address)){
+            return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+        AgentNode agentNode = agentNodeBusiness.getAgentByAddress(address);
+        if(null == agentNode){
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         result = RpcClientResult.getSuccess();
-        result.setData(agentNodeBusiness.getAgentByAddress(agentAddress));
+        //链上加载共识状态
+        RpcClientResult rpcClientResult = agentNodeBusiness.getAgentByAddressWithRpc(agentNode.getTxHash());
+        if(rpcClientResult.isSuccess()){
+            Map<String,Object> attr = (Map)rpcClientResult.getData();
+            Integer status = Integer.parseInt(attr.get("status")+"");
+            agentNode.setStatus(status);
+        }
+        //AgentNodeDto agentNodeDto = new AgentNodeDto(agentNode);
+        result.setData(agentNode);
         return result;
+
     }
 
     /**

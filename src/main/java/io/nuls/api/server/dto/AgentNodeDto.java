@@ -9,9 +9,13 @@ import io.nuls.api.entity.AgentNode;
  */
 public class AgentNodeDto extends AgentNode {
     private Long totalPackingCount;
+    private AgentNode agentNode;
 
     public AgentNodeDto(){
 
+    }
+    public AgentNodeDto(AgentNode entity){
+        this.agentNode = entity;
     }
 
     @Override
@@ -22,5 +26,13 @@ public class AgentNodeDto extends AgentNode {
     @Override
     public void setTotalPackingCount(Long totalPackingCount) {
         this.totalPackingCount = totalPackingCount;
+    }
+
+    public AgentNode getAgentNode() {
+        return agentNode;
+    }
+
+    public void setAgentNode(AgentNode agentNode) {
+        this.agentNode = agentNode;
     }
 }

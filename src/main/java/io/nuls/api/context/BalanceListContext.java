@@ -1,6 +1,5 @@
 package io.nuls.api.context;
 
-import io.nuls.api.server.dto.BlockDto;
 import io.nuls.api.server.dto.UtxoDto;
 
 import java.util.ArrayList;
@@ -19,6 +18,10 @@ public class BalanceListContext {
 
     public static List<UtxoDto> getAll(){
         return blockDtos;
+    }
+
+    public static Integer getSize(){
+        return blockDtos.size();
     }
 
     public static void clear(){

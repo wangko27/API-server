@@ -45,7 +45,8 @@ public class TransactionResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(transactionBusiness.getList(height,type,pageNumber,pageSize));
+        //全部交易，默认时间排序
+        result.setData(transactionBusiness.getList(height,type,pageNumber,pageSize,3));
         return result;
     }
 
