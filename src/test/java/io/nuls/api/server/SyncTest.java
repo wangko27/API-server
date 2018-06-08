@@ -33,7 +33,7 @@ public class SyncTest {
 
     @Before
     public void init() {
-        RestFulUtils.getInstance().init("http://127.0.0.1:8001");
+        RestFulUtils.getInstance().init("http://127.0.0.1:8001/api");
     }
 
     @Test
@@ -49,16 +49,26 @@ public class SyncTest {
 
     @Test
     public void testGetBlock() {
-        for (int i = 0; i < 6000; i++) {
-            RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(i);
-            BlockHeader header = result.getData();
-            try {
-                RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
-                syncDataBusiness.syncData(blockResult.getData());
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
-            }
+//        for (int i = 0; i < 6000; i++) {
+//            RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(i);
+//            BlockHeader header = result.getData();
+//            try {
+//                RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
+//                syncDataBusiness.syncData(blockResult.getData());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                return;
+//            }
+//        }
+
+        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(0);
+        BlockHeader header = result.getData();
+        try {
+            RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
+//            syncDataBusiness.syncData(blockResult.getData());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
         }
     }
 
