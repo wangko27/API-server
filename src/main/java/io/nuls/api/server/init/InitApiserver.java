@@ -56,7 +56,8 @@ public class InitApiserver {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         long time = cal.getTime().getTime();
-        HistoryContext.rewardofday = addressRewardDetailBusiness.selectDayofReward(time);
+        Long rewardOfDay = addressRewardDetailBusiness.selectDayofReward(time);
+        HistoryContext.rewardofday = rewardOfDay==null?0L:rewardOfDay;
 
         /*加载别名到缓存*/
         //AliasContext
