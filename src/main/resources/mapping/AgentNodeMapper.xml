@@ -193,7 +193,7 @@
     where delete_hash = #{deleteHash,jdbcType=VARCHAR}
   </update>
   <select id="selectTotalpackingCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapDto">
-    SELECT *,SUM(total_packing_count) totalPackingCount FROM agent_node GROUP BY agent_address
+    SELECT *,SUM(total_packing_count) totalPackingCount FROM agent_node GROUP BY agent_address ORDER BY totalPackingCount DESC
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
   <select id="selectTotalCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">

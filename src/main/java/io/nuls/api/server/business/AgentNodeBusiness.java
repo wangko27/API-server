@@ -1,6 +1,5 @@
 package io.nuls.api.server.business;
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.dao.mapper.AgentNodeMapper;

@@ -68,4 +68,21 @@ public class EntityConstant {
      */
     public static final Na ALIAS_NA = Na.parseNuls(1);
 
+    /**
+     * 搜索 交易hash
+     */
+    public static int SEARCH_TX_HASH = 1;
+    /**
+     * 搜索 账户地址
+     */
+    public static int SEARCH_ACCOUNT_ADDRESS = 2;
+    /**
+     * 搜索 区块hash
+     */
+    public static int SEARCH_HEADER_HASH = 3;
+    /**
+     * 搜索 高度
+     */
+    public static int SEARCH_HEADER_HEIGHT = 4;
+
 }

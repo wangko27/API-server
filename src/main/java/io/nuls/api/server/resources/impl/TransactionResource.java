@@ -1,10 +1,13 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
+import io.nuls.api.server.dto.TransactionDto;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,8 @@ public class TransactionResource {
 
     @Autowired
     private UtxoBusiness utxoBusiness;
+    @Autowired
+    private BlockBusiness blockBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
 
@@ -92,7 +97,15 @@ public class TransactionResource {
             }
             transaction.transferExtend();
             transaction.setOutputs(utxoBusiness.getList(hash));
-            result.setData(transaction);
+            TransactionDto transactionDto = new TransactionDto(transaction);
+            BlockHeader blockHeader = blockBusiness.getNewest();
+            if(null != blockHeader){
+                Long height = blockHeader.getHeight();
+                if(null != height && null != transaction.getBlockHeight()){
+                    transactionDto.setConfirmCount(height-transaction.getBlockHeight());
+                }
+            }
+            result.setData(transactionDto);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);
