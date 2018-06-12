@@ -80,7 +80,7 @@ public class NulsStatisticsResource {
         }
         RpcClientResult result = RpcClientResult.getSuccess();
         Page<AgentNodeDto> page = new Page<>();
-        page.setList(PackingAddressContext.getAll());
+        page.setList(PackingAddressContext.getAllList());
         page.setPageNumber(pageNumber);
         page.setPageSize(pageSize);
         page.setTotal(PackingAddressContext.getSize());

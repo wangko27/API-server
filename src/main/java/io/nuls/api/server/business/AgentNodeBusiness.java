@@ -36,14 +36,6 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @return
      */
     public RpcClientResult getList(String agentName, int pageNumber, int pageSize) {
-        /*PageHelper.startPage(pageNumber, pageSize);
-        Searchable searchable = new Searchable();
-        if (StringUtils.isNotBlank(agentName)) {
-            searchable.addCondition("agent_name", SearchOperator.like, agentName);
-        }
-        PageInfo<AgentNode> page = new PageInfo<>(agentNodeMapper.selectList(searchable));
-        return page;*/
-        ///consensus/agent/list
         Map<String,String> param = new HashMap<>();
         if (StringUtils.isNotBlank(agentName)) {
             param.put("keyword", agentName);
@@ -145,12 +137,18 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     }
 
     /**
-     * 统计出块排名
+     * 统计出块排名 没出块的就不排名，只统计已经在出块的
      * @return
      */
     public List<AgentNodeDto> selectTotalpackingCount(){
         //getDetailByAgentAddress
-        List<AgentNodeDto> agentNodeDtoList = agentNodeMapper.selectTotalpackingCount(new Searchable());
+        Searchable searchable = new Searchable();
+        /**
+         * 出块数量大于零的
+         */
+        searchable.addCondition("total_packing_count", SearchOperator.gt, 0);
+        List<AgentNodeDto> agentNodeDtoList = agentNodeMapper.selectTotalpackingCount(searchable);
+
         /*for(AgentNode agentNode:agentNodeDtoList){
             RpcClientResult result = getDetailByAgentAddress(agentNode.getAgentAddress());
             if(result.isSuccess()){
@@ -163,7 +161,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     }
 
     /**
-     * 根据Searchable 查询数据条数
+     * 根据Searchable 查询数据条数 不传就查询全部全部共识信息数据
      * @return
      */
     public Integer selectTotalCount(){

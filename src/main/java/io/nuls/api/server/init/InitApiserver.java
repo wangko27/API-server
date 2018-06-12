@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Description: 初始化 第一次启动的时候加载一些信息
@@ -38,7 +40,6 @@ public class InitApiserver {
         for(Utxo utxo:utxoList){
             UtxoContext.put(utxo);
         }
-
         /*启动*/
         /*加载14天历史*/
         blockBusiness.initHistory();
@@ -47,7 +48,11 @@ public class InitApiserver {
         BalanceListContext.reset(blockDtoList);
         /*加载出块账户排行榜*/
         List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
-        PackingAddressContext.reset(agentNodeDtoList);
+        Map<String, AgentNodeDto> agentNodeMap = new ConcurrentHashMap<>();
+        for(AgentNodeDto agentNode:agentNodeDtoList){
+            agentNodeMap.put(agentNode.getAgentAddress(),agentNode);
+        }
+        PackingAddressContext.reset(agentNodeMap);
 
         /*加载24小时奖励*/
         Calendar cal = Calendar.getInstance();

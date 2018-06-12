@@ -2,6 +2,7 @@ package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.HistoryContext;
+import io.nuls.api.context.PackingAddressContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Balance;
 import io.nuls.api.entity.RpcClientResult;
@@ -46,10 +47,13 @@ public class AgentNodeResource {
     public RpcClientResult getConsensusStatistics(){
         RpcClientResult result = null;
         HashMap<String,String> attr = new HashMap<String,String>();
-        attr.put("agentCount",agentNodeBusiness.selectTotalCount()+"");
+        //attr.put("agentCount",agentNodeBusiness.selectTotalCount()+"");
+        attr.put("agentCount",PackingAddressContext.getSize()+"");
         attr.put("rewardOfDay", HistoryContext.rewardofday+"");
-        attr.put("consensusAccountNumber",depositBusiness.selectTotalCount()+"");
-        attr.put("totalDeposit",depositBusiness.selectTotalAmount()+"");
+        //attr.put("consensusAccountNumber",depositBusiness.selectTotalCount()+"");
+        attr.put("consensusAccountNumber", PackingAddressContext.consensusAgentCount+"");
+        //attr.put("totalDeposit",depositBusiness.selectTotalAmount()+"");
+        attr.put("totalDeposit",PackingAddressContext.consensusAgentDepositAmount+"");
         result = RpcClientResult.getSuccess();
         result.setData(attr);
         return result;
