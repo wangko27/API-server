@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 统计出块排行和持币账户排行，现在每一个小时统计一次
@@ -31,11 +29,7 @@ public class BalanceTask {
 
         /*加载出块账户排行榜*/
         List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
-        Map<String, AgentNodeDto> agentNodeMap = new ConcurrentHashMap<>();
-        for(AgentNodeDto agentNode:agentNodeDtoList){
-            agentNodeMap.put(agentNode.getAgentAddress(),agentNode);
-        }
-        PackingAddressContext.reset(agentNodeMap);
+        PackingAddressContext.reset(agentNodeDtoList);
 
 
     }

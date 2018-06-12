@@ -2,11 +2,8 @@ package io.nuls.api.server.task;
 
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.PackingAddressContext;
-import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.AgentNodeBusiness;
-import io.nuls.api.server.dto.AgentNodeDto;
-import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,38 +22,30 @@ public class AgentNodeSyncTask {
     private AgentNodeBusiness agentNodeBusiness;
 
     /**
-     * 去链上查询最新的节点列表，根据节点状态修改内存中的节点的状态，并统计出块节点数量和总的共识中的委托金额数量
+     * 去查询最新的节点列表
      */
     public void execute() {
-        Map<String, AgentNodeDto> agentNodeMap = PackingAddressContext.getAll();
         List<Object> list = sync(new ArrayList<>(),1,100);
         int consensusAgentCount = 0;
-        Long consensusAgentDepositAmount = 0L;
-        for(Object object: list){
-            LinkedHashMap map = (LinkedHashMap)object;
-            if(map.containsKey("agentAddress") && map.containsKey("status")){
-                String agentAddress = map.get("agentAddress").toString();
-                if(StringUtils.validAddress(agentAddress)){
-                    AgentNodeDto dto = agentNodeMap.get(agentAddress);
-                    if(null != dto){
-                        Integer status = Integer.parseInt(map.get("status")+"");
-                        if(status == EntityConstant.CONSENSUS_STATUS_CONSENSUSING){
-                            consensusAgentCount++;
-                            if(null != dto.getTotalDeposit()){
-                                consensusAgentDepositAmount += dto.getTotalDeposit();
-                            }
-                        }
-                        dto.setStatus(status);
-                        agentNodeMap.get(agentAddress).setStatus(status);
-                    }
+        for(Object object: list) {
+            LinkedHashMap map = (LinkedHashMap) object;
+            if( map.containsKey("status")){
+                Integer status = Integer.parseInt(map.get("status")+"");
+                if(status == EntityConstant.CONSENSUS_STATUS_CONSENSUSING){
+                    consensusAgentCount++;
                 }
             }
         }
-        PackingAddressContext.reset(agentNodeMap);
         PackingAddressContext.consensusAgentCount = consensusAgentCount;
-        PackingAddressContext.consensusAgentDepositAmount = consensusAgentDepositAmount;
     }
 
+    /**
+     * 加载所有链上的共识节点
+     * @param list
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
     public List<Object> sync(List<Object> list,int pageNumber,int pageSize){
         RpcClientResult rpcClientResult = agentNodeBusiness.getList(null,pageNumber,pageSize);
         if(rpcClientResult.isSuccess()){

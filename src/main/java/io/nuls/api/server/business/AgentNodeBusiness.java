@@ -45,6 +45,14 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         return RestFulUtils.getInstance().get("/consensus/agent/list", param);
     }
 
+    /**
+     * 查询全网共识信息
+     * @return
+     */
+    public RpcClientResult getConsensus() {
+        return RestFulUtils.getInstance().get("/consensus", null);
+    }
+
 
     /**
      * 根据agentHash查询某个节点的详细信息（加载某信息的信用值、是否正在共识，这些信息只能去链上查询）
@@ -141,22 +149,13 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @return
      */
     public List<AgentNodeDto> selectTotalpackingCount(){
-        //getDetailByAgentAddress
         Searchable searchable = new Searchable();
         /**
-         * 出块数量大于零的
+         * 出块数量大于零的 没有删除的节点
          */
         searchable.addCondition("total_packing_count", SearchOperator.gt, 0);
+        searchable.addCondition("delete_hash", SearchOperator.isNull,null);
         List<AgentNodeDto> agentNodeDtoList = agentNodeMapper.selectTotalpackingCount(searchable);
-
-        /*for(AgentNode agentNode:agentNodeDtoList){
-            RpcClientResult result = getDetailByAgentAddress(agentNode.getAgentAddress());
-            if(result.isSuccess()){
-                HashMap<String,Object> data = (HashMap)result.getData();
-                Integer.parseInt(data.get("status")+"");
-            }
-        }*/
-        //todo 如何统计当前节点状态等信息
         return agentNodeDtoList;
     }
 

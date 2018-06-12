@@ -35,6 +35,10 @@ public class SearchResource {
         RpcClientResult result = null;
         result = RpcClientResult.getSuccess();
         result.setData(0);
+        if(StringUtils.isBlank(keyword)){
+            return result;
+        }
+        keyword = keyword.trim();
         try{
             if(StringUtils.isNonNegativeInteger(keyword)){
                 //高度
