@@ -48,11 +48,8 @@ public class InitApiserver {
         BalanceListContext.reset(blockDtoList);
         /*加载出块账户排行榜*/
         List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
-        Map<String, AgentNodeDto> agentNodeMap = new ConcurrentHashMap<>();
-        for(AgentNodeDto agentNode:agentNodeDtoList){
-            agentNodeMap.put(agentNode.getAgentAddress(),agentNode);
-        }
-        PackingAddressContext.reset(agentNodeMap);
+        PackingAddressContext.reset(agentNodeDtoList);
+
 
         /*加载24小时奖励*/
         Calendar cal = Calendar.getInstance();

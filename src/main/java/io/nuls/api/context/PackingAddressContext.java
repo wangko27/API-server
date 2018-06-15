@@ -1,10 +1,9 @@
 package io.nuls.api.context;
 
 import io.nuls.api.server.dto.AgentNodeDto;
-import io.nuls.api.utils.StringUtils;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Description: 出块账户静态统计数据（数据库）
@@ -20,8 +19,22 @@ public class PackingAddressContext {
      * 正在共识的节点的总委托
      */
     public static Long consensusAgentDepositAmount = 0L;
-    /*private static List<AgentNodeDto> agentNodeList = new ArrayList<>();*/
-    private static Map<String, AgentNodeDto> agentNodeMap = new ConcurrentHashMap<>();
+    private static List<AgentNodeDto> agentNodeList = new ArrayList<>();
+    public static List<AgentNodeDto> getAllList(){
+        return agentNodeList;
+    }
+    public static void clear(){
+        //agentNodeMap.clear();
+        agentNodeList.clear();
+    }
+    public static void reset(List<AgentNodeDto> list){
+        clear();
+        agentNodeList = list;
+    }
+    public static int getSize(){
+        return agentNodeList.size();
+    }
+    /*private static Map<String, AgentNodeDto> agentNodeMap = new ConcurrentHashMap<>();
     public static void add(AgentNodeDto block){
         if(null != block && StringUtils.validAddress(block.getAgentAddress())){
             agentNodeMap.put(block.getAgentAddress(),block);
@@ -55,5 +68,5 @@ public class PackingAddressContext {
     public static void reset(Map<String, AgentNodeDto> map){
         clear();
         agentNodeMap = map;
-    }
+    }*/
 }

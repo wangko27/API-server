@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -47,13 +48,18 @@ public class AgentNodeResource {
     public RpcClientResult getConsensusStatistics(){
         RpcClientResult result = null;
         HashMap<String,String> attr = new HashMap<String,String>();
-        //attr.put("agentCount",agentNodeBusiness.selectTotalCount()+"");
-        attr.put("agentCount",PackingAddressContext.getSize()+"");
+        RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
+        Long totalDeposit = 0L;
+        Integer totalCount = 0;
+        if(rpcClientResult.isSuccess()){
+            Map rpcdata = (Map)rpcClientResult.getData();
+            totalDeposit = Long.valueOf(rpcdata.get("totalDeposit")+"");
+            totalCount = Integer.valueOf(rpcdata.get("agentCount")+"");
+        }
+        attr.put("agentCount",totalCount+"");
         attr.put("rewardOfDay", HistoryContext.rewardofday+"");
-        //attr.put("consensusAccountNumber",depositBusiness.selectTotalCount()+"");
-        attr.put("consensusAccountNumber", PackingAddressContext.consensusAgentCount+"");
-        //attr.put("totalDeposit",depositBusiness.selectTotalAmount()+"");
-        attr.put("totalDeposit",PackingAddressContext.consensusAgentDepositAmount+"");
+        attr.put("consensusAccountNumber",PackingAddressContext.consensusAgentCount+"");
+        attr.put("totalDeposit",totalDeposit+"");
         result = RpcClientResult.getSuccess();
         result.setData(attr);
         return result;
