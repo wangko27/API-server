@@ -28,31 +28,31 @@ public class EntityConstant {
     /**
      * 设置别名交易
      */
-    public static final int TX_TYPE_ACCOUNT_ALIAS = 51;
+    public static final int TX_TYPE_ACCOUNT_ALIAS = 3;
     /**
      * 创建共识节点交易
      */
-    public static final int TX_TYPE_REGISTER_AGENT = 90;
+    public static final int TX_TYPE_REGISTER_AGENT = 4;
     /**
      * 加入共识交易
      */
-    public static final int TX_TYPE_JOIN_CONSENSUS = 91;
+    public static final int TX_TYPE_JOIN_CONSENSUS = 5;
     /**
      * 退出共识交易
      */
-    public static final int TX_TYPE_CANCEL_DEPOSIT = 92;
+    public static final int TX_TYPE_CANCEL_DEPOSIT = 6;
     /**
      * 删除共识节点交易
      */
-    public static final int TX_TYPE_STOP_AGENT = 95;
+    public static final int TX_TYPE_STOP_AGENT = 9;
     /**
      * 黄牌交易
      */
-    public static final int TX_TYPE_YELLOW_PUNISH = 93;
+    public static final int TX_TYPE_YELLOW_PUNISH = 7;
     /**
      * 红牌交易
      */
-    public static final int TX_TYPE_RED_PUNISH = 94;
+    public static final int TX_TYPE_RED_PUNISH = 8;
 
     /**
      * 黄牌惩罚
