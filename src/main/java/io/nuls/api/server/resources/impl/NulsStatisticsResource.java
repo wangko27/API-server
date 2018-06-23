@@ -21,13 +21,17 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Description: 统计信息 （14天交易历史）
+ * Description: 统计信息 （14天交易历史、持币账户、出块账户）
  * Author: zsj
  * Date:  2018/5/29 0029
  */
 @Path("statistics")
 @Component
 public class NulsStatisticsResource {
+    /**
+     * 14天交易历史
+     * @return
+     */
     @GET
     @Path("/history")
     @Produces(MediaType.APPLICATION_JSON)
@@ -37,6 +41,12 @@ public class NulsStatisticsResource {
         return result;
     }
 
+    /**
+     * 持币账户
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
     @GET
     @Path("/balancelist")
     @Produces(MediaType.APPLICATION_JSON)
@@ -63,6 +73,12 @@ public class NulsStatisticsResource {
         return result;
     }
 
+    /**
+     * 出块账户
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
     @GET
     @Path("/minedlist")
     @Produces(MediaType.APPLICATION_JSON)
