@@ -123,7 +123,7 @@
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
 
-  <select id="getLastRewardHeight" parameterType="io.nuls.api.server.dao.util.Searchable">
+  <select id="getLastRewardHeight" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Long">
     select max(block_height) as height from address_reward_detail
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
