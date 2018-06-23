@@ -3,6 +3,7 @@ package io.nuls.api.server.business;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.utils.JSONUtils;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +78,7 @@ public class SyncDataBusiness {
      */
     @Transactional
     public void rollback(BlockHeader header) throws Exception {
+        Log.error("--------------roll back, block height: " + header.getHeight() + ",hash :" +header.getHash());
         List<Transaction> txList = transactionBusiness.getList(header.getHeight());
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
@@ -106,6 +108,9 @@ public class SyncDataBusiness {
                     Input input = tx.getInputs().get(j);
                     utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
                     utxo = utxoBusiness.getByKey(utxoKey);
+                    if(utxo == null) {
+                        Log.error("---------------rollback uxto is null:" + utxoKey.toString());
+                    }
                     UtxoContext.put(utxo);
                 }
             }
