@@ -44,7 +44,7 @@ public class SyncDataHandler {
     }
 
     public RpcClientResult<Block> getBlock(BlockHeader header) throws NulsException {
-        Map<String,String> param = new HashMap<>();
+        Map<String, String> param = new HashMap<>();
         param.put("hash", header.getHash());
         RpcClientResult result = restFulUtils.get("/block/bytes", param);
         if (result.isFaild()) {
@@ -55,6 +55,21 @@ public class SyncDataHandler {
             result.setData(block);
         } catch (Exception e) {
             throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+        }
+        return result;
+    }
+
+    public RpcClientResult<BlockHeader> getNewest() throws NulsException {
+        RpcClientResult result = restFulUtils.get("/block/newest", null);
+        if (result.isFaild()) {
+            return result;
+        }
+        try {
+            BlockHeader blockHeader = RpcTransferUtil.toBlockHeader((Map<String, Object>) result.getData());
+            result.setData(blockHeader);
+        } catch (Exception e) {
+            Log.error(e);
+            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
         }
         return result;
     }
