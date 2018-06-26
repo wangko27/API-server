@@ -27,6 +27,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nuls.api.constant.ErrorCode;
 
+import java.util.Map;
+
 /**
  * @author Niels
  * @date 2017/10/31
@@ -113,9 +115,14 @@ public class RpcClientResult<T> {
         return success;
     }
 
-    public boolean isFaild() {
+    public boolean isFailed() {
         if (success) return false;
-        data = null;
+        if (data != null) {
+            Map<String, Object> errorMap = (Map<String, Object>) data;
+            code = (String) errorMap.get("code");
+            msg = (String) errorMap.get("msg");
+            data = null;
+        }
         return true;
     }
 
