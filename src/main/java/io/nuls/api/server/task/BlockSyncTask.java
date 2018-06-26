@@ -41,16 +41,31 @@ public class BlockSyncTask {
                 }
 
                 RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(bestHeight + 1);
-                if (result.isFaild()) {
-                    //没有新区块，跳出循环，等待下次轮询
+                if (result.isFailed()) {
                     if (result.getCode().equals(ErrorCode.DATA_NOT_FOUND.getCode())) {
+                        //查看最新区块和本地区块是否一致，不一致说明需要回滚
+                        result = syncDataHandler.getNewest();
+                        if (result.isSuccess()) {
+                            BlockHeader newest = result.getData();
+                            if (!localBest.getHash().equals(newest.getHash()) && newest.getHeight() <= localBest.getHeight()) {
+                                syncDataBusiness.rollback(localBest);
+                            } else {
+                                //没有新区块，跳出循环，等待下次轮询
+                                return;
+                            }
+                        } else {
+                            Log.error("----------------------sync block fail:" + result.getMsg());
+                            return;
+                        }
+                    } else {
+                        Log.error("----------------------sync block fail:" + result.getMsg());
                         return;
                     }
                 } else {
                     BlockHeader newest = result.getData();
                     if (checkBlockContinuity(localBest, newest)) {
                         RpcClientResult<Block> blockResult = syncDataHandler.getBlock(newest);
-                        if (blockResult.isFaild()) {
+                        if (blockResult.isFailed()) {
                             throw new NulsException(blockResult.getCode(), blockResult.getMsg());
                         }
                         syncDataBusiness.syncData(blockResult.getData());

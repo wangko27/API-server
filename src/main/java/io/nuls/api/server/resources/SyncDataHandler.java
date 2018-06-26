@@ -30,7 +30,7 @@ public class SyncDataHandler {
      */
     public RpcClientResult<BlockHeader> getBlockHeader(long height) {
         RpcClientResult result = restFulUtils.get("/block/header/height/" + height, null);
-        if (result.isFaild()) {
+        if (result.isFailed()) {
             return result;
         }
         try {
@@ -44,14 +44,16 @@ public class SyncDataHandler {
     }
 
     public RpcClientResult<Block> getBlock(BlockHeader header) throws NulsException {
-        Map<String,String> param = new HashMap<>();
+        Map<String, String> param = new HashMap<>();
         param.put("hash", header.getHash());
         RpcClientResult result = restFulUtils.get("/block/bytes", param);
-        if (result.isFaild()) {
+        if (result.isFailed()) {
             return result;
         }
+        Map<String,Object> resultMap = (Map<String, Object>) result.getData();
+        String txHex = (String) resultMap.get("value");
         try {
-            Block block = RpcTransferUtil.toBlock((String) result.getData(), header);
+            Block block = RpcTransferUtil.toBlock(txHex, header);
             result.setData(block);
         } catch (Exception e) {
             throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
@@ -59,10 +61,25 @@ public class SyncDataHandler {
         return result;
     }
 
+    public RpcClientResult<BlockHeader> getNewest() throws NulsException {
+        RpcClientResult result = restFulUtils.get("/block/newest", null);
+        if (result.isFailed()) {
+            return result;
+        }
+        try {
+            BlockHeader blockHeader = RpcTransferUtil.toBlockHeader((Map<String, Object>) result.getData());
+            result.setData(blockHeader);
+        } catch (Exception e) {
+            Log.error(e);
+            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
+        }
+        return result;
+    }
+
 
     public RpcClientResult<Transaction> getTransaction(String hash) {
         RpcClientResult result = restFulUtils.get("/tx/hash/" + hash, null);
-        if (result.isFaild()) {
+        if (result.isFailed()) {
             return result;
         }
         try {
