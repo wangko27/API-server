@@ -5,6 +5,7 @@ import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.NulsDigestData;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.SyncDataBusiness;
@@ -33,6 +34,7 @@ public class SyncTest {
 
     @Before
     public void init() {
+
         RestFulUtils.getInstance().init("http://127.0.0.1:8001/api");
     }
 
@@ -48,28 +50,45 @@ public class SyncTest {
     }
 
     @Test
-    public void testGetBlock() {
-//        for (int i = 0; i < 6000; i++) {
-//            RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(i);
-//            BlockHeader header = result.getData();
-//            try {
-//                RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
-//                syncDataBusiness.syncData(blockResult.getData());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return;
-//            }
-//        }
-
-        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(0);
-        BlockHeader header = result.getData();
-        try {
-            RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
-//            syncDataBusiness.syncData(blockResult.getData());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
+    public void testSyncData() throws InterruptedException {
+        while (true) {
+            Thread.sleep(100000);
         }
+    }
+
+    @Test
+    public void testNewest() {
+        try {
+            RpcClientResult<BlockHeader> result = syncDataHandler.getNewest();
+            System.out.println(result.isSuccess());
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGetBlock() {
+        for (int i = 0; i < 6000; i++) {
+            RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(i);
+            BlockHeader header = result.getData();
+            try {
+                RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
+                syncDataBusiness.syncData(blockResult.getData());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+//        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(0);
+//        BlockHeader header = result.getData();
+//        try {
+//            RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
+//            syncDataBusiness.syncData(blockResult.getData());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return;
+//        }
     }
 
     @Test

@@ -22,51 +22,42 @@
  * SOFTWARE.
  *
  */
-package io.nuls.api.model.tx;
 
-import io.nuls.api.constant.Constant;
-import io.nuls.api.constant.EntityConstant;
-import io.nuls.api.exception.NulsException;
-import io.nuls.api.model.Coin;
-import io.nuls.api.model.Transaction;
-import io.nuls.api.model.TransactionLogicData;
-import io.nuls.api.utils.AddressTool;
-import io.nuls.api.utils.NulsByteBuffer;
+package io.nuls.api.utils;
 
 import java.util.Arrays;
 
 /**
- * @author Niels
- * @date 2017/11/20
+ * @author: Niels Wang
+ * @date: 2018/5/13
  */
-public class TransferTransaction extends Transaction {
-
-    public TransferTransaction() {
-        this(EntityConstant.TX_TYPE_TRANSFER);
-    }
-
-    protected TransferTransaction(int type) {
-        super(type);
-    }
-
-    @Override
-    public String getInfo(byte[] address) {
-        boolean isTransfer = false;
-        Coin to = coinData.getTo().get(0);
-        if (!Arrays.equals(address, to.getOwner())) {
-            isTransfer = true;
+public class ArraysTool {
+    /**
+     * 按照传入的顺序拼接数组为一个包含所有数组的大数组
+     * Splices the array into a large array containing all of the arrays in the incoming order.
+     *
+     * @param arrays 想要拼接的数组集合、A collection of arrays that you want to concatenate.
+     * @return 拼接结果、 the result of the Joining together
+     */
+    public static final byte[] concatenate(byte[]... arrays) {
+        int length = 0;
+        for (byte[] array : arrays) {
+            length += array.length;
         }
-        if (isTransfer) {
-            return "-" + to.getNa().toCoinString();
-        } else {
-            return "+" + to.getNa().toCoinString();
+        byte[] t = new byte[length];
+        int offset = 0;
+        for (byte[] array : arrays) {
+            System.arraycopy(array, 0, t, offset, array.length);
+            offset += array.length;
         }
+        return t;
     }
 
-    @Override
-    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        byteBuffer.readBytes(Constant.PLACE_HOLDER.length);
-        return null;
+    public static final boolean isEmptyOrNull(byte[] bytes) {
+        return (bytes == null || bytes.length == 0);
     }
 
+    public static boolean arrayEquals(byte[] array1, byte[] array2) {
+        return Arrays.equals(array1, array2);
+    }
 }

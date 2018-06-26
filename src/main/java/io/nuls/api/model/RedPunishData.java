@@ -65,7 +65,7 @@ public class RedPunishData extends TransactionLogicData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.reasonCode = byteBuffer.readByte();
         this.evidence = byteBuffer.readByLengthByte();
     }

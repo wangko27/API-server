@@ -37,6 +37,8 @@ public interface Constant {
     //Minimum version supported
     int MINIMUM_VERSION_SUPPORTED = 0;
 
+    byte DEFAULT_ADDRESS_TYPE = 1;
+
     String CFG_SYSTEM_LANGUAGE = "language";
     String DEFAULT_LANGUAGE = "zh-cn";
     String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";

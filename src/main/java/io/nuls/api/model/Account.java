@@ -217,7 +217,7 @@ public class Account extends BaseNulsData {
 
     @Override
     public int size() {
-        int s = SerializeUtils.sizeOfBytes(address.calcBase58bytes());
+        int s = Address.ADDRESS_LENGTH;
         s += SerializeUtils.sizeOfString(alias);
         s += SerializeUtils.sizeOfBytes(encryptedPriKey);
         s += SerializeUtils.sizeOfBytes(pubKey);
@@ -228,7 +228,7 @@ public class Account extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(address.calcBase58bytes());
+        stream.write(address.getAddressBytes());
         stream.writeString(alias);
         stream.writeBytesWithLength(encryptedPriKey);
         stream.writeBytesWithLength(pubKey);
@@ -238,7 +238,7 @@ public class Account extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        address = Address.fromHashs(byteBuffer.readByLengthByte());
+        address = Address.fromHashs(byteBuffer.readBytes(Address.ADDRESS_LENGTH));
         alias = new String(byteBuffer.readByLengthByte());
         encryptedPriKey = byteBuffer.readByLengthByte();
         pubKey = byteBuffer.readByLengthByte();
