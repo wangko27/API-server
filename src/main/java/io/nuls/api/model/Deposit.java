@@ -68,7 +68,7 @@ public class Deposit extends TransactionLogicData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readInt64());
-        this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.agentHash = byteBuffer.readHash();
     }
 
@@ -76,7 +76,7 @@ public class Deposit extends TransactionLogicData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfInt64(); // deposit.getValue()
-        size += AddressTool.HASH_LENGTH;
+        size += Address.ADDRESS_LENGTH;
         size += this.agentHash.size();
         return size;
     }

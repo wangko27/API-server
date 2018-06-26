@@ -143,7 +143,7 @@ public class RpcTransferUtil {
                 utxo.setTxHash(tx.getHash());
                 utxo.setTxIndex(i);
                 utxo.setAmount(coin.getNa().getValue());
-                utxo.setAddress(Base58.encode(coin.getOwner()));
+                utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
                 utxo.setLockTime(coin.getLockTime());
                 outputs.add(utxo);
 
@@ -159,7 +159,7 @@ public class RpcTransferUtil {
     private static Alias toAlias(AliasTransaction tx) {
         io.nuls.api.model.Alias model = tx.getTxData();
         Alias alias = new Alias();
-        alias.setAddress(Base58.encode(model.getAddress()));
+        alias.setAddress(AddressTool.getStringAddressByBytes(model.getAddress()));
         alias.setAlias(model.getAlias());
         alias.setBlockHeight(tx.getBlockHeight());
         return alias;
@@ -170,9 +170,9 @@ public class RpcTransferUtil {
 
         AgentNode agent = new AgentNode();
         agent.setTxHash(tx.getHash().getDigestHex());
-        agent.setAgentAddress(Base58.encode(model.getAgentAddress()));
-        agent.setPackingAddress(Base58.encode(model.getPackingAddress()));
-        agent.setRewardAddress(Base58.encode(model.getRewardAddress()));
+        agent.setAgentAddress(AddressTool.getStringAddressByBytes(model.getAgentAddress()));
+        agent.setPackingAddress(AddressTool.getStringAddressByBytes(model.getPackingAddress()));
+        agent.setRewardAddress(AddressTool.getStringAddressByBytes(model.getRewardAddress()));
         agent.setDeposit(model.getDeposit().getValue());
         agent.setCommissionRate(new BigDecimal(model.getCommissionRate()));
         agent.setBlockHeight(tx.getBlockHeight());
@@ -191,7 +191,7 @@ public class RpcTransferUtil {
         deposit.setTxHash(tx.getHash().getDigestHex());
         deposit.setAmount(model.getDeposit().getValue());
         deposit.setAgentHash(model.getAgentHash().getDigestHex());
-        deposit.setAddress(Base58.encode(model.getAddress()));
+        deposit.setAddress(AddressTool.getStringAddressByBytes(model.getAddress()));
         deposit.setTxHash(tx.getHash().getDigestHex());
         deposit.setBlockHeight(tx.getBlockHeight());
         deposit.setCreateTime(tx.getTime());
@@ -218,7 +218,7 @@ public class RpcTransferUtil {
         List<TxData> logList = new ArrayList<>();
         for (byte[] address : model.getAddressList()) {
             PunishLog log = new PunishLog();
-            log.setAddress(Base58.encode(address));
+            log.setAddress(AddressTool.getStringAddressByBytes(address));
             log.setBlockHeight(tx.getBlockHeight());
             log.setTime(tx.getTime());
             log.setType(EntityConstant.PUBLISH_YELLOW);
@@ -234,7 +234,7 @@ public class RpcTransferUtil {
 
         PunishLog punishLog = new PunishLog();
         punishLog.setType(EntityConstant.PUTLISH_RED);
-        punishLog.setAddress(Base58.encode(model.getAddress()));
+        punishLog.setAddress(AddressTool.getStringAddressByBytes(model.getAddress()));
         punishLog.setEvidence(model.getEvidence());
         punishLog.setBlockHeight(tx.getBlockHeight());
         punishLog.setTime(tx.getTime());
