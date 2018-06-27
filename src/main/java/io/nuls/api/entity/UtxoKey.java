@@ -30,4 +30,9 @@ public class UtxoKey implements Serializable{
     public void setTxIndex(Integer txIndex) {
         this.txIndex = txIndex;
     }
+
+    @Override
+    public String toString() {
+        return "{txHash:" + txHash + ",txIndex:" + txIndex;
+    }
 }
