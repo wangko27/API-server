@@ -108,10 +108,9 @@ public class SyncDataBusiness {
                     Input input = tx.getInputs().get(j);
                     utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
                     utxo = utxoBusiness.getByKey(utxoKey);
-                    if(utxo == null) {
-                        Log.error("---------------rollback uxto is null:" + utxoKey.toString());
+                    if(utxo != null) {
+                        UtxoContext.put(utxo);
                     }
-                    UtxoContext.put(utxo);
                 }
             }
         }
