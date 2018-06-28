@@ -84,7 +84,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = byteBuffer.readUint16();
         time = byteBuffer.readUint48();
         this.remark = byteBuffer.readByLengthByte();

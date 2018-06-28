@@ -47,7 +47,7 @@ public class RpcTransferUtil {
     public static Block toBlock(String hexBlock, BlockHeader header) throws Exception {
         byte[] data = Base64.getDecoder().decode(hexBlock);
         io.nuls.api.model.Block blockModel = new io.nuls.api.model.Block();
-        blockModel.parse(data);
+        blockModel.parse(new NulsByteBuffer(data));
 
         Block block = new Block();
         header.setSize(blockModel.size());
@@ -126,7 +126,7 @@ public class RpcTransferUtil {
 
                 Input input = new Input();
                 NulsDigestData hash = new NulsDigestData();
-                hash.parse(hashByte);
+                hash.parse(new NulsByteBuffer(hashByte));
                 input.setFromHash(hash.getDigestHex());
                 input.setFromIndex(index);
                 inputs.add(input);

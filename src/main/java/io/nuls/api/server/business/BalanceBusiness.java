@@ -12,6 +12,8 @@ import io.nuls.api.utils.log.Log;
 import org.spongycastle.util.Times;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.ConnectException;
@@ -90,7 +92,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
      * @param usable 可用金额
      * @return 1操作成功，2id不存在，0修改失败
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int update(Long id, long locked, long usable) {
         Balance entity = getByKey(id);
         if (null == entity) {
@@ -112,7 +114,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
      * @param balance
      * @return 1成功，0对象为空，2 主键为空，3高度错误，4地址错误，5锁定余额小于0,6可用余额小于0,7资产名称为空，8资产id错误
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Balance balance) {
         if (null == balance) {
@@ -143,6 +145,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
     }
 
     @Override
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByKey(Long aLong) {
         return balanceMapper.deleteByPrimaryKey(aLong);
     }
@@ -158,7 +161,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
      * @param balance
      * @return 1新增成功，其他失败
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Balance balance) {
         return balanceMapper.insert(balance);

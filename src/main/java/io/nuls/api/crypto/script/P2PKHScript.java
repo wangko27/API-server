@@ -22,8 +22,8 @@
  * SOFTWARE.
  *
  */
-package io.nuls.api.crypto.script;
 
+package io.nuls.api.crypto.script;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.NulsDigestData;
@@ -31,6 +31,7 @@ import io.nuls.api.utils.NulsByteBuffer;
 import io.nuls.api.utils.NulsOutputStreamBuffer;
 import io.nuls.api.utils.SerializeUtils;
 import io.nuls.api.utils.log.Log;
+
 
 import java.io.IOException;
 
@@ -76,7 +77,7 @@ public class P2PKHScript extends Script {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.publicKeyDigest = byteBuffer.readHash();
     }
 
@@ -84,6 +85,4 @@ public class P2PKHScript extends Script {
     public int size() {
         return SerializeUtils.sizeOfNulsData(publicKeyDigest);
     }
-
-    //todo  not finished
 }

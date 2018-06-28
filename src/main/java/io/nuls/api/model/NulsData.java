@@ -32,6 +32,10 @@ import java.io.IOException;
  * @author: Niels Wang
  * @date: 2018/4/17
  */
+/**
+ * @author: Niels Wang
+ * @date: 2018/4/17
+ */
 public interface NulsData {
 
     int size();
@@ -41,5 +45,5 @@ public interface NulsData {
      */
     byte[] serialize() throws IOException;
 
-    void parse(byte[] bytes) throws NulsException;
+    void parse(byte[] bytes,int cursor) throws NulsException;
 }

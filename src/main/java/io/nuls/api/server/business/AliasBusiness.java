@@ -7,6 +7,8 @@ import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -49,7 +51,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
      * @param alias 实体
      * @return 0，设置失败，1设置成功，2实体为空,，3地址格式验证失败，4高度错误,5别名为空，6账户地址已经设置过别名了，7别名已经被设置过了
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Alias alias) {
 //        if(null == alias){
@@ -79,7 +81,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
         return result;
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Alias alias) {
         return aliasMapper.updateByPrimaryKey(alias);
@@ -91,7 +93,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
      * @param id 账户地址
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String id) {
         return aliasMapper.deleteByPrimaryKey(id);
@@ -115,7 +117,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
      * @param height
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteByHeight(long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);

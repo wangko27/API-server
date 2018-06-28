@@ -6,6 +6,8 @@ import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
@@ -33,14 +35,40 @@ public class SyncDataBusiness {
      *
      * @param block
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void syncData(Block block) throws Exception {
-        blockBusiness.saveBlock(block.getHeader());
+        System.out.println("-------------------------------sync block---------" + block.getHeader().getHeight());
+        long time1 = System.currentTimeMillis();
+
+        try {
+            blockBusiness.saveBlock(block.getHeader());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        long time2 = System.currentTimeMillis();
+        if (time2 - time1 > 10) {
+            System.out.println("---------------updateByFrom:" + (time2 - time1) + ",hash:" + block.getHeader().getHash());
+        }
+
         for (int i = 0; i < block.getTxList().size(); i++) {
             Transaction tx = block.getTxList().get(i);
             tx.setTxIndex(i);
+            time1 = System.currentTimeMillis();
             utxoBusiness.updateByFrom(tx);
+            time2 = System.currentTimeMillis();
+            if (time2 - time1 > 100) {
+                System.out.println("---------------updateByFrom:" + (time2 - time1) + ",count:" + tx.getInputs().size() + "," + tx.getHash());
+            }
+            time1 = time2;
+
             utxoBusiness.saveTo(tx);
+            time2 = System.currentTimeMillis();
+            if (time2 - time1 > 100) {
+                System.out.println("---------------saveTo:" + (time2 - time1) + ", count:" + tx.getOutputs().size() + "," + tx.getHash());
+            }
+            time1 = time2;
+
 
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("scriptSign", tx.getScriptSign());
@@ -49,9 +77,15 @@ public class SyncDataBusiness {
             tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
 
             transactionBusiness.save(tx);
+            time2 = System.currentTimeMillis();
+            if (time2 - time1 > 10) {
+                System.out.println("---------------transactionBusiness save:" + (time2 - time1));
+            }
+            time1 = time2;
         }
 
         //所有数据保存成功后，更新utxo缓存
+        time1 = System.currentTimeMillis();
         UtxoKey key = new UtxoKey();
         Utxo utxo;
         for (int i = 0; i < block.getTxList().size(); i++) {
@@ -71,14 +105,19 @@ public class SyncDataBusiness {
                 }
             }
         }
+        time2 = System.currentTimeMillis();
+        if (time2 - time1 > 50) {
+            System.out.println("---------------update UtxoContext:" + (time2 - time1));
+        }
+
     }
 
     /**
      * 回滚当前本地最新块
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollback(BlockHeader header) throws Exception {
-        Log.error("--------------roll back, block height: " + header.getHeight() + ",hash :" +header.getHash());
+        Log.error("--------------roll back, block height: " + header.getHeight() + ",hash :" + header.getHash());
         List<Transaction> txList = transactionBusiness.getList(header.getHeight());
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
@@ -108,7 +147,7 @@ public class SyncDataBusiness {
                     Input input = tx.getInputs().get(j);
                     utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
                     utxo = utxoBusiness.getByKey(utxoKey);
-                    if(utxo != null) {
+                    if (utxo != null) {
                         UtxoContext.put(utxo);
                     }
                 }

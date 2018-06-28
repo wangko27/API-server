@@ -58,6 +58,7 @@ public enum ErrorCode {
     FILE_BROKEN("SYS020", 20020),
     SIGNATURE_ERROR("SYS021", 20021),
     ADDRESS_ERROR("SYS022", 20022),
+    SERIALIZE_ERROR ("SYS032", 20032),
     /**
      * ----------  Consensus Network code   ---------
      */

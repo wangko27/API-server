@@ -23,7 +23,7 @@
  *
  */
 package io.nuls.api.crypto.script;
-
+import io.nuls.api.crypto.script.Script;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.NulsSignData;
 import io.nuls.api.utils.NulsByteBuffer;
@@ -53,7 +53,7 @@ public class P2PKHScriptSig extends Script {
     public P2PKHScriptSig(byte[] signBytes, byte[] publicKey) {
         this.signData = new NulsSignData();
         try {
-            this.signData.parse(signBytes);
+            this.signData.parse(signBytes,0);
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -81,22 +81,10 @@ public class P2PKHScriptSig extends Script {
         this.publicKey = publicKey;
     }
 
-//    public ValidateResult verifySign(NulsDigestData digestData) {
-//        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), this.getPublicKey());
-//        if (b) {
-//            return ValidateResult.getSuccessResult();
-//        } else {
-//            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
-//        }
-//    }
-//
-//    public byte[] getSignerHash160() {
-//        return SerializeUtils.sha256hash160(getPublicKey());
-//    }
 
     public static P2PKHScriptSig createFromBytes(byte[] bytes) throws NulsException {
         P2PKHScriptSig sig = new P2PKHScriptSig();
-        sig.parse(bytes);
+        sig.parse(bytes,0);
         return sig;
     }
 
@@ -122,7 +110,7 @@ public class P2PKHScriptSig extends Script {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         int length = byteBuffer.readByte();
         this.publicKey = byteBuffer.readBytes(length);
         this.signData = new NulsSignData();

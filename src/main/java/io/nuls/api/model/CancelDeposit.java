@@ -78,7 +78,7 @@ public class CancelDeposit extends TransactionLogicData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.joinTxHash = byteBuffer.readHash();
     }
 

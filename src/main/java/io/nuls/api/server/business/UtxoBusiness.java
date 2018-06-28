@@ -12,7 +12,10 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -26,9 +29,12 @@ import java.util.List;
 public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     @Autowired
     private UtxoMapper utxoMapper;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     /**
      * 获取列表
+     *
      * @param pageNumber
      * @param pageSize
      * @return
@@ -74,22 +80,23 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
     /**
      * 根据hash和id查询已经花费的utxo的详情
+     *
      * @param hash
      * @param index
      * @return
      */
-    public String getUtxoBySpentHash(String hash,Integer index){
+    public String getUtxoBySpentHash(String hash, Integer index) {
         if (!StringUtils.validHash(hash)) {
             return null;
         }
-        if(index < 0){
+        if (index < 0) {
             return null;
         }
         UtxoKey utxoKey = new UtxoKey();
         utxoKey.setTxIndex(index);
         utxoKey.setTxHash(hash);
         Utxo utxo = utxoMapper.selectByPrimaryKey(utxoKey);
-        if(null != utxo){
+        if (null != utxo) {
             return utxo.getSpendTxHash();
         }
         return null;
@@ -113,18 +120,18 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
      * @param entity
      * @return 1操作成功，其他失败
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(Utxo entity) {
         return utxoMapper.insert(entity);
     }
 
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int update(Utxo entity) {
         return utxoMapper.updateByPrimaryKey(entity);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(UtxoKey utxoKey) {
         return utxoMapper.deleteByPrimaryKey(utxoKey);
@@ -141,13 +148,13 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
      * @param txHash
      * @return
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int delete(String txHash, Integer index) {
         UtxoKey key = new UtxoKey(txHash, index);
         return utxoMapper.deleteByPrimaryKey(key);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteByTxHash(String txHash) {
         Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
@@ -160,7 +167,7 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
      * @param tx
      * @return
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void updateByFrom(Transaction tx) {
         //coinBase交易，红黄牌交易没有inputs
         if (tx.getInputs() == null) {
@@ -169,21 +176,36 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
         UtxoKey key = new UtxoKey();
         Utxo utxo;
+        long time1, time2;
+
+        String updateSql = "update utxo set spend_tx_hash=? where tx_hash = ? and tx_index = ?";
+
         for (Input input : tx.getInputs()) {
             key.setTxHash(input.getFromHash());
             key.setTxIndex(input.getFromIndex());
+            time1 = System.currentTimeMillis();
             utxo = utxoMapper.selectByPrimaryKey(key);
+            time2 = System.currentTimeMillis();
+            if (time2 - time1 > 40) {
+                System.out.println("------------utxoMapper selectByPrimaryKey");
+            }
 
             utxo.setSpendTxHash(tx.getHash());
 
             //在这里查询出utxo后，记得给每一个input赋值address
             input.setAddress(utxo.getAddress());
             input.setValue(utxo.getAmount());
-            utxoMapper.updateByPrimaryKey(utxo);
+            time1 = System.currentTimeMillis();
+            jdbcTemplate.update(updateSql, tx.getHash(), utxo.getTxHash(), utxo.getTxIndex());
+//            utxoMapper.updateByPrimaryKey(utxo);
+            time2 = System.currentTimeMillis();
+            if (time2 - time1 > 40) {
+                System.out.println("------------utxoMapper updateByPrimaryKey");
+            }
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollBackByFrom(Transaction tx) {
         //删除当前交易生成的utxo
         Searchable searchable = new Searchable();
@@ -200,10 +222,19 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveTo(Transaction tx) {
+
+        long time1, time2;
+        String insertSql = "insert into utxo(tx_hash, tx_index, address, amount, lock_time) values(?,?,?,?,?) ";
         for (Utxo utxo : tx.getOutputs()) {
-            utxoMapper.insert(utxo);
+            time1 = System.currentTimeMillis();
+            jdbcTemplate.update(insertSql, utxo.getTxHash(), utxo.getTxIndex(), utxo.getAddress(), utxo.getAmount(), utxo.getLockTime());
+//            utxoMapper.insert(utxo);
+            time2 = System.currentTimeMillis();
+            if (time2 - time1 > 40) {
+                System.out.println("-----------------------------------" + (time2 - time1));
+            }
         }
     }
 

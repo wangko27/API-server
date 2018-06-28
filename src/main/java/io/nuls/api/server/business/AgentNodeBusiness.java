@@ -11,6 +11,8 @@ import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
@@ -82,7 +84,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @param height 高度
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
@@ -95,13 +97,13 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @param agentNode 实体
      * @return 1成功，其他失败
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(AgentNode agentNode) {
         return agentNodeMapper.insert(agentNode);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(AgentNode agentNode) {
         return agentNodeMapper.updateByPrimaryKey(agentNode);
@@ -113,13 +115,12 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @param id 主键 txhash
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByKey(String id) {
-
         return agentNodeMapper.deleteByPrimaryKey(id);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void stopAgent(AgentNode agentNode, String txHash) {
         agentNode = agentNodeMapper.selectByPrimaryKey(agentNode.getTxHash());
         agentNode.setDeleteHash(txHash);
@@ -127,7 +128,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         depositMapper.deleteByAgentHash(agentNode.getTxHash(), txHash);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollbackStopAgent(String deleteHash) {
         agentNodeMapper.rollbackStopAgent(deleteHash);
         depositMapper.rollbackStopAgent(deleteHash);
