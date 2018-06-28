@@ -12,6 +12,8 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -45,7 +47,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      * @param height
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
@@ -58,13 +60,13 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      * @param addressRewardDetail 需要新增的实体
      * @return 新增结果 1成功，其他失败
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(AddressRewardDetail addressRewardDetail) {
         return addressRewardDetailMapper.insert(addressRewardDetail);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveTxReward(Transaction tx) {
         for (Utxo utxo : tx.getOutputs()) {
             AddressRewardDetail detail = new AddressRewardDetail();
@@ -83,7 +85,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      * @param addressRewardDetail
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(AddressRewardDetail addressRewardDetail) {
         return addressRewardDetailMapper.updateByPrimaryKey(addressRewardDetail);
@@ -95,7 +97,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      * @param id
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(Long id) {
         return addressRewardDetailMapper.deleteByPrimaryKey(id);

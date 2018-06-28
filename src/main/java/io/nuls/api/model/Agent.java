@@ -84,7 +84,7 @@ public class Agent extends TransactionLogicData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readInt64());
         this.agentAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);

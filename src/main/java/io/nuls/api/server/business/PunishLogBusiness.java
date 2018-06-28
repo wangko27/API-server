@@ -11,6 +11,8 @@ import io.nuls.api.utils.StringUtils;
 import org.glassfish.grizzly.compression.lzma.impl.Base;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -49,20 +51,20 @@ public class PunishLogBusiness implements BaseService<PunishLog, Long> {
      * @param height 高度
      * @return 1成功，其他失败
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return punishLogMapper.deleteBySearchable(searchable);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(PunishLog punishLog) {
         return punishLogMapper.insert(punishLog);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveList(List<TxData> list) {
         for (TxData data : list) {
             PunishLog log = (PunishLog) data;
@@ -70,13 +72,13 @@ public class PunishLogBusiness implements BaseService<PunishLog, Long> {
         }
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(PunishLog punishLog) {
         return punishLogMapper.updateByPrimaryKey(punishLog);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(Long id) {
         return punishLogMapper.deleteByPrimaryKey(id);

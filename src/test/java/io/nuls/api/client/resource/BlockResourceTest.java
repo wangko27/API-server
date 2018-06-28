@@ -4,6 +4,7 @@ import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.Block;
+import io.nuls.api.utils.NulsByteBuffer;
 import io.nuls.api.utils.RestFulUtils;
 import org.apache.ibatis.annotations.Param;
 import org.junit.Assert;
@@ -44,7 +45,7 @@ public class BlockResourceTest {
         System.out.println(response.length);
         Block block = new Block();
         try {
-            block.parse(response);
+            block.parse(new NulsByteBuffer(response));
         } catch (NulsException e) {
             e.printStackTrace();
         }
@@ -66,7 +67,7 @@ public class BlockResourceTest {
         byte[] data = Hex.decode(result.getData().toString());
         Block block = new Block();
         try {
-            block.parse(data);
+            block.parse(new NulsByteBuffer(data));
         } catch (NulsException e) {
             e.printStackTrace();
         }

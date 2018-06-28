@@ -12,6 +12,8 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
@@ -58,7 +60,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveBlock(BlockHeader blockHeader) {
         blockHeaderMapper.insert(blockHeader);
         AgentNode agentNode = agentNodeBusiness.getAgentByAddress(blockHeader.getConsensusAddress());
@@ -133,24 +135,24 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         return true;
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteBlock(String hash) {
         return blockHeaderMapper.deleteByPrimaryKey(hash);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(BlockHeader blockHeader) {
         return blockHeaderMapper.insert(blockHeader);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(BlockHeader blockHeader) {
         return blockHeaderMapper.updateByPrimaryKey(blockHeader);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String s) {
         BlockHeader header = blockHeaderMapper.selectByPrimaryKey(s);

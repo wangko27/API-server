@@ -11,6 +11,8 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -52,7 +54,7 @@ public class DepositBusiness implements BaseService<Deposit, String> {
      * @param entity
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int insert(Deposit entity) {
         return depositMapper.insert(entity);
     }
@@ -73,14 +75,14 @@ public class DepositBusiness implements BaseService<Deposit, String> {
      * @param height 高度
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return depositMapper.deleteBySearchable(searchable);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Deposit deposit) {
         AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
@@ -90,13 +92,13 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         return depositMapper.insert(deposit);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Deposit deposit) {
         return depositMapper.updateByPrimaryKey(deposit);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String s) {
         Deposit deposit = depositMapper.selectByPrimaryKey(s);
@@ -107,7 +109,7 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         return depositMapper.deleteByPrimaryKey(s);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int cancelDeposit(Deposit deposit, String deleteHash) {
         deposit = depositMapper.selectByPrimaryKey(deposit.getTxHash());
         AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
@@ -123,7 +125,7 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         return depositMapper.selectByPrimaryKey(s);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollbackCancelDeposit(String deleteHash) {
         Searchable searchable = new Searchable();
         searchable.addCondition("delete_hash", SearchOperator.eq, deleteHash);

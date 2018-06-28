@@ -9,6 +9,8 @@ import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
@@ -40,7 +42,7 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         return null;
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveTxRelation(Transaction tx) {
         Set<String> addressSet = new HashSet<>();
         if (tx.getInputs() != null) {
@@ -59,7 +61,7 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         }
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteByTxHash(String txHash) {
         Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);

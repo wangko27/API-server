@@ -24,6 +24,7 @@
         <property name="targetMethod">
             <value>execute</value>
         </property>
+        <property name="concurrent" value="false" />
     </bean>
     <bean id="balanceTaskSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject">
@@ -32,6 +33,7 @@
         <property name="targetMethod">
             <value>execute</value>
         </property>
+        <property name="concurrent" value="false" />
     </bean>
 
     <bean id="balanceTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">

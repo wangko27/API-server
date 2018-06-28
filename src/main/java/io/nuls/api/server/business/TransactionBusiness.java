@@ -10,6 +10,8 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -108,33 +110,65 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
      *
      * @param tx
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Transaction tx) {
         transactionMapper.insert(tx);
+        long time1 = System.currentTimeMillis();
+        long time2 = 0;
+
         relationBusiness.saveTxRelation(tx);
+        time2 = System.currentTimeMillis();
+        if(time2 - time1 > 10) {
+            System.out.println("---------------saveTxRelation:" + (time2 - time1));
+        }
+
         if (tx.getType() == EntityConstant.TX_TYPE_COINBASE) {
             rewardDetailBusiness.saveTxReward(tx);
+            if(time2 - time1 > 10) {
+                System.out.println("---------------saveTxReward:" + (time2 - time1));
+            }
         } else if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
             aliasBusiness.save((Alias) tx.getTxData());
+            if(time2 - time1 > 10) {
+                System.out.println("---------------aliasBusiness:" + (time2 - time1));
+            }
         } else if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
             agentNodeBusiness.save((AgentNode) tx.getTxData());
+            if(time2 - time1 > 10) {
+                System.out.println("---------------agentNodeBusiness:" + (time2 - time1));
+            }
         } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
             depositBusiness.save((Deposit) tx.getTxData());
+            if(time2 - time1 > 10) {
+                System.out.println("---------------depositBusiness:" + (time2 - time1));
+            }
         } else if (tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
             depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getHash());
+            if(time2 - time1 > 10) {
+                System.out.println("---------------cancelDeposit:" + (time2 - time1));
+            }
         } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             AgentNode agentNode = (AgentNode) tx.getTxData();
             agentNodeBusiness.stopAgent(agentNode, tx.getHash());
+            if(time2 - time1 > 10) {
+                System.out.println("---------------stopAgent:" + (time2 - time1));
+            }
         } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
             punishLogBusiness.save((PunishLog) tx.getTxData());
+            if(time2 - time1 > 10) {
+                System.out.println("---------------punishLogBusiness:" + (time2 - time1));
+            }
         } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
             punishLogBusiness.saveList(tx.getTxDataList());
+            if(time2 - time1 > 10) {
+                System.out.println("---------------punishLogBusiness:" + (time2 - time1));
+            }
         }
         return 1;
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollback(Transaction tx) throws Exception {
         tx.transferExtend();
         //查询出交易生成的utxo，回滚缓存时使用
@@ -165,26 +199,25 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
      * @param height 高度
      * @return
      */
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return transactionMapper.deleteBySearchable(searchable);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Transaction transaction) {
         return transactionMapper.updateByPrimaryKey(transaction);
     }
 
-    @Transactional
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String s) {
         return transactionMapper.deleteByPrimaryKey(s);
     }
 
-    @Transactional
     @Override
     public Transaction getByKey(String s) {
         return transactionMapper.selectByPrimaryKey(s);

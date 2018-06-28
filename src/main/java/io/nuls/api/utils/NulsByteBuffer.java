@@ -23,7 +23,7 @@
  *
  */
 package io.nuls.api.utils;
- 
+
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.exception.NulsException;
@@ -31,8 +31,10 @@ import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.BaseNulsData;
 import io.nuls.api.model.NulsDigestData;
 import io.nuls.api.model.NulsSignData;
+import io.nuls.api.model.Transaction;
 import io.nuls.api.utils.log.Log;
 
+import java.awt.*;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
@@ -52,7 +54,7 @@ public class NulsByteBuffer {
 
     public NulsByteBuffer(byte[] bytes, int cursor) {
         if (null == bytes || bytes.length == 0 || cursor < 0) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "create byte buffer faild!");
+            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
         }
         this.payload = bytes;
         this.cursor = cursor;
@@ -199,11 +201,11 @@ public class NulsByteBuffer {
         return this.payload.length == cursor;
     }
 
-    public byte[] getPayloadByCursor() {
-        byte[] bytes = new byte[payload.length - cursor];
-        System.arraycopy(this.payload, cursor, bytes, 0, bytes.length);
-        return bytes;
-    }
+//    public byte[] getPayloadByCursor() {
+//        byte[] bytes = new byte[payload.length - cursor];
+//        System.arraycopy(this.payload, cursor, bytes, 0, bytes.length);
+//        return bytes;
+//    }
 
     public byte[] getPayload() {
         return payload;
@@ -225,10 +227,7 @@ public class NulsByteBuffer {
                 return null;
             }
         }
-        byte[] bytes = new byte[length];
-        System.arraycopy(payload, cursor, bytes, 0, length);
-        nulsData.parse(bytes);
-        cursor += nulsData.size();
+        nulsData.parse(this);
         return nulsData;
     }
 
@@ -244,19 +243,27 @@ public class NulsByteBuffer {
                 ((payload[cursor + 4] & 0xffL) << 32) |
                 ((payload[cursor + 5] & 0xffL) << 40);
         //todo
-        if(value==281474976710655L){
+        cursor += 6;
+        if (value == 281474976710655L) {
             return -1L;
         }
-        cursor += 6;
         return value;
     }
 
-//    public Transaction readTransaction() throws NulsException {
-//        try {
-//            return TransactionManager.getInstance(this);
-//        } catch (Exception e) {
-//            Log.error(e);
-//            throw new NulsException(e);
-//        }
-//    }
+    public Transaction readTransaction() throws NulsException {
+        try {
+            return TransactionManager.getInstance(this);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsException(e);
+        }
+    }
+
+    public int getCursor() {
+        return cursor;
+    }
+
+    public void setCursor(int cursor) {
+        this.cursor = cursor;
+    }
 }

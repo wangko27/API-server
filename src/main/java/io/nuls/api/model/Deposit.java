@@ -66,7 +66,7 @@ public class Deposit extends TransactionLogicData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readInt64());
         this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.agentHash = byteBuffer.readHash();
