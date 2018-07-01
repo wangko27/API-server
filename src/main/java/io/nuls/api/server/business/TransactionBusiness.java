@@ -120,7 +120,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         relationBusiness.saveTxRelation(tx);
         time2 = System.currentTimeMillis();
         if(time2 - time1 > 10) {
-            System.out.println("---------------saveTxRelation:" + (time2 - time1));
+            System.out.println("---------------saveTxRelation:" + (time2 - time1) + ",count:" + tx.getOutputs().size());
         }
 
         if (tx.getType() == EntityConstant.TX_TYPE_COINBASE) {

@@ -55,9 +55,16 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
                 addressSet.add(utxo.getAddress());
             }
         }
+
+        long time1,time2;
         for (String address : addressSet) {
             TransactionRelationKey key = new TransactionRelationKey(address, tx.getHash());
+            time1 = System.currentTimeMillis();
             relationMapper.insert(key);
+            time2 = System.currentTimeMillis();
+            if(time2 - time1 > 40) {
+                System.out.println("----------------");
+            }
         }
     }
 
