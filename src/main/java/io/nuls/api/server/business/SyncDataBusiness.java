@@ -39,7 +39,6 @@ public class SyncDataBusiness {
     public void syncData(Block block) throws Exception {
         System.out.println("-------------------------------sync block---------" + block.getHeader().getHeight());
         long time1 = System.currentTimeMillis();
-
         try {
             blockBusiness.saveBlock(block.getHeader());
         } catch (Exception e) {
@@ -48,27 +47,16 @@ public class SyncDataBusiness {
         }
         long time2 = System.currentTimeMillis();
         if (time2 - time1 > 10) {
-            System.out.println("---------------updateByFrom:" + (time2 - time1) + ",hash:" + block.getHeader().getHash());
+            System.out.println("---------------saveBlock:" + (time2 - time1) + ",hash:" + block.getHeader().getHash());
         }
 
+        time1 = System.currentTimeMillis();
         for (int i = 0; i < block.getTxList().size(); i++) {
             Transaction tx = block.getTxList().get(i);
             tx.setTxIndex(i);
-            time1 = System.currentTimeMillis();
             utxoBusiness.updateByFrom(tx);
-            time2 = System.currentTimeMillis();
-            if (time2 - time1 > 100) {
-                System.out.println("---------------updateByFrom:" + (time2 - time1) + ",count:" + tx.getInputs().size() + "," + tx.getHash());
-            }
-            time1 = time2;
 
             utxoBusiness.saveTo(tx);
-            time2 = System.currentTimeMillis();
-            if (time2 - time1 > 100) {
-                System.out.println("---------------saveTo:" + (time2 - time1) + ", count:" + tx.getOutputs().size() + "," + tx.getHash());
-            }
-            time1 = time2;
-
 
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("scriptSign", tx.getScriptSign());
@@ -77,11 +65,10 @@ public class SyncDataBusiness {
             tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
 
             transactionBusiness.save(tx);
-            time2 = System.currentTimeMillis();
-            if (time2 - time1 > 10) {
-                System.out.println("---------------transactionBusiness save:" + (time2 - time1));
-            }
-            time1 = time2;
+        }
+        time2 = System.currentTimeMillis();
+        if(time2 - time1 > 100) {
+            System.out.println("------------------------transactionBusiness save:" + (time2 - time1) + ",count" + block.getTxList().size());
         }
 
         //所有数据保存成功后，更新utxo缓存
@@ -106,10 +93,9 @@ public class SyncDataBusiness {
             }
         }
         time2 = System.currentTimeMillis();
-        if (time2 - time1 > 50) {
+        if (time2 - time1 > 200) {
             System.out.println("---------------update UtxoContext:" + (time2 - time1));
         }
-
     }
 
     /**
