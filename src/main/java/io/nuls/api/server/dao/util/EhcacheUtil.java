@@ -30,6 +30,7 @@ public class EhcacheUtil {
         manager.addCache(Constant.BALANCE_CACHE_NAME);
         manager.addCache(Constant.HISTORY_CACHE_NAME);
         manager.addCache(Constant.PACKINGADDRESS_CACHE_NAME);
+        manager.addCache(Constant.ADDRESS_REWARD_DETAIL);
     }
     //得到缓存实例
     public static EhcacheUtil getInstance() {
@@ -44,6 +45,15 @@ public class EhcacheUtil {
         Element element = new Element(key, value);
         cache.put(element);
     }
+
+    //向缓存放入要存储的内容
+    public void putWithTime(String cacheName, String key, Object value,int seconds) {
+        Cache cache = manager.getCache(cacheName);
+        Element element = new Element(key, value);
+        element.setTimeToLive(seconds);
+        cache.put(element);
+    }
+
     //向缓存取出要存储的内容
     public Object get(String cacheName, String key) {
         Cache cache = manager.getCache(cacheName);

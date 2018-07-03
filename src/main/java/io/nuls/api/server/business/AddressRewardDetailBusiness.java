@@ -7,6 +7,7 @@ import io.nuls.api.entity.AddressRewardDetail;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.AddressRewardDetailMapper;
+import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;

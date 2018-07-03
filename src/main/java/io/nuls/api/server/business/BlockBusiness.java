@@ -60,6 +60,22 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
 
     }
 
+    /**
+     * 查询24小时共识奖励
+     *
+     * @param startTime
+     * @return
+     */
+    public Long getBlockSumRewardByTime(Long startTime) {
+        if (startTime < 0) {
+            return 0L;
+        }
+        Searchable searchable = new Searchable();
+        searchable.addCondition("create_time", SearchOperator.gte, startTime-Constant.MILLISECONDS_TIME_DAY);
+        searchable.addCondition("create_time", SearchOperator.lt, startTime);
+        return blockHeaderMapper.getBlockSumReward(searchable);
+    }
+
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveBlock(BlockHeader blockHeader) {
         blockHeaderMapper.insert(blockHeader);

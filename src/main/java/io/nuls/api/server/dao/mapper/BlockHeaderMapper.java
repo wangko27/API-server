@@ -16,4 +16,11 @@ public interface BlockHeaderMapper extends BaseMapper<BlockHeader, String>{
      * @return
      */
     Integer getBlockSumTxcount(Searchable searchable);
+
+    /**
+     * 根据条件统计奖励总和
+     * @param searchable
+     * @return
+     */
+    Long getBlockSumReward(Searchable searchable);
 }

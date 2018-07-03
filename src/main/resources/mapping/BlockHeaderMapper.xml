@@ -249,4 +249,8 @@
     SELECT SUM(tx_count) FROM `block_header`
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+  <select id="getBlockSumReward" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Long">
+    SELECT SUM(reward) FROM `block_header`
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

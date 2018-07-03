@@ -1,14 +1,17 @@
 package io.nuls.api.server.task;
 
 import io.nuls.api.context.BalanceListContext;
+import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.PackingAddressContext;
 import io.nuls.api.server.business.AgentNodeBusiness;
+import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,6 +24,8 @@ public class BalanceTask {
     private UtxoBusiness utxoBusiness;
     @Autowired
     private AgentNodeBusiness agentNodeBusiness;
+    @Autowired
+    private BlockBusiness blockBusiness;
 
     public void execute() {
         /*加载持币账户排行榜*/
@@ -31,6 +36,8 @@ public class BalanceTask {
         List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
         PackingAddressContext.reset(agentNodeDtoList);
 
-
+        /*加载24小时奖励*/
+        Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
+        HistoryContext.rewardofday = rewardOfDay==null?0L:rewardOfDay;
     }
 }

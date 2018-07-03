@@ -86,11 +86,14 @@ public interface Constant {
 
     long MILLISECONDS_TIME_DAY=86400000;
 
+    int SECONDS_TIME_DAY=86400000;
+
     String UTXO_CACHE_NAME = "utxoCache";
     String ALIAS_CACHE_NAME = "alias";
     String BALANCE_CACHE_NAME = "balance";
     String HISTORY_CACHE_NAME="history";
     String PACKINGADDRESS_CACHE_NAME = "packingaddress";
+    String ADDRESS_REWARD_DETAIL = "reward";
     /**
      * 空值占位符
      * Null placeholder.

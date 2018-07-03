@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -58,13 +55,7 @@ public class InitApiserver {
 
 
         /*加载24小时奖励*/
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DATE, cal.get(Calendar.DATE));
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        long time = cal.getTime().getTime();
-        Long rewardOfDay = addressRewardDetailBusiness.selectDayofReward(time);
+        Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
         HistoryContext.rewardofday = rewardOfDay==null?0L:rewardOfDay;
 
         /*加载别名到缓存*/
