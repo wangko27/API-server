@@ -9,6 +9,8 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -37,6 +39,13 @@ public class BalanceListContext {
             UtxoDto utxoDto = (UtxoDto)element.getObjectValue();
             list.add(utxoDto);
         }
+        //按照金额，排序
+        Collections.sort(list, new Comparator<UtxoDto>() {
+            @Override
+            public int compare(UtxoDto o1, UtxoDto o2) {
+                return o1.getTotal()>o2.getTotal()?-1:1;
+            }
+        });
         return list;
     }
     public static void remove(String address) {
