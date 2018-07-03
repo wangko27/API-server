@@ -51,7 +51,8 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
         Long locked = 0L;
 
         List<Utxo> utxolist = UtxoContext.get(address);
-
+        System.out.println("size:");
+        System.out.println(utxolist.size());
         if (utxolist != null) {
             for (Utxo utxo : utxolist) {
                 if (utxo.getLockTime() == -1) {

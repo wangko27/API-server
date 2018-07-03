@@ -7,13 +7,13 @@
     <result column="address" property="address" jdbcType="VARCHAR" />
     <result column="amount" property="amount" jdbcType="BIGINT" />
     <result column="tx_hash" property="txHash" jdbcType="VARCHAR" />
-    <result column="time" property="time" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, block_height, address, amount, tx_hash, time
+    id, block_height, address, amount, tx_hash, create_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from address_reward_detail
     where id = #{id,jdbcType=BIGINT}
@@ -23,10 +23,20 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.AddressRewardDetail" >
-    insert into address_reward_detail (id, block_height, address, 
-      amount, tx_hash, time)
-    values (#{id,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR}, 
-      #{amount,jdbcType=BIGINT}, #{txHash,jdbcType=VARCHAR}, #{time,jdbcType=BIGINT})
+    insert into address_reward_detail (id, block_height, address,
+    amount, tx_hash, create_time
+    )
+    values (#{id,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR},
+    #{amount,jdbcType=BIGINT}, #{txHash,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}
+    )
+  </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into address_reward_detail
+    (block_height, address,amount, tx_hash, create_time)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.blockHeight,jdbcType=BIGINT}, #{item.address,jdbcType=VARCHAR},#{item.amount,jdbcType=BIGINT}, #{item.txHash,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT})
+    </foreach>
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.AddressRewardDetail" >
     insert into address_reward_detail
@@ -46,8 +56,8 @@
       <if test="txHash != null" >
         tx_hash,
       </if>
-      <if test="time != null" >
-        time,
+      <if test="createTime != null" >
+        create_time,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -66,8 +76,8 @@
       <if test="txHash != null" >
         #{txHash,jdbcType=VARCHAR},
       </if>
-      <if test="time != null" >
-        #{time,jdbcType=BIGINT},
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -86,8 +96,8 @@
       <if test="txHash != null" >
         tx_hash = #{txHash,jdbcType=VARCHAR},
       </if>
-      <if test="time != null" >
-        time = #{time,jdbcType=BIGINT},
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
       </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
@@ -98,7 +108,7 @@
       address = #{address,jdbcType=VARCHAR},
       amount = #{amount,jdbcType=BIGINT},
       tx_hash = #{txHash,jdbcType=VARCHAR},
-      time = #{time,jdbcType=BIGINT}
+      create_time = #{createTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">

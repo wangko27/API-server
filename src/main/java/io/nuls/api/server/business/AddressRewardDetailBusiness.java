@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Description: 账户奖励
  * Author: zsj
@@ -68,14 +71,21 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveTxReward(Transaction tx) {
+        //2018-07-02修改成为批量插入
+        List<AddressRewardDetail> utxoList = new ArrayList<>();
         for (Utxo utxo : tx.getOutputs()) {
             AddressRewardDetail detail = new AddressRewardDetail();
             detail.setAddress(utxo.getAddress());
-            detail.setTime(tx.getCreateTime());
+            detail.setCreateTime(tx.getCreateTime());
             detail.setAmount(utxo.getAmount());
             detail.setBlockHeight(tx.getBlockHeight());
             detail.setTxHash(tx.getHash());
-            addressRewardDetailMapper.insert(detail);
+            //addressRewardDetailMapper.insert(detail);
+            utxoList.add(detail);
+            //System.out.println(detail.toString());
+        }
+        if(utxoList.size() > 0){
+            addressRewardDetailMapper.insertByBatch(utxoList);
         }
     }
 
@@ -133,8 +143,8 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      */
     public Long selectDayofReward(Long time){
         Searchable searchable = new Searchable();
-        searchable.addCondition("time", SearchOperator.gte,time-Constant.MILLISECONDS_TIME_DAY);
-        searchable.addCondition("time", SearchOperator.lt, time);
+        searchable.addCondition("create_time", SearchOperator.gte,time-Constant.MILLISECONDS_TIME_DAY);
+        searchable.addCondition("create_time", SearchOperator.lt, time);
         return addressRewardDetailMapper.selectSumReward(searchable);
     }
 

@@ -2,7 +2,8 @@ package io.nuls.api.server.business;
 
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.TransactionRelationKey;
+import io.nuls.api.entity.TransactionRelation;
+
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -13,34 +14,18 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
-public class TransactionRelationBusiness implements BaseService<TransactionRelationKey, TransactionRelationKey> {
+public class TransactionRelationBusiness implements BaseService<TransactionRelation, Long> {
 
     @Autowired
     private TransactionRelationMapper relationMapper;
 
-    @Override
-    public int save(TransactionRelationKey transactionRelationKey) {
-        return relationMapper.insert(transactionRelationKey);
-    }
 
-    @Override
-    public int update(TransactionRelationKey transactionRelationKey) {
-        return 0;
-    }
-
-    @Override
-    public int deleteByKey(TransactionRelationKey transactionRelationKey) {
-        return relationMapper.deleteByPrimaryKey(transactionRelationKey);
-    }
-
-    @Override
-    public TransactionRelationKey getByKey(TransactionRelationKey transactionRelationKey) {
-        return null;
-    }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveTxRelation(Transaction tx) {
@@ -55,16 +40,15 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
                 addressSet.add(utxo.getAddress());
             }
         }
+        //2018-07-02修改为批量插入
 
-        long time1,time2;
+        List<TransactionRelation> relationList = new ArrayList<>();
         for (String address : addressSet) {
-            TransactionRelationKey key = new TransactionRelationKey(address, tx.getHash());
-            time1 = System.currentTimeMillis();
-            relationMapper.insert(key);
-            time2 = System.currentTimeMillis();
-            if(time2 - time1 > 40) {
-                System.out.println("----------------");
-            }
+            TransactionRelation key = new TransactionRelation(address, tx.getHash());
+            relationList.add(key);
+        }
+        if(relationList.size() > 0){
+            relationMapper.insertByBatch(relationList);
         }
     }
 
@@ -73,5 +57,28 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
         relationMapper.deleteByTxHash(txHash);
+    }
+
+    @Override
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int save(TransactionRelation transactionRelation) {
+        return relationMapper.insert(transactionRelation);
+    }
+
+    @Override
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int update(TransactionRelation transactionRelation) {
+        return relationMapper.updateByPrimaryKey(transactionRelation);
+    }
+
+    @Override
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int deleteByKey(Long aLong) {
+        return relationMapper.deleteByPrimaryKey(aLong);
+    }
+
+    @Override
+    public TransactionRelation getByKey(Long aLong) {
+        return relationMapper.selectByPrimaryKey(aLong);
     }
 }

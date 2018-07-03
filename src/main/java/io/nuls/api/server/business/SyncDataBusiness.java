@@ -37,20 +37,15 @@ public class SyncDataBusiness {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void syncData(Block block) throws Exception {
+        long time1,time2;
+        time1 = System.currentTimeMillis();
         System.out.println("-------------------------------sync block---------" + block.getHeader().getHeight());
-        long time1 = System.currentTimeMillis();
         try {
             blockBusiness.saveBlock(block.getHeader());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
-        long time2 = System.currentTimeMillis();
-        if (time2 - time1 > 10) {
-            System.out.println("---------------saveBlock:" + (time2 - time1) + ",hash:" + block.getHeader().getHash());
-        }
-
-        time1 = System.currentTimeMillis();
         for (int i = 0; i < block.getTxList().size(); i++) {
             Transaction tx = block.getTxList().get(i);
             tx.setTxIndex(i);
@@ -66,13 +61,7 @@ public class SyncDataBusiness {
 
             transactionBusiness.save(tx);
         }
-        time2 = System.currentTimeMillis();
-        if(time2 - time1 > 100) {
-            System.out.println("------------------------transactionBusiness save:" + (time2 - time1) + ",count" + block.getTxList().size());
-        }
-
         //所有数据保存成功后，更新utxo缓存
-        time1 = System.currentTimeMillis();
         UtxoKey key = new UtxoKey();
         Utxo utxo;
         for (int i = 0; i < block.getTxList().size(); i++) {
@@ -83,7 +72,7 @@ public class SyncDataBusiness {
                     key.setTxHash(input.getFromHash());
                     key.setTxIndex(input.getFromIndex());
                     utxo = utxoBusiness.getByKey(key);
-                    UtxoContext.remove(utxo);
+                    UtxoContext.remove(utxo.getAddress());
                 }
             }
             if (tx.getOutputs() != null) {
@@ -93,9 +82,8 @@ public class SyncDataBusiness {
             }
         }
         time2 = System.currentTimeMillis();
-        if (time2 - time1 > 200) {
-            System.out.println("---------------update UtxoContext:" + (time2 - time1));
-        }
+        System.out.println("时间差");
+        System.out.println(time2-time1);
     }
 
     /**
@@ -123,7 +111,7 @@ public class SyncDataBusiness {
             Transaction tx = txList.get(i);
             if (tx.getOutputs() != null) {
                 for (int j = tx.getOutputs().size() - 1; j >= 0; j--) {
-                    UtxoContext.remove(tx.getOutputs().get(j));
+                    UtxoContext.remove(tx.getOutputs().get(j).getAddress());
                 }
             }
             UtxoKey utxoKey;

@@ -76,7 +76,8 @@ public class StringUtils {
     private static final int HASH_LENGTH = 23;
 
     public static boolean validAddress(String address) {
-        if (StringUtils.isBlank(address)) {
+        //由于生成地址的格式已经修改更新，此处调用AddressTool的方法验证
+        /*if (StringUtils.isBlank(address)) {
             return false;
         }
         byte[] bytes = null;
@@ -93,7 +94,8 @@ public class StringUtils {
         } catch (Exception e) {
             return false;
         }
-        return true;
+        return true;*/
+        return AddressTool.validAddress(address);
     }
 
     protected static void checkXOR(byte[] hashs) {

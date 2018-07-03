@@ -78,6 +78,6 @@ public class Deposit extends TxData {
     }
 
     public void setDeleteHash(String deleteHash) {
-        this.deleteHash = deleteHash;
+        this.deleteHash = deleteHash == null ? null : deleteHash.trim();
     }
 }

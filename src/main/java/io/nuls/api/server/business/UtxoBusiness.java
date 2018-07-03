@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -206,8 +207,14 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveTo(Transaction tx) {
+        //2018-07-02 修改 批量插入
+        List<Utxo> utxoList = new ArrayList<>();
         for (Utxo utxo : tx.getOutputs()) {
-            utxoMapper.insert(utxo);
+            utxoList.add(utxo);
+            //utxoMapper.insert(utxo);
+        }
+        if(utxoList.size()>0){
+            utxoMapper.insertByBatch(utxoList);
         }
     }
 

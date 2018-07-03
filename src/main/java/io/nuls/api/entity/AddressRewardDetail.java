@@ -11,7 +11,7 @@ public class AddressRewardDetail {
 
     private String txHash;
 
-    private Long time;
+    private Long createTime;
 
     public Long getId() {
         return id;
@@ -53,11 +53,11 @@ public class AddressRewardDetail {
         this.txHash = txHash == null ? null : txHash.trim();
     }
 
-    public Long getTime() {
-        return time;
+    public Long getCreateTime() {
+        return createTime;
     }
 
-    public void setTime(Long time) {
-        this.time = time;
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
     }
 }

@@ -34,39 +34,5 @@ public class PackingAddressContext {
     public static int getSize(){
         return agentNodeList.size();
     }
-    /*private static Map<String, AgentNodeDto> agentNodeMap = new ConcurrentHashMap<>();
-    public static void add(AgentNodeDto block){
-        if(null != block && StringUtils.validAddress(block.getAgentAddress())){
-            agentNodeMap.put(block.getAgentAddress(),block);
-        }
-    }
 
-    public static Integer getSize(){
-        return agentNodeMap.size();
-    }
-    public static List<AgentNodeDto> getAllList(){
-        List<AgentNodeDto> agentNodeList = new ArrayList<>();
-        for(AgentNodeDto agentNodeDto : agentNodeMap.values()){
-            agentNodeList.add(agentNodeDto);
-        }
-        Collections.sort(agentNodeList, new Comparator<AgentNodeDto>() {
-            @Override
-            public int compare(AgentNodeDto o1, AgentNodeDto o2) {
-                return o1.getTotalPackingCount()>o2.getTotalPackingCount()?-1:1;
-            }
-        });
-        return agentNodeList;
-    }
-    public static Map<String, AgentNodeDto> getAll(){
-        return agentNodeMap;
-    }
-
-    public static void clear(){
-        //agentNodeMap.clear();
-        agentNodeMap =  new ConcurrentHashMap<>();
-    }
-    public static void reset(Map<String, AgentNodeDto> map){
-        clear();
-        agentNodeMap = map;
-    }*/
 }

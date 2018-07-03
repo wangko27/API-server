@@ -20,25 +20,17 @@
     from deposit
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </select>
-
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from deposit
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </delete>
-
-  <update id="deleteByAgentHash">
-    update deposit
-    set delete_hash = #{deleteHash,jdbcType=VARCHAR}
-    where agent_hash = #{agentHash,jdbcType=VARCHAR}
-  </update>
-
   <insert id="insert" parameterType="io.nuls.api.entity.Deposit" >
-    insert into deposit (tx_hash, amount, agent_hash, 
-      agent_name, address, create_time, 
-      block_height, delete_hash)
-    values (#{txHash,jdbcType=VARCHAR}, #{amount,jdbcType=BIGINT}, #{agentHash,jdbcType=VARCHAR}, 
-      #{agentName,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, 
-      #{blockHeight,jdbcType=BIGINT}, #{deleteHash,jdbcType=VARCHAR})
+    insert into deposit (tx_hash, amount, agent_hash,
+    agent_name, address, create_time,
+    block_height, delete_hash)
+    values (#{txHash,jdbcType=VARCHAR}, #{amount,jdbcType=BIGINT}, #{agentHash,jdbcType=VARCHAR},
+    #{agentName,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
+    #{blockHeight,jdbcType=BIGINT}, #{deleteHash,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Deposit" >
     insert into deposit
@@ -65,7 +57,7 @@
         block_height,
       </if>
       <if test="deleteHash != null" >
-        block_hash,
+        delete_hash,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -125,12 +117,12 @@
   <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Deposit" >
     update deposit
     set amount = #{amount,jdbcType=BIGINT},
-      agent_hash = #{agentHash,jdbcType=VARCHAR},
-      agent_name = #{agentName,jdbcType=VARCHAR},
-      address = #{address,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=BIGINT},
-      block_height = #{blockHeight,jdbcType=BIGINT},
-      delete_hash = #{deleteHash,jdbcType=VARCHAR}
+    agent_hash = #{agentHash,jdbcType=VARCHAR},
+    agent_name = #{agentName,jdbcType=VARCHAR},
+    address = #{address,jdbcType=VARCHAR},
+    create_time = #{createTime,jdbcType=BIGINT},
+    block_height = #{blockHeight,jdbcType=BIGINT},
+    delete_hash = #{deleteHash,jdbcType=VARCHAR}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
@@ -159,5 +151,4 @@
     SELECT sum(amount) FROM deposit
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
-
 </mapper>

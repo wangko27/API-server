@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.AliasMapper">
-    <resultMap id="BaseResultMap" type="io.nuls.api.entity.Alias">
-        <id column="alias" property="alias" jdbcType="VARCHAR"/>
-        <result column="address" property="address" jdbcType="VARCHAR"/>
-        <result column="block_height" property="blockHeight" jdbcType="BIGINT"/>
+<mapper namespace="io.nuls.api.server.dao.mapper.AliasMapper" >
+    <resultMap id="BaseResultMap" type="io.nuls.api.entity.Alias" >
+        <id column="alias" property="alias" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
     </resultMap>
-    <sql id="Base_Column_List">
-    alias, address, block_height
-  </sql>
-    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+    <sql id="Base_Column_List" >
+        alias, address, block_height
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
         select
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List" />
         from alias
         where alias = #{alias,jdbcType=VARCHAR}
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-    delete from alias
-    where alias = #{alias,jdbcType=VARCHAR}
-  </delete>
-    <insert id="insert" parameterType="io.nuls.api.entity.Alias">
-    insert into alias (alias, address, block_height
-      )
-    values (#{alias,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{blockHeight,jdbcType=BIGINT}
-      )
-  </insert>
-    <insert id="insertSelective" parameterType="io.nuls.api.entity.Alias">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+        delete from alias
+        where alias = #{alias,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="io.nuls.api.entity.Alias" >
+        insert into alias (alias, address, block_height
+        )
+        values (#{alias,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{blockHeight,jdbcType=BIGINT}
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="io.nuls.api.entity.Alias" >
         insert into alias
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="alias != null">
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="alias != null" >
                 alias,
             </if>
-            <if test="address != null">
+            <if test="address != null" >
                 address,
             </if>
-            <if test="blockHeight != null">
+            <if test="blockHeight != null" >
                 block_height,
             </if>
         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="alias != null">
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="alias != null" >
                 #{alias,jdbcType=VARCHAR},
             </if>
-            <if test="address != null">
+            <if test="address != null" >
                 #{address,jdbcType=VARCHAR},
             </if>
-            <if test="blockHeight != null">
+            <if test="blockHeight != null" >
                 #{blockHeight,jdbcType=BIGINT},
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Alias">
+    <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Alias" >
         update alias
-        <set>
-            <if test="address != null">
+        <set >
+            <if test="address != null" >
                 address = #{address,jdbcType=VARCHAR},
             </if>
-            <if test="blockHeight != null">
+            <if test="blockHeight != null" >
                 block_height = #{blockHeight,jdbcType=BIGINT},
             </if>
         </set>
         where alias = #{alias,jdbcType=VARCHAR}
     </update>
-    <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Alias">
+    <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Alias" >
     update alias
     set address = #{address,jdbcType=VARCHAR},
       block_height = #{blockHeight,jdbcType=BIGINT}
@@ -84,5 +84,5 @@
     <update id="deleteBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable">
         DELETE from alias
         <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
-  </update>
+    </update>
 </mapper>

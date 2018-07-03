@@ -1,19 +1,26 @@
 package io.nuls.api.entity;
 
-import java.io.Serializable;
+public class TransactionRelation {
 
-public class TransactionRelationKey implements Serializable {
+    public TransactionRelation(){
+
+    }
+    public TransactionRelation(String address,String txHash){
+        this.address = address;
+        this.txHash = txHash;
+    }
+    private Long id;
 
     private String address;
 
     private String txHash;
 
-    public TransactionRelationKey() {
+    public Long getId() {
+        return id;
     }
 
-    public TransactionRelationKey(String address, String txHash) {
-        this.address = address;
-        this.txHash = txHash;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getAddress() {

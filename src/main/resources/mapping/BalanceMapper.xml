@@ -13,7 +13,7 @@
     id, address, locked, usable, block_height, assets_code
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from balance
     where id = #{id,jdbcType=BIGINT}

@@ -73,7 +73,7 @@ public class ApiServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Override
     public Response toResponse(Exception e) {
-        Log.error(e);
+        Log.error(e.getMessage());
         RpcClientResult result = RpcClientResult.getFailed(e.getMessage());
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }

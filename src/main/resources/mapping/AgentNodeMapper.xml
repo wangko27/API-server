@@ -23,12 +23,12 @@
     <result column="totalPackingCount" property="totalPackingCount" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate, 
-    create_time, block_height, status, total_deposit, deposit_count,
-    credit_value, total_packing_count, last_reward_height,delete_hash, total_reward
+    tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate,
+    create_time, block_height, status, total_deposit, deposit_count, credit_value, total_packing_count,
+    last_reward_height, total_reward, delete_hash
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from agent_node
     where tx_hash = #{txHash,jdbcType=VARCHAR}
@@ -38,16 +38,18 @@
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.AgentNode" >
-    insert into agent_node (tx_hash, agent_address, packing_address, 
-      reward_address, deposit, commission_rate,create_time,
-      block_height, status, total_deposit, 
-      deposit_count, credit_value, total_packing_count, 
-      last_reward_height, total_reward, delete_hash)
-    values (#{txHash,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR}, #{packingAddress,jdbcType=VARCHAR}, 
-      #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL}, #{createTime,jdbcType=BIGINT},
-      #{blockHeight,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{totalDeposit,jdbcType=BIGINT}, 
-      #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL}, #{totalPackingCount,jdbcType=BIGINT}, 
-      #{lastRewardHeight,jdbcType=BIGINT},#{totalReward,jdbcType=BIGINT},#{deleteHash,jdbcType=VARCHAR})
+    insert into agent_node (tx_hash, agent_address, packing_address,
+    reward_address, deposit, commission_rate,
+    create_time, block_height, status,
+    total_deposit, deposit_count, credit_value,
+    total_packing_count, last_reward_height, total_reward,
+    delete_hash)
+    values (#{txHash,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR}, #{packingAddress,jdbcType=VARCHAR},
+    #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL},
+    #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{status,jdbcType=INTEGER},
+    #{totalDeposit,jdbcType=BIGINT}, #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL},
+    #{totalPackingCount,jdbcType=BIGINT}, #{lastRewardHeight,jdbcType=BIGINT}, #{totalReward,jdbcType=BIGINT},
+    #{deleteHash,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
     insert into agent_node
@@ -94,16 +96,64 @@
       <if test="lastRewardHeight != null" >
         last_reward_height,
       </if>
-      <if test="deleteHash != null" >
-        delete_hash,
-      </if>
       <if test="totalReward != null" >
         total_reward,
       </if>
+      <if test="deleteHash != null" >
+        delete_hash,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        #{txHash,jdbcType=VARCHAR},
+      </if>
+      <if test="agentAddress != null" >
+        #{agentAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="packingAddress != null" >
+        #{packingAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="rewardAddress != null" >
+        #{rewardAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="deposit != null" >
+        #{deposit,jdbcType=BIGINT},
+      </if>
+      <if test="commissionRate != null" >
+        #{commissionRate,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="totalDeposit != null" >
+        #{totalDeposit,jdbcType=BIGINT},
+      </if>
+      <if test="depositCount != null" >
+        #{depositCount,jdbcType=INTEGER},
+      </if>
+      <if test="creditValue != null" >
+        #{creditValue,jdbcType=DECIMAL},
+      </if>
+      <if test="totalPackingCount != null" >
+        #{totalPackingCount,jdbcType=BIGINT},
+      </if>
+      <if test="lastRewardHeight != null" >
+        #{lastRewardHeight,jdbcType=BIGINT},
+      </if>
+      <if test="totalReward != null" >
+        #{totalReward,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHash != null" >
+        #{deleteHash,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
-
-
   <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.AgentNode" >
     update agent_node
     <set >
@@ -146,7 +196,7 @@
       <if test="lastRewardHeight != null" >
         last_reward_height = #{lastRewardHeight,jdbcType=BIGINT},
       </if>
-      <if test="totalReward != null">
+      <if test="totalReward != null" >
         total_reward = #{totalReward,jdbcType=BIGINT},
       </if>
       <if test="deleteHash != null" >

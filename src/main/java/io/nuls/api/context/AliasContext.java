@@ -1,8 +1,14 @@
 package io.nuls.api.context;
 
+import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.Alias;
+import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.utils.StringUtils;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,7 +19,35 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AliasContext {
 
-    private static Map<String, Alias> aliasMap = new ConcurrentHashMap<>();
+    public static Alias get(String address) {
+        return (Alias)EhcacheUtil.getInstance().get(Constant.ALIAS_CACHE_NAME,address);
+    }
+    public static int getSize(){
+        return EhcacheUtil.getInstance().get(Constant.ALIAS_CACHE_NAME).getSize();
+    }
+    public static void put(Alias alias) {
+        if(null != alias && StringUtils.isNotBlank(alias.getAddress())){
+            EhcacheUtil.getInstance().put(Constant.ALIAS_CACHE_NAME,alias.getAddress(),alias);
+        }
+    }
+
+    public static void remove(String address) {
+        EhcacheUtil.getInstance().remove(Constant.ALIAS_CACHE_NAME,address);
+    }
+
+    public static void removeByHeight(Long height){
+        Cache cache = EhcacheUtil.getInstance().get(Constant.ALIAS_CACHE_NAME);
+        List<String> keys = cache.getKeys();
+        for (String key:keys){
+            Element element = cache.get(key);
+            Alias alias = (Alias)element.getObjectValue();
+            if(alias.getBlockHeight() == height){
+                remove(alias.getAddress());
+            }
+        }
+    }
+
+    /*private static Map<String, Alias> aliasMap = new ConcurrentHashMap<>();
 
     public static Alias get(String address) {
         return aliasMap.get(address);
@@ -41,5 +75,6 @@ public class AliasContext {
             }
         }
     }
+    */
 
 }

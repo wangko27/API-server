@@ -1,6 +1,12 @@
 package io.nuls.api.context;
 
+import io.nuls.api.constant.Constant;
+import io.nuls.api.entity.Alias;
+import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.server.dto.UtxoDto;
+import io.nuls.api.utils.StringUtils;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +17,42 @@ import java.util.List;
  * Date:  2018/6/5 0005
  */
 public class BalanceListContext {
-    private static List<UtxoDto> blockDtos = new ArrayList<>();
+
+
+    public static UtxoDto get(String address) {
+        return (UtxoDto) EhcacheUtil.getInstance().get(Constant.BALANCE_CACHE_NAME,address);
+    }
+    public static int getSize(){
+        return EhcacheUtil.getInstance().get(Constant.BALANCE_CACHE_NAME).getSize();
+    }
+    public static void add(UtxoDto block){
+        EhcacheUtil.getInstance().put(Constant.BALANCE_CACHE_NAME,block.getAddress(),block);
+    }
+    public static List<UtxoDto> getAll(){
+        List<UtxoDto> list = new ArrayList<>();
+        Cache cache = EhcacheUtil.getInstance().get(Constant.BALANCE_CACHE_NAME);
+        List<String> keys = cache.getKeys();
+        for (String key:keys){
+            Element element = cache.get(key);
+            UtxoDto utxoDto = (UtxoDto)element.getObjectValue();
+            list.add(utxoDto);
+        }
+        return list;
+    }
+    public static void remove(String address) {
+        EhcacheUtil.getInstance().remove(Constant.BALANCE_CACHE_NAME,address);
+    }
+    public static void clear(){
+        EhcacheUtil.getInstance().get(Constant.BALANCE_CACHE_NAME).removeAll();
+    }
+    public static void reset(List<UtxoDto> list){
+        clear();
+        for(UtxoDto dto: list){
+            add(dto);
+        }
+    }
+
+    /*private static List<UtxoDto> blockDtos = new ArrayList<>();
     public static void add(UtxoDto block){
         blockDtos.add(block);
     }
@@ -30,5 +71,5 @@ public class BalanceListContext {
     public static void reset(List<UtxoDto> list){
         clear();
         blockDtos = list;
-    }
+    }*/
 }

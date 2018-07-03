@@ -1,15 +1,20 @@
 package io.nuls.api.server.init;
 
+import io.nuls.api.constant.Constant;
 import io.nuls.api.context.*;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.business.*;
+import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +45,7 @@ public class InitApiserver {
         for(Utxo utxo:utxoList){
             UtxoContext.put(utxo);
         }
+
         /*启动*/
         /*加载14天历史*/
         blockBusiness.initHistory();
