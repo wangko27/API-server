@@ -64,12 +64,9 @@ public class BlockSyncTask {
                 } else {
                     BlockHeader newest = result.getData();
                     if (checkBlockContinuity(localBest, newest)) {
-                        long time1 = System.currentTimeMillis();
+
                         RpcClientResult<Block> blockResult = syncDataHandler.getBlock(newest);
-                        long time2 = System.currentTimeMillis();
-                        if(time2 - time1 > 100) {
-                            System.out.println("-------------------------transfer block:" + (time2-time1) + ",count" + blockResult.getData().getHeader().getTxCount());
-                        }
+
                         if (blockResult.isFailed()) {
                             throw new NulsException(blockResult.getCode(), blockResult.getMsg());
                         }

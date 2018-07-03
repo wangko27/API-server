@@ -37,9 +37,6 @@ public class SyncDataBusiness {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void syncData(Block block) throws Exception {
-        long time1,time2;
-        time1 = System.currentTimeMillis();
-        System.out.println("-------------------------------sync block---------" + block.getHeader().getHeight());
         try {
             blockBusiness.saveBlock(block.getHeader());
         } catch (Exception e) {
@@ -81,9 +78,6 @@ public class SyncDataBusiness {
                 }
             }
         }
-        time2 = System.currentTimeMillis();
-        System.out.println("时间差");
-        System.out.println(time2-time1);
     }
 
     /**
