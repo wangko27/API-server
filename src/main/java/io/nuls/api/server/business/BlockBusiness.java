@@ -122,6 +122,27 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
         return page;
     }
 
+    /**
+     * 获取块列表
+     *
+     * @param address    共识地址
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public List<BlockHeader> getListAll(String address, int pageNumber, int pageSize) {
+        Searchable searchable = new Searchable();
+        if (StringUtils.isNotBlank(address)) {
+            if (StringUtils.validAddress(address)) {
+                searchable.addCondition("consensus_address", SearchOperator.eq, address);
+            } else {
+                return null;
+            }
+        }
+        PageHelper.orderBy("height desc");
+        return blockHeaderMapper.selectList(searchable);
+    }
+
     public BlockHeader getNewest() {
         return blockHeaderMapper.getBestBlock();
     }

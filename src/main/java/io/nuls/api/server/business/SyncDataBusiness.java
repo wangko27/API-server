@@ -1,5 +1,7 @@
 package io.nuls.api.server.business;
 
+import io.nuls.api.constant.Constant;
+import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.utils.JSONUtils;
@@ -39,6 +41,9 @@ public class SyncDataBusiness {
     public void syncData(Block block) throws Exception {
         try {
             blockBusiness.saveBlock(block.getHeader());
+            /*缓存新块*/
+            IndexContext.putBlock(block.getHeader());
+
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -57,6 +62,8 @@ public class SyncDataBusiness {
             tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
 
             transactionBusiness.save(tx);
+            /*缓存新交易*/
+            IndexContext.putTransaction(tx);
         }
         //所有数据保存成功后，更新utxo缓存
         UtxoKey key = new UtxoKey();
@@ -120,6 +127,13 @@ public class SyncDataBusiness {
                     }
                 }
             }
+        }
+        //回滚最新块
+        IndexContext.removeBlock(header);
+        //重新加载最新的几条交易信息
+        List<Transaction> transactionList = transactionBusiness.getListAll(null,0,1, Constant.INDEX_TX_LIST_COUNT,3);
+        if(null != transactionList){
+            IndexContext.initTransactions(transactionList);
         }
     }
 

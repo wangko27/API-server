@@ -70,6 +70,31 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         return page;
     }
 
+    /**
+     * 交易列表 不分页
+     * @param orderType 1 tx_index asc,2 create_time desc,3 block_height desc
+     * @param height 所属的区块
+     * @param type   交易类型
+     * @return
+     */
+    public List<Transaction> getListAll(Long height, int type, int pageNumber, int pageSize,int orderType) {
+        Searchable searchable = new Searchable();
+        if (null != height) {
+            searchable.addCondition("block_height", SearchOperator.eq, height);
+        }
+        if (type > 0) {
+            searchable.addCondition("type", SearchOperator.eq, type);
+        }
+        if(orderType == 2) {
+            PageHelper.orderBy("create_time desc");
+        }else if(orderType == 3){
+            PageHelper.orderBy("block_height desc");
+        }else {
+            PageHelper.orderBy("tx_index asc");
+        }
+        return transactionMapper.selectList(searchable);
+    }
+
     public List<Transaction> getList(Long blockHeight) {
         Searchable searchable = new Searchable();
         if(null == blockHeight){

@@ -88,6 +88,9 @@ public interface Constant {
 
     int SECONDS_TIME_DAY=86400000;
 
+    int INDEX_BLOCK_LIST_COUNT = 6;
+    int INDEX_TX_LIST_COUNT = 5;
+
     String UTXO_CACHE_NAME = "utxoCache";
     String ALIAS_CACHE_NAME = "alias";
     String BALANCE_CACHE_NAME = "balance";

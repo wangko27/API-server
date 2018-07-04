@@ -1,8 +1,11 @@
 package io.nuls.api.server.init;
 
+import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.*;
 import io.nuls.api.entity.Alias;
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dao.util.EhcacheUtil;
@@ -34,6 +37,8 @@ public class InitApiserver {
     private AddressRewardDetailBusiness addressRewardDetailBusiness;
     @Autowired
     private AliasBusiness aliasBusiness;
+    @Autowired
+    private TransactionBusiness transactionBusiness;
 
     @PostConstruct
     public void init() {
@@ -64,5 +69,18 @@ public class InitApiserver {
         for(Alias alias : aliasList){
             AliasContext.put(alias);
         }
+
+        /*加载初始化的区块列表*/
+        List<BlockHeader> blockList = blockBusiness.getListAll(null,1,Constant.INDEX_BLOCK_LIST_COUNT);
+        if(null != blockList){
+            IndexContext.initBlocks(blockList);
+        }
+
+        /*加载初始化的交易列表*/
+        List<Transaction> transactionList = transactionBusiness.getListAll(null,0,1,Constant.INDEX_TX_LIST_COUNT,3);
+        if(null != transactionList){
+            IndexContext.initTransactions(transactionList);
+        }
+
     }
 }
