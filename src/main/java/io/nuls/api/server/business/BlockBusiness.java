@@ -131,6 +131,7 @@ public class BlockBusiness implements BaseService<BlockHeader, String> {
      * @return
      */
     public List<BlockHeader> getListAll(String address, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (StringUtils.isNotBlank(address)) {
             if (StringUtils.validAddress(address)) {

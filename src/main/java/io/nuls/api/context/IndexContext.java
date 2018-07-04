@@ -16,6 +16,18 @@ public class IndexContext {
     private static List<BlockHeader> blocks = new ArrayList<>(Constant.INDEX_BLOCK_LIST_COUNT);
     private static List<Transaction> transactions = new ArrayList<>(Constant.INDEX_TX_LIST_COUNT);
 
+
+    /*private static Queue<BlockHeader> blockQueue = new LinkedList<BlockHeader>();
+    private static Queue<Transaction> transactionsQueue = new LinkedList<Transaction>();
+
+    public static BlockHeader getQueue(){
+        return blockQueue.poll();
+    }
+    public static boolean addQueue(BlockHeader blockHeader){
+        return blockQueue.offer(blockHeader);
+    }*/
+
+
     public static List<BlockHeader> getBlockList(){
         return blocks;
     }
@@ -26,9 +38,10 @@ public class IndexContext {
 
     public static void putBlock(BlockHeader block){
         if(blocks.size() >= Constant.INDEX_BLOCK_LIST_COUNT){
-            blocks.remove(0);
+            blocks.remove(blocks.size()-1);
         }
-        blocks.add(block);
+        blocks.add(0,block);
+
     }
     public static void removeBlock(BlockHeader block){
         blocks.remove(block);
@@ -39,10 +52,10 @@ public class IndexContext {
         }
     }
     public static void putTransaction(Transaction transaction){
-        if(blocks.size() >= Constant.INDEX_TX_LIST_COUNT){
-            blocks.remove(0);
+        if(transactions.size() >= Constant.INDEX_TX_LIST_COUNT){
+            transactions.remove(transactions.size()-1);
         }
-        transactions.add(transaction);
+        transactions.add(0,transaction);
     }
     public static void removeTransaction(Transaction transaction){
         transactions.remove(transaction);

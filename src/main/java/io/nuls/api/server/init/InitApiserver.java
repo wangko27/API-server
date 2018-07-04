@@ -1,6 +1,5 @@
 package io.nuls.api.server.init;
 
-import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.*;
 import io.nuls.api.entity.Alias;
@@ -8,17 +7,14 @@ import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.business.*;
-import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Description: 初始化 第一次启动的时候加载一些信息

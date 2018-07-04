@@ -78,6 +78,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
      * @return
      */
     public List<Transaction> getListAll(Long height, int type, int pageNumber, int pageSize,int orderType) {
+        PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (null != height) {
             searchable.addCondition("block_height", SearchOperator.eq, height);
