@@ -14,10 +14,15 @@ import java.util.List;
  */
 public class IndexContext {
     private static List<BlockHeader> blocks = new ArrayList<>(Constant.INDEX_BLOCK_LIST_COUNT);
-    /**
-     * 首页交易列表缓存
-     */
     private static List<Transaction> transactions = new ArrayList<>(Constant.INDEX_TX_LIST_COUNT);
+
+    public static List<BlockHeader> getBlockList(){
+        return blocks;
+    }
+
+    public static List<Transaction> getTransactions(){
+        return transactions;
+    }
 
     public static void putBlock(BlockHeader block){
         if(blocks.size() >= Constant.INDEX_BLOCK_LIST_COUNT){

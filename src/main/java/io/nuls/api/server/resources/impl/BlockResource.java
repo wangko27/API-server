@@ -1,6 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
@@ -25,6 +26,15 @@ public class BlockResource {
 
     @Autowired
     private BlockBusiness blockBusiness;
+
+    @GET
+    @Path("/index")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult index(){
+        RpcClientResult result = RpcClientResult.getSuccess();
+        result.setData(IndexContext.getBlockList());
+        return result;
+    }
 
     @GET
     @Path("/list")
