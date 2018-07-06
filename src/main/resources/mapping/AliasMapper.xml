@@ -25,6 +25,13 @@
         values (#{alias,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{blockHeight,jdbcType=BIGINT}
         )
     </insert>
+    <insert id="insertByBatch" parameterType="java.util.List">
+        insert into alias (alias, address, block_height)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.alias,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.blockHeight,jdbcType=BIGINT})
+        </foreach>
+    </insert>
     <insert id="insertSelective" parameterType="io.nuls.api.entity.Alias" >
         insert into alias
         <trim prefix="(" suffix=")" suffixOverrides="," >

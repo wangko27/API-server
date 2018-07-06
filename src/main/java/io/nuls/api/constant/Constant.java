@@ -92,6 +92,7 @@ public interface Constant {
     int INDEX_TX_LIST_COUNT = 5;
 
     String UTXO_CACHE_NAME = "utxoCache";
+    String UTXO_TEMP_CACHE_NAME = "utxoTempCache";
     String ALIAS_CACHE_NAME = "alias";
     String BALANCE_CACHE_NAME = "balance";
     String HISTORY_CACHE_NAME="history";

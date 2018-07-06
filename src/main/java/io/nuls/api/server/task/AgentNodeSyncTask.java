@@ -1,6 +1,7 @@
 package io.nuls.api.server.task;
 
 import io.nuls.api.constant.EntityConstant;
+import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.PackingAddressContext;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.AgentNodeBusiness;
@@ -37,6 +38,12 @@ public class AgentNodeSyncTask {
             }
         }
         PackingAddressContext.consensusAgentCount = consensusAgentCount;
+
+        //重置共识信息
+        RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
+        if(rpcClientResult.isSuccess()){
+            IndexContext.resetRpcConsensusData((Map)rpcClientResult.getData());
+        }
     }
 
     /**

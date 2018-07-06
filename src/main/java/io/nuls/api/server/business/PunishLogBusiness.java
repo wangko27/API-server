@@ -73,6 +73,13 @@ public class PunishLogBusiness implements BaseService<PunishLog, Long> {
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void saveAll(List<PunishLog> list) {
+        if(list.size() > 0){
+            punishLogMapper.insertByBatch(list);
+        }
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(PunishLog punishLog) {
         return punishLogMapper.updateByPrimaryKey(punishLog);

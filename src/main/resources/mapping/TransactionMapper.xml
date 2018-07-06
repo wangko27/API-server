@@ -43,6 +43,19 @@
       #{fee,jdbcType=BIGINT}, #{size,jdbcType=INTEGER}, #{amount,jdbcType=BIGINT}, #{extend,jdbcType=LONGVARBINARY}
       )
   </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into transaction (hash, tx_index, type,
+    create_time, block_height, remark,
+    fee, size, amount, extend
+    )
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.hash,jdbcType=VARCHAR}, #{item.txIndex,jdbcType=INTEGER}, #{item.type,jdbcType=INTEGER},
+      #{item.createTime,jdbcType=BIGINT}, #{item.blockHeight,jdbcType=BIGINT}, #{item.remark,jdbcType=VARCHAR},
+      #{item.fee,jdbcType=BIGINT}, #{item.size,jdbcType=INTEGER}, #{item.amount,jdbcType=BIGINT}, #{item.extend,jdbcType=LONGVARBINARY}
+      )
+    </foreach>
+  </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Transaction" >
     insert into transaction
     <trim prefix="(" suffix=")" suffixOverrides="," >

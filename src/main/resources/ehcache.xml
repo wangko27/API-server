@@ -22,8 +22,8 @@
        clearOnFlush：内存数量最大时是否清除。
     -->
     <defaultCache
-            maxElementsInMemory="10000"
-            eternal="true"
+            maxElementsInMemory="10000000"
+            eternal="false"
             timeToIdleSeconds="120"
             timeToLiveSeconds="120"
             overflowToDisk="false"
@@ -33,10 +33,12 @@
             memoryStoreEvictionPolicy="LRU"
     />
     <cache name="apiServerCache"
-           maxElementsInMemory="10000"
+           maxElementsInMemory="10000000"
+           timeToLiveSeconds="86400"
            diskPersistent="false"
            overflowToDisk="false"
            eternal="false"
+           memoryStoreEvictionPolicy="FIFO"
            transactionalMode="off">
     </cache>
 </ehcache>

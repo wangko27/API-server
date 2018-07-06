@@ -26,6 +26,7 @@ public class EhcacheUtil {
         manager = CacheManager.create(url);
         //初始化缓存
         manager.addCache(Constant.UTXO_CACHE_NAME);
+        manager.addCache(Constant.UTXO_TEMP_CACHE_NAME);
         manager.addCache(Constant.ALIAS_CACHE_NAME);
         manager.addCache(Constant.BALANCE_CACHE_NAME);
         manager.addCache(Constant.HISTORY_CACHE_NAME);

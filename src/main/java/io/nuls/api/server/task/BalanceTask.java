@@ -3,6 +3,7 @@ package io.nuls.api.server.task;
 import io.nuls.api.context.BalanceListContext;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.PackingAddressContext;
+import io.nuls.api.context.UtxoTempContext;
 import io.nuls.api.server.business.AgentNodeBusiness;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
@@ -39,5 +40,6 @@ public class BalanceTask {
         /*加载24小时奖励*/
         Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
         HistoryContext.rewardofday = rewardOfDay==null?0L:rewardOfDay;
+
     }
 }

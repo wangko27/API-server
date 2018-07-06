@@ -39,6 +39,17 @@
     #{agentName,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
     #{blockHeight,jdbcType=BIGINT}, #{deleteHash,jdbcType=VARCHAR})
   </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into deposit (tx_hash, amount, agent_hash,
+    agent_name, address, create_time,
+    block_height, delete_hash)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.amount,jdbcType=BIGINT}, #{item.agentHash,jdbcType=VARCHAR},
+      #{item.agentName,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT},
+      #{item.blockHeight,jdbcType=BIGINT}, #{item.deleteHash,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Deposit" >
     insert into deposit
     <trim prefix="(" suffix=")" suffixOverrides="," >

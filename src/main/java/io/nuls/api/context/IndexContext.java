@@ -5,17 +5,19 @@ import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Transaction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Description:
+ * Description: 缓存首页的区块列表和交易列表和全网共识
  * Author: zsj
  * Date:  2018/7/4 0004
  */
 public class IndexContext {
     private static List<BlockHeader> blocks = new ArrayList<>(Constant.INDEX_BLOCK_LIST_COUNT);
     private static List<Transaction> transactions = new ArrayList<>(Constant.INDEX_TX_LIST_COUNT);
-
+    private static Map rpcConsensusData = new HashMap();
 
     /*private static Queue<BlockHeader> blockQueue = new LinkedList<BlockHeader>();
     private static Queue<Transaction> transactionsQueue = new LinkedList<Transaction>();
@@ -64,5 +66,13 @@ public class IndexContext {
         if(null != transactionList){
             transactions = transactionList;
         }
+    }
+
+    public static void resetRpcConsensusData(Map data){
+        rpcConsensusData = data;
+    }
+
+    public static Map getRpcConsensusData(){
+        return rpcConsensusData;
     }
 }

@@ -2,19 +2,18 @@ package io.nuls.api.server.init;
 
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.*;
-import io.nuls.api.entity.Alias;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Description: 初始化 第一次启动的时候加载一些信息
@@ -41,8 +40,11 @@ public class InitApiserver {
         /*加载utxo*/
         List<Utxo> utxoList = utxoBusiness.getList(null,2);
         for(Utxo utxo:utxoList){
+            UtxoTempContext.put(utxo);
             UtxoContext.put(utxo);
+
         }
+
 
         /*启动*/
         /*加载14天历史*/
@@ -76,6 +78,12 @@ public class InitApiserver {
         List<Transaction> transactionList = transactionBusiness.getListAll(null,0,1,Constant.INDEX_TX_LIST_COUNT,3);
         if(null != transactionList){
             IndexContext.initTransactions(transactionList);
+        }
+
+        /*初始化共识信息*/
+        RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
+        if(rpcClientResult.isSuccess()){
+            IndexContext.resetRpcConsensusData((Map)rpcClientResult.getData());
         }
 
     }

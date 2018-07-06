@@ -1,6 +1,12 @@
 package io.nuls.api.entity;
 
-public class Utxo extends UtxoKey {
+public class Utxo {
+    private Long id;
+
+    private String txHash;
+
+    private Integer txIndex;
+
     private String address;
 
     private Long amount;
@@ -8,6 +14,30 @@ public class Utxo extends UtxoKey {
     private Long lockTime;
 
     private String spendTxHash;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash == null ? null : txHash.trim();
+    }
+
+    public Integer getTxIndex() {
+        return txIndex;
+    }
+
+    public void setTxIndex(Integer txIndex) {
+        this.txIndex = txIndex;
+    }
 
     public String getAddress() {
         return address;

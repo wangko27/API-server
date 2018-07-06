@@ -70,9 +70,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
         return addressRewardDetailMapper.insert(addressRewardDetail);
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveTxReward(Transaction tx) {
-        //2018-07-02修改成为批量插入
+    public List<AddressRewardDetail> getRewardList(Transaction tx){
         List<AddressRewardDetail> utxoList = new ArrayList<>();
         for (Utxo utxo : tx.getOutputs()) {
             AddressRewardDetail detail = new AddressRewardDetail();
@@ -85,8 +83,21 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
             utxoList.add(detail);
             //System.out.println(detail.toString());
         }
+        return utxoList;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void saveTxReward(Transaction tx) {
+        //2018-07-02修改成为批量插入
+        List<AddressRewardDetail> utxoList = getRewardList(tx);
         if(utxoList.size() > 0){
             addressRewardDetailMapper.insertByBatch(utxoList);
+        }
+    }
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void saveAll(List<AddressRewardDetail> list) {
+        if(list.size() > 0){
+            addressRewardDetailMapper.insertByBatch(list);
         }
     }
 

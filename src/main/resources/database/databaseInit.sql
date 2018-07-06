@@ -1,6 +1,6 @@
 /*
 SQLyog Ultimate v12.09 (64 bit)
-MySQL - 5.5.49 : Database - nuls_apiserver
+MySQL - 5.7.21 : Database - nuls_apiserver
 *********************************************************************
 */
 
@@ -192,13 +192,15 @@ CREATE TABLE `transaction_relation` (
 DROP TABLE IF EXISTS `utxo`;
 
 CREATE TABLE `utxo` (
+  `id` bigint(15) NOT NULL AUTO_INCREMENT,
   `tx_hash` varchar(70) NOT NULL COMMENT 'tx_hash',
   `tx_index` int(5) NOT NULL COMMENT 'tx_index',
   `address` varchar(40) DEFAULT NULL COMMENT '地址',
   `amount` bigint(19) DEFAULT NULL COMMENT '金额',
   `lock_time` bigint(15) DEFAULT NULL COMMENT '大于10亿按照时间锁定，小于10亿安装高度锁定，-1共识所动，其他可用',
   `spend_tx_hash` varchar(70) DEFAULT NULL COMMENT '已花费的txhash',
-  PRIMARY KEY (`tx_hash`,`tx_index`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hash_index_unique` (`tx_hash`,`tx_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='UTXO';
 
 /*Data for the table `utxo` */

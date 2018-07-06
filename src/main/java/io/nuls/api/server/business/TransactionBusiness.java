@@ -7,6 +7,7 @@ import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.ArraysTool;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -160,6 +161,39 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
             punishLogBusiness.saveList(tx.getTxDataList());
         }
         return 1;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void saveAll(List<Transaction> list){
+        /*for(Transaction tx:list){
+            transactionMapper.insert(tx);
+        }*/
+        if(list.size() > 0){
+            if(list.size()>4000){
+                List<List<Transaction>> lists = ArraysTool.avgList(list,2);
+                transactionMapper.insertByBatch(lists.get(0));
+                transactionMapper.insertByBatch(lists.get(1));
+                StringBuilder strs = new StringBuilder("(");
+                for(Transaction tx: list){
+                    //hash, tx_index, type,
+                    //    create_time, block_height, remark,
+                    //    fee, size, amount, extend
+                    strs.append(tx.getHash()).append(",");
+                    strs.append(tx.getTxIndex()).append(",");
+                    strs.append(tx.getType()).append(",");
+                    strs.append(tx.getCreateTime()).append(",");
+                    strs.append(tx.getBlockHeight()).append(",");
+                    strs.append(tx.getRemark()).append(",");
+                    strs.append(tx.getFee()).append(",");
+                    strs.append(tx.getSize()).append(",");
+                    strs.append(tx.getAmount()).append(",");
+                    strs.append(tx.getExtend().toString()).append(")");
+                }
+                System.out.println(strs.toString());
+            }else{
+                transactionMapper.insertByBatch(list);
+            }
+        }
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)

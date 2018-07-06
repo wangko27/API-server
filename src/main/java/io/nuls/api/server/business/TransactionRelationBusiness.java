@@ -8,6 +8,7 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -26,27 +27,44 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
     private TransactionRelationMapper relationMapper;
 
 
-
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveTxRelation(Transaction tx) {
+    public List<TransactionRelation> getListByTx(Transaction tx){
         Set<String> addressSet = new HashSet<>();
         if (tx.getInputs() != null) {
             for (Input input : tx.getInputs()) {
-                addressSet.add(input.getAddress());
+                if(StringUtils.isNotBlank(input.getAddress())){
+                    addressSet.add(input.getAddress());
+                }
+
             }
         }
         if (tx.getOutputs() != null) {
             for (Utxo utxo : tx.getOutputs()) {
-                addressSet.add(utxo.getAddress());
+                if(StringUtils.isNotBlank(utxo.getAddress())) {
+                    addressSet.add(utxo.getAddress());
+                }
             }
         }
-        //2018-07-02修改为批量插入
-
         List<TransactionRelation> relationList = new ArrayList<>();
         for (String address : addressSet) {
             TransactionRelation key = new TransactionRelation(address, tx.getHash());
             relationList.add(key);
         }
+        return relationList;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void saveTxRelation(Transaction tx) {
+
+        List<TransactionRelation> relationList = getListByTx(tx);
+        if(relationList.size() > 0){
+            relationMapper.insertByBatch(relationList);
+        }
+    }
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void saveAll(List<TransactionRelation> relationList ) {
+        /*for(TransactionRelation txr:relationList){
+            relationMapper.insert(txr);
+        }*/
         if(relationList.size() > 0){
             relationMapper.insertByBatch(relationList);
         }

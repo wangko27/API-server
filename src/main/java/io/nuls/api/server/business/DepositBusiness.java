@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Description: 委托
  * Author: zsj
@@ -43,7 +45,7 @@ public class DepositBusiness implements BaseService<Deposit, String> {
                 searchable.addCondition("agent_hash", SearchOperator.eq, address);
             }
         }
-        searchable.addCondition("delete_hash", SearchOperator.isNull,null);
+        searchable.addCondition("delete_hash", SearchOperator.isNull, null);
         PageInfo<Deposit> page = new PageInfo<>(depositMapper.selectList(searchable));
         return page;
     }
@@ -54,7 +56,7 @@ public class DepositBusiness implements BaseService<Deposit, String> {
      * @param entity
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int insert(Deposit entity) {
         return depositMapper.insert(entity);
     }
@@ -75,14 +77,14 @@ public class DepositBusiness implements BaseService<Deposit, String> {
      * @param height 高度
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         return depositMapper.deleteBySearchable(searchable);
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Deposit deposit) {
         AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
@@ -90,6 +92,23 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         agentNode.setDepositCount(agentNode.getDepositCount() + 1);
         agentNodeMapper.updateByPrimaryKey(agentNode);
         return depositMapper.insert(deposit);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int updateAgentNodeByDeposit(Deposit deposit) {
+        AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
+        agentNode.setTotalDeposit(agentNode.getTotalDeposit() + deposit.getAmount());
+        agentNode.setDepositCount(agentNode.getDepositCount() + 1);
+        return agentNodeMapper.updateByPrimaryKey(agentNode);
+        //return depositMapper.insert(deposit);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAll(List<Deposit> list){
+        if(list.size()>0){
+            return depositMapper.insertByBatch(list);
+        }
+        return 0;
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)

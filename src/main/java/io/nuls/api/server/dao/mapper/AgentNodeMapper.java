@@ -26,4 +26,6 @@ public interface AgentNodeMapper extends BaseMapper<AgentNode, String>{
      * @return
      */
     Integer selectTotalCount(Searchable searchable);
+
+    int insertByBatch(@Param("list") List<AgentNode> list);
 }

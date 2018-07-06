@@ -5,6 +5,8 @@ import io.nuls.api.entity.Deposit;
 import io.nuls.api.server.dao.util.Searchable;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @MyBatisMapper
 public interface DepositMapper extends BaseMapper<Deposit, String> {
 
@@ -15,4 +17,6 @@ public interface DepositMapper extends BaseMapper<Deposit, String> {
     Integer selectTotalCount(Searchable searchable);
 
     Long selectTotalAmount(Searchable searchable);
+
+    int insertByBatch(@Param("list") List<Deposit> list);
 }

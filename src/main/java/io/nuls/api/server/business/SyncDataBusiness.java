@@ -1,20 +1,21 @@
 package io.nuls.api.server.business;
 
 import io.nuls.api.constant.Constant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
+import io.nuls.api.context.UtxoTempContext;
 import io.nuls.api.entity.*;
+import io.nuls.api.model.Address;
 import io.nuls.api.utils.JSONUtils;
+import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class SyncDataBusiness {
@@ -26,19 +27,25 @@ public class SyncDataBusiness {
     @Autowired
     private TransactionBusiness transactionBusiness;
     @Autowired
+    private TransactionRelationBusiness transactionRelationBusiness;
+    @Autowired
     private AliasBusiness aliasBusiness;
     @Autowired
     private PunishLogBusiness punishLogBusiness;
     @Autowired
     private AddressRewardDetailBusiness detailBusiness;
+    @Autowired
+    private DepositBusiness depositBusiness;
+    @Autowired
+    private AgentNodeBusiness agentNodeBusiness;
 
     /**
      * 同步最新块数据
-     *
      * @param block
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void syncData(Block block) throws Exception {
+        long time1=System.currentTimeMillis(),time2;
         try {
             blockBusiness.saveBlock(block.getHeader());
             /*缓存新块*/
@@ -48,43 +55,91 @@ public class SyncDataBusiness {
             e.printStackTrace();
             throw e;
         }
+        /*list*/
+        Map<String,Utxo> utxoMap = new HashMap<>();
+        List<Utxo> utxoUpdateList = new ArrayList<>();
+        List<Transaction> transactionList = new ArrayList<>();
+        List<TransactionRelation> transactionRelationList = new ArrayList<>();
+        List<AddressRewardDetail> addressRewardDetailList = new ArrayList<>();
+        List<Alias> aliasList = new ArrayList<>();
+        List<AgentNode> agentNodeList = new ArrayList<>();
+        List<Deposit> depositList = new ArrayList<>();
+        List<PunishLog> punishLogList = new ArrayList<>();
+
+        //int aj=0,ak=0,al=0;
         for (int i = 0; i < block.getTxList().size(); i++) {
             Transaction tx = block.getTxList().get(i);
             tx.setTxIndex(i);
-            utxoBusiness.updateByFrom(tx);
-
-            utxoBusiness.saveTo(tx);
-
+            for (Utxo utxo : tx.getOutputs()) {
+                utxoMap.put(utxo.getTxHash()+utxo.getTxIndex(),utxo);
+                //写入缓存
+                UtxoContext.put(utxo);
+                UtxoTempContext.put(utxo);
+                //System.out.println(utxo.getTxHash()+"---"+utxo.getTxIndex());
+            }
+            utxoUpdateList.addAll(utxoBusiness.getListByFrom(tx,utxoMap));
             Map<String, Object> dataMap = new HashMap<>();
             dataMap.put("scriptSign", tx.getScriptSign());
             dataMap.put("inputs", tx.getInputs());
             dataMap.put("outputs", tx.getOutputList());
             tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
 
-            transactionBusiness.save(tx);
+            //transactionBusiness.save(tx);
+
+            transactionList.add(tx);
+            transactionRelationList.addAll(transactionRelationBusiness.getListByTx(tx));
+            if (tx.getType() == EntityConstant.TX_TYPE_COINBASE) {
+                addressRewardDetailList.addAll(detailBusiness.getRewardList(tx));
+            } else if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
+                aliasList.add((Alias) tx.getTxData());
+            } else if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
+                agentNodeList.add((AgentNode) tx.getTxData());
+            } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
+                depositList.add((Deposit) tx.getTxData());
+                depositBusiness.updateAgentNodeByDeposit((Deposit) tx.getTxData());
+            } else if (tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
+                depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getHash());
+            } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
+                AgentNode agentNode = (AgentNode) tx.getTxData();
+                agentNodeBusiness.stopAgent(agentNode, tx.getHash());
+            } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
+                punishLogList.add((PunishLog) tx.getTxData());
+            } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
+                for (TxData data : tx.getTxDataList()) {
+                    PunishLog log = (PunishLog) data;
+                    punishLogList.add(log);
+                }
+            }
             /*缓存新交易*/
             IndexContext.putTransaction(tx);
         }
-        //所有数据保存成功后，更新utxo缓存
-        UtxoKey key = new UtxoKey();
-        Utxo utxo;
-        for (int i = 0; i < block.getTxList().size(); i++) {
-            Transaction tx = block.getTxList().get(i);
-            if (tx.getInputs() != null) {
-                for (int j = 0; j < tx.getInputs().size(); j++) {
-                    Input input = tx.getInputs().get(j);
-                    key.setTxHash(input.getFromHash());
-                    key.setTxIndex(input.getFromIndex());
-                    utxo = utxoBusiness.getByKey(key);
-                    UtxoContext.remove(utxo.getAddress());
-                }
-            }
-            if (tx.getOutputs() != null) {
-                for (int j = 0; j < tx.getOutputs().size(); j++) {
-                    UtxoContext.put(tx.getOutputs().get(j));
-                }
-            }
-        }
+
+        utxoBusiness.saveAll(new ArrayList<>(utxoMap.values()));
+        time2 = System.currentTimeMillis();
+        System.out.println("utxo处理时间："+(time2-time1));
+        transactionBusiness.saveAll(transactionList);
+        time1 = System.currentTimeMillis();
+        System.out.println("transaction处理时间："+(time1-time2)+"数量："+transactionList.size());
+        transactionRelationBusiness.saveAll(transactionRelationList);
+        time2 = System.currentTimeMillis();
+        System.out.println("relation处理时间："+(time2-time1)+"数量："+transactionList.size());
+        detailBusiness.saveAll(addressRewardDetailList);
+        aliasBusiness.saveAll(aliasList);
+        agentNodeBusiness.saveAll(agentNodeList);
+        punishLogBusiness.saveAll(punishLogList);
+        depositBusiness.saveAll(depositList);
+        utxoBusiness.updateAll(utxoUpdateList);
+        System.out.println(transactionList.size()+"---"+block.getHeader().getHeight());
+        System.out.println("------------------------------");
+        utxoMap = null;
+        utxoUpdateList= null;
+        transactionList= null;
+        transactionRelationList= null;
+        addressRewardDetailList= null;
+        aliasList= null;
+        agentNodeList= null;
+        depositList= null;
+        punishLogList= null;
     }
 
     /**
@@ -112,18 +167,21 @@ public class SyncDataBusiness {
             Transaction tx = txList.get(i);
             if (tx.getOutputs() != null) {
                 for (int j = tx.getOutputs().size() - 1; j >= 0; j--) {
-                    UtxoContext.remove(tx.getOutputs().get(j).getAddress());
+                    Utxo tempUtxo = tx.getOutputs().get(j);
+                    UtxoContext.remove(tempUtxo.getAddress());
+                    UtxoTempContext.remove(tempUtxo.getTxHash()+tempUtxo.getTxIndex());
                 }
             }
-            UtxoKey utxoKey;
+            //UtxoKey utxoKey;
             Utxo utxo;
             if (tx.getInputs() != null) {
                 for (int j = tx.getInputs().size() - 1; j >= 0; j--) {
                     Input input = tx.getInputs().get(j);
-                    utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
-                    utxo = utxoBusiness.getByKey(utxoKey);
+                    //utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
+                    utxo = utxoBusiness.getByKey(input.getFromHash(), input.getFromIndex());
                     if (utxo != null) {
                         UtxoContext.put(utxo);
+                        UtxoTempContext.put(utxo);
                     }
                 }
             }

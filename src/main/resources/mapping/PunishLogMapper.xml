@@ -39,6 +39,17 @@
       #{time,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{roundIndex,jdbcType=BIGINT}, 
       #{reason,jdbcType=VARCHAR}, #{evidence,jdbcType=LONGVARBINARY})
   </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into punish_log (id, type, address,
+    time, block_height, round_index,
+    reason, evidence)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.id,jdbcType=BIGINT}, #{item.type,jdbcType=INTEGER}, #{item.address,jdbcType=VARCHAR},
+      #{item.time,jdbcType=BIGINT}, #{item.blockHeight,jdbcType=BIGINT}, #{item.roundIndex,jdbcType=BIGINT},
+      #{item.reason,jdbcType=VARCHAR}, #{item.evidence,jdbcType=LONGVARBINARY})
+    </foreach>
+  </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.PunishLog" >
     insert into punish_log
     <trim prefix="(" suffix=")" suffixOverrides="," >

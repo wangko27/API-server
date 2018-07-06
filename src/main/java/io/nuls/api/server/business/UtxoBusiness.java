@@ -2,14 +2,16 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.context.UtxoContext;
+import io.nuls.api.context.UtxoTempContext;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
-import io.nuls.api.entity.UtxoKey;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.UtxoDto;
+import io.nuls.api.utils.ArraysTool;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Description: UTXO
@@ -27,7 +31,7 @@ import java.util.List;
  * Date:  2018/5/29 0029
  */
 @Service
-public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
+public class UtxoBusiness implements BaseService<Utxo, Long> {
     @Autowired
     private UtxoMapper utxoMapper;
 
@@ -77,6 +81,23 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         return utxoMapper.selectList(searchable);
     }
 
+    private Utxo selectUtxoByHashAndIndex(String hash, Integer index){
+        Utxo utxo = UtxoTempContext.get(hash+index);
+        if(utxo == null){
+            Searchable searchable = new Searchable();
+            searchable.addCondition("tx_hash", SearchOperator.eq, hash);
+            searchable.addCondition("tx_index", SearchOperator.eq, index);
+            utxo = utxoMapper.selectByHashAndIndex(searchable);
+        }
+        return utxo;
+    }
+    private int deleteByHashAndIndex(String hash, Integer index){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("tx_hash", SearchOperator.eq, hash);
+        searchable.addCondition("tx_index", SearchOperator.eq, index);
+        return utxoMapper.deleteByHashAndIndex(searchable);
+    }
+
     /**
      * 根据hash和id查询已经花费的utxo的详情
      *
@@ -91,10 +112,8 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         if (index < 0) {
             return null;
         }
-        UtxoKey utxoKey = new UtxoKey();
-        utxoKey.setTxIndex(index);
-        utxoKey.setTxHash(hash);
-        Utxo utxo = utxoMapper.selectByPrimaryKey(utxoKey);
+
+        Utxo utxo = selectUtxoByHashAndIndex(hash,index);
         if (null != utxo) {
             return utxo.getSpendTxHash();
         }
@@ -109,8 +128,8 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
      * @return
      */
     public Utxo getByKey(String txHash, int txIndex) {
-        UtxoKey key = new UtxoKey(txHash, txIndex);
-        return utxoMapper.selectByPrimaryKey(key);
+        //UtxoKey key = new UtxoKey(txHash, txIndex);
+        return selectUtxoByHashAndIndex(txHash,txIndex);
     }
 
     /**
@@ -129,16 +148,29 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
     public int update(Utxo entity) {
         return utxoMapper.updateByPrimaryKey(entity);
     }
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int updateAll(List<Utxo> list) {
+        if(list.size() > 0){
+            if(list.size()>4000){
+                List<List<Utxo>> lists = ArraysTool.avgList(list,2);
+                utxoMapper.updateByBatch(lists.get(0));
+                utxoMapper.updateByBatch(lists.get(1));
+            }else{
+                return utxoMapper.updateByBatch(list);
+            }
+        }
+        return 0;
+    }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int deleteByKey(UtxoKey utxoKey) {
-        return utxoMapper.deleteByPrimaryKey(utxoKey);
+    public int deleteByKey(Long id) {
+        return utxoMapper.deleteByPrimaryKey(id);
     }
 
     @Override
-    public Utxo getByKey(UtxoKey utxoKey) {
-        return utxoMapper.selectByPrimaryKey(utxoKey);
+    public Utxo getByKey(Long id) {
+        return utxoMapper.selectByPrimaryKey(id);
     }
 
     /**
@@ -149,8 +181,7 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int delete(String txHash, Integer index) {
-        UtxoKey key = new UtxoKey(txHash, index);
-        return utxoMapper.deleteByPrimaryKey(key);
+        return deleteByHashAndIndex(txHash,index);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -160,61 +191,65 @@ public class UtxoBusiness implements BaseService<Utxo, UtxoKey> {
         utxoMapper.deleteBySearchable(searchable);
     }
 
-    /**
-     * 根据每一条交易的输入，改变对应的utxo状态
-     *
-     * @param tx
-     * @return
-     */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void updateByFrom(Transaction tx) {
+    //根据交易获取要修改的utxo，之后执行批量修改
+    public List<Utxo> getListByFrom(Transaction tx,Map<String,Utxo> utxoMap) {
         //coinBase交易，红黄牌交易没有inputs
+        List<Utxo> txlist = new ArrayList<>();
         if (tx.getInputs() == null) {
-            return;
+            return txlist;
         }
-
-        UtxoKey key = new UtxoKey();
         Utxo utxo;
         for (Input input : tx.getInputs()) {
-            key.setTxHash(input.getFromHash());
-            key.setTxIndex(input.getFromIndex());
-            utxo = utxoMapper.selectByPrimaryKey(key);
-
-            utxo.setSpendTxHash(tx.getHash());
-            //在这里查询出utxo后，记得给每一个input赋值address
-            input.setAddress(utxo.getAddress());
-            input.setValue(utxo.getAmount());
-            utxoMapper.updateByPrimaryKey(utxo);
+            //重置需要添加的数据的spend_hash
+            String key = input.getFromHash()+input.getFromIndex();
+            if(utxoMap.containsKey(key)){
+                utxoMap.get(key).setSpendTxHash(tx.getHash());
+                continue;
+            }
+            utxo = selectUtxoByHashAndIndex(input.getFromHash(),input.getFromIndex());
+            if(null != utxo){
+                utxo.setSpendTxHash(tx.getHash());
+                input.setAddress(utxo.getAddress());
+                input.setValue(utxo.getAmount());
+                txlist.add(utxo);
+            }
+            //删除缓存
+            UtxoContext.remove(utxo.getAddress());
         }
+        return txlist;
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollBackByFrom(Transaction tx) {
-        //删除当前交易生成的utxo
         Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, tx.getHash());
         utxoMapper.deleteBySearchable(searchable);
 
         //回滚每条被花费的输出
-        UtxoKey utxoKey;
+        //UtxoKey utxoKey;
         for (Input input : tx.getInputs()) {
-            utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
-            Utxo utxo = utxoMapper.selectByPrimaryKey(utxoKey);
+            //utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
+            //System.out.println("3kd");
+            Utxo utxo = selectUtxoByHashAndIndex(input.getFromHash(),input.getFromIndex());
             utxo.setSpendTxHash(null);
             utxoMapper.updateByPrimaryKey(utxo);
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveTo(Transaction tx) {
-        //2018-07-02 修改 批量插入
-        List<Utxo> utxoList = new ArrayList<>();
-        for (Utxo utxo : tx.getOutputs()) {
-            utxoList.add(utxo);
-            //utxoMapper.insert(utxo);
-        }
-        if(utxoList.size()>0){
-            utxoMapper.insertByBatch(utxoList);
+    public void saveAll(List<Utxo> list){
+        System.out.println("utxo数量:"+list.size());
+        /*for (Utxo utxo:list){
+            utxoMapper.insert(utxo);
+        }*/
+        if(list.size()>0){
+            if(list.size()>4000){
+                List<List<Utxo>> lists = ArraysTool.avgList(list,2);
+                utxoMapper.insertByBatch(lists.get(0));
+                utxoMapper.insertByBatch(lists.get(1));
+            }else{
+                utxoMapper.insertByBatch(list);
+            }
         }
     }
 

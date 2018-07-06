@@ -51,6 +51,23 @@
     #{totalPackingCount,jdbcType=BIGINT}, #{lastRewardHeight,jdbcType=BIGINT}, #{totalReward,jdbcType=BIGINT},
     #{deleteHash,jdbcType=VARCHAR})
   </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into agent_node (tx_hash, agent_address, packing_address,
+    reward_address, deposit, commission_rate,
+    create_time, block_height, status,
+    total_deposit, deposit_count, credit_value,
+    total_packing_count, last_reward_height, total_reward,
+    delete_hash)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.agentAddress,jdbcType=VARCHAR}, #{item.packingAddress,jdbcType=VARCHAR},
+      #{item.rewardAddress,jdbcType=VARCHAR}, #{item.deposit,jdbcType=BIGINT}, #{item.commissionRate,jdbcType=DECIMAL},
+      #{item.createTime,jdbcType=BIGINT}, #{item.blockHeight,jdbcType=BIGINT}, #{item.status,jdbcType=INTEGER},
+      #{item.totalDeposit,jdbcType=BIGINT}, #{item.depositCount,jdbcType=INTEGER}, #{item.creditValue,jdbcType=DECIMAL},
+      #{item.totalPackingCount,jdbcType=BIGINT}, #{item.lastRewardHeight,jdbcType=BIGINT}, #{item.totalReward,jdbcType=BIGINT},
+      #{item.deleteHash,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
     insert into agent_node
     <trim prefix="(" suffix=")" suffixOverrides="," >

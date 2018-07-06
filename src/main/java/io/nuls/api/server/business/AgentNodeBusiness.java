@@ -104,6 +104,14 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAll(List<AgentNode> list){
+        if(list.size() > 0){
+            return agentNodeMapper.insertByBatch(list);
+        }
+        return 0;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(AgentNode agentNode) {
         return agentNodeMapper.updateByPrimaryKey(agentNode);

@@ -82,6 +82,14 @@ public class AliasBusiness implements BaseService<Alias, String> {
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAll(List<Alias> list) {
+        if(list.size()>0){
+            return aliasMapper.insertByBatch(list);
+        }
+        return 0;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Alias alias) {
         return aliasMapper.updateByPrimaryKey(alias);

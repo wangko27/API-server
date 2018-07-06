@@ -2,6 +2,7 @@ package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.HistoryContext;
+import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.PackingAddressContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Balance;
@@ -11,6 +12,7 @@ import io.nuls.api.server.business.AgentNodeBusiness;
 import io.nuls.api.server.business.BalanceBusiness;
 import io.nuls.api.server.business.DepositBusiness;
 import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,13 +50,14 @@ public class AgentNodeResource {
     public RpcClientResult getConsensusStatistics(){
         RpcClientResult result = null;
         HashMap<String,String> attr = new HashMap<String,String>();
-        RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
         Long totalDeposit = 0L;
         Integer totalCount = 0;
-        if(rpcClientResult.isSuccess()){
-            Map rpcdata = (Map)rpcClientResult.getData();
+        try{
+            Map rpcdata = IndexContext.getRpcConsensusData();
             totalDeposit = Long.valueOf(rpcdata.get("totalDeposit")+"");
             totalCount = Integer.valueOf(rpcdata.get("agentCount")+"");
+        }catch (NullPointerException e){
+            Log.error("获取全网共识信息失败");
         }
         attr.put("agentCount",totalCount+"");
         attr.put("rewardOfDay", HistoryContext.rewardofday+"");
