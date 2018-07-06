@@ -30,72 +30,74 @@ public class BlockSyncTask {
      * 同步区块
      */
     public void execute() {
-        //查询本地已保存的最新块
         BlockHeader localBest = null;
         long bestHeight = -1;
         while (true) {
-            try {
-                localBest = blockBusiness.getNewest();
-                if (localBest != null) {
-                    bestHeight = localBest.getHeight();
-                }
+            //查询本地已保存的最新块
+            localBest = blockBusiness.getNewest();
+            if (localBest != null) {
+                bestHeight = localBest.getHeight();
+            }
 
-                RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(bestHeight + 1);
-                if (result.isFailed()) {
-                    if (result.getCode().equals(ErrorCode.DATA_NOT_FOUND.getCode())) {
-                        //查看最新区块和本地区块是否一致，不一致说明需要回滚
+            RpcClientResult<BlockHeader> result = null;
+            try {
+                result = syncDataHandler.getBlockHeader(bestHeight + 1);
+            } catch (Exception e) {
+                Log.error("--------获取下一区块头信息异常:" + e);
+                return;
+            }
+            //失败处理
+            if (result.isFailed()) {
+                if (!result.getCode().equals(ErrorCode.DATA_NOT_FOUND.getCode())) {
+                    //如果错误信息不是未找到最新块的话 就说明查询区块报错
+                    Log.error("-------获取下一区块头信息失败:" + result.getCode() + "-" + result.getMsg());
+                } else {
+                    //错误信息是未找到时，就判断最新块是否一致，不一致说明需要回滚
+                    try {
                         result = syncDataHandler.getNewest();
-                        if (result.isSuccess()) {
-                            BlockHeader newest = result.getData();
-                            if (!localBest.getHash().equals(newest.getHash()) && newest.getHeight() <= localBest.getHeight()) {
-                                syncDataBusiness.rollback(localBest);
-                            } else {
-                                //没有新区块，跳出循环，等待下次轮询
-                                return;
-                            }
-                        } else {
-                            Log.error("----------------------sync block fail:" + result.getMsg());
+                    } catch (NulsException e) {
+                        Log.error("-------查询最新区块头信息异常:" + e);
+                        return;
+                    }
+                    if (result.isFailed()) {
+                        Log.error("-------查询最新区块头信息失败:" + result.getCode() + "-" + result.getMsg());
+                    }
+
+                    BlockHeader newest = result.getData();
+                    if (!localBest.getHash().equals(newest.getHash()) && newest.getHeight() <= localBest.getHeight()) {
+                        try {
+                            syncDataBusiness.rollback(localBest);
+                        } catch (Exception e) {
+                            Log.error("-------回滚本地最新区块失败:" + localBest.getHash());
+                            Log.error(e);
                             return;
                         }
                     } else {
-                        Log.error("----------------------sync block fail:" + result.getMsg());
+                        //没有新区块，跳出循环，等待下次轮询
                         return;
                     }
-                } else {
-                    BlockHeader newest = result.getData();
-                    if (checkBlockContinuity(localBest, newest)) {
-
-                        RpcClientResult<Block> blockResult = syncDataHandler.getBlock(newest);
-
-                        if (blockResult.isFailed()) {
-                            throw new NulsException(blockResult.getCode(), blockResult.getMsg());
-                        }
-                        syncDataBusiness.syncData(blockResult.getData());
-                    } else {
-                        syncDataBusiness.rollback(localBest);
-                    }
                 }
-            } catch (NulsException ne) {
-                Log.error("------------ sync block exception , block height is:" + bestHeight);
-                Log.error(ne.getMsg(), ne);
-                if (localBest != null) {
+            } else {
+                //同步区块
+                BlockHeader newest = result.getData();
+                //区块连续性验证
+                if (checkBlockContinuity(localBest, newest)) {
+                    try {
+                        RpcClientResult<Block> blockResult = syncDataHandler.getBlock(newest);
+                        syncDataBusiness.syncData(blockResult.getData());
+                    } catch (Exception e) {
+                        Log.error("-------同步最新区块失败:" + newest.getHash());
+                        Log.error(e);
+                        return;
+                    }
+
+                } else {
                     try {
                         syncDataBusiness.rollback(localBest);
                     } catch (Exception e) {
+                        Log.error("-------回滚本地最新区块失败:" + localBest.getHash());
                         Log.error(e);
-                    }
-                }
-            } catch (Exception e) {
-                if (e instanceof ConnectException) {
-                    return;
-                }
-                Log.error("------------ sync block exception , block height is:" + bestHeight);
-                Log.error(e);
-                if (localBest != null) {
-                    try {
-                        syncDataBusiness.rollback(localBest);
-                    } catch (Exception ne) {
-                        Log.error(ne);
+                        return;
                     }
                 }
             }

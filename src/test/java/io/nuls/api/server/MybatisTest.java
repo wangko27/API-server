@@ -3,8 +3,6 @@ package io.nuls.api.server;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.Utxo;
-import io.nuls.api.entity.UtxoKey;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
@@ -94,11 +92,7 @@ public class MybatisTest {
 
     @Test
     public void testUtxo() {
-        UtxoKey key = new UtxoKey();
-        key.setTxHash("0020a31cc608978298cfa4a174d90c85feccaea6dbe68dd2816f9e922abb9f1c5b1b");
-        key.setTxIndex(1);
 
-        Utxo utxo = utxoBusiness.getByKey(key);
-        System.out.println(utxo);
     }
+
 }
