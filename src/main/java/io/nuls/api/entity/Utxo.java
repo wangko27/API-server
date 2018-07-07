@@ -79,4 +79,8 @@ public class Utxo {
         }
         return false;
     }
+
+    public String getKey() {
+        return txHash + "-" + txIndex;
+    }
 }

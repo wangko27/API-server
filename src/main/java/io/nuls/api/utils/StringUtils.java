@@ -27,6 +27,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Created by Niels on 2017/10/9.
  */
@@ -74,6 +76,10 @@ public class StringUtils {
     }
 
     private static final int HASH_LENGTH = 23;
+
+    public static byte[] bytes(String value) {
+        return (value == null) ? null : value.getBytes(UTF_8);
+    }
 
     public static boolean validAddress(String address) {
         //由于生成地址的格式已经修改更新，此处调用AddressTool的方法验证
