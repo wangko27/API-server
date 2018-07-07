@@ -128,7 +128,6 @@ public class UtxoBusiness implements BaseService<Utxo, Long> {
      * @return
      */
     public Utxo getByKey(String txHash, int txIndex) {
-        //UtxoKey key = new UtxoKey(txHash, txIndex);
         return selectUtxoByHashAndIndex(txHash,txIndex);
     }
 
@@ -190,6 +189,12 @@ public class UtxoBusiness implements BaseService<Utxo, Long> {
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
         utxoMapper.deleteBySearchable(searchable);
     }
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void deleteBySpendHash() {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("spend_tx_hash", SearchOperator.isNotNull, null);
+        utxoMapper.deleteBySearchable(searchable);
+    }
 
     //根据交易获取要修改的utxo，之后执行批量修改
     public List<Utxo> getListByFrom(Transaction tx,Map<String,Utxo> utxoMap) {
@@ -212,9 +217,10 @@ public class UtxoBusiness implements BaseService<Utxo, Long> {
                 input.setAddress(utxo.getAddress());
                 input.setValue(utxo.getAmount());
                 txlist.add(utxo);
+                //删除缓存
+                UtxoContext.remove(utxo.getAddress());
+                UtxoTempContext.remove(utxo.getSpendTxHash()+utxo.getTxIndex());
             }
-            //删除缓存
-            UtxoContext.remove(utxo.getAddress());
         }
         return txlist;
     }
@@ -238,15 +244,15 @@ public class UtxoBusiness implements BaseService<Utxo, Long> {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveAll(List<Utxo> list){
-        System.out.println("utxo数量:"+list.size());
-        /*for (Utxo utxo:list){
-            utxoMapper.insert(utxo);
-        }*/
+
         if(list.size()>0){
-            if(list.size()>4000){
-                List<List<Utxo>> lists = ArraysTool.avgList(list,2);
-                utxoMapper.insertByBatch(lists.get(0));
-                utxoMapper.insertByBatch(lists.get(1));
+            if(list.size()>1000) {
+                int count = list.size()%1000;
+                List<List<Utxo>> lists = ArraysTool.avgList(list, count);
+                for(int i = 0; i<count; i++){
+                    utxoMapper.insertByBatch(lists.get(i));
+                }
+
             }else{
                 utxoMapper.insertByBatch(list);
             }

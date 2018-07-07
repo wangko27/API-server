@@ -12,4 +12,8 @@ public interface TransactionMapper extends BaseMapper<Transaction, String>{
     List<Transaction> selectListByAddress(Searchable searchable);
 
     int insertByBatch(@Param("list") List<Transaction> list);
+
+    void lockTables();
+
+    void unlockTables();
 }

@@ -45,11 +45,10 @@
     #{spendTxHash,jdbcType=VARCHAR})
   </insert>
   <insert id="insertByBatch" parameterType="java.util.List">
-    INSERT INTO utxo (id,tx_hash,tx_index,address,amount,lock_time,spend_tx_hash) VALUES
+    INSERT INTO utxo (tx_hash,tx_index,address,amount,lock_time,spend_tx_hash) VALUES
     <foreach collection="list" item="item" index="index" separator=",">
-      (#{item.id,jdbcType=BIGINT}, #{item.txHash,jdbcType=VARCHAR},#{item.txIndex,jdbcType=INTEGER},#{item.address,jdbcType=VARCHAR},#{item.amount,jdbcType=BIGINT},#{item.lockTime,jdbcType=BIGINT},#{item.spendTxHash,jdbcType=VARCHAR})
+      (#{item.txHash,jdbcType=VARCHAR},#{item.txIndex,jdbcType=INTEGER},#{item.address,jdbcType=VARCHAR},#{item.amount,jdbcType=BIGINT},#{item.lockTime,jdbcType=BIGINT},#{item.spendTxHash,jdbcType=VARCHAR})
     </foreach>
-    ON DUPLICATE KEY UPDATE tx_index=-1;
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Utxo" >
     insert into utxo

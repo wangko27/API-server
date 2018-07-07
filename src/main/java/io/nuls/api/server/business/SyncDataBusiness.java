@@ -45,7 +45,10 @@ public class SyncDataBusiness {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void syncData(Block block) throws Exception {
-        long time1=System.currentTimeMillis(),time2;
+        //long time1=System.currentTimeMillis(),time2;
+        //清理已经使用过的utxo
+        utxoBusiness.deleteBySpendHash();
+        //System.out.println(block.getHeader().getHeight()+"----"+UtxoTempContext.getSize());
         try {
             blockBusiness.saveBlock(block.getHeader());
             /*缓存新块*/
@@ -113,24 +116,27 @@ public class SyncDataBusiness {
             /*缓存新交易*/
             IndexContext.putTransaction(tx);
         }
-
         utxoBusiness.saveAll(new ArrayList<>(utxoMap.values()));
-        time2 = System.currentTimeMillis();
-        System.out.println("utxo处理时间："+(time2-time1));
+
+        long txtime1 = System.currentTimeMillis(),txtime2;
+        System.out.println("数量："+transactionList.size());
         transactionBusiness.saveAll(transactionList);
-        time1 = System.currentTimeMillis();
-        System.out.println("transaction处理时间："+(time1-time2)+"数量："+transactionList.size());
+        txtime2 = System.currentTimeMillis();
+        System.out.println("tx处理时间："+(txtime2-txtime1));
+
         transactionRelationBusiness.saveAll(transactionRelationList);
-        time2 = System.currentTimeMillis();
-        System.out.println("relation处理时间："+(time2-time1)+"数量："+transactionList.size());
+        /*time2 = System.currentTimeMillis();
+        System.out.println("relation处理时间："+(time2-time1)+"数量："+transactionList.size());*/
         detailBusiness.saveAll(addressRewardDetailList);
         aliasBusiness.saveAll(aliasList);
         agentNodeBusiness.saveAll(agentNodeList);
         punishLogBusiness.saveAll(punishLogList);
         depositBusiness.saveAll(depositList);
         utxoBusiness.updateAll(utxoUpdateList);
-        System.out.println(transactionList.size()+"---"+block.getHeader().getHeight());
-        System.out.println("------------------------------");
+        //time2 = System.currentTimeMillis();
+        //System.out.println("处理时间："+(time2-time1)+"--交易数量"+transactionList.size());
+        /*System.out.println(transactionList.size()+"---"+block.getHeader().getHeight());
+        System.out.println("------------------------------");*/
         utxoMap = null;
         utxoUpdateList= null;
         transactionList= null;
@@ -140,6 +146,8 @@ public class SyncDataBusiness {
         agentNodeList= null;
         depositList= null;
         punishLogList= null;
+
+
     }
 
     /**

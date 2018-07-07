@@ -140,27 +140,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Transaction tx) {
-        transactionMapper.insert(tx);
-        relationBusiness.saveTxRelation(tx);
-        if (tx.getType() == EntityConstant.TX_TYPE_COINBASE) {
-            rewardDetailBusiness.saveTxReward(tx);
-        } else if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
-            aliasBusiness.save((Alias) tx.getTxData());
-        } else if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
-            agentNodeBusiness.save((AgentNode) tx.getTxData());
-        } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
-            depositBusiness.save((Deposit) tx.getTxData());
-        } else if (tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
-            depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getHash());
-        } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
-            AgentNode agentNode = (AgentNode) tx.getTxData();
-            agentNodeBusiness.stopAgent(agentNode, tx.getHash());
-        } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
-            punishLogBusiness.save((PunishLog) tx.getTxData());
-        } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
-            punishLogBusiness.saveList(tx.getTxDataList());
-        }
-        return 1;
+        return transactionMapper.insert(tx);
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -168,28 +148,14 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         /*for(Transaction tx:list){
             transactionMapper.insert(tx);
         }*/
+
         if(list.size() > 0){
-            if(list.size()>4000){
-                List<List<Transaction>> lists = ArraysTool.avgList(list,2);
-                transactionMapper.insertByBatch(lists.get(0));
-                transactionMapper.insertByBatch(lists.get(1));
-                StringBuilder strs = new StringBuilder("(");
-                for(Transaction tx: list){
-                    //hash, tx_index, type,
-                    //    create_time, block_height, remark,
-                    //    fee, size, amount, extend
-                    strs.append(tx.getHash()).append(",");
-                    strs.append(tx.getTxIndex()).append(",");
-                    strs.append(tx.getType()).append(",");
-                    strs.append(tx.getCreateTime()).append(",");
-                    strs.append(tx.getBlockHeight()).append(",");
-                    strs.append(tx.getRemark()).append(",");
-                    strs.append(tx.getFee()).append(",");
-                    strs.append(tx.getSize()).append(",");
-                    strs.append(tx.getAmount()).append(",");
-                    strs.append(tx.getExtend().toString()).append(")");
+            if(list.size()>1000) {
+                int count = list.size()%1000;
+                List<List<Transaction>> lists = ArraysTool.avgList(list, count);
+                for(int i = 0; i<count; i++){
+                    transactionMapper.insertByBatch(lists.get(i));
                 }
-                System.out.println(strs.toString());
             }else{
                 transactionMapper.insertByBatch(list);
             }
