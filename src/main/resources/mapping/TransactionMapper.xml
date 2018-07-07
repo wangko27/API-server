@@ -44,6 +44,7 @@
       )
   </insert>
   <insert id="insertByBatch" parameterType="java.util.List">
+
     insert into transaction (hash, tx_index, type,
     create_time, block_height, remark,
     fee, size, amount, extend
@@ -54,8 +55,15 @@
       #{item.createTime,jdbcType=BIGINT}, #{item.blockHeight,jdbcType=BIGINT}, #{item.remark,jdbcType=VARCHAR},
       #{item.fee,jdbcType=BIGINT}, #{item.size,jdbcType=INTEGER}, #{item.amount,jdbcType=BIGINT}, #{item.extend,jdbcType=LONGVARBINARY}
       )
-    </foreach>
+    </foreach>;
+
   </insert>
+  <select id="lockTables">
+      LOCK TABLES utxo WRITE;
+  </select>
+  <select id="unlockTables">
+    UNLOCK TABLES;
+  </select>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Transaction" >
     insert into transaction
     <trim prefix="(" suffix=")" suffixOverrides="," >
