@@ -8,6 +8,7 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.ArraysTool;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,20 +54,20 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveTxRelation(Transaction tx) {
-
-        List<TransactionRelation> relationList = getListByTx(tx);
-        if(relationList.size() > 0){
-            relationMapper.insertByBatch(relationList);
-        }
-    }
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveAll(List<TransactionRelation> relationList ) {
+    public void saveAll(List<TransactionRelation> list ) {
         /*for(TransactionRelation txr:relationList){
             relationMapper.insert(txr);
         }*/
-        if(relationList.size() > 0){
-            relationMapper.insertByBatch(relationList);
+        if(list.size() > 0){
+            if(list.size()>1000) {
+                int count = list.size()%1000;
+                List<List<TransactionRelation>> lists = ArraysTool.avgList(list, count);
+                for(int i = 0; i<count; i++){
+                    relationMapper.insertByBatch(lists.get(i));
+                }
+            }else{
+                relationMapper.insertByBatch(list);
+            }
         }
     }
 
