@@ -14,10 +14,10 @@ import java.util.Queue;
 public class UtxoTempContext {
 
     public static void put(Utxo utxo){
-        EhcacheUtil.getInstance().put(Constant.UTXO_TEMP_CACHE_NAME,utxo.getTxHash()+utxo.getTxIndex(),utxo);
+        EhcacheUtil.getInstance().put(Constant.UTXO_TEMP_CACHE_NAME,utxo.getHashIndex(),utxo);
     }
-    public static void remove(String address) {
-        EhcacheUtil.getInstance().remove(Constant.UTXO_TEMP_CACHE_NAME,address);
+    public static void remove(String hashIndex) {
+        EhcacheUtil.getInstance().remove(Constant.UTXO_TEMP_CACHE_NAME,hashIndex);
     }
     public static Utxo get(String hashAndIndex) {
         return (Utxo)EhcacheUtil.getInstance().get(Constant.UTXO_TEMP_CACHE_NAME,hashAndIndex);

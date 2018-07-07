@@ -6,16 +6,17 @@ import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.context.UtxoTempContext;
 import io.nuls.api.entity.*;
-import io.nuls.api.model.Address;
 import io.nuls.api.utils.JSONUtils;
-import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class SyncDataBusiness {
@@ -47,8 +48,7 @@ public class SyncDataBusiness {
     public void syncData(Block block) throws Exception {
         //long time1=System.currentTimeMillis(),time2;
         //清理已经使用过的utxo
-        utxoBusiness.deleteBySpendHash();
-        //System.out.println(block.getHeader().getHeight()+"----"+UtxoTempContext.getSize());
+        //utxoBusiness.deleteBySpendHash();
         try {
             blockBusiness.saveBlock(block.getHeader());
             /*缓存新块*/
@@ -74,11 +74,10 @@ public class SyncDataBusiness {
             Transaction tx = block.getTxList().get(i);
             tx.setTxIndex(i);
             for (Utxo utxo : tx.getOutputs()) {
-                utxoMap.put(utxo.getTxHash()+utxo.getTxIndex(),utxo);
+                utxoMap.put(utxo.getHashIndex(),utxo);
                 //写入缓存
                 UtxoContext.put(utxo);
                 UtxoTempContext.put(utxo);
-                //System.out.println(utxo.getTxHash()+"---"+utxo.getTxIndex());
             }
             utxoUpdateList.addAll(utxoBusiness.getListByFrom(tx,utxoMap));
             Map<String, Object> dataMap = new HashMap<>();
@@ -177,7 +176,7 @@ public class SyncDataBusiness {
                 for (int j = tx.getOutputs().size() - 1; j >= 0; j--) {
                     Utxo tempUtxo = tx.getOutputs().get(j);
                     UtxoContext.remove(tempUtxo.getAddress());
-                    UtxoTempContext.remove(tempUtxo.getTxHash()+tempUtxo.getTxIndex());
+                    UtxoTempContext.remove(tempUtxo.getHashIndex());
                 }
             }
             //UtxoKey utxoKey;

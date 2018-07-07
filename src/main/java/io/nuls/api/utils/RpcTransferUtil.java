@@ -140,14 +140,13 @@ public class RpcTransferUtil {
             for (int i = 0; i < txModel.getCoinData().getTo().size(); i++) {
                 Coin coin = txModel.getCoinData().getTo().get(i);
                 Utxo utxo = new Utxo();
-                utxo.setTxHash(tx.getHash());
-                utxo.setTxIndex(i);
+                utxo.setHashIndex(utxo.toHashIndex(tx.getHash(),i));
                 utxo.setAmount(coin.getNa().getValue());
                 utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
                 utxo.setLockTime(coin.getLockTime());
                 outputs.add(utxo);
 
-                Output output = new Output(utxo.getTxHash(), utxo.getAddress(), utxo.getAmount());
+                Output output = new Output(tx.getHash(), utxo.getAddress(), utxo.getAmount());
                 outputList.add(output);
             }
         }
@@ -279,8 +278,7 @@ public class RpcTransferUtil {
         for (int i = 0; i < outputMaps.size(); i++) {
             Utxo output = new Utxo();
             dataMap = outputMaps.get(i);
-            output.setTxHash((String) dataMap.get("txHash"));
-            output.setTxIndex((Integer) dataMap.get("index"));
+            output.setHashIndex(output.toHashIndex((String) dataMap.get("txHash"),(Integer) dataMap.get("index")));
             output.setAddress((String) dataMap.get("address"));
             output.setLockTime(Long.parseLong(dataMap.get("lockTime").toString()));
             output.setAmount(Long.parseLong(dataMap.get("value").toString()));

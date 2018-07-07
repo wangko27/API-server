@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -219,7 +220,7 @@ public class UtxoBusiness implements BaseService<Utxo, Long> {
                 txlist.add(utxo);
                 //删除缓存
                 UtxoContext.remove(utxo.getAddress());
-                UtxoTempContext.remove(utxo.getSpendTxHash()+utxo.getTxIndex());
+                UtxoTempContext.remove(utxo.getHashIndex());
             }
         }
         return txlist;
@@ -247,11 +248,13 @@ public class UtxoBusiness implements BaseService<Utxo, Long> {
 
         if(list.size()>0){
             if(list.size()>1000) {
+                //执行批量插入
                 int count = list.size()%1000;
                 List<List<Utxo>> lists = ArraysTool.avgList(list, count);
                 for(int i = 0; i<count; i++){
                     utxoMapper.insertByBatch(lists.get(i));
                 }
+                //LOAD DATA LOCAL INFILE
 
             }else{
                 utxoMapper.insertByBatch(list);
