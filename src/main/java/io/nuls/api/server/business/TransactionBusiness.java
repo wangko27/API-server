@@ -109,29 +109,40 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         return transactionMapper.insert(tx);
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveAll(List<Transaction> list){
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void saveAll(List<Transaction> list) {
         /*for(Transaction tx:list){
             transactionMapper.insert(tx);
         }*/
-        if(list.size() > 0){
-            if(list.size()>1000) {
-                int count = list.size()%1000;
+        long time1, time2;
+        if (list.size() > 0) {
+            time1 = System.currentTimeMillis();
+            if (list.size() > 1000) {
+                int count = list.size() % 1000;
                 List<List<Transaction>> lists = ArraysTool.avgList(list, count);
-                for(int i = 0; i<count; i++){
+                for (int i = 0; i < count; i++) {
                     transactionMapper.insertByBatch(lists.get(i));
                 }
-            }else{
+            } else {
                 transactionMapper.insertByBatch(list);
             }
+            time2 = System.currentTimeMillis();
+            if (time2 - time1 > 1000) {
+                System.out.println("----------save tx mysql:" + (time2 - time1));
+            }
+
             //存入leveldb
+            time1 = System.currentTimeMillis();
             transactionLevelDbService.insertList(list);
+            time2 = System.currentTimeMillis();
+            if (time2 - time1 > 1000) {
+                System.out.println("----------save tx mysql:" + (time2 - time1));
+            }
         }
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollback(Transaction tx) throws Exception {
-        tx.transferExtend();
         //查询出交易生成的utxo，回滚缓存时使用
         //List<Utxo> utxoList = utxoBusiness.getList(tx.getHash());
         //tx.setOutputs(utxoList);
@@ -144,11 +155,11 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         //根据交易类型回滚其他表数据
         if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
             agentNodeBusiness.deleteByKey(tx.getHash());
-        }else if(tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
             depositBusiness.deleteByKey(tx.getHash());
-        }else if(tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
+        } else if (tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
             depositBusiness.rollbackCancelDeposit(tx.getHash());
-        }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
+        } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             agentNodeBusiness.rollbackStopAgent(tx.getHash());
         }
         deleteByHash(tx.getHash());
@@ -189,10 +200,9 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     @Override
     public Transaction getByKey(Long id) {
         Transaction tx = transactionMapper.selectByPrimaryKey(id);
-        if(null != tx){
+        if (null != tx) {
             tx = transactionLevelDbService.select(tx.getHash());
             try {
-                tx.transferExtend();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -204,19 +214,16 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     public Transaction getByHash(String hash) {
         return transactionLevelDbService.select(hash);
     }
-    private List<Transaction> formatTransaction(List<Transaction> transactionList){
-        List<Transaction> txList = new ArrayList<>();
-        for (Transaction trans:transactionList) {
+
+    private List<Transaction> formatTransaction(List<Transaction> transactionList) {
+        for (Transaction trans : transactionList) {
             //去leveldb中重新加载trans
             trans = transactionLevelDbService.select(trans.getHash());
-            //trans.setExtend(null);
-            trans.setOutputs(null);
-            trans.setTxData(null);
-            /*trans.setScriptSign(null);*/
-            //去掉TxDataList
-            trans.setTxDataList(null);
-            txList.add(trans);
         }
-        return txList;
+        return transactionList;
+    }
+
+    private List<Transaction> formatTransactionExtend(List<Transaction> transactionList) {
+        return transactionList;
     }
 }

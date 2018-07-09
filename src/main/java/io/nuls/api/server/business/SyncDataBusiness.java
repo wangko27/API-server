@@ -76,12 +76,6 @@ public class SyncDataBusiness {
             //存放被花费的utxo
             fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
 
-            //todo 分开几个字段存储
-            extendMap.put("scriptSign", tx.getScriptSign());
-            extendMap.put("inputs", tx.getInputs());
-            extendMap.put("outputs", tx.getOutputList());
-            tx.setExtend(JSONUtils.obj2json(extendMap).getBytes());
-
             txList.add(tx);
             txRelationList.addAll(transactionRelationBusiness.getListByTx(tx));
 
@@ -118,14 +112,13 @@ public class SyncDataBusiness {
         depositBusiness.saveAll(depositList);
         utxoBusiness.saveAll(utxoMap);
         utxoBusiness.updateAll(fromList);
-
         //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
         //存入leveldb
         blockHeaderLevelDbService.insert(block.getHeader());
+
         for (Utxo utxo : fromList) {
             UtxoContext.remove(utxo.getAddress(), utxo.getKey());
         }
-
         for (Utxo utxo : utxoMap.values()) {
             if (utxo.getSpendTxHash() == null) {
                 UtxoContext.put(utxo.getAddress(), utxo.getKey());
@@ -134,6 +127,7 @@ public class SyncDataBusiness {
 
         //缓存新块 首页数据展示用
         IndexContext.putBlock(block.getHeader());
+
         //缓存新交易
         int end = txList.size();
         int start = 0;
@@ -141,7 +135,6 @@ public class SyncDataBusiness {
             start = end - Constant.INDEX_TX_LIST_COUNT;
         }
         for (int i = start; i < end; i++) {
-            txList.get(i).transferExtend();
             IndexContext.putTransaction(txList.get(i));
         }
 

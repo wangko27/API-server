@@ -54,12 +54,16 @@ public class RpcTransferUtil {
         block.setHeader(header);
 
         List<Transaction> txList = new ArrayList<>();
+        List<String> txHashList = new ArrayList<>();
         for (int i = 0; i < blockModel.getTxs().size(); i++) {
             io.nuls.api.model.Transaction txModel = blockModel.getTxs().get(i);
             Transaction tx = toTransaction(txModel, header);
             txList.add(tx);
+            txHashList.add(tx.getHash());
         }
+
         block.setTxList(txList);
+        block.getHeader().setTxHashList(txHashList);
         return block;
     }
 
@@ -118,13 +122,14 @@ public class RpcTransferUtil {
         List<Input> inputs = new ArrayList<>();
         byte[] hashByte, owner;
         int index;
+        Input input = null;
         if (txModel.getCoinData() != null && txModel.getCoinData().getFrom() != null) {
             for (Coin coin : txModel.getCoinData().getFrom()) {
                 owner = coin.getOwner();
                 hashByte = LedgerUtil.getTxHashBytes(owner);
                 index = LedgerUtil.getIndex(owner);
 
-                Input input = new Input();
+                input = new Input();
                 NulsDigestData hash = new NulsDigestData();
                 hash.parse(new NulsByteBuffer(hashByte));
                 input.setFromHash(hash.getDigestHex());
@@ -136,10 +141,13 @@ public class RpcTransferUtil {
 
         List<Utxo> outputs = new ArrayList<>();
         List<Output> outputList = new ArrayList<>();
+        Utxo utxo = null;
+        Coin coin = null;
+        Output output = null;
         if (txModel.getCoinData() != null && txModel.getCoinData().getTo() != null) {
             for (int i = 0; i < txModel.getCoinData().getTo().size(); i++) {
-                Coin coin = txModel.getCoinData().getTo().get(i);
-                Utxo utxo = new Utxo();
+                coin = txModel.getCoinData().getTo().get(i);
+                utxo = new Utxo();
                 utxo.setTxHash(tx.getHash());
                 utxo.setTxIndex(i);
                 utxo.setAmount(coin.getNa().getValue());
@@ -147,7 +155,7 @@ public class RpcTransferUtil {
                 utxo.setLockTime(coin.getLockTime());
                 outputs.add(utxo);
 
-                Output output = new Output(tx.getHash(), i, utxo.getAddress(), utxo.getAmount());
+                output = new Output(tx.getHash(), i, utxo.getAddress(), utxo.getAmount());
                 outputList.add(output);
             }
         }
@@ -260,7 +268,7 @@ public class RpcTransferUtil {
 
         dataMap.put("inputs", inputMaps);
         dataMap.put("scriptSign", map.get("scriptSig").toString());
-        tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
+        //   tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
 
         List<Input> inputs = new ArrayList<>();
         for (int i = 0; i < inputMaps.size(); i++) {
