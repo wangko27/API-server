@@ -48,7 +48,6 @@ public class BlockHeaderLevelDbService {
         return 0;
     }
     public int delete(String key){
-        DBService dbService = LevelDbUtil.getInstance();
         Result result =dbService.delete(Constant.BLOCKHEADER_CACHE_NAME, key.getBytes());
         if(result.isSuccess()){
             return 1;
@@ -56,7 +55,6 @@ public class BlockHeaderLevelDbService {
         return 0;
     }
     public BlockHeader select(String key){
-        DBService dbService = LevelDbUtil.getInstance();
         return dbService.getModel(Constant.BLOCKHEADER_CACHE_NAME, key.getBytes(), BlockHeader.class);
     }
     //这里会查询出leveldb里面全部的数据，谨慎使用

@@ -53,7 +53,6 @@ public class UtxoLevelDbService {
     }
 
     public int delete(String key) {
-        DBService dbService = LevelDbUtil.getInstance();
         Result result = dbService.delete(Constant.UTXO_CACHE_NAME, key.getBytes());
         if (result.isSuccess()) {
             return 1;
@@ -62,7 +61,6 @@ public class UtxoLevelDbService {
     }
 
     public Utxo select(String key) {
-        DBService dbService = LevelDbUtil.getInstance();
         return dbService.getModel(Constant.UTXO_CACHE_NAME, key.getBytes(), Utxo.class);
     }
 

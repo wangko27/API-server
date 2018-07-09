@@ -208,7 +208,10 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         List<Transaction> txList = new ArrayList<>();
         for (Transaction trans:transactionList) {
             //去leveldb中重新加载trans
-            txList.add(transactionLevelDbService.select(trans.getHash()));
+            trans = transactionLevelDbService.select(trans.getHash());
+            //去掉TxDataList
+            trans.setTxDataList(null);
+            txList.add(trans);
         }
         return txList;
     }

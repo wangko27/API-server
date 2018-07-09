@@ -105,11 +105,11 @@ public class TransactionResource {
             if(null == transaction){
                 return RpcClientResult.getFailed(ErrorCode.DATA_NOT_FOUND);
             }
-            List<Utxo> outputsList = new ArrayList<>();
+            List<Utxo> outputs = new ArrayList<>();
             for(Output output:transaction.getOutputList()){
-                utxoBusiness.getByKey(output.getKey());
+                outputs.add(utxoBusiness.getByKey(output.getKey()));
             }
-            transaction.setOutputs(outputsList);
+            transaction.setOutputs(outputs);
             TransactionDto transactionDto = new TransactionDto(transaction);
             BlockHeader blockHeader = blockBusiness.getNewest();
             if(null != blockHeader){

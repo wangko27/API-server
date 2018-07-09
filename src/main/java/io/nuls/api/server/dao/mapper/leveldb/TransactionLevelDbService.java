@@ -6,6 +6,7 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
+import io.nuls.api.utils.log.Log;
 
 import java.util.List;
 
@@ -43,7 +44,6 @@ public class TransactionLevelDbService {
         return 0;
     }
     public int delete(String key){
-        DBService dbService = LevelDbUtil.getInstance();
         Result result =dbService.delete(Constant.TRANSACTION_CACHE_NAME, key.getBytes());
         if(result.isSuccess()){
             return 1;
@@ -51,11 +51,13 @@ public class TransactionLevelDbService {
         return 0;
     }
     public Transaction select(String key){
-        DBService dbService = LevelDbUtil.getInstance();
         Transaction transaction = dbService.getModel(Constant.TRANSACTION_CACHE_NAME, key.getBytes(), Transaction.class);
-        try {
-            transaction.transferExtend();
-        } catch (Exception e) {
+        if(null != transaction){
+            try {
+                transaction.transferExtend();
+            } catch (Exception e) {
+                Log.error(e.getMessage());
+            }
         }
         return transaction;
     }

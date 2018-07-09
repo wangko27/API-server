@@ -39,6 +39,5 @@ public class BalanceTask {
         /*加载24小时奖励*/
         Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
         HistoryContext.rewardofday = rewardOfDay==null?0L:rewardOfDay;
-
     }
 }
