@@ -2,6 +2,7 @@ package io.nuls.api.server.dto;
 
 import io.nuls.api.entity.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,6 +57,7 @@ public class TransactionDto{
         this.outputList = transaction.getOutputList();
         this.outputs = transaction.getOutputs();
         this.inputs = transaction.getInputs();
+        this.type = transaction.getType();
     }
 
     public String getHash() {

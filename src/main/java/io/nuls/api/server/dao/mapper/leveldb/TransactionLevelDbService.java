@@ -51,15 +51,7 @@ public class TransactionLevelDbService {
         return 0;
     }
     public Transaction select(String key){
-        Transaction transaction = dbService.getModel(Constant.TRANSACTION_CACHE_NAME, key.getBytes(), Transaction.class);
-        if(null != transaction){
-            try {
-                transaction.transferExtend();
-            } catch (Exception e) {
-                Log.error(e.getMessage());
-            }
-        }
-        return transaction;
+        return dbService.getModel(Constant.TRANSACTION_CACHE_NAME, key.getBytes(), Transaction.class);
     }
     //这里会查询出leveldb里面全部的数据，谨慎使用
     public List<Transaction> getList(){

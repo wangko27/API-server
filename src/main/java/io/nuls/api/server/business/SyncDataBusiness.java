@@ -157,6 +157,7 @@ public class SyncDataBusiness {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollback(BlockHeader header) throws Exception {
         Log.error("--------------roll back, block height: " + header.getHeight() + ",hash :" + header.getHash());
+        //todo 这里是根据高度查询，因为高度索引已经去掉，所以这需要修改
         List<Transaction> txList = transactionBusiness.getList(header.getHeight());
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);

@@ -3,8 +3,10 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
+import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.TransactionRelation;
+import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -54,7 +56,7 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         if (null != height) {
             searchable.addCondition("block_height", SearchOperator.eq, height);
         }
-        PageHelper.orderBy("block_height desc");
+        PageHelper.orderBy("id desc");
         List<Transaction> transactionList = transactionMapper.selectList(searchable);
         //加载list，加载leveldb中的真实交易数据
         PageInfo<Transaction> page = new PageInfo<>(formatTransaction(transactionList));
@@ -123,7 +125,11 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
                 for (int i = 0; i < count; i++) {
                     transactionMapper.insertByBatch(lists.get(i));
                 }
-            } else {
+            } else if(list.size() < 10){
+                for(int i =0; i< list.size(); i++){
+                    transactionMapper.insert(list.get(i));
+                }
+            }else{
                 transactionMapper.insertByBatch(list);
             }
             time2 = System.currentTimeMillis();
@@ -216,14 +222,48 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     }
 
     private List<Transaction> formatTransaction(List<Transaction> transactionList) {
-        for (Transaction trans : transactionList) {
+        List<Transaction> txList = new ArrayList<>();
+        for (Transaction trans:transactionList) {
             //去leveldb中重新加载trans
             trans = transactionLevelDbService.select(trans.getHash());
+            //trans.setExtend(null);
+            trans.setOutputs(null);
+            trans.setTxData(null);
+            /*trans.setScriptSign(null);*/
+            //去掉TxDataList
+            if(null == trans.getOutputList()){
+                trans.setOutputList(new ArrayList<>());
+            }
+            if(null == trans.getInputs()){
+                trans.setInputs(new ArrayList<>());
+            }else{
+                for(Input input: trans.getInputs()){
+                    Utxo utxo =utxoBusiness.getByKey(input.getFromHash(),input.getFromIndex());
+                    input.setAddress(utxo.getAddress());
+                    input.setValue(utxo.getAmount());
+                }
+            }
+            trans.setTxDataList(null);
+            txList.add(trans);
         }
-        return transactionList;
+        return txList;
     }
 
-    private List<Transaction> formatTransactionExtend(List<Transaction> transactionList) {
-        return transactionList;
+    public Transaction formatTransForDetail(Transaction transaction){
+        /*trans.setScriptSign(null);*/
+        //去掉TxDataList
+        if(null == transaction.getInputs()){
+            transaction.setInputs(new ArrayList<>());
+        }else{
+            for(Input input: transaction.getInputs()){
+                Utxo utxo =utxoBusiness.getByKey(input.getFromHash(),input.getFromIndex());
+                input.setAddress(utxo.getAddress());
+                input.setValue(utxo.getAmount());
+            }
+        }
+        transaction.setTxData(null);
+        transaction.setScriptSign(null);
+        transaction.setTxDataList(null);
+        return transaction;
     }
 }

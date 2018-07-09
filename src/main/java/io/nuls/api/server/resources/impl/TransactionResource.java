@@ -110,6 +110,8 @@ public class TransactionResource {
                 outputs.add(utxoBusiness.getByKey(output.getKey()));
             }
             transaction.setOutputs(outputs);
+            //处理格式，null等错误
+            transactionBusiness.formatTransForDetail(transaction);
             TransactionDto transactionDto = new TransactionDto(transaction);
             BlockHeader blockHeader = blockBusiness.getNewest();
             if(null != blockHeader){

@@ -166,7 +166,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      * @return
      */
     public Utxo getByKey(String txHash, int txIndex) {
-
         return selectUtxoByHashAndIndex(txHash + "_" + txIndex);
     }
 

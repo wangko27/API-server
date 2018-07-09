@@ -55,16 +55,16 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
      * @param endTime
      * @return
      */
-    //todo 统计交易笔数
     public Integer getTxcountByTime(Long startTime, Long endTime) {
-        /*if (startTime < 0 || endTime < 0) {
-            return 0;
+        int total = 0;
+        if (startTime < 0 || endTime < 0) {
+            return total;
         }
-        Searchable searchable = new Searchable();
-        searchable.addCondition("create_time", SearchOperator.gte, startTime);
-        searchable.addCondition("create_time", SearchOperator.lt, endTime);
-        return blockHeaderMapper.getBlockSumTxcount(searchable);*/
-        return 0;
+        List<BlockHeader> blockHeaderList = getBlockByTime(startTime,endTime);
+        for(BlockHeader block:blockHeaderList){
+            total += block.getTxCount();
+        }
+        return total;
 
     }
 
@@ -75,15 +75,16 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
      * @return
      */
     public Long getBlockSumRewardByTime(Long startTime) {
-        /*if (startTime < 0) {
-            return 0L;
+        Long total = 0L;
+        if (startTime < 0) {
+            return total;
         }
-        Searchable searchable = new Searchable();
-        searchable.addCondition("create_time", SearchOperator.gte, startTime-Constant.MILLISECONDS_TIME_DAY);
-        searchable.addCondition("create_time", SearchOperator.lt, startTime);
-        return blockHeaderMapper.getBlockSumReward(searchable);*/
-        //todo 24小时共识奖励统计
-        return 0L;
+        Long endTime = startTime - Constant.MILLISECONDS_TIME_DAY;
+        List<BlockHeader> blockHeaderList = getBlockByTime(endTime,startTime);
+        for(BlockHeader block:blockHeaderList){
+            total += block.getReward();
+        }
+        return total;
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
