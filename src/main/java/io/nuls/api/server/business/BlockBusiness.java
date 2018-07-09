@@ -125,9 +125,6 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {
         Searchable searchable = new Searchable();
         if (beginHeight >= 0) {
-            if (beginHeight == 0) {
-                beginHeight = -1;
-            }
             searchable.addCondition("height", SearchOperator.gte, beginHeight);
         }
         if (endHeight > 0) {
@@ -208,10 +205,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             agentNode.setTotalReward(agentNode.getTotalReward() + blockHeader.getReward());
             agentNodeBusiness.update(agentNode);
         }
-        //存入数据库
-        if (blockHeader.getHeight() == 0) {
-            blockHeader.setHeight(-1L);
-        }
+
         return blockHeaderMapper.insert(blockHeader);
     }
 
@@ -231,9 +225,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(Long blockHeight) {
-        if (blockHeight == 0) {
-            blockHeight = -1L;
-        }
+
         BlockHeader header = blockHeaderMapper.selectByPrimaryKey(blockHeight);
         if (null != header) {
             header = blockHeaderLevelDbService.select(header.getHash());
@@ -271,9 +263,6 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
             }
             blockHeaderLevelDbService.delete(header.getHash());
-            if (header.getHeight() == 0) {
-                header.setHeight(-1L);
-            }
             return blockHeaderMapper.deleteByPrimaryKey(header.getHeight());
         }
         return 0;
@@ -287,9 +276,6 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
      */
     @Override
     public BlockHeader getByKey(Long height) {
-        if (height == 0) {
-            height = -1L;
-        }
         BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(height);
         if (null != blockHeader) {
             return blockHeaderLevelDbService.select(blockHeader.getHash());
