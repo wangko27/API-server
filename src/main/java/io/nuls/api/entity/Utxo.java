@@ -3,6 +3,7 @@ package io.nuls.api.entity;
 import java.util.Objects;
 
 public class Utxo {
+
     private Long id;
 
     private String txHash;
@@ -18,6 +19,8 @@ public class Utxo {
     private Long lockTime;
 
     private String spendTxHash;
+
+    private String key;
 
     public Long getId() {
         return id;
@@ -101,6 +104,9 @@ public class Utxo {
     }
 
     public String getKey() {
-        return txHash + "_" + txIndex;
+        if (key == null) {
+            key = txHash + "_" + txIndex;
+        }
+        return key;
     }
 }
