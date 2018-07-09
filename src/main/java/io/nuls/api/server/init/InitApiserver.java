@@ -40,11 +40,7 @@ public class InitApiserver {
     @PostConstruct
     public void init() {
         /*加载utxo*/
-        List<Utxo> utxoList = utxoBusiness.getList(null);
-        for(Utxo utxo:utxoList){
-            UtxoContext.put(utxo.getAddress(),utxo.getKey());
-        }
-
+        utxoBusiness.initUtxoList();
 
         /*启动*/
         /*加载14天历史*/
@@ -69,7 +65,8 @@ public class InitApiserver {
         }
 
         /*加载初始化的区块列表*/
-        List<BlockHeader> blockList = blockBusiness.getListAll(null,1,Constant.INDEX_BLOCK_LIST_COUNT);
+        PageInfo<BlockHeader> blockHeaderPageInfo = blockBusiness.getList(null,1,Constant.INDEX_BLOCK_LIST_COUNT);
+        List<BlockHeader> blockList = blockHeaderPageInfo.getList();
         if(null != blockList){
             IndexContext.initBlocks(blockList);
         }

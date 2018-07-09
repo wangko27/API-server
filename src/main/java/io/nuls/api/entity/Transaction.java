@@ -177,12 +177,19 @@ public class Transaction {
 
         List<Output> outputList = new ArrayList<>();
         mapList = (List<Map>) dataMap.get("outputs");
-        for (Map map : mapList) {
-            Output output = new Output();
-            output.setTxHash((String) map.get("txHash"));
-            output.setAddress((String) map.get("address"));
-            output.setValue(Long.parseLong(map.get("value").toString()));
+
+        Output output = null;
+        for(int i=0;i<mapList.size();i++) {
+            output = new Output();
+            output.setTxIndex(i);
+            output.setTxHash((String) mapList.get(i).get("txHash"));
+            output.setAddress((String) mapList.get(i).get("address"));
+            output.setValue(Long.parseLong(mapList.get(i).get("value").toString()));
             outputList.add(output);
+        }
+
+        for (Map map : mapList) {
+
         }
         this.inputs = inputs;
         this.setOutputList(outputList);

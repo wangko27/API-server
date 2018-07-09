@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.TransactionRelation;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,6 +30,8 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
 
     @Autowired
     private TransactionMapper transactionMapper;
+    @Autowired
+    private TransactionRelationBusiness transactionRelationBusiness;
     @Autowired
     private TransactionRelationBusiness relationBusiness;
     @Autowired
@@ -52,25 +56,25 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         if (null != height) {
             searchable.addCondition("block_height", SearchOperator.eq, height);
         }
-        if (type > 0) {
-            //todo 待优化
-            //searchable.addCondition("type", SearchOperator.eq, type);
-        }
         PageHelper.orderBy("block_height desc");
-        //todo 需要联合leveldb查询list
         List<Transaction> transactionList = transactionMapper.selectList(searchable);
+        //加载list，加载leveldb中的真实交易数据
         formatTransaction(transactionList);
         PageInfo<Transaction> page = new PageInfo<>(transactionList);
         return page;
     }
 
+    /**
+     * 根据高度查询全部交易
+     * @param blockHeight 高度
+     * @return
+     */
     public List<Transaction> getList(Long blockHeight) {
         Searchable searchable = new Searchable();
         if(null == blockHeight){
             return null;
         }
         searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
-        PageHelper.orderBy("tx_index asc");
         List<Transaction> transactionList = transactionMapper.selectList(searchable);
         formatTransaction(transactionList);
         return transactionList;
@@ -78,30 +82,28 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
 
     /**
      * 查询某个地址的交易列表
+     * 先从utxo中查询出hash，然后再利用hash去leveldb去加载真实的交易数据
      *
      * @param address 地址
      * @return
      */
+    //todo 分页的pageNumber需要修改成long，因为按照目前进度，一天8000块，一块1000笔交易，那么一年就是24亿比交易
     public PageInfo<Transaction> getListByAddress(String address, int type, int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
-        Searchable searchable = new Searchable();
-        if(!StringUtils.validAddress(address)){
-            return null;
+        PageInfo<TransactionRelation> relationPageInfo = transactionRelationBusiness.getListByPage(address,pageNumber,pageSize);
+        List<TransactionRelation> relationList = relationPageInfo.getList();
+        List<Transaction> transactionList = new ArrayList<>();
+        if(null != relationList){
+            for(TransactionRelation relation:relationList){
+                transactionList.add(transactionLevelDbService.select(relation.getTxHash()));
+            }
         }
-        searchable.addCondition("address", SearchOperator.eq, address);
-        if (type > 0) {
-            searchable.addCondition("type", SearchOperator.eq, type);
-        }
-        PageHelper.orderBy("block_height desc");
-        List<Transaction> transactionList = transactionMapper.selectListByAddress(searchable);
-        formatTransaction(transactionList);
+        formatTransactionExtend(transactionList);
         PageInfo<Transaction> page = new PageInfo<>(transactionList);
         return page;
     }
 
     /**
      * 新增
-     *
      * @param tx
      */
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -116,7 +118,6 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         /*for(Transaction tx:list){
             transactionMapper.insert(tx);
         }*/
-
         if(list.size() > 0){
             if(list.size()>1000) {
                 int count = list.size()%1000;
@@ -129,7 +130,6 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
             }
             //存入leveldb
             transactionLevelDbService.insertList(list);
-
         }
     }
 
@@ -137,11 +137,10 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     public void rollback(Transaction tx) throws Exception {
         tx.transferExtend();
         //查询出交易生成的utxo，回滚缓存时使用
-        List<Utxo> utxoList = utxoBusiness.getList(tx.getHash());
-        tx.setOutputs(utxoList);
+        //List<Utxo> utxoList = utxoBusiness.getList(tx.getHash());
+        //tx.setOutputs(utxoList);
         //回滚交易新生成的utxo
-        //todo 这里，可以循环直接拿到hashIndex，进行主键删除
-        utxoBusiness.deleteByTxHash(tx.getHash());
+        //utxoBusiness.deleteByTxHash(tx.getHash());
         //回滚未花费输出
         utxoBusiness.rollBackByFrom(tx);
         //删除关系表
@@ -195,7 +194,13 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     public Transaction getByKey(Long id) {
         Transaction tx = transactionMapper.selectByPrimaryKey(id);
         if(null != tx){
-            return transactionLevelDbService.select(tx.getHash());
+            tx = transactionLevelDbService.select(tx.getHash());
+            try {
+                tx.transferExtend();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return tx;
         }
         return null;
     }
@@ -205,6 +210,18 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     }
 
     private List<Transaction> formatTransaction(List<Transaction> transactionList){
+        for (Transaction trans:transactionList) {
+            //去leveldb中重新加载trans
+            trans = transactionLevelDbService.select(trans.getHash());
+            try {
+                trans.transferExtend();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return transactionList;
+    }
+    private List<Transaction> formatTransactionExtend(List<Transaction> transactionList){
         for (Transaction trans:transactionList) {
             try {
                 trans.transferExtend();

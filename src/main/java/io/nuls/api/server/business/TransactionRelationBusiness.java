@@ -1,5 +1,7 @@
 package io.nuls.api.server.business;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.TransactionRelation;
@@ -27,12 +29,35 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
     @Autowired
     private TransactionRelationMapper relationMapper;
 
+    /**
+     * 根据地址查询全部
+     * @param address
+     * @return
+     */
     public List<TransactionRelation> getList(String address){
         Searchable searchable = new Searchable();
         if(StringUtils.isNotBlank(address)){
             searchable.addCondition("address", SearchOperator.eq, address);
         }
         return relationMapper.selectList(searchable);
+    }
+
+    /**
+     * 根据地址，分页查询hash
+     * @param address
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<TransactionRelation> getListByPage(String address,int pageNumber, int pageSize){
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        if(StringUtils.isNotBlank(address)){
+            searchable.addCondition("address", SearchOperator.eq, address);
+        }
+        PageHelper.orderBy("id desc");
+        PageInfo<TransactionRelation> page = new PageInfo<>(relationMapper.selectList(searchable));
+        return page;
     }
 
     public List<TransactionRelation> getListByTx(Transaction tx){

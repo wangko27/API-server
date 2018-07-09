@@ -35,17 +35,15 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     private BlockHeaderLevelDbService blockHeaderLevelDbService = BlockHeaderLevelDbService.getInstance();
 
     public BlockHeader getBlockByHash(String hash) {
-        Searchable searchable = new Searchable();
-        searchable.addCondition("hash", SearchOperator.eq, hash);
-        BlockHeader blockHeader = blockHeaderMapper.selectBySearchable(searchable);
-        if(null != blockHeader){
-            return blockHeaderLevelDbService.select(blockHeader.getHeight()+"");
-        }
-        return null;
+        return blockHeaderLevelDbService.select(hash);
     }
 
     public BlockHeader getBlockByHeight(long height) {
-        return blockHeaderMapper.selectByPrimaryKey(height);
+        BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(height);
+        if(null != blockHeader){
+            return blockHeaderLevelDbService.select(blockHeader.getHash());
+        }
+        return null;
     }
 
     /**
@@ -103,7 +101,12 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         }
     }
 
-    //todo 查询，需要联合leveldb
+    /**
+     * 查询列表
+     * @param beginHeight
+     * @param endHeight
+     * @return
+     */
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {
         Searchable searchable = new Searchable();
         if (beginHeight >= 0) {
@@ -112,13 +115,13 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         if (endHeight > 0) {
             searchable.addCondition("height", SearchOperator.lte, endHeight);
         }
-        return blockHeaderMapper.selectList(searchable);
+        List<BlockHeader> list = blockHeaderMapper.selectList(searchable);
+        setDataWithLeveldb(list);
+        return list;
     }
 
-    //todo 查询，需要联合leveldb
     /**
      * 获取块列表
-     *
      * @param address    共识地址
      * @param pageNumber
      * @param pageSize
@@ -135,45 +138,19 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             }
         }
         PageHelper.orderBy("height desc");
-        PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderMapper.selectList(searchable));
+        List<BlockHeader> blockHeaderList = blockHeaderMapper.selectList(searchable);
+        setDataWithLeveldb(blockHeaderList);
+        PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderList);
         return page;
     }
 
-    //todo 查询，需要联合leveldb
     /**
-     * 获取块列表
-     *
-     * @param address    共识地址
-     * @param pageNumber
-     * @param pageSize
+     * 获取最新区块
      * @return
      */
-    public List<BlockHeader> getListAll(String address, int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
-        Searchable searchable = new Searchable();
-        if (StringUtils.isNotBlank(address)) {
-            if (StringUtils.validAddress(address)) {
-                searchable.addCondition("consensus_address", SearchOperator.eq, address);
-            } else {
-                return null;
-            }
-        }
-        PageHelper.orderBy("height desc");
-        return blockHeaderMapper.selectList(searchable);
-    }
-
-    //todo 查询，需要联合leveldb
     public BlockHeader getNewest() {
-        return blockHeaderMapper.getBestBlock();
-    }
-
-    //todo 查询，需要联合leveldb
-    public PageInfo<BlockHeader> getBlockPage(int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
-        Searchable searchable = new Searchable();
-        List<BlockHeader> list = blockHeaderMapper.selectList(searchable);
-        PageInfo<BlockHeader> page = new PageInfo<>(list);
-        return page;
+        BlockHeader blockHeader = blockHeaderMapper.getBestBlock();
+        return blockHeaderLevelDbService.select(blockHeader.getHash());
     }
 
     /**
@@ -195,8 +172,12 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteBlock(Long blockHeight) {
-        blockHeaderLevelDbService.delete((blockHeight+""));
-        return blockHeaderMapper.deleteByPrimaryKey(blockHeight);
+        BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(blockHeight);
+        if(null != blockHeader){
+            blockHeaderLevelDbService.delete(blockHeader.getHash());
+            return blockHeaderMapper.deleteByPrimaryKey(blockHeight);
+        }
+        return 0;
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -213,28 +194,77 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         return blockHeaderMapper.updateByPrimaryKey(blockHeader);
     }
 
+    /**
+     * 根据高度删除
+     * @param blockHeight
+     * @return
+     */
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(Long blockHeight) {
-        //todo 查询，需要联合leveldb
         BlockHeader header = blockHeaderMapper.selectByPrimaryKey(blockHeight);
-        AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
-        if (agentNode != null) {
-            Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
-            agentNode.setLastRewardHeight(height);
-            agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
-            agentNode.setTotalReward(agentNode.getTotalReward() - header.getReward());
-            agentNodeBusiness.update(agentNode);
+        if(null != header){
+            header = blockHeaderLevelDbService.select(header.getHash());
+            AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
+            if (agentNode != null) {
+                Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
+                agentNode.setLastRewardHeight(height);
+                agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
+                agentNode.setTotalReward(agentNode.getTotalReward() - header.getReward());
+                agentNodeBusiness.update(agentNode);
 
+            }
+            blockHeaderLevelDbService.delete(header.getHash());
+            return blockHeaderMapper.deleteByPrimaryKey(blockHeight);
         }
-        blockHeaderLevelDbService.delete((blockHeight+""));
-        return blockHeaderMapper.deleteByPrimaryKey(blockHeight);
+        return 0;
     }
 
+    /**
+     * 根据hash删除
+     * @param hash
+     * @return
+     */
+    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int deleteByKey(String hash) {
+        BlockHeader header = blockHeaderLevelDbService.select(hash);
+        if(null != header){
+            AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
+            if (agentNode != null) {
+                Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
+                agentNode.setLastRewardHeight(height);
+                agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
+                agentNode.setTotalReward(agentNode.getTotalReward() - header.getReward());
+                agentNodeBusiness.update(agentNode);
+
+            }
+            blockHeaderLevelDbService.delete(header.getHash());
+            return blockHeaderMapper.deleteByPrimaryKey(header.getHeight());
+        }
+        return 0;
+    }
+
+    /**
+     * 根据高度获取
+     * @param blockHeight
+     * @return
+     */
     @Override
     public BlockHeader getByKey(Long blockHeight) {
-        //return blockHeaderMapper.selectByPrimaryKey(blockHeight);
-        return blockHeaderLevelDbService.select((blockHeight+""));
+        BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(blockHeight);
+        if(null != blockHeader){
+            return blockHeaderLevelDbService.select(blockHeader.getHash());
+        }
+        return null;
+    }
+
+    /**
+     * 根据hash获取
+     * @param hash
+     * @return
+     */
+    public BlockHeader getByKey(String hash) {
+        return blockHeaderLevelDbService.select(hash);
     }
 
     /**
@@ -255,5 +285,16 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             historyList[i] = values;
         }
         HistoryContext.reset(historyList);
+    }
+
+    /**
+     * 根据list，重置block数据
+     * @param list
+     */
+    public void setDataWithLeveldb(List<BlockHeader> list){
+        for(BlockHeader block:list){
+            block = blockHeaderLevelDbService.select(block.getHash());
+        }
+
     }
 }

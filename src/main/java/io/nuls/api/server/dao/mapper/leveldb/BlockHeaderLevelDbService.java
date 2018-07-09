@@ -37,7 +37,7 @@ public class BlockHeaderLevelDbService {
         batch.executeBatch();
     }
     public int insert(BlockHeader blockHeader){
-        Result<BlockHeader> result = dbService.putModel(Constant.BLOCKHEADER_CACHE_NAME, (blockHeader.getHeight()+"").getBytes(), blockHeader);
+        Result<BlockHeader> result = dbService.putModel(Constant.BLOCKHEADER_CACHE_NAME, blockHeader.getHash().getBytes(), blockHeader);
         if(result.isSuccess()){
             return 1;
         }

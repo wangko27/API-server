@@ -2,9 +2,7 @@ package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.IndexContext;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.*;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
@@ -16,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Description:
@@ -105,8 +105,11 @@ public class TransactionResource {
             if(null == transaction){
                 return RpcClientResult.getFailed(ErrorCode.DATA_NOT_FOUND);
             }
-            transaction.transferExtend();
-            transaction.setOutputs(utxoBusiness.getList(hash));
+            List<Utxo> outputsList = new ArrayList<>();
+            for(Output output:transaction.getOutputList()){
+                utxoBusiness.getByKey(output.getKey());
+            }
+            transaction.setOutputs(outputsList);
             TransactionDto transactionDto = new TransactionDto(transaction);
             BlockHeader blockHeader = blockBusiness.getNewest();
             if(null != blockHeader){
