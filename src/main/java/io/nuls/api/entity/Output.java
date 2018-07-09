@@ -14,8 +14,9 @@ public class Output {
 
     }
 
-    public Output(String txHash, String address, long value) {
+    public Output(String txHash, Integer txIndex, String address, long value) {
         this.txHash = txHash;
+        this.txIndex = txIndex;
         this.address = address;
         this.value = value;
     }
