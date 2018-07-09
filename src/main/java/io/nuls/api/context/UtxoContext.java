@@ -20,10 +20,10 @@ public class UtxoContext {
         list.add(hashIndex);
         EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME,address,list);
     }
-    public static void remove(String address) {
-        List<String> hashIndexList = get(address);
+    public static void remove(String hashIndex) {
+        List<String> hashIndexList = get(hashIndex);
         if (hashIndexList != null) {
-            hashIndexList.remove(address);
+            hashIndexList.remove(hashIndex);
         }
         //EhcacheUtil.getInstance().remove(Constant.UTXO_CACHE_NAME,address);
     }
