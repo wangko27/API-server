@@ -140,6 +140,8 @@ public class RpcTransferUtil {
             for (int i = 0; i < txModel.getCoinData().getTo().size(); i++) {
                 Coin coin = txModel.getCoinData().getTo().get(i);
                 Utxo utxo = new Utxo();
+                utxo.setTxHash(tx.getHash());
+                utxo.setTxIndex(i);
                 utxo.setAmount(coin.getNa().getValue());
                 utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
                 utxo.setLockTime(coin.getLockTime());

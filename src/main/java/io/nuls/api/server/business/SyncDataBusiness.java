@@ -61,7 +61,6 @@ public class SyncDataBusiness {
         List<TransactionRelation> txRelationList = new ArrayList<>();
         List<AddressRewardDetail> addressRewardDetailList = new ArrayList<>();
         List<Alias> aliasList = new ArrayList<>();
-        //List<AgentNode> agentNodeList = new ArrayList<>();
         List<Deposit> depositList = new ArrayList<>();
         List<PunishLog> punishLogList = new ArrayList<>();
 
