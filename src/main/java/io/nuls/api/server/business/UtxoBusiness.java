@@ -82,8 +82,8 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         List<Utxo> list = utxoLevelDbService.getList();
         for(Utxo utxo:list){
             if(StringUtils.isBlank(utxo.getSpendTxHash())){
-                System.out.println("utxo.getAddress():"+utxo.getAddress()+"---utxo.getHashIndex()"+utxo.getHashIndex());
-                UtxoContext.put(utxo.getAddress(),utxo.getHashIndex());
+                System.out.println("utxo.getAddress():"+utxo.getAddress()+"---utxo.getHashIndex()"+utxo.getKey());
+                UtxoContext.put(utxo.getAddress(),utxo.getKey());
             }
         }
     }

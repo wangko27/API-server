@@ -71,9 +71,9 @@ public class MybatisTest {
     public void getBlockPage() {
         int pageNumber = 1;
         int pageSize = 10;
-        PageInfo<BlockHeader> pageInfo = blockBusiness.getBlockPage(1, 10);
-        System.out.println(pageInfo.getPages());
-        System.out.println(pageInfo.getTotal());
+      //  PageInfo<BlockHeader> pageInfo = blockBusiness.getBlockPage(1, 10);
+      //  System.out.println(pageInfo.getPages());
+      //  System.out.println(pageInfo.getTotal());
     }
 
     @Test
