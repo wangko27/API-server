@@ -52,7 +52,7 @@ public class SearchResource {
             }else if(StringUtils.validHash(keyword)){
                 if(null != blockBusiness.getBlockByHash(keyword)){
                     result.setData(EntityConstant.SEARCH_HEADER_HASH);
-                }else if(null != transactionBusiness.getByKey(keyword)){
+                }else if(null != transactionBusiness.getByHash(keyword)){
                     result.setData(EntityConstant.SEARCH_TX_HASH);
                 }
             }

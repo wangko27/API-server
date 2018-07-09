@@ -96,6 +96,8 @@ public interface Constant {
     String ALIAS_CACHE_NAME = "alias";
     String BALANCE_CACHE_NAME = "balance";
     String HISTORY_CACHE_NAME="history";
+    String TRANSACTION_CACHE_NAME="transaction";
+    String BLOCKHEADER_CACHE_NAME="blockheader";
     String PACKINGADDRESS_CACHE_NAME = "packingaddress";
     String ADDRESS_REWARD_DETAIL = "reward";
     /**

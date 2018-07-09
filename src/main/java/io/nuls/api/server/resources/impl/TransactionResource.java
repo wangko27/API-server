@@ -101,7 +101,7 @@ public class TransactionResource {
         }
         try {
             result = RpcClientResult.getSuccess();
-            Transaction transaction = transactionBusiness.getByKey(hash);
+            Transaction transaction = transactionBusiness.getByHash(hash);
             if(null == transaction){
                 return RpcClientResult.getFailed(ErrorCode.DATA_NOT_FOUND);
             }

@@ -1,5 +1,6 @@
 package io.nuls.api.server.init;
 
+import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.*;
 import io.nuls.api.entity.*;
@@ -35,14 +36,13 @@ public class InitApiserver {
     @Autowired
     private TransactionBusiness transactionBusiness;
 
+
     @PostConstruct
     public void init() {
         /*加载utxo*/
-        List<Utxo> utxoList = utxoBusiness.getList(null,2);
+        List<Utxo> utxoList = utxoBusiness.getList(null);
         for(Utxo utxo:utxoList){
-            UtxoTempContext.put(utxo);
-            UtxoContext.put(utxo);
-
+            UtxoContext.put(utxo.getAddress(),utxo.getHashIndex());
         }
 
 
@@ -75,9 +75,9 @@ public class InitApiserver {
         }
 
         /*加载初始化的交易列表*/
-        List<Transaction> transactionList = transactionBusiness.getListAll(null,0,1,Constant.INDEX_TX_LIST_COUNT,3);
-        if(null != transactionList){
-            IndexContext.initTransactions(transactionList);
+        PageInfo<Transaction> pageInfo = transactionBusiness.getList(null,0,1,Constant.INDEX_TX_LIST_COUNT,3);
+        if(null != pageInfo.getList()){
+            IndexContext.initTransactions(pageInfo.getList());
         }
 
         /*初始化共识信息*/

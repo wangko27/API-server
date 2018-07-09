@@ -50,7 +50,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
         Long usable = 0L;
         Long locked = 0L;
 
-        List<Utxo> utxolist = UtxoContext.get(address);
+        List<Utxo> utxolist = UtxoContext.getUtxoList(address);
         if (utxolist != null) {
             for (Utxo utxo : utxolist) {
                 if (utxo.getLockTime() == -1) {

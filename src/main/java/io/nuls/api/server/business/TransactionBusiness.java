@@ -3,15 +3,16 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
+import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.ArraysTool;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,24 +24,20 @@ import java.util.List;
  * Date:  2018/5/29 0029
  */
 @Service
-public class TransactionBusiness implements BaseService<Transaction, String> {
+public class TransactionBusiness implements BaseService<Transaction, Long> {
 
     @Autowired
     private TransactionMapper transactionMapper;
     @Autowired
     private TransactionRelationBusiness relationBusiness;
     @Autowired
-    private AliasBusiness aliasBusiness;
-    @Autowired
     private AgentNodeBusiness agentNodeBusiness;
     @Autowired
     private DepositBusiness depositBusiness;
     @Autowired
-    private PunishLogBusiness punishLogBusiness;
-    @Autowired
-    private AddressRewardDetailBusiness rewardDetailBusiness;
-    @Autowired
     private UtxoBusiness utxoBusiness;
+
+    private TransactionLevelDbService transactionLevelDbService = TransactionLevelDbService.getInstance();
 
     /**
      * 交易列表
@@ -56,45 +53,15 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
             searchable.addCondition("block_height", SearchOperator.eq, height);
         }
         if (type > 0) {
-            searchable.addCondition("type", SearchOperator.eq, type);
+            //todo 待优化
+            //searchable.addCondition("type", SearchOperator.eq, type);
         }
-        if(orderType == 2) {
-            PageHelper.orderBy("create_time desc");
-        }else if(orderType == 3){
-            PageHelper.orderBy("block_height desc");
-        }else {
-            PageHelper.orderBy("tx_index asc");
-        }
+        PageHelper.orderBy("block_height desc");
+        //todo 需要联合leveldb查询list
         List<Transaction> transactionList = transactionMapper.selectList(searchable);
         formatTransaction(transactionList);
         PageInfo<Transaction> page = new PageInfo<>(transactionList);
         return page;
-    }
-
-    /**
-     * 交易列表 不分页
-     * @param orderType 1 tx_index asc,2 create_time desc,3 block_height desc
-     * @param height 所属的区块
-     * @param type   交易类型
-     * @return
-     */
-    public List<Transaction> getListAll(Long height, int type, int pageNumber, int pageSize,int orderType) {
-        PageHelper.startPage(pageNumber, pageSize);
-        Searchable searchable = new Searchable();
-        if (null != height) {
-            searchable.addCondition("block_height", SearchOperator.eq, height);
-        }
-        if (type > 0) {
-            searchable.addCondition("type", SearchOperator.eq, type);
-        }
-        if(orderType == 2) {
-            PageHelper.orderBy("create_time desc");
-        }else if(orderType == 3){
-            PageHelper.orderBy("block_height desc");
-        }else {
-            PageHelper.orderBy("tx_index asc");
-        }
-        return transactionMapper.selectList(searchable);
     }
 
     public List<Transaction> getList(Long blockHeight) {
@@ -140,6 +107,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Transaction tx) {
+        transactionLevelDbService.insert(tx);
         return transactionMapper.insert(tx);
     }
 
@@ -159,6 +127,9 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
             }else{
                 transactionMapper.insertByBatch(list);
             }
+            //存入leveldb
+            transactionLevelDbService.insertList(list);
+
         }
     }
 
@@ -169,6 +140,7 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         List<Utxo> utxoList = utxoBusiness.getList(tx.getHash());
         tx.setOutputs(utxoList);
         //回滚交易新生成的utxo
+        //todo 这里，可以直接拿到hash和index，进行主键删除
         utxoBusiness.deleteByTxHash(tx.getHash());
         //回滚未花费输出
         utxoBusiness.rollBackByFrom(tx);
@@ -184,37 +156,52 @@ public class TransactionBusiness implements BaseService<Transaction, String> {
         }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
             agentNodeBusiness.rollbackStopAgent(tx.getHash());
         }
-        transactionMapper.deleteByPrimaryKey(tx.getHash());
+        deleteByHash(tx.getHash());
     }
 
     /**
-     * 根据高度删除
+     * 根据tx删除
      *
-     * @param height 高度
+     * @param hash hash
      * @return
      */
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int deleteByHeight(Long height) {
+    public int deleteByHash(String hash) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("block_height", SearchOperator.eq, height);
+        searchable.addCondition("hash", SearchOperator.eq, hash);
+        transactionLevelDbService.delete(hash);
         return transactionMapper.deleteBySearchable(searchable);
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Transaction transaction) {
+        transactionLevelDbService.insert(transaction);
         return transactionMapper.updateByPrimaryKey(transaction);
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int deleteByKey(String s) {
-        return transactionMapper.deleteByPrimaryKey(s);
+    public int deleteByKey(Long id) {
+        Transaction tx = transactionMapper.selectByPrimaryKey(id);
+        if(null != tx){
+            transactionLevelDbService.delete(tx.getHash());
+            return transactionMapper.deleteByPrimaryKey(id);
+        }
+        return 0;
     }
 
     @Override
-    public Transaction getByKey(String s) {
-        return transactionMapper.selectByPrimaryKey(s);
+    public Transaction getByKey(Long id) {
+        Transaction tx = transactionMapper.selectByPrimaryKey(id);
+        if(null != tx){
+            return transactionLevelDbService.select(tx.getHash());
+        }
+        return null;
+    }
+
+    public Transaction getByHash(String hash) {
+        return transactionLevelDbService.select(hash);
     }
 
     private List<Transaction> formatTransaction(List<Transaction> transactionList){

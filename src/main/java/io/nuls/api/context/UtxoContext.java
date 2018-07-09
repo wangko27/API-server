@@ -2,16 +2,54 @@ package io.nuls.api.context;
 
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.Utxo;
+import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.util.EhcacheUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class UtxoContext {
 
-    public static void put(Utxo utxo){
+    private static UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+    //根据地址，把List<hashIndex> 放入缓存
+    public static void put(String address,String hashIndex){
+        List<String> list = (List<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME,address);
+        if(list == null){
+            list = new ArrayList<>();
+        }
+        list.add(hashIndex);
+        EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME,address,list);
+    }
+    public static void remove(String address) {
+        List<String> hashIndexList = get(address);
+        if (hashIndexList != null) {
+            hashIndexList.remove(address);
+        }
+        EhcacheUtil.getInstance().remove(Constant.UTXO_CACHE_NAME,address);
+    }
+    public static List<String> get(String address) {
+        return (List<String>)EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME,address);
+    }
+    public static List<Utxo> getUtxoList(String address){
+        List<String> hashIndexList = get(address);
+        List<Utxo> list = new ArrayList<>();
+        if(null != hashIndexList && hashIndexList.size() > 0){
+            //去leveldb加载utxo
+            //todo 这里可能需要缓存，之后根据效率再考虑
+            for(String hashIndex: hashIndexList){
+                Utxo utxo = utxoLevelDbService.select(hashIndex);
+                if(null != utxo){
+                    list.add(utxo);
+                }
+            }
+        }
+        return list;
+
+    }
+
+
+    //-----------------------------------------------------第二次修改
+    /*public static void put(Utxo utxo){
         List<Utxo> list = (List<Utxo>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME,utxo.getAddress());
         if(list == null){
             list = new ArrayList<>();
@@ -24,7 +62,10 @@ public class UtxoContext {
     }
     public static List<Utxo> get(String address) {
         return (List<Utxo>)EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME,address);
-    }
+    }*/
+    //------------------------------------------------------第一次修改
+
+
     /*//存放所有地址的未花费输出
     private static Map<String, List<Utxo>> utxoMap = new ConcurrentHashMap<>();
 

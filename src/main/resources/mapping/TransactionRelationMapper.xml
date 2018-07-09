@@ -79,4 +79,10 @@
     delete from transaction_relation
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </delete>
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from transaction_relation
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

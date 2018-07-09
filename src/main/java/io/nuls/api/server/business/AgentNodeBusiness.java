@@ -100,7 +100,10 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(AgentNode agentNode) {
-        return agentNodeMapper.insert(agentNode);
+        if(null == getAgentByAddress(agentNode.getPackingAddress())){
+            return agentNodeMapper.insert(agentNode);
+        }
+        return 0;
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)

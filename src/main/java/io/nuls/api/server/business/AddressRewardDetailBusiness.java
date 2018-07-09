@@ -81,19 +81,10 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
             detail.setTxHash(tx.getHash());
             //addressRewardDetailMapper.insert(detail);
             utxoList.add(detail);
-            //System.out.println(detail.toString());
         }
         return utxoList;
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveTxReward(Transaction tx) {
-        //2018-07-02修改成为批量插入
-        List<AddressRewardDetail> utxoList = getRewardList(tx);
-        if(utxoList.size() > 0){
-            addressRewardDetailMapper.insertByBatch(utxoList);
-        }
-    }
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveAll(List<AddressRewardDetail> list) {
         if(list.size() > 0){

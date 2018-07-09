@@ -1,6 +1,11 @@
-package io.nuls.api.entity;
+package io.nuls.api.entity.leveldb;
 
-public class BlockHeader {
+/**
+ * Description:
+ * Author: zsj
+ * Date:  2018/7/7 0007
+ */
+public class LeveldbBlockHeader {
     private String hash;
 
     private Long height;
@@ -34,7 +39,7 @@ public class BlockHeader {
     }
 
     public void setHash(String hash) {
-        this.hash = hash == null ? null : hash.trim();
+        this.hash = hash;
     }
 
     public Long getHeight() {
@@ -50,7 +55,7 @@ public class BlockHeader {
     }
 
     public void setPreHash(String preHash) {
-        this.preHash = preHash == null ? null : preHash.trim();
+        this.preHash = preHash;
     }
 
     public String getMerkleHash() {
@@ -58,7 +63,7 @@ public class BlockHeader {
     }
 
     public void setMerkleHash(String merkleHash) {
-        this.merkleHash = merkleHash == null ? null : merkleHash.trim();
+        this.merkleHash = merkleHash;
     }
 
     public Long getCreateTime() {
@@ -74,7 +79,7 @@ public class BlockHeader {
     }
 
     public void setConsensusAddress(String consensusAddress) {
-        this.consensusAddress = consensusAddress == null ? null : consensusAddress.trim();
+        this.consensusAddress = consensusAddress;
     }
 
     public Integer getTxCount() {
@@ -102,7 +107,7 @@ public class BlockHeader {
     }
 
     public Long getReward() {
-        return reward==null?0L:reward;
+        return reward;
     }
 
     public void setReward(Long reward) {

@@ -96,21 +96,10 @@ CREATE TABLE `balance` (
 DROP TABLE IF EXISTS `block_header`;
 
 CREATE TABLE `block_header` (
-  `hash` varchar(80) NOT NULL COMMENT 'hash',
   `height` bigint(15) NOT NULL COMMENT '高度',
-  `pre_hash` varchar(80) DEFAULT NULL COMMENT '上一个区块hash',
-  `merkle_hash` varchar(80) NOT NULL COMMENT 'merkle_hash',
-  `create_time` bigint(15) NOT NULL COMMENT '出块时间',
+  `hash` varchar(80) NOT NULL COMMENT 'hash',
   `consensus_address` varchar(40) DEFAULT NULL COMMENT '共识地址',
-  `tx_count` int(5) NOT NULL COMMENT '交易笔数',
-  `round_index` bigint(15) NOT NULL COMMENT 'round_index',
-  `total_fee` bigint(19) DEFAULT NULL COMMENT 'total_fee',
-  `reward` bigint(19) NOT NULL COMMENT '奖励',
-  `extend` blob NOT NULL COMMENT 'sign+block data',
-  `size` int(9) DEFAULT NULL COMMENT '大小',
-  `packing_index_of_round` int(5) DEFAULT NULL COMMENT 'packing_index_of_round',
-  `round_start_time` bigint(15) DEFAULT NULL COMMENT 'round_start_time',
-  PRIMARY KEY (`hash`),
+  PRIMARY KEY (`height`),
   UNIQUE KEY `height_idx` (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块头';
 
@@ -157,19 +146,11 @@ CREATE TABLE `punish_log` (
 DROP TABLE IF EXISTS `transaction`;
 
 CREATE TABLE `transaction` (
+  `id` bigint(15) NOT NULL AUTO_INCREMENT,
   `hash` varchar(80) NOT NULL COMMENT '交易hash',
-  `tx_index` int(5) NOT NULL COMMENT '排序index',
-  `type` int(3) NOT NULL COMMENT '交易类型',
-  `create_time` bigint(15) NOT NULL COMMENT '交易时间',
   `block_height` bigint(15) NOT NULL COMMENT '区块高度',
-  `remark` varchar(200) DEFAULT NULL COMMENT '备注',
-  `fee` bigint(19) NOT NULL COMMENT '交易手续费',
-  `extend` mediumblob COMMENT '交易附加信息',
-  `size` int(9) DEFAULT NULL COMMENT '大小',
-  `amount` bigint(19) DEFAULT NULL COMMENT '交易金额（待考虑）',
-  PRIMARY KEY (`hash`),
-  KEY `block_height_idx` (`block_height`),
-  KEY `block_type_idx` (`type`)
+  PRIMARY KEY (`id`),
+  KEY `block_height_idx` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易记录表';
 
 /*Data for the table `transaction` */
@@ -192,15 +173,9 @@ CREATE TABLE `transaction_relation` (
 DROP TABLE IF EXISTS `utxo`;
 
 CREATE TABLE `utxo` (
-  `id` bigint(15) NOT NULL AUTO_INCREMENT,
-  `tx_hash` varchar(70) NOT NULL COMMENT 'tx_hash',
-  `tx_index` int(5) NOT NULL COMMENT 'tx_index',
-  `address` varchar(40) DEFAULT NULL COMMENT '地址',
-  `amount` bigint(19) DEFAULT NULL COMMENT '金额',
-  `lock_time` bigint(15) DEFAULT NULL COMMENT '大于10亿按照时间锁定，小于10亿安装高度锁定，-1共识所动，其他可用',
-  `spend_tx_hash` varchar(70) DEFAULT NULL COMMENT '已花费的txhash',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `hash_index_unique` (`tx_hash`,`tx_index`)
+  `hash_index` varchar(76) NOT NULL COMMENT 'tx_hash和tx_index',
+  `address` varchar(40) NOT NULL,
+  PRIMARY KEY (`hash_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='UTXO';
 
 /*Data for the table `utxo` */

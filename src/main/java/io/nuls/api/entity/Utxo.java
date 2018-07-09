@@ -1,11 +1,15 @@
 package io.nuls.api.entity;
 
+import java.util.Objects;
+
 public class Utxo {
     private Long id;
 
     private String txHash;
 
     private Integer txIndex;
+
+    private String hashIndex;
 
     private String address;
 
@@ -23,20 +27,12 @@ public class Utxo {
         this.id = id;
     }
 
-    public String getTxHash() {
-        return txHash;
+    public String getHashIndex() {
+        return hashIndex;
     }
 
-    public void setTxHash(String txHash) {
-        this.txHash = txHash == null ? null : txHash.trim();
-    }
-
-    public Integer getTxIndex() {
-        return txIndex;
-    }
-
-    public void setTxIndex(Integer txIndex) {
-        this.txIndex = txIndex;
+    public void setHashIndex(String hashIndex) {
+        this.hashIndex = hashIndex == null ? null : hashIndex.trim();
     }
 
     public String getAddress() {
@@ -71,16 +67,48 @@ public class Utxo {
         this.spendTxHash = spendTxHash == null ? null : spendTxHash.trim();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        Utxo utxo = (Utxo) obj;
-        if (this.getTxHash().equals(utxo.getTxHash()) && this.getTxIndex() == utxo.getTxIndex()) {
-            return true;
-        }
-        return false;
+    public String getTxHash() {
+        return txHash;
     }
 
-    public String getKey() {
-        return txHash + "-" + txIndex;
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public Integer getTxIndex() {
+        return txIndex;
+    }
+
+    public void setTxIndex(Integer txIndex) {
+        this.txIndex = txIndex;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Utxo)) return false;
+        Utxo utxo = (Utxo) o;
+        return Objects.equals(getHashIndex(), utxo.getHashIndex());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getHashIndex(), getSpendTxHash());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("id").append(id).append("--");
+        sb.append("hashIndex").append(hashIndex).append("--");
+        sb.append("address").append(address).append("--");
+        sb.append("amount").append(amount).append("--");
+        sb.append("lockTime").append(lockTime).append("--");
+        sb.append("spendTxHash").append(spendTxHash).append("--");
+        return sb.toString();
+    }
+
+    public String toHashIndex(String hash,Integer index){
+        return hash+"_"+index;
     }
 }

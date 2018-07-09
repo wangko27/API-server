@@ -45,5 +45,5 @@ public interface NulsData {
      */
     byte[] serialize() throws IOException;
 
-    void parse(byte[] bytes,int cursor) throws NulsException;
+    void parse(byte[] bytes, int cursor) throws NulsException;
 }

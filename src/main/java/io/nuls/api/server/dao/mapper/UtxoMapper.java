@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @MyBatisMapper
-public interface UtxoMapper extends BaseMapper<Utxo, Long>{
+public interface UtxoMapper extends BaseMapper<Utxo, String>{
     /**
      * 持币账户统计
      * @return

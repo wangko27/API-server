@@ -2,255 +2,88 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.nuls.api.server.dao.mapper.BlockHeaderMapper" >
   <resultMap id="BaseResultMap" type="io.nuls.api.entity.BlockHeader" >
-    <id column="hash" property="hash" jdbcType="VARCHAR" />
-    <result column="height" property="height" jdbcType="BIGINT" />
-    <result column="pre_hash" property="preHash" jdbcType="VARCHAR" />
-    <result column="merkle_hash" property="merkleHash" jdbcType="VARCHAR" />
-    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <id column="height" property="height" jdbcType="BIGINT" />
+    <result column="hash" property="hash" jdbcType="VARCHAR" />
     <result column="consensus_address" property="consensusAddress" jdbcType="VARCHAR" />
-    <result column="tx_count" property="txCount" jdbcType="INTEGER" />
-    <result column="round_index" property="roundIndex" jdbcType="BIGINT" />
-    <result column="total_fee" property="totalFee" jdbcType="BIGINT" />
-    <result column="reward" property="reward" jdbcType="BIGINT" />
-    <result column="size" property="size" jdbcType="INTEGER" />
-    <result column="packing_index_of_round" property="packingIndexOfRound" jdbcType="INTEGER" />
-    <result column="round_start_time" property="roundStartTime" jdbcType="BIGINT" />
-  </resultMap>
-  <resultMap id="ResultMapWithBLOBs" type="io.nuls.api.entity.BlockHeader" extends="BaseResultMap" >
-    <result column="extend" property="extend" jdbcType="LONGVARBINARY" />
   </resultMap>
   <sql id="Base_Column_List" >
-    hash, height, pre_hash, merkle_hash, create_time, consensus_address, tx_count, round_index, 
-    total_fee, reward, size, packing_index_of_round, round_start_time
+    height, hash, consensus_address
   </sql>
-  <sql id="Blob_Column_List" >
-    extend
-  </sql>
-  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select
     <include refid="Base_Column_List" />
-    ,
-    <include refid="Blob_Column_List" />
     from block_header
-    where hash = #{hash,jdbcType=VARCHAR}
+    where height = #{height,jdbcType=BIGINT}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from block_header
-    where hash = #{hash,jdbcType=VARCHAR}
+    where height = #{height,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.BlockHeader" >
-    insert into block_header (hash, height, pre_hash, 
-      merkle_hash, create_time, consensus_address, 
-      tx_count, round_index, total_fee, 
-      reward, size, packing_index_of_round, 
-      round_start_time, extend)
-    values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{preHash,jdbcType=VARCHAR}, 
-      #{merkleHash,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, #{consensusAddress,jdbcType=VARCHAR}, 
-      #{txCount,jdbcType=INTEGER}, #{roundIndex,jdbcType=BIGINT}, #{totalFee,jdbcType=BIGINT}, 
-      #{reward,jdbcType=BIGINT}, #{size,jdbcType=INTEGER}, #{packingIndexOfRound,jdbcType=INTEGER}, 
-      #{roundStartTime,jdbcType=BIGINT}, #{extend,jdbcType=LONGVARBINARY})
+    insert into block_header (height, hash, consensus_address
+    )
+    values (#{height,jdbcType=BIGINT}, #{hash,jdbcType=VARCHAR}, #{consensusAddress,jdbcType=VARCHAR}
+    )
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.BlockHeader" >
     insert into block_header
     <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="hash != null" >
-        hash,
-      </if>
       <if test="height != null" >
         height,
       </if>
-      <if test="preHash != null" >
-        pre_hash,
-      </if>
-      <if test="merkleHash != null" >
-        merkle_hash,
-      </if>
-      <if test="createTime != null" >
-        create_time,
+      <if test="hash != null" >
+        hash,
       </if>
       <if test="consensusAddress != null" >
         consensus_address,
       </if>
-      <if test="txCount != null" >
-        tx_count,
-      </if>
-      <if test="roundIndex != null" >
-        round_index,
-      </if>
-      <if test="totalFee != null" >
-        total_fee,
-      </if>
-      <if test="reward != null" >
-        reward,
-      </if>
-      <if test="size != null" >
-        size,
-      </if>
-      <if test="packingIndexOfRound != null" >
-        packing_index_of_round,
-      </if>
-      <if test="roundStartTime != null" >
-        round_start_time,
-      </if>
-      <if test="extend != null" >
-        extend,
-      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="hash != null" >
-        #{hash,jdbcType=VARCHAR},
-      </if>
       <if test="height != null" >
         #{height,jdbcType=BIGINT},
       </if>
-      <if test="preHash != null" >
-        #{preHash,jdbcType=VARCHAR},
-      </if>
-      <if test="merkleHash != null" >
-        #{merkleHash,jdbcType=VARCHAR},
-      </if>
-      <if test="createTime != null" >
-        #{createTime,jdbcType=BIGINT},
+      <if test="hash != null" >
+        #{hash,jdbcType=VARCHAR},
       </if>
       <if test="consensusAddress != null" >
         #{consensusAddress,jdbcType=VARCHAR},
-      </if>
-      <if test="txCount != null" >
-        #{txCount,jdbcType=INTEGER},
-      </if>
-      <if test="roundIndex != null" >
-        #{roundIndex,jdbcType=BIGINT},
-      </if>
-      <if test="totalFee != null" >
-        #{totalFee,jdbcType=BIGINT},
-      </if>
-      <if test="reward != null" >
-        #{reward,jdbcType=BIGINT},
-      </if>
-      <if test="size != null" >
-        #{size,jdbcType=INTEGER},
-      </if>
-      <if test="packingIndexOfRound != null" >
-        #{packingIndexOfRound,jdbcType=INTEGER},
-      </if>
-      <if test="roundStartTime != null" >
-        #{roundStartTime,jdbcType=BIGINT},
-      </if>
-      <if test="extend != null" >
-        #{extend,jdbcType=LONGVARBINARY},
       </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.BlockHeader" >
     update block_header
     <set >
-      <if test="height != null" >
-        height = #{height,jdbcType=BIGINT},
-      </if>
-      <if test="preHash != null" >
-        pre_hash = #{preHash,jdbcType=VARCHAR},
-      </if>
-      <if test="merkleHash != null" >
-        merkle_hash = #{merkleHash,jdbcType=VARCHAR},
-      </if>
-      <if test="createTime != null" >
-        create_time = #{createTime,jdbcType=BIGINT},
+      <if test="hash != null" >
+        hash = #{hash,jdbcType=VARCHAR},
       </if>
       <if test="consensusAddress != null" >
         consensus_address = #{consensusAddress,jdbcType=VARCHAR},
       </if>
-      <if test="txCount != null" >
-        tx_count = #{txCount,jdbcType=INTEGER},
-      </if>
-      <if test="roundIndex != null" >
-        round_index = #{roundIndex,jdbcType=BIGINT},
-      </if>
-      <if test="totalFee != null" >
-        total_fee = #{totalFee,jdbcType=BIGINT},
-      </if>
-      <if test="reward != null" >
-        reward = #{reward,jdbcType=BIGINT},
-      </if>
-      <if test="size != null" >
-        size = #{size,jdbcType=INTEGER},
-      </if>
-      <if test="packingIndexOfRound != null" >
-        packing_index_of_round = #{packingIndexOfRound,jdbcType=INTEGER},
-      </if>
-      <if test="roundStartTime != null" >
-        round_start_time = #{roundStartTime,jdbcType=BIGINT},
-      </if>
-      <if test="extend != null" >
-        extend = #{extend,jdbcType=LONGVARBINARY},
-      </if>
     </set>
-    where hash = #{hash,jdbcType=VARCHAR}
-  </update>
-  <update id="updateByPrimaryKeyWithBLOBs" parameterType="io.nuls.api.entity.BlockHeader" >
-    update block_header
-    set height = #{height,jdbcType=BIGINT},
-      pre_hash = #{preHash,jdbcType=VARCHAR},
-      merkle_hash = #{merkleHash,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=BIGINT},
-      consensus_address = #{consensusAddress,jdbcType=VARCHAR},
-      tx_count = #{txCount,jdbcType=INTEGER},
-      round_index = #{roundIndex,jdbcType=BIGINT},
-      total_fee = #{totalFee,jdbcType=BIGINT},
-      reward = #{reward,jdbcType=BIGINT},
-      size = #{size,jdbcType=INTEGER},
-      packing_index_of_round = #{packingIndexOfRound,jdbcType=INTEGER},
-      round_start_time = #{roundStartTime,jdbcType=BIGINT},
-      extend = #{extend,jdbcType=LONGVARBINARY}
-    where hash = #{hash,jdbcType=VARCHAR}
+    where height = #{height,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.BlockHeader" >
     update block_header
-    set height = #{height,jdbcType=BIGINT},
-      pre_hash = #{preHash,jdbcType=VARCHAR},
-      merkle_hash = #{merkleHash,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=BIGINT},
-      consensus_address = #{consensusAddress,jdbcType=VARCHAR},
-      tx_count = #{txCount,jdbcType=INTEGER},
-      round_index = #{roundIndex,jdbcType=BIGINT},
-      total_fee = #{totalFee,jdbcType=BIGINT},
-      reward = #{reward,jdbcType=BIGINT},
-      size = #{size,jdbcType=INTEGER},
-      packing_index_of_round = #{packingIndexOfRound,jdbcType=INTEGER},
-      round_start_time = #{roundStartTime,jdbcType=BIGINT}
-    where hash = #{hash,jdbcType=VARCHAR}
+    set hash = #{hash,jdbcType=VARCHAR},
+      consensus_address = #{consensusAddress,jdbcType=VARCHAR}
+    where height = #{height,jdbcType=BIGINT}
   </update>
-  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithBLOBs">
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    ,
-    <include refid="Blob_Column_List" />
     from block_header
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
-
-  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithBLOBs">
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    ,
-    <include refid="Blob_Column_List" />
     from block_header
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
-
-  <select id="getBestBlock" resultMap="ResultMapWithBLOBs" >
+  <select id="getBestBlock" resultMap="BaseResultMap" >
     select
     <include refid="Base_Column_List" />
-    ,
-    <include refid="Blob_Column_List" />
     from block_header
     WHERE height = (SELECT height FROM block_header ORDER BY height DESC LIMIT 1)
-  </select>
-  <select id="getBlockSumTxcount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
-    SELECT SUM(tx_count) FROM `block_header`
-    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
-  </select>
-  <select id="getBlockSumReward" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Long">
-    SELECT SUM(reward) FROM `block_header`
-    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
 </mapper>

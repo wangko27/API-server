@@ -27,6 +27,13 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
     @Autowired
     private TransactionRelationMapper relationMapper;
 
+    public List<TransactionRelation> getList(String address){
+        Searchable searchable = new Searchable();
+        if(StringUtils.isNotBlank(address)){
+            searchable.addCondition("address", SearchOperator.eq, address);
+        }
+        return relationMapper.selectList(searchable);
+    }
 
     public List<TransactionRelation> getListByTx(Transaction tx){
         Set<String> addressSet = new HashSet<>();

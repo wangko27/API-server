@@ -2,143 +2,64 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.nuls.api.server.dao.mapper.UtxoMapper" >
   <resultMap id="BaseResultMap" type="io.nuls.api.entity.Utxo" >
-    <id column="id" property="id" jdbcType="BIGINT" />
-    <result column="tx_hash" property="txHash" jdbcType="VARCHAR" />
-    <result column="tx_index" property="txIndex" jdbcType="INTEGER" />
+    <id column="hash_index" property="hashIndex" jdbcType="VARCHAR" />
     <result column="address" property="address" jdbcType="VARCHAR" />
-    <result column="amount" property="amount" jdbcType="BIGINT" />
-    <result column="lock_time" property="lockTime" jdbcType="BIGINT" />
-    <result column="spend_tx_hash" property="spendTxHash" jdbcType="VARCHAR" />
-  </resultMap>
-  <resultMap id="ResultMapWithAmount" type="io.nuls.api.server.dto.UtxoDto" extends="BaseResultMap" >
-    <result column="total" property="total" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, tx_hash, tx_index, address, amount, lock_time, spend_tx_hash
+    hash_index, address
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
     <include refid="Base_Column_List" />
     from utxo
-    where id = #{id,jdbcType=BIGINT}
+    where hash_index = #{hashIndex,jdbcType=VARCHAR}
   </select>
-  <select id="selectByHashAndIndex" resultMap="BaseResultMap" parameterType="io.nuls.api.server.dao.util.Searchable">
-    select
-    <include refid="Base_Column_List" />
-    from utxo
-    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from utxo
-    where id = #{id,jdbcType=BIGINT}
-  </delete>
-  <delete id="deleteByHashAndIndex" parameterType="io.nuls.api.server.dao.util.Searchable">
-    delete from utxo
-    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+    where hash_index = #{hashIndex,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.Utxo" >
-    insert into utxo (id, tx_hash, tx_index,
-    address, amount, lock_time,
-    spend_tx_hash)
-    values (#{id,jdbcType=BIGINT}, #{txHash,jdbcType=VARCHAR}, #{txIndex,jdbcType=INTEGER},
-    #{address,jdbcType=VARCHAR}, #{amount,jdbcType=BIGINT}, #{lockTime,jdbcType=BIGINT},
-    #{spendTxHash,jdbcType=VARCHAR})
+    insert into utxo (hash_index, address)
+    values (#{hashIndex,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR})
   </insert>
   <insert id="insertByBatch" parameterType="java.util.List">
-    INSERT INTO utxo (tx_hash,tx_index,address,amount,lock_time,spend_tx_hash) VALUES
+    insert into utxo (hash_index, address)values
     <foreach collection="list" item="item" index="index" separator=",">
-      (#{item.txHash,jdbcType=VARCHAR},#{item.txIndex,jdbcType=INTEGER},#{item.address,jdbcType=VARCHAR},#{item.amount,jdbcType=BIGINT},#{item.lockTime,jdbcType=BIGINT},#{item.spendTxHash,jdbcType=VARCHAR})
+      (#{item.hashIndex,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR})
     </foreach>
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Utxo" >
     insert into utxo
     <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        id,
-      </if>
-      <if test="txHash != null" >
-        tx_hash,
-      </if>
-      <if test="txIndex != null" >
-        tx_index,
+      <if test="hashIndex != null" >
+        hash_index,
       </if>
       <if test="address != null" >
         address,
       </if>
-      <if test="amount != null" >
-        amount,
-      </if>
-      <if test="lockTime != null" >
-        lock_time,
-      </if>
-      <if test="spendTxHash != null" >
-        spend_tx_hash,
-      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        #{id,jdbcType=BIGINT},
-      </if>
-      <if test="txHash != null" >
-        #{txHash,jdbcType=VARCHAR},
-      </if>
-      <if test="txIndex != null" >
-        #{txIndex,jdbcType=INTEGER},
+      <if test="hashIndex != null" >
+        #{hashIndex,jdbcType=VARCHAR},
       </if>
       <if test="address != null" >
         #{address,jdbcType=VARCHAR},
-      </if>
-      <if test="amount != null" >
-        #{amount,jdbcType=BIGINT},
-      </if>
-      <if test="lockTime != null" >
-        #{lockTime,jdbcType=BIGINT},
-      </if>
-      <if test="spendTxHash != null" >
-        #{spendTxHash,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Utxo" >
     update utxo
     <set >
-      <if test="txHash != null" >
-        tx_hash = #{txHash,jdbcType=VARCHAR},
-      </if>
-      <if test="txIndex != null" >
-        tx_index = #{txIndex,jdbcType=INTEGER},
-      </if>
       <if test="address != null" >
         address = #{address,jdbcType=VARCHAR},
       </if>
-      <if test="amount != null" >
-        amount = #{amount,jdbcType=BIGINT},
-      </if>
-      <if test="lockTime != null" >
-        lock_time = #{lockTime,jdbcType=BIGINT},
-      </if>
-      <if test="spendTxHash != null" >
-        spend_tx_hash = #{spendTxHash,jdbcType=VARCHAR},
-      </if>
     </set>
-    where id = #{id,jdbcType=BIGINT}
+    where hash_index = #{hashIndex,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Utxo" >
     update utxo
-    set tx_hash = #{txHash,jdbcType=VARCHAR},
-      tx_index = #{txIndex,jdbcType=INTEGER},
-      address = #{address,jdbcType=VARCHAR},
-      amount = #{amount,jdbcType=BIGINT},
-      lock_time = #{lockTime,jdbcType=BIGINT},
-      spend_tx_hash = #{spendTxHash,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=BIGINT}
-  </update>
-  <update id="updateByBatch">
-    INSERT INTO utxo (id,tx_hash,tx_index,address,amount,lock_time,spend_tx_hash) VALUES
-    <foreach collection="list" item="item" index="index" separator=",">
-      (#{item.id,jdbcType=BIGINT}, #{item.txHash,jdbcType=VARCHAR},#{item.txIndex,jdbcType=INTEGER},#{item.address,jdbcType=VARCHAR},#{item.amount,jdbcType=BIGINT},#{item.lockTime,jdbcType=BIGINT},#{item.spendTxHash,jdbcType=VARCHAR})
-    </foreach>
-    ON DUPLICATE KEY UPDATE spend_tx_hash=VALUES(spend_tx_hash);
+    set address = #{address,jdbcType=VARCHAR}
+    where hash_index = #{hashIndex,jdbcType=VARCHAR}
   </update>
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
     select
@@ -152,12 +73,8 @@
     from utxo
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
-
   <delete id="deleteBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable">
     DELETE from utxo
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </delete>
-  <select id="getBlockSumTxamount" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapWithAmount" >
-    SELECT *,SUM(amount) total FROM utxo WHERE spend_tx_hash IS NULL GROUP BY address ORDER BY total DESC
-  </select>
 </mapper>
