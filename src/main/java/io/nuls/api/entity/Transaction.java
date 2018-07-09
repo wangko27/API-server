@@ -28,8 +28,6 @@ public class Transaction {
 
     private Long amount;
 
-    private byte[] extend;
-
     private List<Input> inputs;
 
     private List<Output> outputList;
@@ -114,14 +112,6 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public byte[] getExtend() {
-        return extend;
-    }
-
-    public void setExtend(byte[] extend) {
-        this.extend = extend;
-    }
-
     public List<Input> getInputs() {
         return inputs;
     }
@@ -168,41 +158,6 @@ public class Transaction {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public void transferExtend() throws Exception {
-        String extend = new String(this.getExtend());
-        Map dataMap = JSONUtils.json2map(extend);
-        this.setScriptSign((String) dataMap.get("scriptSign"));
-        List<Map> mapList = (List<Map>) dataMap.get("inputs");
-        List<Input> inputs = new ArrayList<>();
-        for (Map map : mapList) {
-            Input input = new Input();
-            input.setFromHash((String) map.get("fromHash"));
-            input.setFromIndex((Integer) map.get("fromIndex"));
-            input.setValue(Long.parseLong(map.get("value").toString()));
-            input.setAddress((String) map.get("address"));
-            inputs.add(input);
-        }
-
-        List<Output> outputList = new ArrayList<>();
-        mapList = (List<Map>) dataMap.get("outputs");
-
-        Output output = null;
-        for(int i=0;i<mapList.size();i++) {
-            output = new Output();
-            output.setTxIndex(i);
-            output.setTxHash((String) mapList.get(i).get("txHash"));
-            output.setAddress((String) mapList.get(i).get("address"));
-            output.setValue(Long.parseLong(mapList.get(i).get("value").toString()));
-            outputList.add(output);
-        }
-
-        for (Map map : mapList) {
-
-        }
-        this.inputs = inputs;
-        this.setOutputList(outputList);
     }
 
     public List<Output> getOutputList() {

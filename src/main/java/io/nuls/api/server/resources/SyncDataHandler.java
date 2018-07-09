@@ -50,7 +50,7 @@ public class SyncDataHandler {
         if (result.isFailed()) {
             return result;
         }
-        Map<String,Object> resultMap = (Map<String, Object>) result.getData();
+        Map<String, Object> resultMap = (Map<String, Object>) result.getData();
         String txHex = (String) resultMap.get("value");
         try {
             Block block = RpcTransferUtil.toBlock(txHex, header);

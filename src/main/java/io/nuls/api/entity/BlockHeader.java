@@ -1,5 +1,7 @@
 package io.nuls.api.entity;
 
+import java.util.List;
+
 public class BlockHeader {
 
     private String hash;
@@ -29,6 +31,8 @@ public class BlockHeader {
     private Long roundStartTime;
 
     private byte[] extend;
+
+    private List<String> txHashList;
 
     public String getHash() {
         return hash;
@@ -79,7 +83,7 @@ public class BlockHeader {
     }
 
     public Integer getTxCount() {
-        return txCount==null?0:txCount;
+        return txCount == null ? 0 : txCount;
     }
 
     public void setTxCount(Integer txCount) {
@@ -103,7 +107,7 @@ public class BlockHeader {
     }
 
     public Long getReward() {
-        return reward==null?0L:reward;
+        return reward == null ? 0L : reward;
     }
 
     public void setReward(Long reward) {
@@ -140,5 +144,13 @@ public class BlockHeader {
 
     public void setExtend(byte[] extend) {
         this.extend = extend;
+    }
+
+    public List<String> getTxHashList() {
+        return txHashList;
+    }
+
+    public void setTxHashList(List<String> txHashList) {
+        this.txHashList = txHashList;
     }
 }
