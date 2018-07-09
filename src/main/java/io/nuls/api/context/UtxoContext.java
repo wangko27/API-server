@@ -12,45 +12,47 @@ import java.util.Map;
 public class UtxoContext {
 
     private static UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
-    //根据地址，把List<hashIndex> 放入缓存
-    public static void put(String address,String hashIndex){
-        List<String> list = (List<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME,address);
-        if(list == null){
+
+    //根据地址，把List<key> 放入缓存
+    public static void put(String address, String key) {
+        List<String> list = (List<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
+        if (list == null) {
             list = new ArrayList<>();
         }
-        list.add(hashIndex);
-        EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME,address,list);
+        list.add(key);
+        EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
     }
+
     //根据hashIndex，移除某个utxo
-    public static void remove(String hashIndex) {
-        List<String> hashIndexList = get(hashIndex);
-        if (hashIndexList != null) {
-            hashIndexList.remove(hashIndex);
+    public static void remove(String address, String key) {
+        List<String> list = get(address);
+        if (list != null) {
+            list.remove(key);
         }
     }
 
     public static List<String> get(String address) {
-        return (List<String>)EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME,address);
+        return (List<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
     }
 
-    public static List<String> getAllKeys(){
+    public static List<String> getAllKeys() {
         return EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME).getKeys();
     }
 
-    public static List<Utxo> getUtxoList(String address){
-        List<String> hashIndexList = get(address);
-        List<Utxo> list = new ArrayList<>();
-        if(null != hashIndexList && hashIndexList.size() > 0){
+    public static List<Utxo> getUtxoList(String address) {
+        List<String> keyList = get(address);
+        List<Utxo> utxoList = new ArrayList<>();
+        if (null != keyList && !keyList.isEmpty()) {
             //去leveldb加载utxo
             //todo 这里可能需要缓存，之后根据效率再考虑
-            for(String hashIndex: hashIndexList){
-                Utxo utxo = utxoLevelDbService.select(hashIndex);
-                if(null != utxo){
-                    list.add(utxo);
+            for (String key : keyList) {
+                Utxo utxo = utxoLevelDbService.select(key);
+                if (null != utxo) {
+                    utxoList.add(utxo);
                 }
             }
         }
-        return list;
+        return utxoList;
     }
 
 

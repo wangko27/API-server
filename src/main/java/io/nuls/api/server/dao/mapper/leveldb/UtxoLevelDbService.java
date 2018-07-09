@@ -39,7 +39,9 @@ public class UtxoLevelDbService {
     public void insertMap(Map<String, Utxo> utxoMap) {
         BatchOperation batch = dbService.createWriteBatch(Constant.UTXO_CACHE_NAME);
         for (Utxo utxo : utxoMap.values()) {
-            batch.putModel(utxo.getKey().getBytes(), utxo);
+            if (utxo.getSpendTxHash() == null) {
+                batch.putModel(utxo.getKey().getBytes(), utxo);
+            }
         }
         batch.executeBatch();
     }

@@ -88,8 +88,6 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     public void saveBlock(BlockHeader blockHeader) {
         //存入数据库
         blockHeaderMapper.insert(blockHeader);
-        //存入leveldb
-        blockHeaderLevelDbService.insert(blockHeader);
 
         //修改agentnode
         AgentNode agentNode = agentNodeBusiness.getAgentByAddress(blockHeader.getConsensusAddress());

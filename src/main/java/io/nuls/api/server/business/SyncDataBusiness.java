@@ -6,6 +6,8 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
+import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
+import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,10 @@ public class SyncDataBusiness {
     @Autowired
     private AgentNodeBusiness agentNodeBusiness;
 
+    private BlockHeaderLevelDbService blockHeaderLevelDbService = BlockHeaderLevelDbService.getInstance();
+
+    UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+
     /**
      * 同步最新块数据
      *
@@ -48,8 +54,6 @@ public class SyncDataBusiness {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void syncData(Block block) throws Exception {
         long time1 = System.currentTimeMillis(), time2;
-        blockBusiness.saveBlock(block.getHeader());
-
         /*list*/
         Map<String, Utxo> utxoMap = new HashMap<>();                            //存放区块内交易新生成的utxo
         List<Utxo> fromList = new ArrayList<>();                                //存放区块内交易引用到的utxo
@@ -65,14 +69,17 @@ public class SyncDataBusiness {
         for (int i = 0; i < block.getTxList().size(); i++) {
             Transaction tx = block.getTxList().get(i);
             tx.setTxIndex(i);
+
+            //存放新的utxo到utxoMap
             for (Utxo utxo : tx.getOutputs()) {
                 utxoMap.put(utxo.getKey(), utxo);
                 //todo   不在这里写入缓存
                 UtxoContext.put(utxo.getAddress(), utxo.getKey());
             }
+            //存放被花费的utxo
+            fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
 
             //todo 分开几个字段存储
-            fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
             extendMap.put("scriptSign", tx.getScriptSign());
             extendMap.put("inputs", tx.getInputs());
             extendMap.put("outputs", tx.getOutputList());
@@ -105,6 +112,7 @@ public class SyncDataBusiness {
             }
         }
 
+        blockBusiness.saveBlock(block.getHeader());
         transactionBusiness.saveAll(txList);
         transactionRelationBusiness.saveAll(txRelationList);
         detailBusiness.saveAll(addressRewardDetailList);
@@ -115,20 +123,39 @@ public class SyncDataBusiness {
         utxoBusiness.updateAll(fromList);
 
         //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
-            /*缓存新块 首页数据展示用*/
+        //存入leveldb
+        blockHeaderLevelDbService.insert(block.getHeader());
+        for (Utxo utxo : fromList) {
+            UtxoContext.remove(utxo.getAddress(), utxo.getKey());
+        }
+
+        for (Utxo utxo : utxoMap.values()) {
+            if (utxo.getSpendTxHash() == null) {
+                UtxoContext.put(utxo.getAddress(), utxo.getKey());
+            }
+        }
+
+        //缓存新块 首页数据展示用
         IndexContext.putBlock(block.getHeader());
-            /*缓存新交易*/
-    //    IndexContext.putTransaction(tx);
+        //缓存新交易
+        int end = txList.size() - 1;
+        int start = 0;
+        if (end > 10) {
+            start = end - 10;
+        }
+        for (int i = start; i < end; i++) {
+            IndexContext.putTransaction(txList.get(i));
+        }
 
         time2 = System.currentTimeMillis();
         System.out.println("高度：" + block.getHeader().getHeight() + "交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
+
         utxoMap = null;
         fromList = null;
         txList = null;
         txRelationList = null;
         addressRewardDetailList = null;
         aliasList = null;
-        //agentNodeList= null;
         depositList = null;
         punishLogList = null;
     }
@@ -159,7 +186,7 @@ public class SyncDataBusiness {
             if (tx.getOutputs() != null) {
                 for (int j = tx.getOutputs().size() - 1; j >= 0; j--) {
                     Utxo tempUtxo = tx.getOutputs().get(j);
-                    UtxoContext.remove(tempUtxo.getAddress());
+                    UtxoContext.remove(tempUtxo.getAddress(), tempUtxo.getAddress());
                 }
             }
             //UtxoKey utxoKey;

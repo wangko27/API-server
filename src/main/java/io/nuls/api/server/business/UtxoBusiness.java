@@ -31,6 +31,7 @@ import java.util.Map;
 public class UtxoBusiness implements BaseService<Utxo, String> {
     @Autowired
     private UtxoMapper utxoMapper;
+
     UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
 
     /**
@@ -52,6 +53,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     /**
      * 查询全部，包含已花费，未花费
+     *
      * @return
      */
     public List<Utxo> getList() {
@@ -61,13 +63,14 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     /**
      * 查询全部，未花费
+     *
      * @return
      */
     public List<Utxo> getUtxoList() {
         List<Utxo> utxoList = new ArrayList<>();
         List<Utxo> list = utxoLevelDbService.getList();
-        for(Utxo utxo:list){
-            if(StringUtils.isBlank(utxo.getSpendTxHash())){
+        for (Utxo utxo : list) {
+            if (StringUtils.isBlank(utxo.getSpendTxHash())) {
                 utxoList.add(utxo);
             }
         }
@@ -76,14 +79,15 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     /**
      * init Utxo
+     *
      * @return
      */
     public void initUtxoList() {
         List<Utxo> list = utxoLevelDbService.getList();
-        for(Utxo utxo:list){
-            if(StringUtils.isBlank(utxo.getSpendTxHash())){
-                System.out.println("utxo.getAddress():"+utxo.getAddress()+"---utxo.getHashIndex()"+utxo.getKey());
-                UtxoContext.put(utxo.getAddress(),utxo.getKey());
+        for (Utxo utxo : list) {
+            if (StringUtils.isBlank(utxo.getSpendTxHash())) {
+                System.out.println("utxo.getAddress():" + utxo.getAddress() + "---utxo.getHashIndex()" + utxo.getKey());
+                UtxoContext.put(utxo.getAddress(), utxo.getKey());
             }
         }
     }
@@ -111,7 +115,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         return utxoMapper.selectList(searchable);
     }
 
-    private Utxo selectUtxoByHashAndIndex(String hashIndex){
+    private Utxo selectUtxoByHashAndIndex(String hashIndex) {
         /*Utxo utxo = UtxoTempContext.get(hashIndex);
         if(utxo == null){
             *//*Searchable searchable = new Searchable();
@@ -123,13 +127,14 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         }*/
         return utxoLevelDbService.select(hashIndex);
     }
-    private int deleteByHashAndIndex(String hash, Integer index){
+
+    private int deleteByHashAndIndex(String hash, Integer index) {
         /*Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, hash);
         searchable.addCondition("tx_index", SearchOperator.eq, index);
         return utxoMapper.deleteByHashAndIndex(searchable);*/
         //leveldb 删除
-        return utxoLevelDbService.delete(hash+"_"+index);
+        return utxoLevelDbService.delete(hash + "_" + index);
     }
 
     /**
@@ -147,7 +152,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             return null;
         }
 
-        Utxo utxo = selectUtxoByHashAndIndex(hash+"_"+index);
+        Utxo utxo = selectUtxoByHashAndIndex(hash + "_" + index);
         if (null != utxo) {
             return utxo.getSpendTxHash();
         }
@@ -163,7 +168,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      */
     public Utxo getByKey(String txHash, int txIndex) {
 
-        return selectUtxoByHashAndIndex(txHash+"_"+txIndex);
+        return selectUtxoByHashAndIndex(txHash + "_" + txIndex);
     }
 
     /**
@@ -184,9 +189,10 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         return utxoLevelDbService.insert(entity);
         //return utxoMapper.updateByPrimaryKey(entity);
     }
+
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int updateAll(List<Utxo> list) {
-        if(list.size() > 0){
+        if (list.size() > 0) {
             /*if(list.size()>4000){
                 List<List<Utxo>> lists = ArraysTool.avgList(list,2);
                 utxoMapper.updateByBatch(lists.get(0));
@@ -220,13 +226,13 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int delete(String txHash, Integer index) {
-        String key = txHash+"_"+index;
+        String key = txHash + "_" + index;
         return deleteByKey(key);
         //return utxoLevelDbService.delete(key);
     }
 
     //根据交易获取要修改的utxo，之后执行批量修改
-    public List<Utxo> getListByFrom(Transaction tx,Map<String,Utxo> utxoMap) {
+    public List<Utxo> getListByFrom(Transaction tx, Map<String, Utxo> utxoMap) {
         //coinBase交易，红黄牌交易没有inputs
         List<Utxo> txlist = new ArrayList<>();
         if (tx.getInputs() == null) {
