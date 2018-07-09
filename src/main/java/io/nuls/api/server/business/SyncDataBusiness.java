@@ -94,7 +94,9 @@ public class SyncDataBusiness {
             } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
                 agentNodeBusiness.stopAgent((AgentNode) tx.getTxData(), tx.getHash());
             } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
-                punishLogList.add((PunishLog) tx.getTxData());
+                PunishLog punishLog = (PunishLog) tx.getTxData();
+                punishLogList.add(punishLog);
+                agentNodeBusiness.stopAgentByRedPublish(punishLog.getAddress(), tx.getHash());
             } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
                 for (TxData data : tx.getTxDataList()) {
                     PunishLog log = (PunishLog) data;
