@@ -44,7 +44,7 @@ public class MybatisTest {
         blockHeader.setTotalFee(3445L);
         blockHeader.setExtend(new byte[]{1,2,'a','b'});
         blockHeader.setRoundIndex(7L);
-        blockBusiness.saveBlock(blockHeader);
+        blockBusiness.save(blockHeader);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class MybatisTest {
     @Test
     public void getBlockByHeight() {
         long height = 100;
-        BlockHeader blockHeader = blockBusiness.getBlockByHeight(height);
+        BlockHeader blockHeader = blockBusiness.getByKey(height);
     }
 
     @Test

@@ -4,7 +4,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.HistoryContext;
-import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
@@ -42,45 +41,47 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     public BlockHeader getBlockByHeight(long height) {
         BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(height);
         if(null != blockHeader){
-            blockHeader = blockHeaderLevelDbService.select(blockHeader.getHash());
+            return blockHeaderLevelDbService.select(blockHeader.getHash());
         }
-        return blockHeader;
+        return null;
     }
 
     /**
-     * 查询某时间段内的交易笔数，14天交易历史，根据块来统计
+     * 查询某时间段内的交易笔数
+     *
      * @param startTime
      * @param endTime
      * @return
      */
-    public int getTxcountByTime(Long startTime, Long endTime) {
-        int total = 0;
-        if (startTime < 0 || endTime < 0) {
-            return total;
+    //todo 统计交易笔数
+    public Integer getTxcountByTime(Long startTime, Long endTime) {
+        /*if (startTime < 0 || endTime < 0) {
+            return 0;
         }
-        List<BlockHeader> blockHeaderList = getBlockByTime(startTime,endTime);
-        for(BlockHeader block:blockHeaderList){
-            total += block.getTxCount();
-        }
-        return total;
+        Searchable searchable = new Searchable();
+        searchable.addCondition("create_time", SearchOperator.gte, startTime);
+        searchable.addCondition("create_time", SearchOperator.lt, endTime);
+        return blockHeaderMapper.getBlockSumTxcount(searchable);*/
+        return 0;
+
     }
 
     /**
      * 查询24小时共识奖励
+     *
      * @param startTime
      * @return
      */
     public Long getBlockSumRewardByTime(Long startTime) {
-        Long total = 0L;
-        if (startTime < 0) {
-            return total;
+        /*if (startTime < 0) {
+            return 0L;
         }
-        Long endTime = startTime - Constant.MILLISECONDS_TIME_DAY;
-        List<BlockHeader> blockHeaderList = getBlockByTime(endTime,startTime);
-        for(BlockHeader block:blockHeaderList){
-            total += block.getReward();
-        }
-        return total;
+        Searchable searchable = new Searchable();
+        searchable.addCondition("create_time", SearchOperator.gte, startTime-Constant.MILLISECONDS_TIME_DAY);
+        searchable.addCondition("create_time", SearchOperator.lt, startTime);
+        return blockHeaderMapper.getBlockSumReward(searchable);*/
+        //todo 24小时共识奖励统计
+        return 0L;
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -123,6 +124,9 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     public List<BlockHeader> getBlockList(long beginHeight, long endHeight) {
         Searchable searchable = new Searchable();
         if (beginHeight >= 0) {
+            if (beginHeight == 0) {
+                beginHeight = -1;
+            }
             searchable.addCondition("height", SearchOperator.gte, beginHeight);
         }
         if (endHeight > 0) {
@@ -179,35 +183,38 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
      * @param blockHeader
      * @return
      */
-    public boolean validatePreBlock(BlockHeader blockHeader) {
-        BlockHeader preBlock = getBlockByHeight(blockHeader.getHeight() - 1);
-        if (preBlock == null) {
-            return false;
-        }
-        if (preBlock.getHeight() != blockHeader.getHeight() - 1) {
-            return false;
-        }
-        return true;
-    }
+//    public boolean validatePreBlock(BlockHeader blockHeader) {
+//        BlockHeader preBlock = getBlockByHeight(blockHeader.getHeight() - 1);
+//        if (preBlock == null) {
+//            return false;
+//        }
+//        if (preBlock.getHeight() != blockHeader.getHeight() - 1) {
+//            return false;
+//        }
+//        return true;
+//    }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int deleteBlock(Long blockHeight) {
-        BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(blockHeight);
-        if(null != blockHeader){
-            blockHeaderLevelDbService.delete(blockHeader.getHash());
-            return blockHeaderMapper.deleteByPrimaryKey(blockHeight);
-        }
-        return 0;
-    }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(BlockHeader blockHeader) {
-        blockHeaderLevelDbService.insert(blockHeader);
+
+        //修改agentnode
+        AgentNode agentNode = agentNodeBusiness.getAgentByAddress(blockHeader.getConsensusAddress());
+        if (agentNode != null) {
+            agentNode.setLastRewardHeight(blockHeader.getHeight());
+            agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() + 1);
+            agentNode.setTotalReward(agentNode.getTotalReward() + blockHeader.getReward());
+            agentNodeBusiness.update(agentNode);
+        }
+        //存入数据库
+        if (blockHeader.getHeight() == 0) {
+            blockHeader.setHeight(-1L);
+        }
         return blockHeaderMapper.insert(blockHeader);
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(BlockHeader blockHeader) {
         blockHeaderLevelDbService.insert(blockHeader);
@@ -216,14 +223,18 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 根据高度删除
+     *
      * @param blockHeight
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(Long blockHeight) {
+        if (blockHeight == 0) {
+            blockHeight = -1L;
+        }
         BlockHeader header = blockHeaderMapper.selectByPrimaryKey(blockHeight);
-        if(null != header){
+        if (null != header) {
             header = blockHeaderLevelDbService.select(header.getHash());
             AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
             if (agentNode != null) {
@@ -232,7 +243,6 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
                 agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
                 agentNode.setTotalReward(agentNode.getTotalReward() - header.getReward());
                 agentNodeBusiness.update(agentNode);
-
             }
             blockHeaderLevelDbService.delete(header.getHash());
             return blockHeaderMapper.deleteByPrimaryKey(blockHeight);
@@ -242,13 +252,14 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 根据hash删除
+     *
      * @param hash
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByKey(String hash) {
         BlockHeader header = blockHeaderLevelDbService.select(hash);
-        if(null != header){
+        if (null != header) {
             AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
             if (agentNode != null) {
                 Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
@@ -259,6 +270,9 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
             }
             blockHeaderLevelDbService.delete(header.getHash());
+            if (header.getHeight() == 0) {
+                header.setHeight(-1L);
+            }
             return blockHeaderMapper.deleteByPrimaryKey(header.getHeight());
         }
         return 0;
@@ -266,13 +280,17 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 根据高度获取
-     * @param blockHeight
+     *
+     * @param height
      * @return
      */
     @Override
-    public BlockHeader getByKey(Long blockHeight) {
-        BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(blockHeight);
-        if(null != blockHeader){
+    public BlockHeader getByKey(Long height) {
+        if (height == 0) {
+            height = -1L;
+        }
+        BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(height);
+        if (null != blockHeader) {
             return blockHeaderLevelDbService.select(blockHeader.getHash());
         }
         return null;
@@ -280,6 +298,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 根据hash获取
+     *
      * @param hash
      * @return
      */
@@ -299,9 +318,9 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         cal.set(Calendar.SECOND, 0);
         long time = cal.getTime().getTime();
         for (int i = 13; i >= 0; i--) {
-            int count = getTxcountByTime(time - Constant.MILLISECONDS_TIME_DAY, time);
+            Integer count = getTxcountByTime(time - Constant.MILLISECONDS_TIME_DAY, time);
             time = time - Constant.MILLISECONDS_TIME_DAY;
-            String values = time + "-" + count;
+            String values = null == count ? time+"-0":time + "-" + count;
             historyList[i] = values;
         }
         HistoryContext.reset(historyList);

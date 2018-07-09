@@ -40,7 +40,7 @@ public class SyncTest {
 
     @Test
     public void testBlock() {
-        BlockHeader block = blockBusiness.getBlockByHeight(0);
+        BlockHeader block = blockBusiness.getByKey(0L);
 
         try {
             System.out.println(new String(block.getExtend(), Constant.DEFAULT_ENCODING));
@@ -93,8 +93,8 @@ public class SyncTest {
 
     @Test
     public void testRollback() {
-        for (int i = 1120; i >= 0; i--) {
-            BlockHeader blockHeader = blockBusiness.getBlockByHeight(i);
+        for (long i = 1120; i >= 0; i--) {
+            BlockHeader blockHeader = blockBusiness.getByKey(i);
             try {
                 syncDataBusiness.rollback(blockHeader);
             } catch (Exception e) {
