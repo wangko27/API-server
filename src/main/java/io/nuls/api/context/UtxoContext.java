@@ -25,7 +25,7 @@ public class UtxoContext {
         if (hashIndexList != null) {
             hashIndexList.remove(address);
         }
-        EhcacheUtil.getInstance().remove(Constant.UTXO_CACHE_NAME,address);
+        //EhcacheUtil.getInstance().remove(Constant.UTXO_CACHE_NAME,address);
     }
     public static List<String> get(String address) {
         return (List<String>)EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME,address);
