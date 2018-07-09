@@ -140,7 +140,7 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         List<Utxo> utxoList = utxoBusiness.getList(tx.getHash());
         tx.setOutputs(utxoList);
         //回滚交易新生成的utxo
-        //todo 这里，可以直接拿到hash和index，进行主键删除
+        //todo 这里，可以循环直接拿到hashIndex，进行主键删除
         utxoBusiness.deleteByTxHash(tx.getHash());
         //回滚未花费输出
         utxoBusiness.rollBackByFrom(tx);
