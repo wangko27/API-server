@@ -99,8 +99,8 @@ CREATE TABLE `block_header` (
   `height` bigint(15) NOT NULL COMMENT '高度',
   `hash` varchar(80) NOT NULL COMMENT 'hash',
   `consensus_address` varchar(40) DEFAULT NULL COMMENT '共识地址',
-  PRIMARY KEY (`height`),
-  UNIQUE KEY `height_idx` (`height`)
+  `create_time` bigint(18) NOT NULL COMMENT '创建时间',
+  PRIMARY KEY (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块头';
 
 /*Data for the table `block_header` */

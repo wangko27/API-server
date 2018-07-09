@@ -34,21 +34,23 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
 
     /**
      * 根据页数查询节点列表，由于信用值没办法及时获取，只能每次调用都去链上查询
+     *
      * @param agentName 节点名称 (搜索用)
      * @return
      */
     public RpcClientResult getList(String agentName, int pageNumber, int pageSize) {
-        Map<String,String> param = new HashMap<>();
+        Map<String, String> param = new HashMap<>();
         if (StringUtils.isNotBlank(agentName)) {
             param.put("keyword", agentName);
         }
-        param.put("pageNumber", pageNumber+"");
-        param.put("pageSize", pageSize+"");
+        param.put("pageNumber", pageNumber + "");
+        param.put("pageSize", pageSize + "");
         return RestFulUtils.getInstance().get("/consensus/agent/list", param);
     }
 
     /**
      * 查询全网共识信息
+     *
      * @return
      */
     public RpcClientResult getConsensus() {
@@ -58,11 +60,12 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
 
     /**
      * 根据agentHash查询某个节点的详细信息（加载某信息的信用值、是否正在共识，这些信息只能去链上查询）
+     *
      * @param agentHash
      * @return
      */
     public RpcClientResult getAgentByAddressWithRpc(String agentHash) {
-        return RestFulUtils.getInstance().get("/consensus/agent/"+agentHash,null);
+        return RestFulUtils.getInstance().get("/consensus/agent/" + agentHash, null);
     }
 
     /**
@@ -74,7 +77,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     public AgentNode getAgentByAddress(String address) {
         Searchable searchable = new Searchable();
         searchable.addCondition("packing_address", SearchOperator.eq, address);
-        searchable.addCondition("delete_hash", SearchOperator.isNull,null);
+        searchable.addCondition("delete_hash", SearchOperator.isNull, null);
         return agentNodeMapper.selectBySearchable(searchable);
     }
 
@@ -84,7 +87,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @param height 高度
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
@@ -97,21 +100,21 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @param agentNode 实体
      * @return 1成功，其他失败
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(AgentNode agentNode) {
         return agentNodeMapper.insert(agentNode);
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int saveAll(List<AgentNode> list){
-        if(list.size() > 0){
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAll(List<AgentNode> list) {
+        if (list.size() > 0) {
             return agentNodeMapper.insertByBatch(list);
         }
         return 0;
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(AgentNode agentNode) {
         return agentNodeMapper.updateByPrimaryKey(agentNode);
@@ -123,12 +126,12 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @param id 主键 txhash
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByKey(String id) {
         return agentNodeMapper.deleteByPrimaryKey(id);
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void stopAgent(AgentNode agentNode, String txHash) {
         agentNode = agentNodeMapper.selectByPrimaryKey(agentNode.getTxHash());
         agentNode.setDeleteHash(txHash);
@@ -136,7 +139,18 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         depositMapper.deleteByAgentHash(agentNode.getTxHash(), txHash);
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void stopAgentByRedPublish(String agentAddress, String txHash) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("agent_address", SearchOperator.eq, agentAddress);
+        searchable.addCondition("delete_hash", SearchOperator.isNull, null);
+        AgentNode agentNode = agentNodeMapper.selectBySearchable(searchable);
+        agentNode.setDeleteHash(txHash);
+        agentNodeMapper.updateByPrimaryKey(agentNode);
+        depositMapper.deleteByAgentHash(agentNode.getTxHash(), txHash);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollbackStopAgent(String deleteHash) {
         agentNodeMapper.rollbackStopAgent(deleteHash);
         depositMapper.rollbackStopAgent(deleteHash);
@@ -155,24 +169,26 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
 
     /**
      * 统计出块排名 没出块的就不排名，只统计已经在出块的
+     *
      * @return
      */
-    public List<AgentNodeDto> selectTotalpackingCount(){
+    public List<AgentNodeDto> selectTotalpackingCount() {
         Searchable searchable = new Searchable();
         /**
          * 出块数量大于零的 没有删除的节点
          */
         searchable.addCondition("total_packing_count", SearchOperator.gt, 0);
-        searchable.addCondition("delete_hash", SearchOperator.isNull,null);
+        searchable.addCondition("delete_hash", SearchOperator.isNull, null);
         List<AgentNodeDto> agentNodeDtoList = agentNodeMapper.selectTotalpackingCount(searchable);
         return agentNodeDtoList;
     }
 
     /**
      * 根据Searchable 查询数据条数 不传就查询全部全部共识信息数据
+     *
      * @return
      */
-    public Integer selectTotalCount(){
+    public Integer selectTotalCount() {
         return agentNodeMapper.selectTotalCount(new Searchable());
     }
 }
