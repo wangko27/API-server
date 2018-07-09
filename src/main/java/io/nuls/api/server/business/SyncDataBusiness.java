@@ -137,17 +137,17 @@ public class SyncDataBusiness {
         //缓存新块 首页数据展示用
         IndexContext.putBlock(block.getHeader());
         //缓存新交易
-        int end = txList.size() - 1;
+        int end = txList.size();
         int start = 0;
-        if (end > 10) {
-            start = end - 10;
+        if (end > Constant.INDEX_TX_LIST_COUNT) {
+            start = end - Constant.INDEX_TX_LIST_COUNT;
         }
         for (int i = start; i < end; i++) {
             IndexContext.putTransaction(txList.get(i));
         }
 
         time2 = System.currentTimeMillis();
-        System.out.println("高度：" + block.getHeader().getHeight() + "交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
+        System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
 
         utxoMap = null;
         fromList = null;

@@ -78,6 +78,14 @@ public class Utxo {
         this.txIndex = txIndex;
     }
 
+    public String getHashIndex() {
+        return hashIndex;
+    }
+
+    public void setHashIndex(String hashIndex) {
+        this.hashIndex = hashIndex;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

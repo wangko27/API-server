@@ -29,6 +29,12 @@ public class IndexContext {
         return blockQueue.offer(blockHeader);
     }*/
 
+    public static BlockHeader getBestNewBlock(){
+        if(blocks.size()>0){
+            return blocks.get(0);
+        }
+        return null;
+    }
 
     public static List<BlockHeader> getBlockList(){
         return blocks;

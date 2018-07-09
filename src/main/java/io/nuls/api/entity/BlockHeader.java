@@ -79,7 +79,7 @@ public class BlockHeader {
     }
 
     public Integer getTxCount() {
-        return txCount;
+        return txCount==null?0:txCount;
     }
 
     public void setTxCount(Integer txCount) {

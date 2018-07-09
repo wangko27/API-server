@@ -86,7 +86,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         List<Utxo> list = utxoLevelDbService.getList();
         for (Utxo utxo : list) {
             if (StringUtils.isBlank(utxo.getSpendTxHash())) {
-                System.out.println("utxo.getAddress():" + utxo.getAddress() + "---utxo.getHashIndex()" + utxo.getKey());
                 UtxoContext.put(utxo.getAddress(), utxo.getKey());
             }
         }
@@ -291,7 +290,23 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      * @return
      */
     public List<UtxoDto> getBlockSumTxamount() {
-        return new ArrayList<>();
+        List<UtxoDto> utxList = new ArrayList<>();
+
+        List<String> addressList =UtxoContext.getAllKeys();
+        for(String addr:addressList){
+            List<Utxo> list = UtxoContext.getUtxoList(addr);
+            if(list.size()>0){
+                Long total = 0L;
+                for(Utxo utxo: list){
+                    total += utxo.getAmount();
+                }
+                UtxoDto dto = new UtxoDto();
+                dto.setTotal(total);//加载金额
+                dto.setAddress(addr);//加载地址
+                utxList.add(dto);
+            }
+        }
+        return utxList;
         //return utxoMapper.getBlockSumTxamount();
     }
 }

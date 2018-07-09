@@ -5,9 +5,10 @@
     <id column="height" property="height" jdbcType="BIGINT" />
     <result column="hash" property="hash" jdbcType="VARCHAR" />
     <result column="consensus_address" property="consensusAddress" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    height, hash, consensus_address
+    height, hash, consensus_address, create_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select
@@ -20,10 +21,10 @@
     where height = #{height,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.BlockHeader" >
-    insert into block_header (height, hash, consensus_address
-    )
-    values (#{height,jdbcType=BIGINT}, #{hash,jdbcType=VARCHAR}, #{consensusAddress,jdbcType=VARCHAR}
-    )
+    insert into block_header (height, hash, consensus_address,
+    create_time)
+    values (#{height,jdbcType=BIGINT}, #{hash,jdbcType=VARCHAR}, #{consensusAddress,jdbcType=VARCHAR},
+    #{createTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.BlockHeader" >
     insert into block_header
@@ -37,6 +38,9 @@
       <if test="consensusAddress != null" >
         consensus_address,
       </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="height != null" >
@@ -47,6 +51,9 @@
       </if>
       <if test="consensusAddress != null" >
         #{consensusAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -59,13 +66,17 @@
       <if test="consensusAddress != null" >
         consensus_address = #{consensusAddress,jdbcType=VARCHAR},
       </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
     </set>
     where height = #{height,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.BlockHeader" >
     update block_header
     set hash = #{hash,jdbcType=VARCHAR},
-      consensus_address = #{consensusAddress,jdbcType=VARCHAR}
+      consensus_address = #{consensusAddress,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=BIGINT}
     where height = #{height,jdbcType=BIGINT}
   </update>
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">

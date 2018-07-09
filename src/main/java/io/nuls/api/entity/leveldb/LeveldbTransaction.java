@@ -6,6 +6,7 @@ package io.nuls.api.entity.leveldb;
  * Date:  2018/7/7 0007
  */
 public class LeveldbTransaction {
+    private Long id;
     private String hash;
 
     private Integer txIndex;
@@ -104,5 +105,13 @@ public class LeveldbTransaction {
 
     public void setExtend(byte[] extend) {
         this.extend = extend;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

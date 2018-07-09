@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.HistoryContext;
+import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
@@ -41,53 +42,53 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     public BlockHeader getBlockByHeight(long height) {
         BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(height);
         if(null != blockHeader){
-            return blockHeaderLevelDbService.select(blockHeader.getHash());
+            blockHeader = blockHeaderLevelDbService.select(blockHeader.getHash());
         }
-        return null;
+        return blockHeader;
     }
 
     /**
-     * 查询某时间段内的交易笔数
-     *
+     * 查询某时间段内的交易笔数，14天交易历史，根据块来统计
      * @param startTime
      * @param endTime
      * @return
      */
-    //todo 统计交易笔数
-    public Integer getTxcountByTime(Long startTime, Long endTime) {
-        /*if (startTime < 0 || endTime < 0) {
-            return 0;
+    public int getTxcountByTime(Long startTime, Long endTime) {
+        int total = 0;
+        if (startTime < 0 || endTime < 0) {
+            return total;
         }
-        Searchable searchable = new Searchable();
-        searchable.addCondition("create_time", SearchOperator.gte, startTime);
-        searchable.addCondition("create_time", SearchOperator.lt, endTime);
-        return blockHeaderMapper.getBlockSumTxcount(searchable);*/
-        return 0;
-
+        List<BlockHeader> blockHeaderList = getBlockByTime(startTime,endTime);
+        for(BlockHeader block:blockHeaderList){
+            total += block.getTxCount();
+        }
+        return total;
     }
 
     /**
      * 查询24小时共识奖励
-     *
      * @param startTime
      * @return
      */
     public Long getBlockSumRewardByTime(Long startTime) {
-        /*if (startTime < 0) {
-            return 0L;
+        Long total = 0L;
+        if (startTime < 0) {
+            return total;
         }
-        Searchable searchable = new Searchable();
-        searchable.addCondition("create_time", SearchOperator.gte, startTime-Constant.MILLISECONDS_TIME_DAY);
-        searchable.addCondition("create_time", SearchOperator.lt, startTime);
-        return blockHeaderMapper.getBlockSumReward(searchable);*/
-        //todo 24小时共识奖励统计
-        return 0L;
+        Long endTime = startTime - Constant.MILLISECONDS_TIME_DAY;
+        List<BlockHeader> blockHeaderList = getBlockByTime(endTime,startTime);
+        for(BlockHeader block:blockHeaderList){
+            total += block.getReward();
+        }
+        return total;
     }
 
     @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveBlock(BlockHeader blockHeader) {
         //存入数据库
         blockHeaderMapper.insert(blockHeader);
+        //存入leveldb
+        blockHeaderLevelDbService.insert(blockHeader);
 
         //修改agentnode
         AgentNode agentNode = agentNodeBusiness.getAgentByAddress(blockHeader.getConsensusAddress());
@@ -97,6 +98,20 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             agentNode.setTotalReward(agentNode.getTotalReward() + blockHeader.getReward());
             agentNodeBusiness.update(agentNode);
         }
+    }
+
+    /**
+     * 获取某个时间段内的区块
+     * @param startTime
+     * @return
+     */
+    public List<BlockHeader> getBlockByTime(Long startTime, Long endTime){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("create_time", SearchOperator.gte, startTime);
+        searchable.addCondition("create_time", SearchOperator.lt, endTime);
+        List<BlockHeader> list = blockHeaderMapper.selectList(searchable);
+        setDataWithLeveldb(list);
+        return list;
     }
 
     /**
@@ -147,8 +162,15 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
      * @return
      */
     public BlockHeader getNewest() {
-        BlockHeader blockHeader = blockHeaderMapper.getBestBlock();
-        return blockHeaderLevelDbService.select(blockHeader.getHash());
+        //先从缓存加载，如果没有，再从数据库加载
+        BlockHeader blockHeader = IndexContext.getBestNewBlock();
+        if(null == blockHeader){
+            blockHeader = blockHeaderMapper.getBestBlock();
+            if(null != blockHeader){
+                blockHeader = blockHeaderLevelDbService.select(blockHeader.getHash());
+            }
+        }
+        return blockHeader;
     }
 
     /**
@@ -277,9 +299,9 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         cal.set(Calendar.SECOND, 0);
         long time = cal.getTime().getTime();
         for (int i = 13; i >= 0; i--) {
-            Integer count = getTxcountByTime(time - Constant.MILLISECONDS_TIME_DAY, time);
+            int count = getTxcountByTime(time - Constant.MILLISECONDS_TIME_DAY, time);
             time = time - Constant.MILLISECONDS_TIME_DAY;
-            String values = null == count ? time+"-0":time + "-" + count;
+            String values = time + "-" + count;
             historyList[i] = values;
         }
         HistoryContext.reset(historyList);
