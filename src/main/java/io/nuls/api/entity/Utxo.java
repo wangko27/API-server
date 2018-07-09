@@ -27,14 +27,6 @@ public class Utxo {
         this.id = id;
     }
 
-    public String getHashIndex() {
-        return hashIndex;
-    }
-
-    public void setHashIndex(String hashIndex) {
-        this.hashIndex = hashIndex == null ? null : hashIndex.trim();
-    }
-
     public String getAddress() {
         return address;
     }
@@ -88,12 +80,12 @@ public class Utxo {
         if (this == o) return true;
         if (!(o instanceof Utxo)) return false;
         Utxo utxo = (Utxo) o;
-        return Objects.equals(getHashIndex(), utxo.getHashIndex());
+        return Objects.equals(getKey(), utxo.getKey());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getHashIndex(), getSpendTxHash());
+        return Objects.hash(getId(), getKey(), getSpendTxHash());
     }
 
     @Override
@@ -108,7 +100,7 @@ public class Utxo {
         return sb.toString();
     }
 
-    public String toHashIndex(String hash,Integer index){
-        return hash+"_"+index;
+    public String getKey() {
+        return txHash + "_" + txIndex;
     }
 }

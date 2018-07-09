@@ -42,7 +42,7 @@ public class InitApiserver {
         /*加载utxo*/
         List<Utxo> utxoList = utxoBusiness.getList(null);
         for(Utxo utxo:utxoList){
-            UtxoContext.put(utxo.getAddress(),utxo.getHashIndex());
+            UtxoContext.put(utxo.getAddress(),utxo.getKey());
         }
 
 

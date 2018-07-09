@@ -1,6 +1,5 @@
 package io.nuls.api.server.task;
 
-import io.nuls.api.context.UtxoTempContext;
 import io.nuls.api.server.business.BlockBusiness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

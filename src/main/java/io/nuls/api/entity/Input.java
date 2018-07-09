@@ -41,4 +41,8 @@ public class Input extends TxData {
     public void setValue(long value) {
         this.value = value;
     }
+
+    public String getKey() {
+        return fromHash + "_" + fromIndex;
+    }
 }

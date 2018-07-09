@@ -1,6 +1,7 @@
 package io.nuls.api.entity;
 
 public class BlockHeader {
+
     private String hash;
 
     private Long height;

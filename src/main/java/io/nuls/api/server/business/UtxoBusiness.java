@@ -52,14 +52,14 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     public List<Utxo> getList(String txHash) {
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(txHash)){
+        if (StringUtils.isNotBlank(txHash)) {
             //todo 待验证 正确性
             searchable.addCondition("tx_hash", SearchOperator.suffixLike, txHash);
         }
         return utxoMapper.selectList(searchable);
     }
 
-    public int deleteByTxHash(String txHash){
+    public int deleteByTxHash(String txHash) {
         //todo 根据hash删除utxo
         return 0;
     }
@@ -87,7 +87,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         return utxoMapper.selectList(searchable);
     }
 
-    private Utxo selectUtxoByHashAndIndex(String hashIndex){
+    private Utxo selectUtxoByHashAndIndex(String hashIndex) {
         /*Utxo utxo = UtxoTempContext.get(hashIndex);
         if(utxo == null){
             *//*Searchable searchable = new Searchable();
@@ -99,13 +99,14 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         }*/
         return utxoLevelDbService.select(hashIndex);
     }
-    private int deleteByHashAndIndex(String hash, Integer index){
+
+    private int deleteByHashAndIndex(String hash, Integer index) {
         /*Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, hash);
         searchable.addCondition("tx_index", SearchOperator.eq, index);
         return utxoMapper.deleteByHashAndIndex(searchable);*/
         //leveldb 删除
-        return utxoLevelDbService.delete(hash+"_"+index);
+        return utxoLevelDbService.delete(hash + "_" + index);
     }
 
     /**
@@ -123,7 +124,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             return null;
         }
 
-        Utxo utxo = selectUtxoByHashAndIndex(hash+"_"+index);
+        Utxo utxo = selectUtxoByHashAndIndex(hash + "_" + index);
         if (null != utxo) {
             return utxo.getSpendTxHash();
         }
@@ -139,7 +140,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      */
     public Utxo getByKey(String txHash, int txIndex) {
 
-        return selectUtxoByHashAndIndex(txHash+"_"+txIndex);
+        return selectUtxoByHashAndIndex(txHash + "_" + txIndex);
     }
 
     /**
@@ -160,9 +161,10 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         return utxoLevelDbService.insert(entity);
         //return utxoMapper.updateByPrimaryKey(entity);
     }
+
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int updateAll(List<Utxo> list) {
-        if(list.size() > 0){
+        if (list.size() > 0) {
             /*if(list.size()>4000){
                 List<List<Utxo>> lists = ArraysTool.avgList(list,2);
                 utxoMapper.updateByBatch(lists.get(0));
@@ -196,7 +198,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int delete(String txHash, Integer index) {
-        String key = txHash+"_"+index;
+        String key = txHash + "_" + index;
         return deleteByKey(key);
         //return utxoLevelDbService.delete(key);
     }
@@ -210,28 +212,28 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }*/
 
     //根据交易获取要修改的utxo，之后执行批量修改
-    public List<Utxo> getListByFrom(Transaction tx,Map<String,Utxo> utxoMap) {
+    public List<Utxo> getListByFrom(Transaction tx, Map<String, Utxo> utxoMap) {
         //coinBase交易，红黄牌交易没有inputs
         List<Utxo> txlist = new ArrayList<>();
         if (tx.getInputs() == null) {
             return txlist;
         }
         Utxo utxo;
+        String key;
         for (Input input : tx.getInputs()) {
             //重置需要添加的数据的spend_hash
-            String key = input.getFromHash()+input.getFromIndex();
-            if(utxoMap.containsKey(key)){
+            key = input.getKey();
+            if (utxoMap.containsKey(key)) {
                 utxoMap.get(key).setSpendTxHash(tx.getHash());
                 continue;
             }
-            utxo = selectUtxoByHashAndIndex(key);
-            if(null != utxo){
+
+            utxo = utxoLevelDbService.select(key);
+            if (null != utxo) {
                 utxo.setSpendTxHash(tx.getHash());
                 input.setAddress(utxo.getAddress());
                 input.setValue(utxo.getAmount());
                 txlist.add(utxo);
-                //删除缓存
-                UtxoContext.remove(utxo.getAddress());
             }
         }
         return txlist;
@@ -249,7 +251,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         for (Input input : tx.getInputs()) {
             //utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
             //System.out.println("3kd");
-            Utxo utxo = selectUtxoByHashAndIndex(input.getFromHash()+"_"+input.getFromIndex());
+            Utxo utxo = selectUtxoByHashAndIndex(input.getFromHash() + "_" + input.getFromIndex());
             utxo.setSpendTxHash(null);
             //utxoMapper.updateByPrimaryKey(utxo);
             utxoLevelDbService.insert(utxo);
@@ -257,24 +259,9 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveAll(List<Utxo> list){
-
-        if(list.size()>0){
-            /*if(list.size()>1000) {
-                //执行批量插入
-                int count = list.size()%1000;
-                List<List<Utxo>> lists = ArraysTool.avgList(list, count);
-                for(int i = 0; i<count; i++){
-                    utxoMapper.insertByBatch(lists.get(i));
-                }
-                //LOAD DATA LOCAL INFILE
-
-            }else{
-                utxoMapper.insertByBatch(list);
-            }*/
-            //存入leveldb
-            utxoLevelDbService.insertList(list);
-
+    public void saveAll(Map<String, Utxo> utxoMap) {
+        if (!utxoMap.isEmpty()) {
+            utxoLevelDbService.insertMap(utxoMap);
         }
     }
 

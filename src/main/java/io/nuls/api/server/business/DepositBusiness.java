@@ -100,7 +100,6 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         agentNode.setTotalDeposit(agentNode.getTotalDeposit() + deposit.getAmount());
         agentNode.setDepositCount(agentNode.getDepositCount() + 1);
         return agentNodeMapper.updateByPrimaryKey(agentNode);
-        //return depositMapper.insert(deposit);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
