@@ -5,13 +5,11 @@ import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.TransactionRelation;
-import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.ArraysTool;
-import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -59,8 +57,7 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         PageHelper.orderBy("block_height desc");
         List<Transaction> transactionList = transactionMapper.selectList(searchable);
         //加载list，加载leveldb中的真实交易数据
-        formatTransaction(transactionList);
-        PageInfo<Transaction> page = new PageInfo<>(transactionList);
+        PageInfo<Transaction> page = new PageInfo<>(formatTransaction(transactionList));
         return page;
     }
 
@@ -97,8 +94,7 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
                 transactionList.add(transactionLevelDbService.select(relation.getTxHash()));
             }
         }
-        formatTransactionExtend(transactionList);
-        PageInfo<Transaction> page = new PageInfo<>(transactionList);
+        PageInfo<Transaction> page = new PageInfo<>(formatTransaction(transactionList));
         return page;
     }
 
@@ -208,27 +204,12 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     public Transaction getByHash(String hash) {
         return transactionLevelDbService.select(hash);
     }
-
     private List<Transaction> formatTransaction(List<Transaction> transactionList){
+        List<Transaction> txList = new ArrayList<>();
         for (Transaction trans:transactionList) {
             //去leveldb中重新加载trans
-            trans = transactionLevelDbService.select(trans.getHash());
-            try {
-                trans.transferExtend();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            txList.add(transactionLevelDbService.select(trans.getHash()));
         }
-        return transactionList;
-    }
-    private List<Transaction> formatTransactionExtend(List<Transaction> transactionList){
-        for (Transaction trans:transactionList) {
-            try {
-                trans.transferExtend();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return transactionList;
+        return txList;
     }
 }

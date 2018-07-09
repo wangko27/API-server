@@ -20,7 +20,7 @@ public class LevelDbUtil {
             //transaction
             dbService.createArea(Constant.TRANSACTION_CACHE_NAME);
             //blockheader
-            dbService.clearArea(Constant.BLOCKHEADER_CACHE_NAME);
+            dbService.createArea(Constant.BLOCKHEADER_CACHE_NAME);
         }
         return dbService;
     }

@@ -29,12 +29,16 @@ public class BlockHeaderLevelDbService {
         return blockHeaderLevelDbService;
     }
 
-    public void insertList(List<BlockHeader> list){
+    public int insertList(List<BlockHeader> list){
         BatchOperation batch = dbService.createWriteBatch(Constant.BLOCKHEADER_CACHE_NAME);
         for(BlockHeader block:list){
-            batch.putModel((block.getHeight()+"").getBytes(),block);
+            batch.putModel((block.getHash()).getBytes(),block);
         }
-        batch.executeBatch();
+        Result result = batch.executeBatch();
+        if(result.isSuccess()){
+            return 1;
+        }
+        return 0;
     }
     public int insert(BlockHeader blockHeader){
         Result<BlockHeader> result = dbService.putModel(Constant.BLOCKHEADER_CACHE_NAME, blockHeader.getHash().getBytes(), blockHeader);

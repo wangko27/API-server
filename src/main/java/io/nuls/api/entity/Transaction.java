@@ -107,7 +107,7 @@ public class Transaction {
     }
 
     public Long getAmount() {
-        return amount;
+        return amount==null?0L:amount;
     }
 
     public void setAmount(Long amount) {
@@ -196,10 +196,6 @@ public class Transaction {
             output.setAddress((String) mapList.get(i).get("address"));
             output.setValue(Long.parseLong(mapList.get(i).get("value").toString()));
             outputList.add(output);
-        }
-
-        for (Map map : mapList) {
-
         }
         this.inputs = inputs;
         this.setOutputList(outputList);

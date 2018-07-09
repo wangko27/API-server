@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -112,8 +113,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         searchable.addCondition("create_time", SearchOperator.gte, startTime);
         searchable.addCondition("create_time", SearchOperator.lt, endTime);
         List<BlockHeader> list = blockHeaderMapper.selectList(searchable);
-        setDataWithLeveldb(list);
-        return list;
+        return setDataWithLeveldb(list);
     }
 
     /**
@@ -131,8 +131,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             searchable.addCondition("height", SearchOperator.lte, endHeight);
         }
         List<BlockHeader> list = blockHeaderMapper.selectList(searchable);
-        setDataWithLeveldb(list);
-        return list;
+        return setDataWithLeveldb(list);
     }
 
     /**
@@ -154,8 +153,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         }
         PageHelper.orderBy("height desc");
         List<BlockHeader> blockHeaderList = blockHeaderMapper.selectList(searchable);
-        setDataWithLeveldb(blockHeaderList);
-        PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderList);
+        PageInfo<BlockHeader> page = new PageInfo<>(setDataWithLeveldb(blockHeaderList));
         return page;
     }
 
@@ -205,7 +203,11 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             agentNode.setTotalReward(agentNode.getTotalReward() + blockHeader.getReward());
             agentNodeBusiness.update(agentNode);
         }
-
+        //存入leveldb
+        if(blockHeaderLevelDbService.insert(blockHeader) ==0){
+            throw new NullPointerException();
+        }
+        //存入数据库
         return blockHeaderMapper.insert(blockHeader);
     }
 
@@ -317,10 +319,12 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
      * 根据list，重置block数据
      * @param list
      */
-    public void setDataWithLeveldb(List<BlockHeader> list){
+    public List<BlockHeader> setDataWithLeveldb(List<BlockHeader> list){
+        List<BlockHeader> listBlock = new ArrayList<>();
         for(BlockHeader block:list){
-            block = blockHeaderLevelDbService.select(block.getHash());
+            listBlock.add(blockHeaderLevelDbService.select(block.getHash()));
         }
+        return listBlock;
 
     }
 }

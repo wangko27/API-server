@@ -52,7 +52,12 @@ public class TransactionLevelDbService {
     }
     public Transaction select(String key){
         DBService dbService = LevelDbUtil.getInstance();
-        return dbService.getModel(Constant.TRANSACTION_CACHE_NAME, key.getBytes(), Transaction.class);
+        Transaction transaction = dbService.getModel(Constant.TRANSACTION_CACHE_NAME, key.getBytes(), Transaction.class);
+        try {
+            transaction.transferExtend();
+        } catch (Exception e) {
+        }
+        return transaction;
     }
     //这里会查询出leveldb里面全部的数据，谨慎使用
     public List<Transaction> getList(){
