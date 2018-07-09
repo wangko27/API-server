@@ -72,8 +72,6 @@ public class SyncDataBusiness {
             //存放新的utxo到utxoMap
             for (Utxo utxo : tx.getOutputs()) {
                 utxoMap.put(utxo.getKey(), utxo);
-                //todo   不在这里写入缓存
-                UtxoContext.put(utxo.getAddress(), utxo.getKey());
             }
             //存放被花费的utxo
             fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
@@ -143,6 +141,7 @@ public class SyncDataBusiness {
             start = end - 10;
         }
         for (int i = start; i < end; i++) {
+            txList.get(i).transferExtend();
             IndexContext.putTransaction(txList.get(i));
         }
 
