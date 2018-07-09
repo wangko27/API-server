@@ -5,7 +5,6 @@ import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
-import io.nuls.api.context.UtxoTempContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.log.Log;

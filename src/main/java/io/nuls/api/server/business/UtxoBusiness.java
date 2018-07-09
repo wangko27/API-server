@@ -50,18 +50,42 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         return page;
     }
 
-    public List<Utxo> getList(String txHash) {
-        Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(txHash)){
-            //todo 待验证 正确性
-            searchable.addCondition("tx_hash", SearchOperator.suffixLike, txHash);
-        }
-        return utxoMapper.selectList(searchable);
+    /**
+     * 查询全部，包含已花费，未花费
+     * @return
+     */
+    public List<Utxo> getList() {
+        List<Utxo> list = utxoLevelDbService.getList();
+        return list;
     }
 
-    public int deleteByTxHash(String txHash){
-        //todo 根据hash删除utxo
-        return 0;
+    /**
+     * 查询全部，未花费
+     * @return
+     */
+    public List<Utxo> getUtxoList() {
+        List<Utxo> utxoList = new ArrayList<>();
+        List<Utxo> list = utxoLevelDbService.getList();
+        for(Utxo utxo:list){
+            if(StringUtils.isBlank(utxo.getSpendTxHash())){
+                utxoList.add(utxo);
+            }
+        }
+        return utxoList;
+    }
+
+    /**
+     * init Utxo
+     * @return
+     */
+    public void initUtxoList() {
+        List<Utxo> list = utxoLevelDbService.getList();
+        for(Utxo utxo:list){
+            if(StringUtils.isBlank(utxo.getSpendTxHash())){
+                System.out.println("utxo.getAddress():"+utxo.getAddress()+"---utxo.getHashIndex()"+utxo.getHashIndex());
+                UtxoContext.put(utxo.getAddress(),utxo.getHashIndex());
+            }
+        }
     }
 
     /**
@@ -201,14 +225,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         //return utxoLevelDbService.delete(key);
     }
 
-    //todo 根据tx_hash删除utxo
-    /*@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void deleteByTxHash(String txHash) {
-        Searchable searchable = new Searchable();
-        searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
-        utxoMapper.deleteBySearchable(searchable);
-    }*/
-
     //根据交易获取要修改的utxo，之后执行批量修改
     public List<Utxo> getListByFrom(Transaction tx,Map<String,Utxo> utxoMap) {
         //coinBase交易，红黄牌交易没有inputs
@@ -279,13 +295,28 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }
 
     /**
-     * 统计持币账户
+     * 统计持币账户 扫描所有utxo
      *
      * @return
      */
-    //todo 统计持币账户
     public List<UtxoDto> getBlockSumTxamount() {
-        return new ArrayList<>();
+        List<UtxoDto> utxList = new ArrayList<>();
+
+        List<String> addressList =UtxoContext.getAllKeys();
+        for(String addr:addressList){
+            List<Utxo> list = UtxoContext.getUtxoList(addr);
+            if(list.size()>0){
+                Long total = 0L;
+                for(Utxo utxo: list){
+                    total += utxo.getAmount();
+                }
+                UtxoDto dto = new UtxoDto();
+                dto.setTotal(total);//加载金额
+                dto.setAddress(addr);//加载地址
+                utxList.add(dto);
+            }
+        }
+        return utxList;
         //return utxoMapper.getBlockSumTxamount();
     }
 }

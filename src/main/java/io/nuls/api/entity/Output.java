@@ -8,6 +8,8 @@ public class Output {
 
     private Long value;
 
+    private Integer txIndex;
+
     public Output() {
 
     }
@@ -40,5 +42,17 @@ public class Output {
 
     public void setValue(Long value) {
         this.value = value;
+    }
+
+    public Integer getTxIndex() {
+        return txIndex;
+    }
+
+    public void setTxIndex(Integer txIndex) {
+        this.txIndex = txIndex;
+    }
+
+    public String getKey() {
+        return this.txHash + "_" + this.txIndex;
     }
 }

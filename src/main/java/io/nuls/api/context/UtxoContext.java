@@ -7,6 +7,7 @@ import io.nuls.api.server.dao.util.EhcacheUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UtxoContext {
 
@@ -20,16 +21,22 @@ public class UtxoContext {
         list.add(hashIndex);
         EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME,address,list);
     }
+    //根据hashIndex，移除某个utxo
     public static void remove(String hashIndex) {
         List<String> hashIndexList = get(hashIndex);
         if (hashIndexList != null) {
             hashIndexList.remove(hashIndex);
         }
-        //EhcacheUtil.getInstance().remove(Constant.UTXO_CACHE_NAME,address);
     }
+
     public static List<String> get(String address) {
         return (List<String>)EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME,address);
     }
+
+    public static List<String> getAllKeys(){
+        return EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME).getKeys();
+    }
+
     public static List<Utxo> getUtxoList(String address){
         List<String> hashIndexList = get(address);
         List<Utxo> list = new ArrayList<>();
@@ -44,7 +51,6 @@ public class UtxoContext {
             }
         }
         return list;
-
     }
 
 
