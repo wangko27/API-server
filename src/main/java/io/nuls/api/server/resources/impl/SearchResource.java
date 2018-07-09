@@ -31,32 +31,32 @@ public class SearchResource {
     @GET
     @Path("/{keyword}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult search(@PathParam("keyword") String keyword){
+    public RpcClientResult search(@PathParam("keyword") String keyword) {
         RpcClientResult result = null;
         result = RpcClientResult.getSuccess();
         result.setData(0);
-        if(StringUtils.isBlank(keyword)){
+        if (StringUtils.isBlank(keyword)) {
             return result;
         }
         keyword = keyword.trim();
-        try{
-            if(StringUtils.isNonNegativeInteger(keyword)){
+        try {
+            if (StringUtils.isNonNegativeInteger(keyword)) {
                 //高度
-                if(null != blockBusiness.getBlockByHeight(Long.valueOf(keyword+""))){
+                if (null != blockBusiness.getByKey(Long.valueOf(keyword + ""))) {
                     result.setData(EntityConstant.SEARCH_HEADER_HEIGHT);
                 }
-            }else if (StringUtils.validAddress(keyword)){
-                if(null != UtxoContext.get(keyword)){
+            } else if (StringUtils.validAddress(keyword)) {
+                if (null != UtxoContext.get(keyword)) {
                     result.setData(EntityConstant.SEARCH_ACCOUNT_ADDRESS);
                 }
-            }else if(StringUtils.validHash(keyword)){
-                if(null != blockBusiness.getBlockByHash(keyword)){
+            } else if (StringUtils.validHash(keyword)) {
+                if (null != blockBusiness.getBlockByHash(keyword)) {
                     result.setData(EntityConstant.SEARCH_HEADER_HASH);
-                }else if(null != transactionBusiness.getByHash(keyword)){
+                } else if (null != transactionBusiness.getByHash(keyword)) {
                     result.setData(EntityConstant.SEARCH_TX_HASH);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;

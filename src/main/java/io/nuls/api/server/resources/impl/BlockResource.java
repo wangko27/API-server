@@ -70,7 +70,7 @@ public class BlockResource {
             result = RpcClientResult.getSuccess();
             //加载最新块，计算确认次数
             BlockHeader localBest = blockBusiness.getNewest();
-            BlockHeader requestBlock = blockBusiness.getBlockByHeight(height);
+            BlockHeader requestBlock = blockBusiness.getByKey(height);
 
             if(null == localBest){
                 return RpcClientResult.getFailed(ErrorCode.FAILED);

@@ -109,7 +109,7 @@ public class SyncDataBusiness {
             }
         }
 
-        blockBusiness.saveBlock(block.getHeader());
+        blockBusiness.save(block.getHeader());
         transactionBusiness.saveAll(txList);
         transactionRelationBusiness.saveAll(txRelationList);
         detailBusiness.saveAll(addressRewardDetailList);
