@@ -227,7 +227,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     public int delete(String txHash, Integer index) {
         String key = txHash + "_" + index;
         return deleteByKey(key);
-        //return utxoLevelDbService.delete(key);
     }
 
     //根据交易获取要修改的utxo，之后执行批量修改
@@ -279,9 +278,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveAll(Map<String, Utxo> utxoMap) {
-        if (!utxoMap.isEmpty()) {
-            utxoLevelDbService.insertMap(utxoMap);
-        }
+        utxoLevelDbService.insertMap(utxoMap);
     }
 
     /**

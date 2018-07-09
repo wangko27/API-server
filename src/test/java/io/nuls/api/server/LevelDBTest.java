@@ -13,12 +13,20 @@ import java.util.List;
 public class LevelDBTest {
 
     private static DBService dbService;
-    private static String areaName = "api-server-utxo";
+    private static String areaName = "utxoCache";
 
     @BeforeClass
     public static void init() {
         dbService = new LevelDBServiceImpl();
         dbService.createArea(areaName);
+
+    }
+
+    @Test
+    public void testUtxo() {
+        String key = "0020942a4c3d6eed38f28fd8f34322069b0c642d0140c6e46d52f74c3c49dd8ea6e1_1";
+        Utxo utxo = dbService.getModel(areaName, key.getBytes(), Utxo.class);
+        System.out.println(utxo.getSpendTxHash());
     }
 
     @Test

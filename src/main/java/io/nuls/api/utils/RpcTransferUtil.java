@@ -147,7 +147,7 @@ public class RpcTransferUtil {
                 utxo.setLockTime(coin.getLockTime());
                 outputs.add(utxo);
 
-                Output output = new Output(tx.getHash(), utxo.getAddress(), utxo.getAmount());
+                Output output = new Output(tx.getHash(), i, utxo.getAddress(), utxo.getAmount());
                 outputList.add(output);
             }
         }
