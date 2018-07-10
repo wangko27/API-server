@@ -204,11 +204,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             agentNode.setTotalReward(agentNode.getTotalReward() + blockHeader.getReward());
             agentNodeBusiness.update(agentNode);
         }
-        //存入leveldb
-        if(blockHeaderLevelDbService.insert(blockHeader) ==0){
-            throw new NullPointerException();
-        }
-        //存入数据库
+
         return blockHeaderMapper.insert(blockHeader);
     }
 

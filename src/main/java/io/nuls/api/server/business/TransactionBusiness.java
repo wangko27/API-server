@@ -3,10 +3,7 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.TransactionRelation;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -66,21 +63,33 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         return page;
     }
 
+    public PageInfo<Transaction> getNewestList(int pageSize) {
+        PageHelper.startPage(1, pageSize);
+        Searchable searchable = new Searchable();
+        PageHelper.orderBy("id desc");
+        List<Transaction> transactionList = transactionMapper.selectList(searchable);
+        //加载list，加载leveldb中的真实交易数据
+        formatTransaction(transactionList);
+        PageInfo<Transaction> page = new PageInfo<>(transactionList);
+        return page;
+    }
+
     /**
      * 根据高度查询全部交易
      *
-     * @param blockHeight 高度
+     * @param header 高度
      * @return
      */
-    public List<Transaction> getList(Long blockHeight) {
-        Searchable searchable = new Searchable();
-        if (null == blockHeight) {
-            return null;
+    public List<Transaction> getList(BlockHeader header) {
+        List<Transaction> txList = new ArrayList<>();
+        Transaction tx;
+        for (String txHash : header.getTxHashList()) {
+            tx = transactionLevelDbService.select(txHash);
+            if (tx != null) {
+                txList.add(tx);
+            }
         }
-        searchable.addCondition("block_height", SearchOperator.eq, blockHeight);
-        List<Transaction> transactionList = transactionMapper.selectList(searchable);
-        formatTransaction(transactionList);
-        return transactionList;
+        return txList;
     }
 
     /**
