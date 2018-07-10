@@ -19,12 +19,11 @@
  */
 package io.nuls.api.server.leveldb.service.impl;
 
-import io.nuls.api.constant.Constant;
+import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.manager.LevelDBManager;
 import io.nuls.api.server.leveldb.model.Entry;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
-import io.nuls.api.model.Result;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.stereotype.Service;
@@ -35,19 +34,6 @@ import java.util.Set;
 
 @Service
 public class LevelDBServiceImpl implements DBService {
-    public LevelDBServiceImpl() {
-        try {
-            LevelDBManager.init();
-            //utxo
-            createArea(Constant.UTXO_DB_NAME);
-            //transaction
-            createArea(Constant.TRANSACTION_DB_NAME);
-            //blockheader
-            clearArea(Constant.BLOCKHEADER_DB_NAME);
-        } catch (Exception e) {
-            //skip it
-        }
-    }
 
     @Override
     public Result createArea(String areaName) {

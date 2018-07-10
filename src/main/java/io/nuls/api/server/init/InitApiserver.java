@@ -8,6 +8,8 @@ import io.nuls.api.server.business.*;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
+import io.nuls.api.server.leveldb.manager.LevelDBManager;
+import io.nuls.api.server.leveldb.service.DBService;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,9 +38,10 @@ public class InitApiserver {
     private AliasBusiness aliasBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
+    @Autowired
+    private DBService dbService;
 
-
-//    @PostConstruct
+    @PostConstruct
     public void init() {
 
         /*List<Utxo> list = UtxoLevelDbService.getInstance().getList();
@@ -49,6 +52,20 @@ public class InitApiserver {
             }
         }
         System.out.println("初始化---utxo数量："+ list.size()+",null数量："+nullcount);*/
+
+        try {
+            LevelDBManager.init();
+            //utxo
+            dbService.createArea(Constant.UTXO_DB_NAME);
+            //transaction
+            dbService.createArea(Constant.TRANSACTION_DB_NAME);
+            //blockheader
+            dbService.clearArea(Constant.BLOCKHEADER_DB_NAME);
+            System.out.println("--------------------------- LevelDBManager.init");
+        } catch (Exception e) {
+            //skip it
+        }
+
         /*加载utxo*/
         utxoBusiness.initUtxoList();
 
@@ -65,32 +82,32 @@ public class InitApiserver {
 
         /*加载24小时奖励*/
         Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
-        HistoryContext.rewardofday = rewardOfDay==null?0L:rewardOfDay;
+        HistoryContext.rewardofday = rewardOfDay == null ? 0L : rewardOfDay;
 
         /*加载别名到缓存*/
         //AliasContext
         List<Alias> aliasList = aliasBusiness.getList();
-        for(Alias alias : aliasList){
+        for (Alias alias : aliasList) {
             AliasContext.put(alias);
         }
 
         /*加载初始化的区块列表*/
-        PageInfo<BlockHeader> blockHeaderPageInfo = blockBusiness.getList(null,1,Constant.INDEX_BLOCK_LIST_COUNT);
+        PageInfo<BlockHeader> blockHeaderPageInfo = blockBusiness.getList(null, 1, Constant.INDEX_BLOCK_LIST_COUNT);
         List<BlockHeader> blockList = blockHeaderPageInfo.getList();
-        if(null != blockList){
+        if (null != blockList) {
             IndexContext.initBlocks(blockList);
         }
 
         /*加载初始化的交易列表*/
-        PageInfo<Transaction> pageInfo = transactionBusiness.getList(null,0,1,Constant.INDEX_TX_LIST_COUNT,3);
-        if(null != pageInfo.getList()){
+        PageInfo<Transaction> pageInfo = transactionBusiness.getList(null, 0, 1, Constant.INDEX_TX_LIST_COUNT, 3);
+        if (null != pageInfo.getList()) {
             IndexContext.initTransactions(pageInfo.getList());
         }
 
         /*初始化共识信息*/
         RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
-        if(rpcClientResult.isSuccess()){
-            IndexContext.resetRpcConsensusData((Map)rpcClientResult.getData());
+        if (rpcClientResult.isSuccess()) {
+            IndexContext.resetRpcConsensusData((Map) rpcClientResult.getData());
         }
 
     }
