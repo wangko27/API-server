@@ -6,6 +6,7 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.utils.JSONUtils;
@@ -41,10 +42,10 @@ public class SyncDataBusiness {
     private DepositBusiness depositBusiness;
     @Autowired
     private AgentNodeBusiness agentNodeBusiness;
-
-    private BlockHeaderLevelDbService blockHeaderLevelDbService = BlockHeaderLevelDbService.getInstance();
-
-    UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+    @Autowired
+    private BlockHeaderLevelDbService blockHeaderLevelDbService;
+    @Autowired
+    UtxoLevelDbService utxoLevelDbService;
 
     /**
      * 同步最新块数据
@@ -104,32 +105,45 @@ public class SyncDataBusiness {
                 }
             }
         }
-
         blockBusiness.save(block.getHeader());
+        System.out.println("-----------------blockBusiness");
         transactionBusiness.saveAll(txList);
+        System.out.println("-----------------transactionBusiness");
         transactionRelationBusiness.saveAll(txRelationList);
+        System.out.println("-----------------transactionRelationBusiness");
         detailBusiness.saveAll(addressRewardDetailList);
+        System.out.println("-----------------detailBusiness");
         aliasBusiness.saveAll(aliasList);
+        System.out.println("-----------------aliasBusiness");
         punishLogBusiness.saveAll(punishLogList);
+        System.out.println("-----------------punishLogBusiness");
         depositBusiness.saveAll(depositList);
+        System.out.println("-----------------depositBusiness");
         utxoBusiness.saveAll(utxoMap);
+        System.out.println("-----------------utxoBusiness");
         utxoBusiness.updateAll(fromList);
+        System.out.println("-----------------utxoBusiness");
         //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
         //存入leveldb
-        blockHeaderLevelDbService.insert(block.getHeader());
 
+        int result = blockHeaderLevelDbService.insert(block.getHeader());
+        if (result == 0) {
+            throw new NulsException();
+        }
+        System.out.println("-----------------blockHeaderLevelDbService");
         for (Utxo utxo : fromList) {
             UtxoContext.remove(utxo.getAddress(), utxo.getKey());
         }
+        System.out.println("-----------------UtxoContext.remove");
         for (Utxo utxo : utxoMap.values()) {
             if (utxo.getSpendTxHash() == null) {
                 UtxoContext.put(utxo.getAddress(), utxo.getKey());
             }
         }
-
+        System.out.println("-----------------UtxoContext.put");
         //缓存新块 首页数据展示用
         IndexContext.putBlock(block.getHeader());
-
+        System.out.println("-----------------putBlock");
         //缓存新交易
         int end = txList.size();
         int start = 0;
@@ -139,7 +153,7 @@ public class SyncDataBusiness {
         for (int i = start; i < end; i++) {
             IndexContext.putTransaction(txList.get(i));
         }
-
+        System.out.println("-----------------putTransaction");
         time2 = System.currentTimeMillis();
         System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
 
@@ -159,43 +173,46 @@ public class SyncDataBusiness {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollback(BlockHeader header) throws Exception {
         Log.error("--------------roll back, block height: " + header.getHeight() + ",hash :" + header.getHash());
-        //todo 这里是根据高度查询，因为高度索引已经去掉，所以这需要修改
-        List<Transaction> txList = transactionBusiness.getList(header.getHeight());
+
+        List<Transaction> txList = transactionBusiness.getList(header);   //回滚的交易
+        List<Utxo> outputs = new ArrayList<>();                           //回滚时需要删除output
+        Map<String, Utxo> inputMap = new HashMap<>();                     //回滚时需要重置的inputs
+
+        Utxo utxo;
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
+            for (Output output : tx.getOutputList()) {
+                utxo = utxoLevelDbService.select(output.getKey());
+                outputs.add(utxo);
+                if (inputMap.containsKey(utxo.getKey())) {
+                    inputMap.remove(utxo.getKey());
+                }
+            }
+            for (Input input : tx.getInputs()) {
+                utxo = utxoLevelDbService.select(input.getKey());
+                utxo.setSpendTxHash(null);
+                inputMap.put(utxo.getKey(), utxo);
+            }
             transactionBusiness.rollback(tx);
         }
+
         //回滚别名
         aliasBusiness.deleteByHeight(header.getHeight());
         //回滚惩罚记录
         punishLogBusiness.deleteByHeight(header.getHeight());
         //回滚奖励
         detailBusiness.deleteByHeight(header.getHeight());
+        //回滚交易
+        transactionBusiness.deleteList(header.getTxHashList());
         //回滚块
         blockBusiness.deleteByKey(header.getHeight());
+        //回滚levelDB与缓存
+        //回滚交易
+        transactionBusiness.deleteLevelDBList(header.getTxHashList());
+        //回滚utxo
+        utxoBusiness.rollbackByTo(outputs);
+        utxoBusiness.rollBackByFrom(inputMap);
 
-        //回滚缓存
-        for (int i = txList.size() - 1; i >= 0; i--) {
-            Transaction tx = txList.get(i);
-            if (tx.getOutputs() != null) {
-                for (int j = tx.getOutputs().size() - 1; j >= 0; j--) {
-                    Utxo tempUtxo = tx.getOutputs().get(j);
-                    UtxoContext.remove(tempUtxo.getAddress(), tempUtxo.getAddress());
-                }
-            }
-            //UtxoKey utxoKey;
-            Utxo utxo;
-            if (tx.getInputs() != null) {
-                for (int j = tx.getInputs().size() - 1; j >= 0; j--) {
-                    Input input = tx.getInputs().get(j);
-                    //utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
-                    utxo = utxoBusiness.getByKey(input.getFromHash(), input.getFromIndex());
-                    if (utxo != null) {
-                        UtxoContext.put(utxo.getAddress(), utxo.getKey());
-                    }
-                }
-            }
-        }
         //回滚最新块
         IndexContext.removeBlock(header);
         //重新加载最新的几条交易信息

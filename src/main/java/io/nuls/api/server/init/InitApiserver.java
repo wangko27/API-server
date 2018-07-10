@@ -38,7 +38,7 @@ public class InitApiserver {
     private TransactionBusiness transactionBusiness;
 
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
 
         /*List<Utxo> list = UtxoLevelDbService.getInstance().getList();

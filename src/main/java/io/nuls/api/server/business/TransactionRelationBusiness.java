@@ -67,7 +67,6 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
                 if(StringUtils.isNotBlank(input.getAddress())){
                     addressSet.add(input.getAddress());
                 }
-
             }
         }
         if (tx.getOutputs() != null) {

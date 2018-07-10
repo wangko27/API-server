@@ -11,8 +11,6 @@ import java.util.Map;
 
 public class UtxoContext {
 
-    private static UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
-
     //根据地址，把List<key> 放入缓存
     public static void put(String address, String key) {
         List<String> list = (List<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
@@ -39,21 +37,21 @@ public class UtxoContext {
         return EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME).getKeys();
     }
 
-    public static List<Utxo> getUtxoList(String address) {
-        List<String> keyList = get(address);
-        List<Utxo> utxoList = new ArrayList<>();
-        if (null != keyList && !keyList.isEmpty()) {
-            //去leveldb加载utxo
-            //todo 这里可能需要缓存，之后根据效率再考虑
-            for (String key : keyList) {
-                Utxo utxo = utxoLevelDbService.select(key);
-                if (null != utxo) {
-                    utxoList.add(utxo);
-                }
-            }
-        }
-        return utxoList;
-    }
+//    public static List<Utxo> getUtxoList(String address) {
+//        List<String> keyList = get(address);
+//        List<Utxo> utxoList = new ArrayList<>();
+//        if (null != keyList && !keyList.isEmpty()) {
+//            //去leveldb加载utxo
+//            //todo 这里可能需要缓存，之后根据效率再考虑
+//            for (String key : keyList) {
+//                Utxo utxo = utxoLevelDbService.select(key);
+//                if (null != utxo) {
+//                    utxoList.add(utxo);
+//                }
+//            }
+//        }
+//        return utxoList;
+//    }
 
 
     //-----------------------------------------------------第二次修改

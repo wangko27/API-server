@@ -19,6 +19,7 @@
  */
 package io.nuls.api.server.leveldb.service.impl;
 
+import io.nuls.api.constant.Constant;
 import io.nuls.api.server.leveldb.manager.LevelDBManager;
 import io.nuls.api.server.leveldb.model.Entry;
 import io.nuls.api.server.leveldb.service.BatchOperation;
@@ -37,6 +38,12 @@ public class LevelDBServiceImpl implements DBService {
     public LevelDBServiceImpl() {
         try {
             LevelDBManager.init();
+            //utxo
+            createArea(Constant.UTXO_DB_NAME);
+            //transaction
+            createArea(Constant.TRANSACTION_DB_NAME);
+            //blockheader
+            clearArea(Constant.BLOCKHEADER_DB_NAME);
         } catch (Exception e) {
             //skip it
         }
@@ -134,12 +141,12 @@ public class LevelDBServiceImpl implements DBService {
 
     @Override
     public BatchOperation createWriteBatch(String area) {
-        if(StringUtils.isBlank(area)) {
+        if (StringUtils.isBlank(area)) {
             return null;
         }
         BatchOperationImpl batchOperation = new BatchOperationImpl(area);
         Result result = batchOperation.checkBatch();
-        if(result.isFailed()) {
+        if (result.isFailed()) {
             Log.error("DB batch create error: " + result.getMsg());
             return null;
         }

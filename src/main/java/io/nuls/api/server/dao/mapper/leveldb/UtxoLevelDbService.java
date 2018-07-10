@@ -5,6 +5,8 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,21 +18,13 @@ import java.util.Map;
  * Author: zsj
  * Date:  2018/7/8 0008
  */
+@Service
 public class UtxoLevelDbService {
-
-    private DBService dbService = LevelDbUtil.getInstance();
-
-    private static UtxoLevelDbService utxoLevelDbService;
-
-    public static UtxoLevelDbService getInstance() {
-        if (null == utxoLevelDbService) {
-            utxoLevelDbService = new UtxoLevelDbService();
-        }
-        return utxoLevelDbService;
-    }
+    @Autowired
+    private DBService dbService;
 
     public void insertList(List<Utxo> list) {
-        BatchOperation batch = dbService.createWriteBatch(Constant.UTXO_CACHE_NAME);
+        BatchOperation batch = dbService.createWriteBatch(Constant.UTXO_DB_NAME);
         for (Utxo utxo : list) {
             batch.putModel(utxo.getKey().getBytes(), utxo);
         }
@@ -38,7 +32,7 @@ public class UtxoLevelDbService {
     }
 
     public void insertMap(Map<String, Utxo> utxoMap) {
-        BatchOperation batch = dbService.createWriteBatch(Constant.UTXO_CACHE_NAME);
+        BatchOperation batch = dbService.createWriteBatch(Constant.UTXO_DB_NAME);
         for (Utxo utxo : utxoMap.values()) {
             batch.putModel(utxo.getKey().getBytes(), utxo);
         }
@@ -46,7 +40,7 @@ public class UtxoLevelDbService {
     }
 
     public int insert(Utxo utxo) {
-        Result<Utxo> result = dbService.putModel(Constant.UTXO_CACHE_NAME, utxo.getKey().getBytes(), utxo);
+        Result<Utxo> result = dbService.putModel(Constant.UTXO_DB_NAME, utxo.getKey().getBytes(), utxo);
         if (result.isSuccess()) {
             return 1;
         }
@@ -54,7 +48,7 @@ public class UtxoLevelDbService {
     }
 
     public int delete(String key) {
-        Result result = dbService.delete(Constant.UTXO_CACHE_NAME, key.getBytes());
+        Result result = dbService.delete(Constant.UTXO_DB_NAME, key.getBytes());
         if (result.isSuccess()) {
             return 1;
         }
@@ -62,15 +56,24 @@ public class UtxoLevelDbService {
     }
 
     public Utxo select(String key) {
-        return dbService.getModel(Constant.UTXO_CACHE_NAME, key.getBytes(), Utxo.class);
+        return dbService.getModel(Constant.UTXO_DB_NAME, key.getBytes(), Utxo.class);
+    }
+
+    public List<Utxo> selectList(List<String> keyList) {
+        List<Utxo> utxoList = new ArrayList<>();
+        if (null != keyList && !keyList.isEmpty()) {
+            for (String key : keyList) {
+                Utxo utxo = select(key);
+                if (null != utxo) {
+                    utxoList.add(utxo);
+                }
+            }
+        }
+        return utxoList;
     }
 
     //这里会查询出leveldb里面全部的数据，谨慎使用
     public List<Utxo> getList() {
-        List<Utxo> list = dbService.values(Constant.UTXO_CACHE_NAME, Utxo.class);
-        if(null == list){
-            list = new ArrayList<>();
-        }
-        return list;
+        return dbService.values(Constant.UTXO_DB_NAME, Utxo.class);
     }
 }

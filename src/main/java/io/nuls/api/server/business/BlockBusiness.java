@@ -33,8 +33,8 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     private AgentNodeBusiness agentNodeBusiness;
     @Autowired
     private AddressRewardDetailBusiness rewardDetailBusiness;
-
-    private BlockHeaderLevelDbService blockHeaderLevelDbService = BlockHeaderLevelDbService.getInstance();
+    @Autowired
+    private BlockHeaderLevelDbService blockHeaderLevelDbService;
 
     public BlockHeader getBlockByHash(String hash) {
         return blockHeaderLevelDbService.select(hash);
@@ -42,7 +42,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     public BlockHeader getBlockByHeight(long height) {
         BlockHeader blockHeader = blockHeaderMapper.selectByPrimaryKey(height);
-        if(null != blockHeader){
+        if (null != blockHeader) {
             return blockHeaderLevelDbService.select(blockHeader.getHash());
         }
         return null;
@@ -87,7 +87,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         return total;
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveBlock(BlockHeader blockHeader) {
         //存入数据库
         blockHeaderMapper.insert(blockHeader);
@@ -165,9 +165,9 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     public BlockHeader getNewest() {
         //先从缓存加载，如果没有，再从数据库加载
         BlockHeader blockHeader = IndexContext.getBestNewBlock();
-        if(null == blockHeader){
+        if (null == blockHeader) {
             blockHeader = blockHeaderMapper.getBestBlock();
-            if(null != blockHeader){
+            if (null != blockHeader) {
                 blockHeader = blockHeaderLevelDbService.select(blockHeader.getHash());
             }
         }

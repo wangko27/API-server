@@ -85,4 +85,11 @@
     from transaction
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from transaction where hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
 </mapper>
