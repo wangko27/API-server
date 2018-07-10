@@ -4,8 +4,10 @@ import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.BalanceListContext;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.PackingAddressContext;
+import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Utxo;
+import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.Page;
 import io.nuls.api.server.dto.UtxoDto;
@@ -40,6 +42,23 @@ public class NulsStatisticsResource {
         result.setData(HistoryContext.getAll());
         return result;
     }
+
+    /*@GET
+    @Path("/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult stop(){
+        List<Utxo> list = UtxoLevelDbService.getInstance().getList();
+        int nullcount = 0;
+        for(Utxo utxo: list){
+            if(null == utxo){
+                nullcount++;
+            }
+        }
+        System.out.println("停止---utxo数量："+ list.size()+",null数量："+nullcount);
+        System.exit(0);
+        RpcClientResult result = RpcClientResult.getSuccess();
+        return result;
+    }*/
 
     /**
      * 持币账户

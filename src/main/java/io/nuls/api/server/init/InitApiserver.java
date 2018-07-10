@@ -5,6 +5,7 @@ import io.nuls.api.constant.Constant;
 import io.nuls.api.context.*;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.business.*;
+import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.StringUtils;
@@ -39,6 +40,15 @@ public class InitApiserver {
 
     @PostConstruct
     public void init() {
+
+        /*List<Utxo> list = UtxoLevelDbService.getInstance().getList();
+        int nullcount = 0;
+        for(Utxo utxo: list){
+            if(null == utxo){
+                nullcount++;
+            }
+        }
+        System.out.println("初始化---utxo数量："+ list.size()+",null数量："+nullcount);*/
         /*加载utxo*/
         utxoBusiness.initUtxoList();
 

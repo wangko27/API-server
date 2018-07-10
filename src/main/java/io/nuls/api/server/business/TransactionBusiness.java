@@ -57,9 +57,10 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
             searchable.addCondition("block_height", SearchOperator.eq, height);
         }
         PageHelper.orderBy("id desc");
-        List<Transaction> transactionList = transactionMapper.selectList(searchable);
+        //List<Transaction> transactionList = transactionMapper.selectList(searchable);
         //加载list，加载leveldb中的真实交易数据
-        PageInfo<Transaction> page = new PageInfo<>(formatTransaction(transactionList));
+        PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
+        page.setList(formatTransaction(page.getList()));
         return page;
     }
 
@@ -97,6 +98,13 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
             }
         }
         PageInfo<Transaction> page = new PageInfo<>(formatTransaction(transactionList));
+        //重置分页相关数据
+        page.setPageSize(relationPageInfo.getPageSize());
+        page.setSize(relationPageInfo.getSize());
+        page.setStartRow(relationPageInfo.getStartRow());
+        page.setEndRow(relationPageInfo.getEndRow());
+        page.setTotal(relationPageInfo.getTotal());
+        page.setPages(relationPageInfo.getPages());
         return page;
     }
 

@@ -223,6 +223,11 @@
             <artifactId>ehcache-spring-annotations</artifactId>
             <version>1.1.2</version>
         </dependency>
+        <!--<dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>3.5.2</version>
+        </dependency>-->
 
         <!-- level DB -->
         <dependency>

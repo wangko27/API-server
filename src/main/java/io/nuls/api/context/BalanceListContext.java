@@ -41,7 +41,7 @@ public class BalanceListContext {
         Collections.sort(list, new Comparator<UtxoDto>() {
             @Override
             public int compare(UtxoDto o1, UtxoDto o2) {
-                return o1.getTotal().compareTo(o2.getTotal());
+                return o2.getTotal().compareTo(o1.getTotal());
             }
         });
         return list;

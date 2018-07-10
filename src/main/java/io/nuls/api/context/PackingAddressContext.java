@@ -28,7 +28,6 @@ public class PackingAddressContext {
         agentNodeList.clear();
     }
     public static void reset(List<AgentNodeDto> list){
-        clear();
         agentNodeList = list;
     }
     public static int getSize(){

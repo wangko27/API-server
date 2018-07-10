@@ -33,7 +33,6 @@ public class AgentNode extends TxData {
 
     private String deleteHash;
 
-
     private Long totalReward;
 
     public String getTxHash() {

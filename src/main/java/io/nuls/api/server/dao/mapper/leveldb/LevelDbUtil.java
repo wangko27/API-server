@@ -16,32 +16,19 @@ public class LevelDbUtil {
     public static DBService getInstance(){
         if(null == dbService){
             dbService = new LevelDBServiceImpl();
-
-            if(checkAreaName(Constant.UTXO_CACHE_NAME)){
-                //utxo
-                dbService.createArea(Constant.UTXO_CACHE_NAME);
+            //utxo
+            dbService.createArea(Constant.UTXO_CACHE_NAME);
+            //transaction
+            dbService.createArea(Constant.TRANSACTION_CACHE_NAME);
+            //blockheader
+            dbService.createArea(Constant.BLOCKHEADER_CACHE_NAME);
+            System.out.println("-------------休眠开始，一分钟，让leveldb加载数据");
+            try {
+                Thread.sleep(600L);
+            } catch (InterruptedException e) {
             }
-
-            if(checkAreaName(Constant.TRANSACTION_CACHE_NAME)) {
-                //transaction
-                dbService.createArea(Constant.TRANSACTION_CACHE_NAME);
-            }
-
-            if(checkAreaName(Constant.BLOCKHEADER_CACHE_NAME)) {
-                //blockheader
-                dbService.createArea(Constant.BLOCKHEADER_CACHE_NAME);
-            }
-
+            System.out.println("-------------休眠结束");
         }
         return dbService;
-    }
-    private static boolean checkAreaName(String name){
-        String[] areaList = dbService.listArea();
-        for(int i=0;i<areaList.length;i++){
-            if(areaList[i].equals(name)){
-                return false;
-            }
-        }
-        return true;
     }
 }

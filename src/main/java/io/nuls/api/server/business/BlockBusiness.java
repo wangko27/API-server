@@ -153,8 +153,8 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             }
         }
         PageHelper.orderBy("height desc");
-        List<BlockHeader> blockHeaderList = blockHeaderMapper.selectList(searchable);
-        PageInfo<BlockHeader> page = new PageInfo<>(setDataWithLeveldb(blockHeaderList));
+        PageInfo<BlockHeader> page = new PageInfo<>(blockHeaderMapper.selectList(searchable));
+        page.setList(setDataWithLeveldb(page.getList()));
         return page;
     }
 
