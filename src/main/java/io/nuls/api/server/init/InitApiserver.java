@@ -10,6 +10,7 @@ import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.server.leveldb.manager.LevelDBManager;
 import io.nuls.api.server.leveldb.service.DBService;
+import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class InitApiserver {
 
     @PostConstruct
     public void init() {
-
+        RestFulUtils.getInstance().init("http://192.168.1.233:8001/api");
         /*List<Utxo> list = UtxoLevelDbService.getInstance().getList();
         int nullcount = 0;
         for(Utxo utxo: list){

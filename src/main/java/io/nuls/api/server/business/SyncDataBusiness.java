@@ -71,9 +71,12 @@ public class SyncDataBusiness {
             tx.setTxIndex(i);
 
             //存放新的utxo到utxoMap
-            for (Utxo utxo : tx.getOutputs()) {
-                utxoMap.put(utxo.getKey(), utxo);
+            if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
+                for (Utxo utxo : tx.getOutputs()) {
+                    utxoMap.put(utxo.getKey(), utxo);
+                }
             }
+
             //存放被花费的utxo
             fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
 
@@ -167,18 +170,23 @@ public class SyncDataBusiness {
         Utxo utxo;
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
-            for (Output output : tx.getOutputList()) {
-                utxo = utxoLevelDbService.select(output.getKey());
-                outputs.add(utxo);
-                if (inputMap.containsKey(utxo.getKey())) {
-                    inputMap.remove(utxo.getKey());
+            if (tx.getOutputList() != null && !tx.getOutputList().isEmpty()) {
+                for (Output output : tx.getOutputList()) {
+                    utxo = utxoLevelDbService.select(output.getKey());
+                    outputs.add(utxo);
+                    if (inputMap.containsKey(utxo.getKey())) {
+                        inputMap.remove(utxo.getKey());
+                    }
                 }
             }
-            for (Input input : tx.getInputs()) {
-                utxo = utxoLevelDbService.select(input.getKey());
-                utxo.setSpendTxHash(null);
-                inputMap.put(utxo.getKey(), utxo);
+            if (tx.getInputs() != null && !tx.getInputs().isEmpty()) {
+                for (Input input : tx.getInputs()) {
+                    utxo = utxoLevelDbService.select(input.getKey());
+                    utxo.setSpendTxHash(null);
+                    inputMap.put(utxo.getKey(), utxo);
+                }
             }
+
             transactionBusiness.rollback(tx);
         }
 

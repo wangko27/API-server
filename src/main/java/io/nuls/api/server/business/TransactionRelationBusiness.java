@@ -31,12 +31,13 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
 
     /**
      * 根据地址查询全部
+     *
      * @param address
      * @return
      */
-    public List<TransactionRelation> getList(String address){
+    public List<TransactionRelation> getList(String address) {
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(address)){
+        if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
         }
         return relationMapper.selectList(searchable);
@@ -44,15 +45,16 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
 
     /**
      * 根据地址，分页查询hash
+     *
      * @param address
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<TransactionRelation> getListByPage(String address,int pageNumber, int pageSize){
+    public PageInfo<TransactionRelation> getListByPage(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if(StringUtils.isNotBlank(address)){
+        if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
         }
         PageHelper.orderBy("id desc");
@@ -60,18 +62,18 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         return page;
     }
 
-    public List<TransactionRelation> getListByTx(Transaction tx){
+    public List<TransactionRelation> getListByTx(Transaction tx) {
         Set<String> addressSet = new HashSet<>();
-        if (tx.getInputs() != null) {
+        if (tx.getInputs() != null && !tx.getInputs().isEmpty()) {
             for (Input input : tx.getInputs()) {
-                if(StringUtils.isNotBlank(input.getAddress())){
+                if (StringUtils.isNotBlank(input.getAddress())) {
                     addressSet.add(input.getAddress());
                 }
             }
         }
-        if (tx.getOutputs() != null) {
+        if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
             for (Utxo utxo : tx.getOutputs()) {
-                if(StringUtils.isNotBlank(utxo.getAddress())) {
+                if (StringUtils.isNotBlank(utxo.getAddress())) {
                     addressSet.add(utxo.getAddress());
                 }
             }
@@ -84,25 +86,25 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         return relationList;
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void saveAll(List<TransactionRelation> list ) {
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void saveAll(List<TransactionRelation> list) {
         /*for(TransactionRelation txr:relationList){
             relationMapper.insert(txr);
         }*/
-        if(list.size() > 0){
-            if(list.size()>1000) {
-                int count = list.size()%1000;
+        if (list.size() > 0) {
+            if (list.size() > 1000) {
+                int count = list.size() % 1000;
                 List<List<TransactionRelation>> lists = ArraysTool.avgList(list, count);
-                for(int i = 0; i<count; i++){
+                for (int i = 0; i < count; i++) {
                     relationMapper.insertByBatch(lists.get(i));
                 }
-            }else{
+            } else {
                 relationMapper.insertByBatch(list);
             }
         }
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteByTxHash(String txHash) {
         Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
@@ -110,19 +112,19 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
     }
 
     @Override
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(TransactionRelation transactionRelation) {
         return relationMapper.insert(transactionRelation);
     }
 
     @Override
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int update(TransactionRelation transactionRelation) {
         return relationMapper.updateByPrimaryKey(transactionRelation);
     }
 
     @Override
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByKey(Long aLong) {
         return relationMapper.deleteByPrimaryKey(aLong);
     }
