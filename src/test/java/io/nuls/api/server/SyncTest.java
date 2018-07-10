@@ -37,22 +37,6 @@ public class SyncTest {
 
     private static String areaName = "blockDB";
 
-    @Before
-    public void init() {
-        RestFulUtils.getInstance().init("http://192.168.1.233:8001/api");
-//        try {
-//            LevelDBManager.init();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        //utxo
-//        dbService.createArea(Constant.UTXO_DB_NAME);
-//        //transaction
-//        dbService.createArea(Constant.TRANSACTION_DB_NAME);
-//        //blockheader
-//        dbService.createArea(Constant.BLOCKHEADER_DB_NAME);
-    }
-
     @Test
     public void testGetBlock() {
         for (int i = 0; i <= 50000; i++) {
@@ -110,7 +94,7 @@ public class SyncTest {
 
     @Test
     public void testRollback() {
-        for (long i = 3325; i >= 0; i--) {
+        for (long i = 5521; i >= 0; i--) {
             BlockHeader blockHeader = blockBusiness.getByKey(i);
             try {
                 syncDataBusiness.rollback(blockHeader);

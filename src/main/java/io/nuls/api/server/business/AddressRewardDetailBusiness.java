@@ -51,7 +51,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      * @param height
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(Long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
@@ -64,30 +64,32 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      * @param addressRewardDetail 需要新增的实体
      * @return 新增结果 1成功，其他失败
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(AddressRewardDetail addressRewardDetail) {
         return addressRewardDetailMapper.insert(addressRewardDetail);
     }
 
-    public List<AddressRewardDetail> getRewardList(Transaction tx){
+    public List<AddressRewardDetail> getRewardList(Transaction tx) {
         List<AddressRewardDetail> utxoList = new ArrayList<>();
-        for (Utxo utxo : tx.getOutputs()) {
-            AddressRewardDetail detail = new AddressRewardDetail();
-            detail.setAddress(utxo.getAddress());
-            detail.setCreateTime(tx.getCreateTime());
-            detail.setAmount(utxo.getAmount());
-            detail.setBlockHeight(tx.getBlockHeight());
-            detail.setTxHash(tx.getHash());
-            //addressRewardDetailMapper.insert(detail);
-            utxoList.add(detail);
+        if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
+            for (Utxo utxo : tx.getOutputs()) {
+                AddressRewardDetail detail = new AddressRewardDetail();
+                detail.setAddress(utxo.getAddress());
+                detail.setCreateTime(tx.getCreateTime());
+                detail.setAmount(utxo.getAmount());
+                detail.setBlockHeight(tx.getBlockHeight());
+                detail.setTxHash(tx.getHash());
+                //addressRewardDetailMapper.insert(detail);
+                utxoList.add(detail);
+            }
         }
         return utxoList;
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveAll(List<AddressRewardDetail> list) {
-        if(list.size() > 0){
+        if (list.size() > 0) {
             addressRewardDetailMapper.insertByBatch(list);
         }
     }
@@ -98,7 +100,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      * @param addressRewardDetail
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(AddressRewardDetail addressRewardDetail) {
         return addressRewardDetailMapper.updateByPrimaryKey(addressRewardDetail);
@@ -110,7 +112,7 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
      * @param id
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(Long id) {
         return addressRewardDetailMapper.deleteByPrimaryKey(id);
@@ -129,24 +131,27 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
 
     /**
      * 统计某地址总的奖励
+     *
      * @return
      */
-    public Long selectSumReward(String address){
-        if(StringUtils.validAddress(address)){
+    public Long selectSumReward(String address) {
+        if (StringUtils.validAddress(address)) {
             Searchable searchable = new Searchable();
             searchable.addCondition("address", SearchOperator.eq, address);
             return addressRewardDetailMapper.selectSumReward(searchable);
-        }else{
+        } else {
             return 0L;
         }
     }
+
     /**
      * 统计某地址总的奖励 （根据时间统计）
+     *
      * @return
      */
-    public Long selectDayofReward(Long time){
+    public Long selectDayofReward(Long time) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("create_time", SearchOperator.gte,time-Constant.MILLISECONDS_TIME_DAY);
+        searchable.addCondition("create_time", SearchOperator.gte, time - Constant.MILLISECONDS_TIME_DAY);
         searchable.addCondition("create_time", SearchOperator.lt, time);
         return addressRewardDetailMapper.selectSumReward(searchable);
     }

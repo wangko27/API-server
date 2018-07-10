@@ -232,7 +232,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     public List<Utxo> getListByFrom(Transaction tx, Map<String, Utxo> utxoMap) {
         //coinBase交易，红黄牌交易没有inputs
         List<Utxo> txlist = new ArrayList<>();
-        if (tx.getInputs() == null) {
+        if (tx.getInputs() == null || tx.getInputs().isEmpty()) {
             return txlist;
         }
         Utxo utxo;
