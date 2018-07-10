@@ -7,6 +7,7 @@ import io.nuls.api.model.NulsDigestData;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.SyncDataBusiness;
+import io.nuls.api.server.leveldb.manager.LevelDBManager;
 import io.nuls.api.server.leveldb.service.DBService;
 import io.nuls.api.server.leveldb.service.impl.LevelDBServiceImpl;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -31,15 +32,25 @@ public class SyncTest {
     private SyncDataBusiness syncDataBusiness;
     @Autowired
     private BlockBusiness blockBusiness;
-
+    @Autowired
     private static DBService dbService;
+
     private static String areaName = "blockDB";
 
     @Before
     public void init() {
         RestFulUtils.getInstance().init("http://192.168.1.233:8001/api");
-        dbService = new LevelDBServiceImpl();
-        dbService.createArea(areaName);
+//        try {
+//            LevelDBManager.init();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        //utxo
+//        dbService.createArea(Constant.UTXO_DB_NAME);
+//        //transaction
+//        dbService.createArea(Constant.TRANSACTION_DB_NAME);
+//        //blockheader
+//        dbService.createArea(Constant.BLOCKHEADER_DB_NAME);
     }
 
     @Test
@@ -62,7 +73,7 @@ public class SyncTest {
 
     @Test
     public void testBlock() {
-        BlockHeader block = blockBusiness.getByKey(0L);
+        BlockHeader block = blockBusiness.getByKey(5486L);
 
         try {
             System.out.println(new String(block.getExtend(), Constant.DEFAULT_ENCODING));
@@ -99,7 +110,7 @@ public class SyncTest {
 
     @Test
     public void testRollback() {
-        for (long i = 6157; i >= 0; i--) {
+        for (long i = 3325; i >= 0; i--) {
             BlockHeader blockHeader = blockBusiness.getByKey(i);
             try {
                 syncDataBusiness.rollback(blockHeader);

@@ -66,49 +66,50 @@ public class InitApiserver {
             //skip it
         }
 
-        /*加载utxo*/
-        utxoBusiness.initUtxoList();
-
-        /*启动*/
-        /*加载14天历史*/
-        blockBusiness.initHistory();
-        /*加载持币账户排行榜*/
-        List<UtxoDto> blockDtoList = utxoBusiness.getBlockSumTxamount();
-        BalanceListContext.reset(blockDtoList);
-        /*加载出块账户排行榜*/
-        List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
-        PackingAddressContext.reset(agentNodeDtoList);
-
-
-        /*加载24小时奖励*/
-        Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
-        HistoryContext.rewardofday = rewardOfDay == null ? 0L : rewardOfDay;
-
-        /*加载别名到缓存*/
-        //AliasContext
-        List<Alias> aliasList = aliasBusiness.getList();
-        for (Alias alias : aliasList) {
-            AliasContext.put(alias);
-        }
-
-        /*加载初始化的区块列表*/
-        PageInfo<BlockHeader> blockHeaderPageInfo = blockBusiness.getList(null, 1, Constant.INDEX_BLOCK_LIST_COUNT);
-        List<BlockHeader> blockList = blockHeaderPageInfo.getList();
-        if (null != blockList) {
-            IndexContext.initBlocks(blockList);
-        }
-
-        /*加载初始化的交易列表*/
-        PageInfo<Transaction> pageInfo = transactionBusiness.getList(null, 0, 1, Constant.INDEX_TX_LIST_COUNT, 3);
-        if (null != pageInfo.getList()) {
-            IndexContext.initTransactions(pageInfo.getList());
-        }
-
-        /*初始化共识信息*/
-        RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
-        if (rpcClientResult.isSuccess()) {
-            IndexContext.resetRpcConsensusData((Map) rpcClientResult.getData());
-        }
+        return;
+//        /*加载utxo*/
+//        utxoBusiness.initUtxoList();
+//
+//        /*启动*/
+//        /*加载14天历史*/
+//        blockBusiness.initHistory();
+//        /*加载持币账户排行榜*/
+//        List<UtxoDto> blockDtoList = utxoBusiness.getBlockSumTxamount();
+//        BalanceListContext.reset(blockDtoList);
+//        /*加载出块账户排行榜*/
+//        List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
+//        PackingAddressContext.reset(agentNodeDtoList);
+//
+//
+//        /*加载24小时奖励*/
+//        Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
+//        HistoryContext.rewardofday = rewardOfDay == null ? 0L : rewardOfDay;
+//
+//        /*加载别名到缓存*/
+//        //AliasContext
+//        List<Alias> aliasList = aliasBusiness.getList();
+//        for (Alias alias : aliasList) {
+//            AliasContext.put(alias);
+//        }
+//
+//        /*加载初始化的区块列表*/
+//        PageInfo<BlockHeader> blockHeaderPageInfo = blockBusiness.getList(null, 1, Constant.INDEX_BLOCK_LIST_COUNT);
+//        List<BlockHeader> blockList = blockHeaderPageInfo.getList();
+//        if (null != blockList) {
+//            IndexContext.initBlocks(blockList);
+//        }
+//
+//        /*加载初始化的交易列表*/
+//        PageInfo<Transaction> pageInfo = transactionBusiness.getList(null, 0, 1, Constant.INDEX_TX_LIST_COUNT, 3);
+//        if (null != pageInfo.getList()) {
+//            IndexContext.initTransactions(pageInfo.getList());
+//        }
+//
+//        /*初始化共识信息*/
+//        RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
+//        if (rpcClientResult.isSuccess()) {
+//            IndexContext.resetRpcConsensusData((Map) rpcClientResult.getData());
+//        }
 
     }
 }
