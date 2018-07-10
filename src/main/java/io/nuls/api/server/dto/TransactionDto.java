@@ -58,6 +58,7 @@ public class TransactionDto{
         this.outputs = transaction.getOutputs();
         this.inputs = transaction.getInputs();
         this.type = transaction.getType();
+        this.remark = transaction.getRemark();
     }
 
     public String getHash() {

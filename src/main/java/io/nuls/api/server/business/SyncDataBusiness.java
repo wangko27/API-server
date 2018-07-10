@@ -66,7 +66,7 @@ public class SyncDataBusiness {
         List<PunishLog> punishLogList = new ArrayList<>();
 
         try {
-            Map<String, Object> extendMap = new HashMap<>();                       //用于组装transation.extend字段
+            //Map<String, Object> extendMap = new HashMap<>();                       //用于组装transation.extend字段
             for (int i = 0; i < block.getTxList().size(); i++) {
                 Transaction tx = block.getTxList().get(i);
                 tx.setTxIndex(i);

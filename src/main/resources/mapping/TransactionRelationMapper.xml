@@ -85,4 +85,8 @@
     from transaction_relation
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+  <select id="isAddressExist" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Long">
+    SELECT COUNT(1) FROM transaction_relation
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

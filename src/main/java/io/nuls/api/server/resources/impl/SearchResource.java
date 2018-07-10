@@ -5,6 +5,8 @@ import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
+import io.nuls.api.server.business.TransactionRelationBusiness;
+import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,9 @@ public class SearchResource {
     private BlockBusiness blockBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
+    @Autowired
+    private TransactionRelationBusiness transactionRelationBusiness;
+
 
     @GET
     @Path("/{keyword}")
@@ -46,7 +51,7 @@ public class SearchResource {
                     result.setData(EntityConstant.SEARCH_HEADER_HEIGHT);
                 }
             } else if (StringUtils.validAddress(keyword)) {
-                if (null != UtxoContext.get(keyword)) {
+                if (transactionRelationBusiness.isAddressExist(keyword) > 0) {
                     result.setData(EntityConstant.SEARCH_ACCOUNT_ADDRESS);
                 }
             } else if (StringUtils.validHash(keyword)) {
