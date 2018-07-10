@@ -161,58 +161,63 @@ public class SyncDataBusiness {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollback(BlockHeader header) throws Exception {
-        Log.error("--------------roll back, block height: " + header.getHeight() + ",hash :" + header.getHash());
+        try {
+            Log.error("--------------roll back, block height: " + header.getHeight() + ",hash :" + header.getHash());
 
-        List<Transaction> txList = transactionBusiness.getList(header);   //回滚的交易
-        List<Utxo> outputs = new ArrayList<>();                           //回滚时需要删除output
-        Map<String, Utxo> inputMap = new HashMap<>();                     //回滚时需要重置的inputs
+            List<Transaction> txList = transactionBusiness.getList(header);   //回滚的交易
+            List<Utxo> outputs = new ArrayList<>();                           //回滚时需要删除output
+            Map<String, Utxo> inputMap = new HashMap<>();                     //回滚时需要重置的inputs
 
-        Utxo utxo;
-        for (int i = txList.size() - 1; i >= 0; i--) {
-            Transaction tx = txList.get(i);
-            if (tx.getOutputList() != null && !tx.getOutputList().isEmpty()) {
-                for (Output output : tx.getOutputList()) {
-                    utxo = utxoLevelDbService.select(output.getKey());
-                    outputs.add(utxo);
-                    if (inputMap.containsKey(utxo.getKey())) {
-                        inputMap.remove(utxo.getKey());
+            Utxo utxo;
+            for (int i = txList.size() - 1; i >= 0; i--) {
+                Transaction tx = txList.get(i);
+                if (tx.getOutputList() != null && !tx.getOutputList().isEmpty()) {
+                    for (Output output : tx.getOutputList()) {
+                        utxo = utxoLevelDbService.select(output.getKey());
+                        outputs.add(utxo);
+                        if (inputMap.containsKey(utxo.getKey())) {
+                            inputMap.remove(utxo.getKey());
+                        }
                     }
                 }
-            }
-            if (tx.getInputs() != null && !tx.getInputs().isEmpty()) {
-                for (Input input : tx.getInputs()) {
-                    utxo = utxoLevelDbService.select(input.getKey());
-                    utxo.setSpendTxHash(null);
-                    inputMap.put(utxo.getKey(), utxo);
+                if (tx.getInputs() != null && !tx.getInputs().isEmpty()) {
+                    for (Input input : tx.getInputs()) {
+                        utxo = utxoLevelDbService.select(input.getKey());
+                        utxo.setSpendTxHash(null);
+                        inputMap.put(utxo.getKey(), utxo);
+                    }
                 }
+
+                transactionBusiness.rollback(tx);
             }
 
-            transactionBusiness.rollback(tx);
-        }
+            //回滚别名
+            aliasBusiness.deleteByHeight(header.getHeight());
+            //回滚惩罚记录
+            punishLogBusiness.deleteByHeight(header.getHeight());
+            //回滚奖励
+            detailBusiness.deleteByHeight(header.getHeight());
+            //回滚交易
+            transactionBusiness.deleteList(header.getTxHashList());
+            //回滚块
+            blockBusiness.deleteByKey(header.getHeight());
+            //回滚levelDB与缓存
+            //回滚交易
+            transactionBusiness.deleteLevelDBList(header.getTxHashList());
+            //回滚utxo
+            utxoBusiness.rollbackByTo(outputs);
+            utxoBusiness.rollBackByFrom(inputMap);
 
-        //回滚别名
-        aliasBusiness.deleteByHeight(header.getHeight());
-        //回滚惩罚记录
-        punishLogBusiness.deleteByHeight(header.getHeight());
-        //回滚奖励
-        detailBusiness.deleteByHeight(header.getHeight());
-        //回滚交易
-        transactionBusiness.deleteList(header.getTxHashList());
-        //回滚块
-        blockBusiness.deleteByKey(header.getHeight());
-        //回滚levelDB与缓存
-        //回滚交易
-        transactionBusiness.deleteLevelDBList(header.getTxHashList());
-        //回滚utxo
-        utxoBusiness.rollbackByTo(outputs);
-        utxoBusiness.rollBackByFrom(inputMap);
-
-        //回滚最新块
-        IndexContext.removeBlock(header);
-        //重新加载最新的几条交易信息
-        PageInfo<Transaction> pageInfo = transactionBusiness.getList(null, 0, 1, Constant.INDEX_TX_LIST_COUNT, 3);
-        if (null != pageInfo.getList()) {
-            IndexContext.initTransactions(pageInfo.getList());
+            //回滚最新块
+            IndexContext.removeBlock(header);
+            //重新加载最新的几条交易信息
+            PageInfo<Transaction> pageInfo = transactionBusiness.getList(null, 0, 1, Constant.INDEX_TX_LIST_COUNT, 3);
+            if (null != pageInfo.getList()) {
+                IndexContext.initTransactions(pageInfo.getList());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 

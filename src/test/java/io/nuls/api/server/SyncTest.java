@@ -94,12 +94,13 @@ public class SyncTest {
 
     @Test
     public void testRollback() {
-        for (long i = 5521; i >= 0; i--) {
+        for (long i = 3396; i >= 0; i--) {
             BlockHeader blockHeader = blockBusiness.getByKey(i);
             try {
                 syncDataBusiness.rollback(blockHeader);
             } catch (Exception e) {
                 e.printStackTrace();
+                return;
             }
         }
     }
