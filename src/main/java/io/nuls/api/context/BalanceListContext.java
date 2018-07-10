@@ -17,9 +17,32 @@ import java.util.List;
  * Date:  2018/6/5 0005
  */
 public class BalanceListContext {
+    private static List<UtxoDto> blockDtos = new ArrayList<>();
+    public static void add(UtxoDto block){
+        blockDtos.add(block);
+    }
 
+    public static List<UtxoDto> getAll(){
+        Collections.sort(blockDtos, new Comparator<UtxoDto>() {
+            @Override
+            public int compare(UtxoDto o1, UtxoDto o2) {
+                return o2.getTotal().compareTo(o1.getTotal());
+            }
+        });
+        return blockDtos;
+    }
 
-    public static UtxoDto get(String address) {
+    public static void clear(){
+        blockDtos.clear();
+    }
+    public static void reset(List<UtxoDto> list){
+        blockDtos = list;
+    }
+    public static int getSize(){
+        return blockDtos.size();
+    }
+
+    /*public static UtxoDto get(String address) {
         return (UtxoDto) EhcacheUtil.getInstance().get(Constant.BALANCE_CACHE_NAME,address);
     }
     public static int getSize(){
@@ -58,7 +81,7 @@ public class BalanceListContext {
         for(UtxoDto dto: list){
             add(dto);
         }
-    }
+    }*/
 
     /*private static List<UtxoDto> blockDtos = new ArrayList<>();
     public static void add(UtxoDto block){

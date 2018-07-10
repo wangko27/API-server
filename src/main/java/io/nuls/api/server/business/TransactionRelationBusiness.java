@@ -44,6 +44,17 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
     }
 
     /**
+     * 判断某个地址是否有交易存在
+     * @param address
+     * @return
+     */
+    public long isAddressExist(String address){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, address);
+        return relationMapper.isAddressExist(searchable);
+    }
+
+    /**
      * 根据地址，分页查询hash
      *
      * @param address
