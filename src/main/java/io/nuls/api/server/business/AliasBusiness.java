@@ -130,7 +130,11 @@ public class AliasBusiness implements BaseService<Alias, String> {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         //删除缓存中的别名
-        AliasContext.removeByHeight(height);
-        aliasMapper.deleteBySearchable(searchable);
+        //AliasContext.removeByHeight(height);
+        List<Alias> list = aliasMapper.selectList(searchable);
+        for(Alias alias:list){
+            aliasMapper.deleteByPrimaryKey(alias.getAlias());
+            AliasContext.remove(alias.getAddress());
+        }
     }
 }

@@ -32,18 +32,6 @@ public class AliasContext {
         EhcacheUtil.getInstance().remove(Constant.ALIAS_CACHE_NAME,address);
     }
 
-    public static void removeByHeight(Long height){
-        Cache cache = EhcacheUtil.getInstance().get(Constant.ALIAS_CACHE_NAME);
-        List<String> keys = cache.getKeys();
-        for (String key:keys){
-            Element element = cache.get(key);
-            Alias alias = (Alias)element.getObjectValue();
-            if(alias.getBlockHeight() == height){
-                remove(alias.getAddress());
-            }
-        }
-    }
-
     /*private static Map<String, Alias> aliasMap = new ConcurrentHashMap<>();
 
     public static Alias get(String address) {

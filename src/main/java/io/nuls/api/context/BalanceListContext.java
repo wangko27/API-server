@@ -44,6 +44,7 @@ public class BalanceListContext {
                 return o2.getTotal().compareTo(o1.getTotal());
             }
         });
+        System.out.println(list.size());
         return list;
     }
     public static void remove(String address) {
