@@ -65,84 +65,90 @@ public class SyncDataBusiness {
         List<Deposit> depositList = new ArrayList<>();
         List<PunishLog> punishLogList = new ArrayList<>();
 
-        Map<String, Object> extendMap = new HashMap<>();                       //用于组装transation.extend字段
-        for (int i = 0; i < block.getTxList().size(); i++) {
-            Transaction tx = block.getTxList().get(i);
-            tx.setTxIndex(i);
+        try {
+            Map<String, Object> extendMap = new HashMap<>();                       //用于组装transation.extend字段
+            for (int i = 0; i < block.getTxList().size(); i++) {
+                Transaction tx = block.getTxList().get(i);
+                tx.setTxIndex(i);
 
-            //存放新的utxo到utxoMap
-            if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
-                for (Utxo utxo : tx.getOutputs()) {
-                    utxoMap.put(utxo.getKey(), utxo);
+                //存放新的utxo到utxoMap
+                if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
+                    for (Utxo utxo : tx.getOutputs()) {
+                        utxoMap.put(utxo.getKey(), utxo);
+                    }
+                }
+
+                //存放被花费的utxo
+                fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
+
+                txList.add(tx);
+                txRelationList.addAll(transactionRelationBusiness.getListByTx(tx));
+
+                if (tx.getType() == EntityConstant.TX_TYPE_COINBASE) {
+                    addressRewardDetailList.addAll(detailBusiness.getRewardList(tx));
+                } else if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
+                    aliasList.add((Alias) tx.getTxData());
+                } else if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
+                    //agentNodeList.add((AgentNode) tx.getTxData());
+                    agentNodeBusiness.save((AgentNode) tx.getTxData());
+                } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
+                    depositList.add((Deposit) tx.getTxData());
+                    depositBusiness.updateAgentNodeByDeposit((Deposit) tx.getTxData());
+                } else if (tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
+                    depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getHash());
+                } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
+                    agentNodeBusiness.stopAgent((AgentNode) tx.getTxData(), tx.getHash());
+                } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
+                    PunishLog punishLog = (PunishLog) tx.getTxData();
+                    punishLogList.add(punishLog);
+                    agentNodeBusiness.stopAgentByRedPublish(punishLog.getAddress(), tx.getHash());
+                } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
+                    for (TxData data : tx.getTxDataList()) {
+                        PunishLog log = (PunishLog) data;
+                        punishLogList.add(log);
+                    }
                 }
             }
+            blockBusiness.save(block.getHeader());
+            transactionBusiness.saveAll(txList);
+            transactionRelationBusiness.saveAll(txRelationList);
+            detailBusiness.saveAll(addressRewardDetailList);
+            aliasBusiness.saveAll(aliasList);
+            punishLogBusiness.saveAll(punishLogList);
+            depositBusiness.saveAll(depositList);
+            utxoBusiness.saveAll(utxoMap);
+            utxoBusiness.updateAll(fromList);
+            //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
+            //存入leveldb
 
-            //存放被花费的utxo
-            fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
-
-            txList.add(tx);
-            txRelationList.addAll(transactionRelationBusiness.getListByTx(tx));
-
-            if (tx.getType() == EntityConstant.TX_TYPE_COINBASE) {
-                addressRewardDetailList.addAll(detailBusiness.getRewardList(tx));
-            } else if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
-                aliasList.add((Alias) tx.getTxData());
-            } else if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
-                //agentNodeList.add((AgentNode) tx.getTxData());
-                agentNodeBusiness.save((AgentNode) tx.getTxData());
-            } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
-                depositList.add((Deposit) tx.getTxData());
-                depositBusiness.updateAgentNodeByDeposit((Deposit) tx.getTxData());
-            } else if (tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
-                depositBusiness.cancelDeposit((Deposit) tx.getTxData(), tx.getHash());
-            } else if (tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
-                agentNodeBusiness.stopAgent((AgentNode) tx.getTxData(), tx.getHash());
-            } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
-                PunishLog punishLog = (PunishLog) tx.getTxData();
-                punishLogList.add(punishLog);
-                agentNodeBusiness.stopAgentByRedPublish(punishLog.getAddress(), tx.getHash());
-            } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
-                for (TxData data : tx.getTxDataList()) {
-                    PunishLog log = (PunishLog) data;
-                    punishLogList.add(log);
+            int result = blockHeaderLevelDbService.insert(block.getHeader());
+            if (result == 0) {
+                throw new NulsException();
+            }
+            for (Utxo utxo : fromList) {
+                UtxoContext.remove(utxo.getAddress(), utxo.getKey());
+            }
+            for (Utxo utxo : utxoMap.values()) {
+                if (utxo.getSpendTxHash() == null) {
+                    UtxoContext.put(utxo.getAddress(), utxo.getKey());
                 }
             }
-        }
-        blockBusiness.save(block.getHeader());
-        transactionBusiness.saveAll(txList);
-        transactionRelationBusiness.saveAll(txRelationList);
-        detailBusiness.saveAll(addressRewardDetailList);
-        aliasBusiness.saveAll(aliasList);
-        punishLogBusiness.saveAll(punishLogList);
-        depositBusiness.saveAll(depositList);
-        utxoBusiness.saveAll(utxoMap);
-        utxoBusiness.updateAll(fromList);
-        //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
-        //存入leveldb
-
-        int result = blockHeaderLevelDbService.insert(block.getHeader());
-        if (result == 0) {
-            throw new NulsException();
-        }
-        for (Utxo utxo : fromList) {
-            UtxoContext.remove(utxo.getAddress(), utxo.getKey());
-        }
-        for (Utxo utxo : utxoMap.values()) {
-            if (utxo.getSpendTxHash() == null) {
-                UtxoContext.put(utxo.getAddress(), utxo.getKey());
+            //缓存新块 首页数据展示用
+            IndexContext.putBlock(block.getHeader());
+            //缓存新交易
+            int end = txList.size();
+            int start = 0;
+            if (end > Constant.INDEX_TX_LIST_COUNT) {
+                start = end - Constant.INDEX_TX_LIST_COUNT;
             }
+            for (int i = start; i < end; i++) {
+                IndexContext.putTransaction(txList.get(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        //缓存新块 首页数据展示用
-        IndexContext.putBlock(block.getHeader());
-        //缓存新交易
-        int end = txList.size();
-        int start = 0;
-        if (end > Constant.INDEX_TX_LIST_COUNT) {
-            start = end - Constant.INDEX_TX_LIST_COUNT;
-        }
-        for (int i = start; i < end; i++) {
-            IndexContext.putTransaction(txList.get(i));
-        }
+
         time2 = System.currentTimeMillis();
         System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
 
@@ -162,7 +168,7 @@ public class SyncDataBusiness {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollback(BlockHeader header) throws Exception {
         try {
-            Log.error("--------------roll back, block height: " + header.getHeight() + ",hash :" + header.getHash());
+            Log.warn("--------------roll back, block height: " + header.getHeight() + ",hash :" + header.getHash());
 
             List<Transaction> txList = transactionBusiness.getList(header);   //回滚的交易
             List<Utxo> outputs = new ArrayList<>();                           //回滚时需要删除output

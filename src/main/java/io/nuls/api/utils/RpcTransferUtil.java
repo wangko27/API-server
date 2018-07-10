@@ -105,7 +105,7 @@ public class RpcTransferUtil {
         tx.setHash(txModel.getHash().getDigestHex());
         tx.setBlockHeight(txModel.getBlockHeight());
         tx.setFee(txModel.getFee().getValue());
-        if (tx.getRemark() != null) {
+        if (txModel.getRemark() != null) {
             try {
                 tx.setRemark(new String(txModel.getRemark(), Constant.DEFAULT_ENCODING));
             } catch (UnsupportedEncodingException e) {

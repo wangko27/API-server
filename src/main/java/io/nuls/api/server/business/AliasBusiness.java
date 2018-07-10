@@ -51,7 +51,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
      * @param alias 实体
      * @return 0，设置失败，1设置成功，2实体为空,，3地址格式验证失败，4高度错误,5别名为空，6账户地址已经设置过别名了，7别名已经被设置过了
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Alias alias) {
 //        if(null == alias){
@@ -74,22 +74,22 @@ public class AliasBusiness implements BaseService<Alias, String> {
 //        }
 
         int result = aliasMapper.insert(alias);
-        if(result == 1){
+        if (result == 1) {
             //保存成功后，同步别名到静态缓存中
             AliasContext.put(alias);
         }
         return result;
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int saveAll(List<Alias> list) {
-        if(list.size()>0){
+        if (list.size() > 0) {
             return aliasMapper.insertByBatch(list);
         }
         return 0;
     }
 
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Alias alias) {
         return aliasMapper.updateByPrimaryKey(alias);
@@ -101,7 +101,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
      * @param id 账户地址
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED,isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String id) {
         return aliasMapper.deleteByPrimaryKey(id);
@@ -125,16 +125,18 @@ public class AliasBusiness implements BaseService<Alias, String> {
      * @param height
      * @return
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteByHeight(long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
         //删除缓存中的别名
         //AliasContext.removeByHeight(height);
         List<Alias> list = aliasMapper.selectList(searchable);
-        for(Alias alias:list){
-            aliasMapper.deleteByPrimaryKey(alias.getAlias());
-            AliasContext.remove(alias.getAddress());
+        if (!list.isEmpty()) {
+            for (Alias alias : list) {
+                aliasMapper.deleteByPrimaryKey(alias.getAlias());
+                AliasContext.remove(alias.getAddress());
+            }
         }
     }
 }

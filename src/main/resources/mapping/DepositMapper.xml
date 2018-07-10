@@ -28,7 +28,7 @@
   <update id="deleteByAgentHash">
     update deposit
     set delete_hash = #{deleteHash,jdbcType=VARCHAR}
-    where agent_hash = #{agentHash,jdbcType=VARCHAR}
+    where agent_hash = #{agentHash,jdbcType=VARCHAR} and delete_hash is null
   </update>
 
   <insert id="insert" parameterType="io.nuls.api.entity.Deposit" >

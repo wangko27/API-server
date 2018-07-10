@@ -1,17 +1,22 @@
 package io.nuls.api.server;
 
 import io.nuls.api.constant.Constant;
+import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.NulsDigestData;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.SyncDataBusiness;
+import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
+import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
+import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.leveldb.manager.LevelDBManager;
 import io.nuls.api.server.leveldb.service.DBService;
 import io.nuls.api.server.leveldb.service.impl.LevelDBServiceImpl;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.RestFulUtils;
+import net.sf.ehcache.util.FindBugsSuppressWarnings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +26,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:ApplicationContext.xml")
@@ -33,38 +39,12 @@ public class SyncTest {
     @Autowired
     private BlockBusiness blockBusiness;
     @Autowired
-    private static DBService dbService;
+    private BlockHeaderLevelDbService headerLevelDbService;
+    @Autowired
+    private TransactionLevelDbService transactionLevelDbService;
+    @Autowired
+    private UtxoLevelDbService utxoLevelDbService;
 
-    private static String areaName = "blockDB";
-
-    @Test
-    public void testGetBlock() {
-        for (int i = 0; i <= 50000; i++) {
-            RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(i);
-            BlockHeader header = result.getData();
-            Result result1 = dbService.putModel(areaName, header.getHash().getBytes(), header);
-
-        }
-    }
-
-
-    @Test
-    public void testGetBlockDBlevel() {
-        BlockHeader header = dbService.getModel(areaName, "0020b88302681a0fb27e12aa9bc2e42d9c9310b5d9e5dc5a35d4af71c6382f10815a".getBytes(), BlockHeader.class);
-        System.out.println(header.getHeight());
-    }
-
-
-    @Test
-    public void testBlock() {
-        BlockHeader block = blockBusiness.getByKey(5486L);
-
-        try {
-            System.out.println(new String(block.getExtend(), Constant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Test
     public void testSyncData() throws InterruptedException {
@@ -94,7 +74,7 @@ public class SyncTest {
 
     @Test
     public void testRollback() {
-        for (long i = 3396; i >= 0; i--) {
+        for (long i = 493; i >= 0; i--) {
             BlockHeader blockHeader = blockBusiness.getByKey(i);
             try {
                 syncDataBusiness.rollback(blockHeader);
@@ -103,5 +83,15 @@ public class SyncTest {
                 return;
             }
         }
+
+
+        List<BlockHeader> headers = headerLevelDbService.getList();
+        System.out.println(headers == null);
+
+        List<Transaction> transactions = transactionLevelDbService.getList();
+        System.out.println(transactions == null);
+
+        List<Utxo> utxos = utxoLevelDbService.getList();
+        System.out.println(utxos == null);
     }
 }

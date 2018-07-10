@@ -44,7 +44,6 @@ public class InitApiserver {
 
     @PostConstruct
     public void init() {
-        RestFulUtils.getInstance().init("http://192.168.1.233:8001/api");
         /*List<Utxo> list = UtxoLevelDbService.getInstance().getList();
         int nullcount = 0;
         for(Utxo utxo: list){
