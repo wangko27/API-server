@@ -11,7 +11,6 @@ import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.UtxoDto;
-import io.nuls.api.utils.ArraysTool;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,6 +83,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      */
     public void initUtxoList() {
         List<Utxo> list = utxoLevelDbService.getList();
+
         for (Utxo utxo : list) {
             if (StringUtils.isBlank(utxo.getSpendTxHash())) {
                 UtxoContext.put(utxo.getAddress(), utxo.getKey());

@@ -6,6 +6,7 @@ import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,10 @@ public class UtxoLevelDbService {
 
     //这里会查询出leveldb里面全部的数据，谨慎使用
     public List<Utxo> getList() {
-        return dbService.values(Constant.UTXO_CACHE_NAME, Utxo.class);
+        List<Utxo> list = dbService.values(Constant.UTXO_CACHE_NAME, Utxo.class);
+        if(null == list){
+            list = new ArrayList<>();
+        }
+        return list;
     }
 }

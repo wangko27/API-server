@@ -7,10 +7,7 @@ import io.nuls.api.utils.StringUtils;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Description: 缓存别名

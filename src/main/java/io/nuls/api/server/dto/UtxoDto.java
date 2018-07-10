@@ -1,15 +1,24 @@
 package io.nuls.api.server.dto;
 
-import io.nuls.api.entity.Utxo;
+public class UtxoDto {
 
-public class UtxoDto extends Utxo {
-
-
+    private String address;
 
     private Long total;
 
     public UtxoDto() {
 
+    }
+    public UtxoDto(String address) {
+        this.address = address;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public Long getTotal() {

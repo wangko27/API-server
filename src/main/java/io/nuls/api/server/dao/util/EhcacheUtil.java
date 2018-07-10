@@ -13,6 +13,7 @@ import net.sf.ehcache.Element;
  * Date:  2018/7/2 0002
  */
 public class EhcacheUtil {
+
     private static final String path = "/ehcache.xml";
 
     private URL url;
@@ -26,12 +27,12 @@ public class EhcacheUtil {
         manager = CacheManager.create(url);
         //初始化缓存
         manager.addCache(Constant.UTXO_CACHE_NAME);
-        manager.addCache(Constant.UTXO_TEMP_CACHE_NAME);
         manager.addCache(Constant.ALIAS_CACHE_NAME);
         manager.addCache(Constant.BALANCE_CACHE_NAME);
         manager.addCache(Constant.HISTORY_CACHE_NAME);
         manager.addCache(Constant.PACKINGADDRESS_CACHE_NAME);
         manager.addCache(Constant.ADDRESS_REWARD_DETAIL);
+
     }
     //得到缓存实例
     public static EhcacheUtil getInstance() {
