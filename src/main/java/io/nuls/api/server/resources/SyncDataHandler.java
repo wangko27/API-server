@@ -1,10 +1,7 @@
 package io.nuls.api.server.resources;
 
 import io.nuls.api.constant.ErrorCode;
-import io.nuls.api.entity.Block;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.RpcTransferUtil;
@@ -89,6 +86,12 @@ public class SyncDataHandler {
             Log.error(e);
             result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
         }
+        return result;
+    }
+
+
+    public RpcClientResult<Utxo> getUtxo(String address, int limit) {
+        RpcClientResult result = restFulUtils.get("/utxo/limit/" + address + "/" + limit, null);
         return result;
     }
 }

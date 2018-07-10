@@ -7,6 +7,8 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -15,48 +17,41 @@ import java.util.List;
  * Author: zsj
  * Date:  2018/7/8 0008
  */
+@Service
 public class BlockHeaderLevelDbService {
+    @Autowired
+    private DBService dbService;
 
-    private DBService dbService = LevelDbUtil.getInstance();
-
-    //signal model
-    private static BlockHeaderLevelDbService blockHeaderLevelDbService;
-
-    public static BlockHeaderLevelDbService getInstance() {
-        if(null == blockHeaderLevelDbService){
-            blockHeaderLevelDbService = new BlockHeaderLevelDbService();
-        }
-        return blockHeaderLevelDbService;
-    }
-
-    public void insertList(List<BlockHeader> list){
-        BatchOperation batch = dbService.createWriteBatch(Constant.BLOCKHEADER_CACHE_NAME);
-        for(BlockHeader block:list){
-            batch.putModel((block.getHeight()+"").getBytes(),block);
+    public void insertList(List<BlockHeader> list) {
+        BatchOperation batch = dbService.createWriteBatch(Constant.BLOCKHEADER_DB_NAME);
+        for (BlockHeader block : list) {
+            batch.putModel((block.getHeight() + "").getBytes(), block);
         }
         batch.executeBatch();
     }
-    public int insert(BlockHeader blockHeader){
-        Result<BlockHeader> result = dbService.putModel(Constant.BLOCKHEADER_CACHE_NAME, blockHeader.getHash().getBytes(), blockHeader);
-        if(result.isSuccess()){
+
+    public int insert(BlockHeader blockHeader) {
+        Result<BlockHeader> result = dbService.putModel(Constant.BLOCKHEADER_DB_NAME, blockHeader.getHash().getBytes(), blockHeader);
+        if (result.isSuccess()) {
             return 1;
         }
         return 0;
     }
-    public int delete(String key){
-        DBService dbService = LevelDbUtil.getInstance();
-        Result result =dbService.delete(Constant.BLOCKHEADER_CACHE_NAME, key.getBytes());
-        if(result.isSuccess()){
+
+    public int delete(String key) {
+        Result result = dbService.delete(Constant.BLOCKHEADER_DB_NAME, key.getBytes());
+        if (result.isSuccess()) {
             return 1;
         }
         return 0;
     }
-    public BlockHeader select(String key){
-        DBService dbService = LevelDbUtil.getInstance();
-        return dbService.getModel(Constant.BLOCKHEADER_CACHE_NAME, key.getBytes(), BlockHeader.class);
+
+    public BlockHeader select(String key) {
+        return dbService.getModel(Constant.BLOCKHEADER_DB_NAME, key.getBytes(), BlockHeader.class);
     }
+
     //这里会查询出leveldb里面全部的数据，谨慎使用
-    public List<BlockHeader> getList(){
-        return dbService.values(Constant.BLOCKHEADER_CACHE_NAME, BlockHeader.class);
+    public List<BlockHeader> getList() {
+        return dbService.values(Constant.BLOCKHEADER_DB_NAME, BlockHeader.class);
     }
 }

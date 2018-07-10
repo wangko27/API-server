@@ -1,14 +1,14 @@
 package io.nuls.api.server;
 
 import io.nuls.api.constant.Constant;
-import io.nuls.api.entity.Block;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.NulsDigestData;
+import io.nuls.api.model.Result;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.SyncDataBusiness;
+import io.nuls.api.server.leveldb.service.DBService;
+import io.nuls.api.server.leveldb.service.impl.LevelDBServiceImpl;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.RestFulUtils;
 import org.junit.Before;
@@ -32,11 +32,33 @@ public class SyncTest {
     @Autowired
     private BlockBusiness blockBusiness;
 
+    private static DBService dbService;
+    private static String areaName = "blockDB";
+
     @Before
     public void init() {
-
-        RestFulUtils.getInstance().init("http://192.168.1.109:8001/api");
+        RestFulUtils.getInstance().init("http://192.168.1.233:8001/api");
+        dbService = new LevelDBServiceImpl();
+        dbService.createArea(areaName);
     }
+
+    @Test
+    public void testGetBlock() {
+        for (int i = 0; i <= 50000; i++) {
+            RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(i);
+            BlockHeader header = result.getData();
+            Result result1 = dbService.putModel(areaName, header.getHash().getBytes(), header);
+
+        }
+    }
+
+
+    @Test
+    public void testGetBlockDBlevel() {
+        BlockHeader header = dbService.getModel(areaName, "0020b88302681a0fb27e12aa9bc2e42d9c9310b5d9e5dc5a35d4af71c6382f10815a".getBytes(), BlockHeader.class);
+        System.out.println(header.getHeight());
+    }
+
 
     @Test
     public void testBlock() {
@@ -66,36 +88,18 @@ public class SyncTest {
         }
     }
 
+
     @Test
-    public void testGetBlock() {
-        RestFulUtils.getInstance().init("http://192.168.1.109:8001/api");
-        for (int i = 6619; i < 20000; i++) {
-            RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(i);
-            BlockHeader header = result.getData();
-            try {
-                RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
+    public void testGetUtxo() {
+        String address = "6HgaqsowQbVM8AXbHbssSAAHddeypwcc";
+        int limit = 0;
+        RpcClientResult<Utxo> result = syncDataHandler.getUtxo(address, limit);
 
-//                syncDataBusiness.syncData(blockResult.getData());
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
-            }
-        }
-
-//        RpcClientResult<BlockHeader> result = syncDataHandler.getBlockHeader(0);
-//        BlockHeader header = result.getData();
-//        try {
-//            RpcClientResult<Block> blockResult = syncDataHandler.getBlock(header);
-//            syncDataBusiness.syncData(blockResult.getData());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return;
-//        }
     }
 
     @Test
     public void testRollback() {
-        for (long i = 1120; i >= 0; i--) {
+        for (long i = 6157; i >= 0; i--) {
             BlockHeader blockHeader = blockBusiness.getByKey(i);
             try {
                 syncDataBusiness.rollback(blockHeader);

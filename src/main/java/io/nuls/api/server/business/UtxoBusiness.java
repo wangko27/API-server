@@ -31,8 +31,8 @@ import java.util.Map;
 public class UtxoBusiness implements BaseService<Utxo, String> {
     @Autowired
     private UtxoMapper utxoMapper;
-
-    UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+    @Autowired
+    UtxoLevelDbService utxoLevelDbService;
 
     /**
      * 获取列表
@@ -257,24 +257,20 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         return txlist;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void rollBackByFrom(Transaction tx) {
-        /*Searchable searchable = new Searchable();
-        searchable.addCondition("tx_hash", SearchOperator.eq, tx.getHash());
-        utxoMapper.deleteBySearchable(searchable);*/
-        //todo 根据tx_hash回滚utxo，先从数据库查询出需要回滚的tx_hash，然后根据这些utxo去leveldb删除
-
-        //回滚每条被花费的输出
-        //UtxoKey utxoKey;
-        for (Input input : tx.getInputs()) {
-            //utxoKey = new UtxoKey(input.getFromHash(), input.getFromIndex());
-            //System.out.println("3kd");
-            Utxo utxo = selectUtxoByHashAndIndex(input.getFromHash() + "_" + input.getFromIndex());
-            utxo.setSpendTxHash(null);
-            //utxoMapper.updateByPrimaryKey(utxo);
-            utxoLevelDbService.insert(utxo);
+    public void rollBackByFrom(Map<String, Utxo> inputMap) {
+        utxoLevelDbService.insertMap(inputMap);
+        for (Utxo utxo : inputMap.values()) {
+            UtxoContext.put(utxo.getAddress(), utxo.getKey());
         }
     }
+
+    public void rollbackByTo(List<Utxo> outputs) {
+        for (Utxo utxo : outputs) {
+            utxoLevelDbService.delete(utxo.getKey());
+            UtxoContext.remove(utxo.getAddress(), utxo.getKey());
+        }
+    }
+
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveAll(Map<String, Utxo> utxoMap) {
@@ -289,12 +285,15 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     public List<UtxoDto> getBlockSumTxamount() {
         List<UtxoDto> utxList = new ArrayList<>();
 
-        List<String> addressList =UtxoContext.getAllKeys();
-        for(String addr:addressList){
-            List<Utxo> list = UtxoContext.getUtxoList(addr);
-            if(list.size()>0){
+        List<String> addressList = UtxoContext.getAllKeys();
+        List<String> keyList;
+        List<Utxo> list;
+        for (String addr : addressList) {
+            keyList = UtxoContext.get(addr);
+            list = utxoLevelDbService.selectList(keyList);
+            if (list.size() > 0) {
                 Long total = 0L;
-                for(Utxo utxo: list){
+                for (Utxo utxo : list) {
                     total += utxo.getAmount();
                 }
                 UtxoDto dto = new UtxoDto();

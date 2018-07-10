@@ -6,6 +6,8 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -14,48 +16,41 @@ import java.util.List;
  * Author: zsj
  * Date:  2018/7/8 0008
  */
+@Service
 public class TransactionLevelDbService {
+    @Autowired
+    private DBService dbService;
 
-    private DBService dbService = LevelDbUtil.getInstance();
-
-    //signal model
-    private static TransactionLevelDbService transactionLevelDbService;
-
-    public static TransactionLevelDbService getInstance() {
-        if(null == transactionLevelDbService){
-            transactionLevelDbService = new TransactionLevelDbService();
-        }
-        return transactionLevelDbService;
-    }
-
-    public void insertList(List<Transaction> list){
-        BatchOperation batch = dbService.createWriteBatch(Constant.TRANSACTION_CACHE_NAME);
-        for(Transaction tx:list){
-            batch.putModel(tx.getHash().getBytes(),tx);
+    public void insertList(List<Transaction> list) {
+        BatchOperation batch = dbService.createWriteBatch(Constant.TRANSACTION_DB_NAME);
+        for (Transaction tx : list) {
+            batch.putModel(tx.getHash().getBytes(), tx);
         }
         batch.executeBatch();
     }
-    public int insert(Transaction tx){
-        Result<Utxo> result = dbService.putModel(Constant.TRANSACTION_CACHE_NAME, tx.getHash().getBytes(), tx);
-        if(result.isSuccess()){
+
+    public int insert(Transaction tx) {
+        Result<Utxo> result = dbService.putModel(Constant.TRANSACTION_DB_NAME, tx.getHash().getBytes(), tx);
+        if (result.isSuccess()) {
             return 1;
         }
         return 0;
     }
-    public int delete(String key){
-        DBService dbService = LevelDbUtil.getInstance();
-        Result result =dbService.delete(Constant.TRANSACTION_CACHE_NAME, key.getBytes());
-        if(result.isSuccess()){
+
+    public int delete(String key) {
+        Result result = dbService.delete(Constant.TRANSACTION_DB_NAME, key.getBytes());
+        if (result.isSuccess()) {
             return 1;
         }
         return 0;
     }
-    public Transaction select(String key){
-        DBService dbService = LevelDbUtil.getInstance();
-        return dbService.getModel(Constant.TRANSACTION_CACHE_NAME, key.getBytes(), Transaction.class);
+
+    public Transaction select(String key) {
+        return dbService.getModel(Constant.TRANSACTION_DB_NAME, key.getBytes(), Transaction.class);
     }
+
     //这里会查询出leveldb里面全部的数据，谨慎使用
-    public List<Transaction> getList(){
-        return dbService.values(Constant.TRANSACTION_CACHE_NAME, Transaction.class);
+    public List<Transaction> getList() {
+        return dbService.values(Constant.TRANSACTION_DB_NAME, Transaction.class);
     }
 }

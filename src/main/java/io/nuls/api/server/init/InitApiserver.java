@@ -37,7 +37,7 @@ public class InitApiserver {
     private TransactionBusiness transactionBusiness;
 
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         /*加载utxo*/
         utxoBusiness.initUtxoList();

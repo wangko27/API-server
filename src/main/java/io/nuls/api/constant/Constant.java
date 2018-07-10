@@ -91,14 +91,19 @@ public interface Constant {
     int INDEX_BLOCK_LIST_COUNT = 6;
     int INDEX_TX_LIST_COUNT = 5;
 
-    String UTXO_CACHE_NAME = "utxoCache";
+
     String UTXO_TEMP_CACHE_NAME = "utxoTempCache";
     String ALIAS_CACHE_NAME = "alias";
+    String UTXO_CACHE_NAME ="utxoCache";
     String BALANCE_CACHE_NAME = "balance";
     String HISTORY_CACHE_NAME="history";
-    String TRANSACTION_CACHE_NAME="transaction";
-    String BLOCKHEADER_CACHE_NAME="blockheader";
     String PACKINGADDRESS_CACHE_NAME = "packingaddress";
+
+
+    String UTXO_DB_NAME = "utxo";
+    String TRANSACTION_DB_NAME="transaction";
+    String BLOCKHEADER_DB_NAME="blockheader";
+
     String ADDRESS_REWARD_DETAIL = "reward";
     /**
      * 空值占位符

@@ -9,5 +9,8 @@ import java.util.List;
 
 @MyBatisMapper
 public interface TransactionMapper extends BaseMapper<Transaction, Long>{
+
     int insertByBatch(@Param("list") List<Transaction> list);
+
+    void deleteList(@Param("list") List<String> txHashList);
 }

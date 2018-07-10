@@ -5,6 +5,7 @@ import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.BalanceMapper;
+import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.resources.impl.BlockResource;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.TimeService;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +34,8 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
     @Autowired
     private BalanceMapper balanceMapper;
 
+    @Autowired
+    private UtxoLevelDbService utxoLevelDbService;
 
     /**
      * 查询账户资产
@@ -50,28 +54,29 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
         Long usable = 0L;
         Long locked = 0L;
 
-        List<Utxo> utxolist = UtxoContext.getUtxoList(address);
-        if (utxolist != null) {
-            for (Utxo utxo : utxolist) {
-                if (utxo.getLockTime() == -1) {
-                    locked += utxo.getAmount();
-                } else if (utxo.getLockTime() == 0) {
-                    usable += utxo.getAmount();
-                } else {
-                    if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
-                        //根据时间锁定
-                        if (utxo.getLockTime() <= currentTime) {
-                            usable += utxo.getAmount();
-                        } else {
-                            locked += utxo.getAmount();
-                        }
+        List<String> keyList = UtxoContext.get(address);
+        List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
+
+
+        for (Utxo utxo : utxoList) {
+            if (utxo.getLockTime() == -1) {
+                locked += utxo.getAmount();
+            } else if (utxo.getLockTime() == 0) {
+                usable += utxo.getAmount();
+            } else {
+                if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
+                    //根据时间锁定
+                    if (utxo.getLockTime() <= currentTime) {
+                        usable += utxo.getAmount();
                     } else {
-                        //根据高度锁定
-                        if (utxo.getLockTime() <= bestHeight) {
-                            usable += utxo.getAmount();
-                        } else {
-                            locked += utxo.getAmount();
-                        }
+                        locked += utxo.getAmount();
+                    }
+                } else {
+                    //根据高度锁定
+                    if (utxo.getLockTime() <= bestHeight) {
+                        usable += utxo.getAmount();
+                    } else {
+                        locked += utxo.getAmount();
                     }
                 }
             }
@@ -82,7 +87,6 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
         return balance;
     }
 
-
     /**
      * 修改资产
      *
@@ -91,7 +95,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
      * @param usable 可用金额
      * @return 1操作成功，2id不存在，0修改失败
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int update(Long id, long locked, long usable) {
         Balance entity = getByKey(id);
         if (null == entity) {
@@ -113,7 +117,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
      * @param balance
      * @return 1成功，0对象为空，2 主键为空，3高度错误，4地址错误，5锁定余额小于0,6可用余额小于0,7资产名称为空，8资产id错误
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Balance balance) {
         if (null == balance) {
@@ -144,7 +148,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
     }
 
     @Override
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByKey(Long aLong) {
         return balanceMapper.deleteByPrimaryKey(aLong);
     }
@@ -160,7 +164,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
      * @param balance
      * @return 1新增成功，其他失败
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Balance balance) {
         return balanceMapper.insert(balance);
