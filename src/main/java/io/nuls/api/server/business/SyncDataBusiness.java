@@ -106,23 +106,14 @@ public class SyncDataBusiness {
             }
         }
         blockBusiness.save(block.getHeader());
-        System.out.println("-----------------blockBusiness");
         transactionBusiness.saveAll(txList);
-        System.out.println("-----------------transactionBusiness");
         transactionRelationBusiness.saveAll(txRelationList);
-        System.out.println("-----------------transactionRelationBusiness");
         detailBusiness.saveAll(addressRewardDetailList);
-        System.out.println("-----------------detailBusiness");
         aliasBusiness.saveAll(aliasList);
-        System.out.println("-----------------aliasBusiness");
         punishLogBusiness.saveAll(punishLogList);
-        System.out.println("-----------------punishLogBusiness");
         depositBusiness.saveAll(depositList);
-        System.out.println("-----------------depositBusiness");
         utxoBusiness.saveAll(utxoMap);
-        System.out.println("-----------------utxoBusiness");
         utxoBusiness.updateAll(fromList);
-        System.out.println("-----------------utxoBusiness");
         //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
         //存入leveldb
 
@@ -130,20 +121,16 @@ public class SyncDataBusiness {
         if (result == 0) {
             throw new NulsException();
         }
-        System.out.println("-----------------blockHeaderLevelDbService");
         for (Utxo utxo : fromList) {
             UtxoContext.remove(utxo.getAddress(), utxo.getKey());
         }
-        System.out.println("-----------------UtxoContext.remove");
         for (Utxo utxo : utxoMap.values()) {
             if (utxo.getSpendTxHash() == null) {
                 UtxoContext.put(utxo.getAddress(), utxo.getKey());
             }
         }
-        System.out.println("-----------------UtxoContext.put");
         //缓存新块 首页数据展示用
         IndexContext.putBlock(block.getHeader());
-        System.out.println("-----------------putBlock");
         //缓存新交易
         int end = txList.size();
         int start = 0;
@@ -153,7 +140,6 @@ public class SyncDataBusiness {
         for (int i = start; i < end; i++) {
             IndexContext.putTransaction(txList.get(i));
         }
-        System.out.println("-----------------putTransaction");
         time2 = System.currentTimeMillis();
         System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
 

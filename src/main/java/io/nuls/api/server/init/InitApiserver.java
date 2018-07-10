@@ -60,8 +60,7 @@ public class InitApiserver {
             //transaction
             dbService.createArea(Constant.TRANSACTION_DB_NAME);
             //blockheader
-            dbService.clearArea(Constant.BLOCKHEADER_DB_NAME);
-            System.out.println("--------------------------- LevelDBManager.init");
+            dbService.createArea(Constant.BLOCKHEADER_DB_NAME);
         } catch (Exception e) {
             //skip it
         }

@@ -106,8 +106,10 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(ErrorCode.DATA_NOT_FOUND);
             }
             List<Utxo> outputs = new ArrayList<>();
-            for(Output output:transaction.getOutputList()){
-                outputs.add(utxoBusiness.getByKey(output.getKey()));
+            if(null != transaction.getOutputList()){
+                for(Output output:transaction.getOutputList()){
+                    outputs.add(utxoBusiness.getByKey(output.getKey()));
+                }
             }
             transaction.setOutputs(outputs);
             //处理格式，null等错误
