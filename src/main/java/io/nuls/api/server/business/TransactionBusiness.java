@@ -101,11 +101,11 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
      */
     //todo 分页的pageNumber需要修改成long，因为按照目前进度，一天8000块，一块1000笔交易，那么一年就是24亿比交易
     public PageInfo<Transaction> getListByAddress(String address, int type, int pageNumber, int pageSize) {
-        PageInfo<TransactionRelation> relationPageInfo = transactionRelationBusiness.getListByPage(address,pageNumber,pageSize);
+        PageInfo<TransactionRelation> relationPageInfo = transactionRelationBusiness.getListByPage(address, pageNumber, pageSize);
         List<TransactionRelation> relationList = relationPageInfo.getList();
         List<Transaction> transactionList = new ArrayList<>();
-        if(null != relationList){
-            for(TransactionRelation relation:relationList){
+        if (null != relationList) {
+            for (TransactionRelation relation : relationList) {
                 transactionList.add(transactionLevelDbService.select(relation.getTxHash()));
             }
         }
@@ -122,9 +122,10 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
 
     /**
      * 新增
+     *
      * @param tx
      */
-    @Transactional(propagation= Propagation.REQUIRED, rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Transaction tx) {
         transactionLevelDbService.insert(tx);
@@ -136,41 +137,25 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         /*for(Transaction tx:list){
             transactionMapper.insert(tx);
         }*/
-        long time1, time2;
         if (list.size() > 0) {
-            time1 = System.currentTimeMillis();
             if (list.size() > 1000) {
                 int count = list.size() % 1000;
                 List<List<Transaction>> lists = ArraysTool.avgList(list, count);
                 for (int i = 0; i < count; i++) {
                     transactionMapper.insertByBatch(lists.get(i));
                 }
-            } else if(list.size() < 10){
-                for(int i =0; i< list.size(); i++){
+            } else if (list.size() < 10) {
+                for (int i = 0; i < list.size(); i++) {
                     transactionMapper.insert(list.get(i));
                 }
-            }else{
+            } else {
                 transactionMapper.insertByBatch(list);
-            }
-            time2 = System.currentTimeMillis();
-            if (time2 - time1 > 1000) {
-                System.out.println("----------save tx mysql:" + (time2 - time1));
-            }
-
-            //存入leveldb
-            time1 = System.currentTimeMillis();
-            transactionLevelDbService.insertList(list);
-            time2 = System.currentTimeMillis();
-            if (time2 - time1 > 1000) {
-                System.out.println("----------save tx mysql:" + (time2 - time1));
             }
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void rollback(Transaction tx) throws Exception {
-        //删除关系表
-        relationBusiness.deleteByTxHash(tx.getHash());
         //根据交易类型回滚其他表数据
         if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
             agentNodeBusiness.deleteByKey(tx.getHash());
@@ -183,7 +168,6 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
             agentNodeBusiness.rollbackStopAgent(tx.getHash());
         }
-//        deleteByHash(tx.getHash());
     }
 
     /**
@@ -246,7 +230,7 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
 
     private List<Transaction> formatTransaction(List<Transaction> transactionList) {
         List<Transaction> txList = new ArrayList<>();
-        for (Transaction trans:transactionList) {
+        for (Transaction trans : transactionList) {
             //去leveldb中重新加载trans
             trans = transactionLevelDbService.select(trans.getHash());
             //trans.setExtend(null);
@@ -254,14 +238,14 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
             trans.setTxData(null);
             /*trans.setScriptSign(null);*/
             //去掉TxDataList
-            if(null == trans.getOutputList()){
+            if (null == trans.getOutputList()) {
                 trans.setOutputList(new ArrayList<>());
             }
-            if(null == trans.getInputs()){
+            if (null == trans.getInputs()) {
                 trans.setInputs(new ArrayList<>());
-            }else{
-                for(Input input: trans.getInputs()){
-                    Utxo utxo =utxoBusiness.getByKey(input.getFromHash(),input.getFromIndex());
+            } else {
+                for (Input input : trans.getInputs()) {
+                    Utxo utxo = utxoBusiness.getByKey(input.getFromHash(), input.getFromIndex());
                     input.setAddress(utxo.getAddress());
                     input.setValue(utxo.getAmount());
                 }
@@ -272,14 +256,14 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         return txList;
     }
 
-    public Transaction formatTransForDetail(Transaction transaction){
+    public Transaction formatTransForDetail(Transaction transaction) {
         /*trans.setScriptSign(null);*/
         //去掉TxDataList
-        if(null == transaction.getInputs()){
+        if (null == transaction.getInputs()) {
             transaction.setInputs(new ArrayList<>());
-        }else{
-            for(Input input: transaction.getInputs()){
-                Utxo utxo =utxoBusiness.getByKey(input.getFromHash(),input.getFromIndex());
+        } else {
+            for (Input input : transaction.getInputs()) {
+                Utxo utxo = utxoBusiness.getByKey(input.getFromHash(), input.getFromIndex());
                 input.setAddress(utxo.getAddress());
                 input.setValue(utxo.getAmount());
             }

@@ -74,7 +74,7 @@ public class SyncTest {
 
     @Test
     public void testRollback() {
-        for (long i = 493; i >= 0; i--) {
+        for (long i = 6616; i >= 0; i--) {
             BlockHeader blockHeader = blockBusiness.getByKey(i);
             try {
                 syncDataBusiness.rollback(blockHeader);
@@ -83,7 +83,6 @@ public class SyncTest {
                 return;
             }
         }
-
 
         List<BlockHeader> headers = headerLevelDbService.getList();
         System.out.println(headers == null);

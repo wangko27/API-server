@@ -111,6 +111,11 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         relationMapper.deleteByTxHash(txHash);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void deleteList(List<String> txHashList) {
+        relationMapper.deleteList(txHashList);
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(TransactionRelation transactionRelation) {

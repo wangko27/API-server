@@ -8,6 +8,7 @@ import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
+import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.log.Log;
@@ -45,6 +46,8 @@ public class SyncDataBusiness {
     @Autowired
     private BlockHeaderLevelDbService blockHeaderLevelDbService;
     @Autowired
+    private TransactionLevelDbService transactionLevelDbService;
+    @Autowired
     UtxoLevelDbService utxoLevelDbService;
 
     /**
@@ -66,7 +69,6 @@ public class SyncDataBusiness {
         List<PunishLog> punishLogList = new ArrayList<>();
 
         try {
-            Map<String, Object> extendMap = new HashMap<>();                       //用于组装transation.extend字段
             for (int i = 0; i < block.getTxList().size(); i++) {
                 Transaction tx = block.getTxList().get(i);
                 tx.setTxIndex(i);
@@ -77,7 +79,6 @@ public class SyncDataBusiness {
                         utxoMap.put(utxo.getKey(), utxo);
                     }
                 }
-
                 //存放被花费的utxo
                 fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
 
@@ -109,6 +110,7 @@ public class SyncDataBusiness {
                     }
                 }
             }
+
             blockBusiness.save(block.getHeader());
             transactionBusiness.saveAll(txList);
             transactionRelationBusiness.saveAll(txRelationList);
@@ -116,15 +118,16 @@ public class SyncDataBusiness {
             aliasBusiness.saveAll(aliasList);
             punishLogBusiness.saveAll(punishLogList);
             depositBusiness.saveAll(depositList);
-            utxoBusiness.saveAll(utxoMap);
-            utxoBusiness.updateAll(fromList);
-            //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
-            //存入leveldb
 
+            //存入leveldb
             int result = blockHeaderLevelDbService.insert(block.getHeader());
             if (result == 0) {
                 throw new NulsException();
             }
+            utxoBusiness.saveAll(utxoMap);
+            utxoBusiness.updateAll(fromList);
+            transactionLevelDbService.insertList(txList);
+
             for (Utxo utxo : fromList) {
                 UtxoContext.remove(utxo.getAddress(), utxo.getKey());
             }
@@ -133,6 +136,8 @@ public class SyncDataBusiness {
                     UtxoContext.put(utxo.getAddress(), utxo.getKey());
                 }
             }
+
+            //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
             //缓存新块 首页数据展示用
             IndexContext.putBlock(block.getHeader());
             //缓存新交易
@@ -150,8 +155,9 @@ public class SyncDataBusiness {
         }
 
         time2 = System.currentTimeMillis();
-        System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
-
+        if (time2 - time1 > 5000) {
+            System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
+        }
         utxoMap = null;
         fromList = null;
         txList = null;
@@ -193,10 +199,8 @@ public class SyncDataBusiness {
                         inputMap.put(utxo.getKey(), utxo);
                     }
                 }
-
                 transactionBusiness.rollback(tx);
             }
-
             //回滚别名
             aliasBusiness.deleteByHeight(header.getHeight());
             //回滚惩罚记录
@@ -205,6 +209,8 @@ public class SyncDataBusiness {
             detailBusiness.deleteByHeight(header.getHeight());
             //回滚交易
             transactionBusiness.deleteList(header.getTxHashList());
+            //回滚交易关系
+            transactionRelationBusiness.deleteList(header.getTxHashList());
             //回滚块
             blockBusiness.deleteByKey(header.getHeight());
             //回滚levelDB与缓存
@@ -213,11 +219,10 @@ public class SyncDataBusiness {
             //回滚utxo
             utxoBusiness.rollbackByTo(outputs);
             utxoBusiness.rollBackByFrom(inputMap);
-
             //回滚最新块
             IndexContext.removeBlock(header);
             //重新加载最新的几条交易信息
-            PageInfo<Transaction> pageInfo = transactionBusiness.getList(null, 0, 1, Constant.INDEX_TX_LIST_COUNT, 3);
+            PageInfo<Transaction> pageInfo = transactionBusiness.getNewestList(10);
             if (null != pageInfo.getList()) {
                 IndexContext.initTransactions(pageInfo.getList());
             }
