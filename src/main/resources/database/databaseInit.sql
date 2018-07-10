@@ -1,6 +1,6 @@
 /*
 SQLyog Ultimate v12.09 (64 bit)
-MySQL - 5.7.21 : Database - nuls_apiserver
+MySQL - 5.5.49-log : Database - nuls_apiserver
 *********************************************************************
 */
 
@@ -99,7 +99,7 @@ CREATE TABLE `block_header` (
   `height` bigint(15) NOT NULL COMMENT '高度',
   `hash` varchar(80) NOT NULL COMMENT 'hash',
   `consensus_address` varchar(40) DEFAULT NULL COMMENT '共识地址',
-  `create_time` bigint(18) NOT NULL COMMENT '创建时间',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '出块时间',
   PRIMARY KEY (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块头';
 
@@ -149,8 +149,7 @@ CREATE TABLE `transaction` (
   `id` bigint(15) NOT NULL AUTO_INCREMENT,
   `hash` varchar(80) NOT NULL COMMENT '交易hash',
   `block_height` bigint(15) NOT NULL COMMENT '区块高度',
-  PRIMARY KEY (`id`),
-  KEY `block_height_idx` (`block_height`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易记录表';
 
 /*Data for the table `transaction` */
@@ -163,7 +162,8 @@ CREATE TABLE `transaction_relation` (
   `id` bigint(15) NOT NULL AUTO_INCREMENT,
   `address` varchar(40) NOT NULL COMMENT 'address',
   `tx_hash` varchar(80) NOT NULL COMMENT 'tx_hash',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `relation_address_idx` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `transaction_relation` */
