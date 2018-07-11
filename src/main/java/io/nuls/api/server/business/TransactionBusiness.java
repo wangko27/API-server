@@ -9,7 +9,6 @@ import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.ArraysTool;
-import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,15 +30,13 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     @Autowired
     private TransactionRelationBusiness transactionRelationBusiness;
     @Autowired
-    private TransactionRelationBusiness relationBusiness;
-    @Autowired
     private AgentNodeBusiness agentNodeBusiness;
     @Autowired
     private DepositBusiness depositBusiness;
     @Autowired
     private UtxoBusiness utxoBusiness;
-    @Autowired
-    private TransactionLevelDbService transactionLevelDbService;
+
+    private TransactionLevelDbService transactionLevelDbService = TransactionLevelDbService.getInstance();
 
     /**
      * 交易列表

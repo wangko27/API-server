@@ -33,8 +33,8 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
     private AgentNodeBusiness agentNodeBusiness;
     @Autowired
     private AddressRewardDetailBusiness rewardDetailBusiness;
-    @Autowired
-    private BlockHeaderLevelDbService blockHeaderLevelDbService;
+
+    private BlockHeaderLevelDbService blockHeaderLevelDbService = BlockHeaderLevelDbService.getInstance();
 
     public BlockHeader getBlockByHash(String hash) {
         return blockHeaderLevelDbService.select(hash);

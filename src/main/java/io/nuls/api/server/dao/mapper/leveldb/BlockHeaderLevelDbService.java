@@ -2,13 +2,9 @@ package io.nuls.api.server.dao.mapper.leveldb;
 
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -17,10 +13,17 @@ import java.util.List;
  * Author: zsj
  * Date:  2018/7/8 0008
  */
-@Service
 public class BlockHeaderLevelDbService {
-    @Autowired
-    private DBService dbService;
+
+    private static BlockHeaderLevelDbService instance;
+    public static BlockHeaderLevelDbService getInstance(){
+        if(null == instance){
+            instance = new BlockHeaderLevelDbService();
+        }
+        return instance;
+    }
+
+    private DBService dbService = LevelDbUtil.getInstance();
 
     public void insertList(List<BlockHeader> list) {
         BatchOperation batch = dbService.createWriteBatch(Constant.BLOCKHEADER_DB_NAME);

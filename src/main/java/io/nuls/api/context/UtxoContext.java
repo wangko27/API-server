@@ -1,40 +1,36 @@
 package io.nuls.api.context;
 
 import io.nuls.api.constant.Constant;
-import io.nuls.api.entity.Utxo;
-import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.util.EhcacheUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class UtxoContext {
 
     //根据地址，把List<key> 放入缓存
     public static void put(String address, String key) {
-        List<String> list = (List<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
+        Set<String> list = (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
         if (list == null) {
-            list = new ArrayList<>();
+            list = new HashSet<>();
         }
         list.add(key);
+        //重置缓存
         EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
     }
 
     //根据hashIndex，移除某个utxo
     public static void remove(String address, String key) {
-        List<String> list = get(address);
+        Set<String> list = get(address);
         if (list != null) {
             list.remove(key);
         }
     }
 
-    public static List<String> get(String address) {
-        return (List<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
-    }
-
-    public static List<String> getAllKeys() {
-        return EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME).getKeys();
+    public static Set<String> get(String address) {
+        return (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
     }
 
 //    public static List<Utxo> getUtxoList(String address) {

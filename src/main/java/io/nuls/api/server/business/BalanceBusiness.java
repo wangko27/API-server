@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Description: 资产
@@ -34,8 +35,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
     @Autowired
     private BalanceMapper balanceMapper;
 
-    @Autowired
-    private UtxoLevelDbService utxoLevelDbService;
+    private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
 
     /**
      * 查询账户资产
@@ -54,7 +54,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
         Long usable = 0L;
         Long locked = 0L;
 
-        List<String> keyList = UtxoContext.get(address);
+        Set<String> keyList = UtxoContext.get(address);
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
 
 

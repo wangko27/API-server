@@ -43,12 +43,10 @@ public class SyncDataBusiness {
     private DepositBusiness depositBusiness;
     @Autowired
     private AgentNodeBusiness agentNodeBusiness;
-    @Autowired
-    private BlockHeaderLevelDbService blockHeaderLevelDbService;
-    @Autowired
-    private TransactionLevelDbService transactionLevelDbService;
-    @Autowired
-    UtxoLevelDbService utxoLevelDbService;
+
+    private BlockHeaderLevelDbService blockHeaderLevelDbService = BlockHeaderLevelDbService.getInstance();
+    private TransactionLevelDbService transactionLevelDbService = TransactionLevelDbService.getInstance();
+    private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
 
     /**
      * 同步最新块数据
@@ -155,9 +153,7 @@ public class SyncDataBusiness {
         }
 
         time2 = System.currentTimeMillis();
-        if (time2 - time1 > 5000) {
-            System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
-        }
+        System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
         utxoMap = null;
         fromList = null;
         txList = null;

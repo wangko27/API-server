@@ -4,7 +4,7 @@ public class UtxoDto {
 
     private String address;
 
-    private Long total;
+    private Long total=0L;
 
     public UtxoDto() {
 

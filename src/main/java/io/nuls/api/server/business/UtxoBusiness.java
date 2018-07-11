@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +31,8 @@ import java.util.Map;
 public class UtxoBusiness implements BaseService<Utxo, String> {
     @Autowired
     private UtxoMapper utxoMapper;
-    @Autowired
-    UtxoLevelDbService utxoLevelDbService;
+
+    private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
 
     /**
      * 获取列表
@@ -68,6 +69,9 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     public List<Utxo> getUtxoList() {
         List<Utxo> utxoList = new ArrayList<>();
         List<Utxo> list = utxoLevelDbService.getList();
+        if(null == list){
+            return utxoList;
+        }
         for (Utxo utxo : list) {
             if (StringUtils.isBlank(utxo.getSpendTxHash())) {
                 utxoList.add(utxo);
@@ -82,58 +86,14 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      * @return
      */
     public void initUtxoList() {
-        List<Utxo> list = utxoLevelDbService.getList();
-
+        List<Utxo> list = getUtxoList();
         for (Utxo utxo : list) {
-            if (StringUtils.isBlank(utxo.getSpendTxHash())) {
-                UtxoContext.put(utxo.getAddress(), utxo.getKey());
-            }
+            UtxoContext.put(utxo.getAddress(), utxo.getKey());
         }
-    }
-
-    /**
-     * 根据地址获取该地址全部的utxo
-     *
-     * @param address
-     * @param type    1查询全部 2查询未花费 3查询已花费
-     * @return
-     */
-    public List<Utxo> getList(String address, int type) {
-
-        Searchable searchable = new Searchable();
-        if (StringUtils.validAddress(address)) {
-            searchable.addCondition("address", SearchOperator.eq, address);
-        }
-        if (type > 0) {
-            if (type == 2) {
-                searchable.addCondition("spend_tx_hash", SearchOperator.isNull, null);
-            } else if (type == 3) {
-                searchable.addCondition("spend_tx_hash", SearchOperator.isNotNull, null);
-            }
-        }
-        return utxoMapper.selectList(searchable);
     }
 
     private Utxo selectUtxoByHashAndIndex(String hashIndex) {
-        /*Utxo utxo = UtxoTempContext.get(hashIndex);
-        if(utxo == null){
-            *//*Searchable searchable = new Searchable();
-            searchable.addCondition("tx_hash", SearchOperator.eq, hash);
-            searchable.addCondition("tx_index", SearchOperator.eq, index);
-            utxo = utxoMapper.selectByHashAndIndex(searchable);*//*
-            //去leveldb获取
-            utxo = utxoLevelDbService.select(hashIndex);
-        }*/
         return utxoLevelDbService.select(hashIndex);
-    }
-
-    private int deleteByHashAndIndex(String hash, Integer index) {
-        /*Searchable searchable = new Searchable();
-        searchable.addCondition("tx_hash", SearchOperator.eq, hash);
-        searchable.addCondition("tx_index", SearchOperator.eq, index);
-        return utxoMapper.deleteByHashAndIndex(searchable);*/
-        //leveldb 删除
-        return utxoLevelDbService.delete(hash + "_" + index);
     }
 
     /**
@@ -150,7 +110,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         if (index < 0) {
             return null;
         }
-
         Utxo utxo = selectUtxoByHashAndIndex(hash + "_" + index);
         if (null != utxo) {
             return utxo.getSpendTxHash();
@@ -282,26 +241,22 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      * @return
      */
     public List<UtxoDto> getBlockSumTxamount() {
-        List<UtxoDto> utxList = new ArrayList<>();
-
-        List<String> addressList = UtxoContext.getAllKeys();
-        List<String> keyList;
-        List<Utxo> list;
-        for (String addr : addressList) {
-            keyList = UtxoContext.get(addr);
-            list = utxoLevelDbService.selectList(keyList);
-            if (list.size() > 0) {
-                Long total = 0L;
-                for (Utxo utxo : list) {
-                    total += utxo.getAmount();
+        Map<String,UtxoDto> mapData = new HashMap<>();
+        List<Utxo> utxoList = utxoLevelDbService.getList();
+        UtxoDto utxoDto;
+        for (Utxo utxo : utxoList) {
+            if(null == utxo.getSpendTxHash()){
+                if(mapData.containsKey(utxo.getAddress())){
+                    utxoDto = mapData.get(utxo.getAddress());
+                    mapData.get(utxo.getAddress()).setTotal(utxoDto.getTotal()+utxo.getAmount());
+                }else{
+                    utxoDto = new UtxoDto();
+                    utxoDto.setAddress(utxo.getAddress());
+                    utxoDto.setTotal(utxo.getAmount());
+                    mapData.put(utxo.getAddress(),utxoDto);
                 }
-                UtxoDto dto = new UtxoDto();
-                dto.setTotal(total);//加载金额
-                dto.setAddress(addr);//加载地址
-                utxList.add(dto);
             }
         }
-        return utxList;
-        //return utxoMapper.getBlockSumTxamount();
+        return new ArrayList<UtxoDto>(mapData.values());
     }
 }

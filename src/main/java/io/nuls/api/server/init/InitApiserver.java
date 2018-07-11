@@ -3,15 +3,13 @@ package io.nuls.api.server.init;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.*;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.Alias;
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.business.*;
-import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
-import io.nuls.api.server.leveldb.manager.LevelDBManager;
-import io.nuls.api.server.leveldb.service.DBService;
-import io.nuls.api.utils.RestFulUtils;
-import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,13 +32,9 @@ public class InitApiserver {
     @Autowired
     private BlockBusiness blockBusiness;
     @Autowired
-    private AddressRewardDetailBusiness addressRewardDetailBusiness;
-    @Autowired
     private AliasBusiness aliasBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
-    @Autowired
-    private DBService dbService;
 
     @PostConstruct
     public void init() {
@@ -52,18 +46,6 @@ public class InitApiserver {
             }
         }
         System.out.println("初始化---utxo数量："+ list.size()+",null数量："+nullcount);*/
-
-        try {
-            LevelDBManager.init();
-            //utxo
-            dbService.createArea(Constant.UTXO_DB_NAME);
-            //transaction
-            dbService.createArea(Constant.TRANSACTION_DB_NAME);
-            //blockheader
-            dbService.createArea(Constant.BLOCKHEADER_DB_NAME);
-        } catch (Exception e) {
-            //skip it
-        }
 
         /*加载utxo*/
         utxoBusiness.initUtxoList();

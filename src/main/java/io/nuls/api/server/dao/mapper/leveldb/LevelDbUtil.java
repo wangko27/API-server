@@ -15,16 +15,13 @@ public class LevelDbUtil {
 
     public static DBService getInstance(){
         if(null == dbService){
-            /*dbService = new LevelDBServiceImpl();
-            //utxo
-            dbService.createArea(Constant.UTXO_CACHE_NAME);
-            //transaction
-            dbService.createArea(Constant.TRANSACTION_CACHE_NAME);
-            //blockheader
-            dbService.createArea(Constant.BLOCKHEADER_CACHE_NAME);*/
+            dbService= new LevelDBServiceImpl();
+            dbService.createArea(Constant.UTXO_DB_NAME);
+            dbService.createArea(Constant.TRANSACTION_DB_NAME);
+            dbService.createArea(Constant.BLOCKHEADER_DB_NAME);
             System.out.println("-------------休眠开始，一分钟，让leveldb加载数据");
             try {
-                Thread.sleep(6000L);
+                Thread.sleep(600L);
             } catch (InterruptedException e) {
             }
             System.out.println("-------------休眠结束");

@@ -5,23 +5,28 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Description:
  * Author: zsj
  * Date:  2018/7/8 0008
  */
-@Service
 public class UtxoLevelDbService {
-    @Autowired
-    private DBService dbService;
+
+    private static UtxoLevelDbService instance;
+    public static UtxoLevelDbService getInstance(){
+        if(null == instance){
+            instance = new UtxoLevelDbService();
+        }
+        return instance;
+    }
+
+    private DBService dbService = LevelDbUtil.getInstance();
 
     public void insertList(List<Utxo> list) {
         BatchOperation batch = dbService.createWriteBatch(Constant.UTXO_DB_NAME);
@@ -59,7 +64,7 @@ public class UtxoLevelDbService {
         return dbService.getModel(Constant.UTXO_DB_NAME, key.getBytes(), Utxo.class);
     }
 
-    public List<Utxo> selectList(List<String> keyList) {
+    public List<Utxo> selectList(Set<String> keyList) {
         List<Utxo> utxoList = new ArrayList<>();
         if (null != keyList && !keyList.isEmpty()) {
             for (String key : keyList) {
@@ -74,6 +79,11 @@ public class UtxoLevelDbService {
 
     //这里会查询出leveldb里面全部的数据，谨慎使用
     public List<Utxo> getList() {
-        return dbService.values(Constant.UTXO_DB_NAME, Utxo.class);
+        List<Utxo> list = dbService.values(Constant.UTXO_DB_NAME, Utxo.class);
+        if(null == list){
+            list = new ArrayList<>();
+        }
+        return list;
+
     }
 }

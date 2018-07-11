@@ -6,8 +6,6 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -16,10 +14,17 @@ import java.util.List;
  * Author: zsj
  * Date:  2018/7/8 0008
  */
-@Service
 public class TransactionLevelDbService {
-    @Autowired
-    private DBService dbService;
+
+    private static TransactionLevelDbService instance;
+    public static TransactionLevelDbService getInstance(){
+        if(null == instance){
+            instance = new TransactionLevelDbService();
+        }
+        return instance;
+    }
+
+    private DBService dbService = LevelDbUtil.getInstance();
 
     public void insertList(List<Transaction> list) {
         BatchOperation batch = dbService.createWriteBatch(Constant.TRANSACTION_DB_NAME);
