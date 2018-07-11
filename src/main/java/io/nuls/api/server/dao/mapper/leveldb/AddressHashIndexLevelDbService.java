@@ -1,16 +1,17 @@
 package io.nuls.api.server.dao.mapper.leveldb;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.AddressHashIndex;
-import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.Result;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.server.leveldb.service.DBService;
 import io.nuls.api.utils.log.Log;
 
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Description:
