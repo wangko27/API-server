@@ -80,18 +80,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         return utxoList;
     }
 
-    /**
-     * init Utxo
-     *
-     * @return
-     */
-    public void initUtxoList() {
-        List<Utxo> list = getUtxoList();
-        for (Utxo utxo : list) {
-            UtxoContext.put(utxo.getAddress(), utxo.getKey());
-        }
-    }
-
     private Utxo selectUtxoByHashAndIndex(String hashIndex) {
         return utxoLevelDbService.select(hashIndex);
     }
