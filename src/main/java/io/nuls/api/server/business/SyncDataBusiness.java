@@ -10,7 +10,6 @@ import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
-import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -112,19 +111,17 @@ public class SyncDataBusiness {
             blockBusiness.save(block.getHeader());
             transactionBusiness.saveAll(txList);
             transactionRelationBusiness.saveAll(txRelationList);
+            utxoBusiness.saveAll(utxoMap);
+            utxoBusiness.updateAll(fromList);
+
             detailBusiness.saveAll(addressRewardDetailList);
             aliasBusiness.saveAll(aliasList);
             punishLogBusiness.saveAll(punishLogList);
             depositBusiness.saveAll(depositList);
 
             //存入leveldb
-            int result = blockHeaderLevelDbService.insert(block.getHeader());
-            if (result == 0) {
-                throw new NulsException();
-            }
-            utxoBusiness.saveAll(utxoMap);
-            utxoBusiness.updateAll(fromList);
-            transactionLevelDbService.insertList(txList);
+
+//            transactionLevelDbService.insertList(txList);
 
             for (Utxo utxo : fromList) {
                 UtxoContext.remove(utxo.getAddress(), utxo.getKey());

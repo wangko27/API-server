@@ -148,6 +148,8 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
             } else {
                 transactionMapper.insertByBatch(list);
             }
+
+            transactionLevelDbService.insertList(list);
         }
     }
 

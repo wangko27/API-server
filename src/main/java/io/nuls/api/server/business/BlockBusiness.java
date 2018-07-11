@@ -7,6 +7,7 @@ import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
 import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -60,8 +61,8 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         if (startTime < 0 || endTime < 0) {
             return total;
         }
-        List<BlockHeader> blockHeaderList = getBlockByTime(startTime,endTime);
-        for(BlockHeader block:blockHeaderList){
+        List<BlockHeader> blockHeaderList = getBlockByTime(startTime, endTime);
+        for (BlockHeader block : blockHeaderList) {
             total += block.getTxCount();
         }
         return total;
@@ -80,8 +81,8 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             return total;
         }
         Long endTime = startTime - Constant.MILLISECONDS_TIME_DAY;
-        List<BlockHeader> blockHeaderList = getBlockByTime(endTime,startTime);
-        for(BlockHeader block:blockHeaderList){
+        List<BlockHeader> blockHeaderList = getBlockByTime(endTime, startTime);
+        for (BlockHeader block : blockHeaderList) {
             total += block.getReward();
         }
         return total;
@@ -106,10 +107,11 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 获取某个时间段内的区块
+     *
      * @param startTime
      * @return
      */
-    public List<BlockHeader> getBlockByTime(Long startTime, Long endTime){
+    public List<BlockHeader> getBlockByTime(Long startTime, Long endTime) {
         Searchable searchable = new Searchable();
         searchable.addCondition("create_time", SearchOperator.gte, startTime);
         searchable.addCondition("create_time", SearchOperator.lt, endTime);
@@ -119,6 +121,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 查询列表
+     *
      * @param beginHeight
      * @param endHeight
      * @return
@@ -137,6 +140,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 获取块列表
+     *
      * @param address    共识地址
      * @param pageNumber
      * @param pageSize
@@ -160,6 +164,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 获取最新区块
+     *
      * @return
      */
     public BlockHeader getNewest() {
@@ -190,12 +195,9 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 //        }
 //        return true;
 //    }
-
-
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(BlockHeader blockHeader) {
-
         //修改agentnode
         AgentNode agentNode = agentNodeBusiness.getAgentByAddress(blockHeader.getConsensusAddress());
         if (agentNode != null) {
@@ -204,8 +206,8 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
             agentNode.setTotalReward(agentNode.getTotalReward() + blockHeader.getReward());
             agentNodeBusiness.update(agentNode);
         }
-
-        return blockHeaderMapper.insert(blockHeader);
+        blockHeaderMapper.insert(blockHeader);
+        return blockHeaderLevelDbService.insert(blockHeader);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -306,7 +308,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         for (int i = 13; i >= 0; i--) {
             Integer count = getTxcountByTime(time - Constant.MILLISECONDS_TIME_DAY, time);
             time = time - Constant.MILLISECONDS_TIME_DAY;
-            String values = null == count ? time+"-0":time + "-" + count;
+            String values = null == count ? time + "-0" : time + "-" + count;
             historyList[i] = values;
         }
         HistoryContext.reset(historyList);
@@ -314,11 +316,12 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 根据list，重置block数据
+     *
      * @param list
      */
-    public List<BlockHeader> setDataWithLeveldb(List<BlockHeader> list){
+    public List<BlockHeader> setDataWithLeveldb(List<BlockHeader> list) {
         List<BlockHeader> listBlock = new ArrayList<>();
-        for(BlockHeader block:list){
+        for (BlockHeader block : list) {
             listBlock.add(blockHeaderLevelDbService.select(block.getHash()));
         }
         return listBlock;
