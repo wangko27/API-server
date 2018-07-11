@@ -1,14 +1,16 @@
 package io.nuls.api.context;
 
 import io.nuls.api.constant.Constant;
+import io.nuls.api.entity.AddressHashIndex;
+import io.nuls.api.server.dao.mapper.leveldb.AddressHashIndexLevelDbService;
+import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.util.EhcacheUtil;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class UtxoContext {
+
+    private static AddressHashIndexLevelDbService addressHashIndexLevelDbService = AddressHashIndexLevelDbService.getInstance();
 
     //根据地址，把List<key> 放入缓存
     public static void put(String address, String key) {
@@ -19,6 +21,8 @@ public class UtxoContext {
         list.add(key);
         //重置缓存
         EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
+        //重置leveldb
+        addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
     }
 
     //根据hashIndex，移除某个utxo
@@ -26,28 +30,29 @@ public class UtxoContext {
         Set<String> list = get(address);
         if (list != null) {
             list.remove(key);
+            //重置leveldb
+            addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
         }
     }
 
+    //根据地址，获取该地址所有的未花费的hashIndex
     public static Set<String> get(String address) {
-        return (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
+        Set<String> setList = (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
+        if(null == setList){
+            AddressHashIndex addressHashIndex = addressHashIndexLevelDbService.select(address);
+            if(null != address){
+                setList = addressHashIndex.getHashIndexSet();
+            }
+        }
+        return setList;
     }
 
-//    public static List<Utxo> getUtxoList(String address) {
-//        List<String> keyList = get(address);
-//        List<Utxo> utxoList = new ArrayList<>();
-//        if (null != keyList && !keyList.isEmpty()) {
-//            //去leveldb加载utxo
-//            //todo 这里可能需要缓存，之后根据效率再考虑
-//            for (String key : keyList) {
-//                Utxo utxo = utxoLevelDbService.select(key);
-//                if (null != utxo) {
-//                    utxoList.add(utxo);
-//                }
-//            }
-//        }
-//        return utxoList;
-//    }
+    //启动的时候，初始化缓存
+    public static void initCache(List<AddressHashIndex> list){
+        for(AddressHashIndex hashIndex: list){
+            EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, hashIndex.getAddress(), hashIndex.getHashIndexSet());
+        }
+    }
 
 
     //-----------------------------------------------------第二次修改

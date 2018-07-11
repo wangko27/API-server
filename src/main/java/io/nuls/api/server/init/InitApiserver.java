@@ -3,11 +3,9 @@ package io.nuls.api.server.init;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.*;
-import io.nuls.api.entity.Alias;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.*;
 import io.nuls.api.server.business.*;
+import io.nuls.api.server.dao.mapper.leveldb.AddressHashIndexLevelDbService;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,7 @@ import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Description: 初始化 第一次启动的时候加载一些信息
@@ -36,6 +35,8 @@ public class InitApiserver {
     @Autowired
     private TransactionBusiness transactionBusiness;
 
+    private AddressHashIndexLevelDbService addressHashIndexLevelDbService = AddressHashIndexLevelDbService.getInstance();
+
     @PostConstruct
     public void init() {
         /*List<Utxo> list = UtxoLevelDbService.getInstance().getList();
@@ -48,7 +49,8 @@ public class InitApiserver {
         System.out.println("初始化---utxo数量："+ list.size()+",null数量："+nullcount);*/
 
         /*加载utxo*/
-        utxoBusiness.initUtxoList();
+        //utxoBusiness.initUtxoList();
+        UtxoContext.initCache(addressHashIndexLevelDbService.getAll());
 
         /*启动*/
         /*加载14天历史*/

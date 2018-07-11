@@ -56,8 +56,6 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
 
         Set<String> keyList = UtxoContext.get(address);
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
-
-
         for (Utxo utxo : utxoList) {
             if (utxo.getLockTime() == -1) {
                 locked += utxo.getAmount();
