@@ -14,10 +14,7 @@ public class UtxoContext {
 
     //根据地址，把List<key> 放入缓存
     public static void put(String address, String key) {
-        Set<String> list = (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
-        if (list == null) {
-            list = new HashSet<>();
-        }
+        Set<String> list = get(address);
         list.add(key);
         //重置缓存
         EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
@@ -40,8 +37,10 @@ public class UtxoContext {
         Set<String> setList = (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
         if(null == setList){
             AddressHashIndex addressHashIndex = addressHashIndexLevelDbService.select(address);
-            if(null != address){
+            if(null != addressHashIndex){
                 setList = addressHashIndex.getHashIndexSet();
+            }else{
+                setList = new HashSet<>();
             }
         }
         return setList;

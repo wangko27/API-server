@@ -1,5 +1,7 @@
 package io.nuls.api.entity;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -9,7 +11,7 @@ import java.util.Set;
  */
 public class AddressHashIndex {
     private String address;
-    private Set<String> hashIndexSet;
+    private Set<String> hashIndexSet = new HashSet<>();
 
     public AddressHashIndex(){
 

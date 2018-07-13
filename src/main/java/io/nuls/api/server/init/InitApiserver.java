@@ -39,20 +39,11 @@ public class InitApiserver {
 
     @PostConstruct
     public void init() {
-        /*List<Utxo> list = UtxoLevelDbService.getInstance().getList();
-        int nullcount = 0;
-        for(Utxo utxo: list){
-            if(null == utxo){
-                nullcount++;
-            }
-        }
-        System.out.println("初始化---utxo数量："+ list.size()+",null数量："+nullcount);*/
 
-        /*加载utxo*/
-        //utxoBusiness.initUtxoList();
         UtxoContext.initCache(addressHashIndexLevelDbService.getAll());
 
         /*启动*/
+
         /*加载14天历史*/
         blockBusiness.initHistory();
         /*加载持币账户排行榜*/
