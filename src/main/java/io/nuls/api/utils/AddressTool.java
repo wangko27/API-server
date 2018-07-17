@@ -59,6 +59,7 @@ public class AddressTool {
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
         Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
+
         return address.getAddressBytes();
     }
 

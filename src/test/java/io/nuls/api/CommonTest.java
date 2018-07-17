@@ -1,14 +1,32 @@
 package io.nuls.api;
 
+import io.nuls.api.context.NulsContext;
+import io.nuls.api.crypto.ECKey;
+import io.nuls.api.crypto.Hex;
+import io.nuls.api.model.Address;
 import io.nuls.api.utils.JSONUtils;
+import io.nuls.api.utils.SerializeUtils;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CommonTest {
+
+    @Test
+    public void testAddress() {
+        String priKey = "88061d66be3d054ae6e93094b99e807b57595cbc19b0b3588236cf1cdc131995";
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
+        String pubKey = Hex.encode(ecKey.getPubKey());
+        System.out.println(pubKey);
+
+        byte[] hash160 = SerializeUtils.sha256hash160(ecKey.getPubKey());
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
+        System.out.println(address.getBase58());
+    }
 
     @Test
     public void testMapToString() {
