@@ -2,7 +2,9 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.constant.Constant;
 import io.nuls.api.context.UtxoContext;
+import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.Utxo;
@@ -12,15 +14,13 @@ import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Description: UTXO
@@ -31,11 +31,14 @@ import java.util.Map;
 public class UtxoBusiness implements BaseService<Utxo, String> {
     @Autowired
     private UtxoMapper utxoMapper;
+    @Autowired
+    private BlockBusiness blockBusiness;
+
 
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
 
     /**
-     * 获取列表
+     * 获取列表 数据库查询
      *
      * @param pageNumber
      * @param pageSize
@@ -52,7 +55,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }
 
     /**
-     * 查询全部，包含已花费，未花费
+     * 通过leveldb查询全部，包含已花费，未花费
      *
      * @return
      */
@@ -62,7 +65,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }
 
     /**
-     * 查询全部，未花费
+     * 通过leveldb查询全部，未花费
      *
      * @return
      */
@@ -78,6 +81,53 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             }
         }
         return utxoList;
+    }
+
+    /**
+     * 根据地址，获取所有冻结的utxo
+     * @param address
+     * @return
+     */
+    public PageInfo<Utxo> getListByAddress(String address,int pageNumber,int pageSize){
+        List<Utxo> utxoList = new ArrayList<>();
+        Set<String> setList = UtxoContext.get(address);
+        BlockHeader blockHeader = blockBusiness.getNewest();
+        long currentTime = TimeService.currentTimeMillis();
+        long bestHeight = 0L;
+        if (blockHeader != null) {
+            bestHeight = blockHeader.getHeight();
+        }
+        for(String str: setList){
+            Utxo utxo = utxoLevelDbService.select(str);
+            if (utxo.getLockTime() == -1) {
+                utxoList.add(utxo);
+            }else {
+                if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
+                    if (utxo.getLockTime() > currentTime) {
+                        utxoList.add(utxo);
+                    }
+                } else {
+                    if (utxo.getLockTime() > bestHeight) {
+                        utxoList.add(utxo);
+                    }
+                }
+            }
+        }
+        //模拟分页
+        PageInfo<Utxo> page = new PageInfo<>();
+        int start = (pageNumber-1)*pageSize;
+        int end = pageNumber*pageSize;
+        List<Utxo> tempList = new ArrayList<>();
+        if(utxoList.size()-pageNumber < end){
+            end = utxoList.size()-pageNumber;
+        }
+        for(int i = start; i < end; i++){
+            tempList.add(utxoList.get(i));
+        }
+        page.setTotal(setList.size());
+        page.setPageNum(pageNumber);
+        page.setSize(pageSize);
+        return page;
     }
 
     private Utxo selectUtxoByHashAndIndex(String hashIndex) {

@@ -126,7 +126,12 @@ public class BlockResource {
         RpcClientResult result;
         try {
             result = RpcClientResult.getSuccess();
-            result.setData(blockBusiness.getNewest());
+            BlockHeader blockHeader = blockBusiness.getNewest();
+            //去掉不需要的返回值
+            blockHeader.setExtend(null);
+            blockHeader.setTxHashList(null);
+
+            result.setData(blockHeader);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

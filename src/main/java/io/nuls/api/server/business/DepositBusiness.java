@@ -166,10 +166,13 @@ public class DepositBusiness implements BaseService<Deposit, String> {
     }
 
     /**
-     * 查询总委托金额
+     * 查询总委托金额 根据地址，查询某人的委托总额
      * @return
      */
-    public Long selectTotalAmount(){
-        return depositMapper.selectTotalAmount(new Searchable());
+    public Long selectTotalAmount(String address){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, address);
+        searchable.addCondition("delete_hash", SearchOperator.isNull, null);
+        return depositMapper.selectTotalAmount(searchable);
     }
 }

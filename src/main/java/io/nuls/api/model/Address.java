@@ -25,8 +25,8 @@
 
 package io.nuls.api.model;
 
-import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.context.NulsContext;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.utils.AddressTool;
 import io.nuls.api.utils.ArraysTool;
@@ -52,7 +52,7 @@ public class Address {
     /**
      * chain id
      */
-    private short chainId = Constant.DEFAULT_CHAIN_ID;
+    private short chainId = NulsContext.DEFAULT_CHAIN_ID;
 
     /**
      * address type
@@ -64,15 +64,11 @@ public class Address {
      */
     protected byte[] hash160;
 
-    /**
-     * @param address bytes
-     */
-
     protected byte[] addressBytes;
 
-    /**
-     * @param address
-     */
+    //    /**
+//     * @param address
+//     */
     public Address(String address) {
         try {
             byte[] bytes = AddressTool.getAddress(address);

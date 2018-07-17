@@ -141,6 +141,7 @@ public class AgentNodeResource {
         }
         result = RpcClientResult.getSuccess();
         HashMap<String,String> attr = new HashMap<>();
+        //加载奖励
         attr.put("reward",addressRewardDetailBusiness.selectSumReward(address)+"");
         AgentNode agentNode = agentNodeBusiness.getAgentByAddress(address);
         if(null != agentNode){
@@ -148,6 +149,7 @@ public class AgentNodeResource {
         }else{
             attr.put("totalDeposit","0");
         }
+        //加载可用余额和冻结余额
         Balance balance = balanceBusiness.getBalance(address);
         if(null != balance){
             attr.put("usable",balance.getUsable()+"");
@@ -156,6 +158,12 @@ public class AgentNodeResource {
             attr.put("usable","0");
             attr.put("locked","0");
         }
+        //加载委托金额
+        Long depositMoney = depositBusiness.selectTotalAmount(address);
+        if(null == depositMoney){
+            depositMoney = 0L;
+        }
+        attr.put("depositMoney",depositMoney+"");
         result.setData(attr);
         return result;
     }

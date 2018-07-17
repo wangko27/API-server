@@ -26,8 +26,8 @@
 package io.nuls.api.utils;
 
 
-import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.context.NulsContext;
 import io.nuls.api.crypto.script.P2PKHScriptSig;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
@@ -58,7 +58,7 @@ public class AddressTool {
             return null;
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
-        Address address = new Address(Constant.DEFAULT_CHAIN_ID, Constant.DEFAULT_ADDRESS_TYPE, hash160);
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
         return address.getAddressBytes();
     }
 
@@ -90,6 +90,19 @@ public class AddressTool {
         } catch (NulsException e) {
             return false;
         } catch (Exception e) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId || NulsContext.DEFAULT_ADDRESS_TYPE != type) {
             return false;
         }
         try {
