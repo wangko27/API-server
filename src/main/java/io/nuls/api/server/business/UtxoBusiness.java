@@ -4,10 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.context.UtxoContext;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -98,20 +95,16 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             bestHeight = blockHeader.getHeight();
         }
         for(String str: setList){
-            System.out.println("hasindex:"+str);
             Utxo utxo = utxoLevelDbService.select(str);
             if (utxo.getLockTime() == -1) {
-                System.out.println("冻结1");
                 utxoList.add(utxo);
             }else {
                 if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
                     if (utxo.getLockTime() > currentTime) {
-                        System.out.println("冻结2");
                         utxoList.add(utxo);
                     }
                 } else {
                     if (utxo.getLockTime() > bestHeight) {
-                        System.out.println("冻结3");
                         utxoList.add(utxo);
                     }
                 }
@@ -132,6 +125,49 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         page.setPageNum(pageNumber);
         page.setSize(pageSize);
         return page;
+    }
+
+    /**
+     * 查询账户可用的utxo
+     * @param address 用户账户
+     * @return
+     */
+    public List<Utxo> getUsableUtxo(String address) {
+        List<Utxo> list = new ArrayList<>();
+        BlockHeader blockHeader = blockBusiness.getNewest();
+        long currentTime = TimeService.currentTimeMillis();
+        long bestHeight = 0L;
+        if (blockHeader != null) {
+            bestHeight = blockHeader.getHeight();
+        }
+
+        Set<String> keyList = UtxoContext.get(address);
+        List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
+        for (Utxo utxo : utxoList) {
+            if (utxo.getLockTime() == 0) {
+                list.add(utxo);
+            }else {
+                if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
+                    //根据时间锁定
+                    if (utxo.getLockTime() <= currentTime) {
+                        list.add(utxo);
+                    }
+                } else {
+                    //根据高度锁定
+                    if (utxo.getLockTime() <= bestHeight) {
+                        list.add(utxo);
+                    }
+                }
+            }
+        }
+        //排序
+        Collections.sort(list, new Comparator<Utxo>() {
+            @Override
+            public int compare(Utxo o1, Utxo o2) {
+                return o1.getAmount().compareTo(o2.getAmount());
+            }
+        });
+        return list;
     }
 
     private Utxo selectUtxoByHashAndIndex(String hashIndex) {
