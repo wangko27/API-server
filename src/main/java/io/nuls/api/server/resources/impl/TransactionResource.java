@@ -9,13 +9,16 @@ import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.server.dto.TransactionDto;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Description:
@@ -150,4 +153,31 @@ public class TransactionResource {
         }
         return result;
     }
+
+    @GET
+    @Path("/transFee")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getTransFee(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address,@QueryParam("type")int type){
+        RpcClientResult result = null;
+        result = RpcClientResult.getSuccess();
+        Map<String,String> attr = new HashMap<String,String>();
+        attr.put("value","100000100");
+        result.setData(attr);
+        return result;
+    }
+
+    @POST
+    @Path("/trans")
+    @Produces(MediaType.APPLICATION_JSON)
+    //@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public RpcClientResult trans(Alias alias){
+        RpcClientResult result;
+        result = RpcClientResult.getSuccess();
+        result.setData(alias);
+        return result;
+    }
+
+
+
+
 }

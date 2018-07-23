@@ -1,6 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.AddressTool;
 import io.nuls.api.utils.StringUtils;
@@ -21,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 @Path("account")
 @Component
 public class AccountResource {
+
     @GET
     @Path("/getAddress/{publicKey}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -32,8 +34,7 @@ public class AccountResource {
                 return result;
             }
             result = RpcClientResult.getSuccess();
-            String address = AddressTool.getStringAddressByBytes(AddressTool.getAddress(publicKey.getBytes()));
-            result.setData(address);
+            result.setData(AddressTool.getStringAddress(Hex.decode(publicKey)));
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

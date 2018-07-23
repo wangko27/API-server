@@ -101,7 +101,9 @@ public class StringUtils {
             return false;
         }
         return true;*/
-        return AddressTool.validAddress(address);
+        //todo 验证格式，现在临时去掉，因为需要v0.9.12版本钱包测试，地址格式有冲突
+        //return AddressTool.validAddress(address);
+        return true;
     }
 
     protected static void checkXOR(byte[] hashs) {

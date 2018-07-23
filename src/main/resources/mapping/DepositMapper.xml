@@ -148,12 +148,14 @@
     <include refid="Base_Column_List" />
     from deposit
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+
   </select>
   <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from deposit
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+
   </select>
 
   <update id="rollbackStopAgent" parameterType="java.lang.String">

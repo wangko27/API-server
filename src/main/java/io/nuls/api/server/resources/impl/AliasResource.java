@@ -1,6 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.AliasBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
@@ -35,7 +36,12 @@ public class AliasResource {
         }
         try {
             result = RpcClientResult.getSuccess();
-            result.setData(aliasBusiness.getAliasByAddress(address));
+            Alias alias = aliasBusiness.getAliasByAddress(address);
+            //处理掉null返回
+            if(null == alias){
+                alias = new Alias();
+            }
+            result.setData(alias);
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

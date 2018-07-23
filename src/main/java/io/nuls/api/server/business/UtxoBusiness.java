@@ -98,16 +98,20 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             bestHeight = blockHeader.getHeight();
         }
         for(String str: setList){
+            System.out.println("hasindex:"+str);
             Utxo utxo = utxoLevelDbService.select(str);
             if (utxo.getLockTime() == -1) {
+                System.out.println("冻结1");
                 utxoList.add(utxo);
             }else {
                 if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
                     if (utxo.getLockTime() > currentTime) {
+                        System.out.println("冻结2");
                         utxoList.add(utxo);
                     }
                 } else {
                     if (utxo.getLockTime() > bestHeight) {
+                        System.out.println("冻结3");
                         utxoList.add(utxo);
                     }
                 }
@@ -226,6 +230,13 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }
 
     //根据交易获取要修改的utxo，之后执行批量修改
+    public void rollBackByFrom(Map<String, Utxo> inputMap) {
+        utxoLevelDbService.insertMap(inputMap);
+        for (Utxo utxo : inputMap.values()) {
+            UtxoContext.put(utxo.getAddress(), utxo.getKey());
+        }
+    }
+
     public List<Utxo> getListByFrom(Transaction tx, Map<String, Utxo> utxoMap) {
         //coinBase交易，红黄牌交易没有inputs
         List<Utxo> txlist = new ArrayList<>();
@@ -251,13 +262,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             }
         }
         return txlist;
-    }
-
-    public void rollBackByFrom(Map<String, Utxo> inputMap) {
-        utxoLevelDbService.insertMap(inputMap);
-        for (Utxo utxo : inputMap.values()) {
-            UtxoContext.put(utxo.getAddress(), utxo.getKey());
-        }
     }
 
     public void rollbackByTo(List<Utxo> outputs) {

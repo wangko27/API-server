@@ -1,12 +1,11 @@
 package io.nuls.main;
 
-import io.nuls.api.i18n.I18nUtils;
-import io.nuls.api.utils.RestFulUtils;
-import io.nuls.api.server.ApiApplication;
 import io.nuls.api.constant.Constant;
+import io.nuls.api.i18n.I18nUtils;
+import io.nuls.api.server.ApiApplication;
 import io.nuls.api.utils.PropertiesUtils;
+import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
-import org.springframework.context.ApplicationContext;
 
 public enum Main {
     MAIN;
@@ -55,6 +54,8 @@ public enum Main {
         } else {
             entry.start(ip, Integer.parseInt(port), moduleUrl);
         }
+        //启动sdk
+        //SDKBootstrap.init(this.remoteIp,this.remotePort);
     }
 
     public static void main(String[] args) throws Exception {

@@ -15,10 +15,6 @@ public class PackingAddressContext {
      * 当前正在共识的节点数量
      */
     public static int consensusAgentCount = 0;
-    /**
-     * 正在共识的节点的总委托
-     */
-    public static Long consensusAgentDepositAmount = 0L;
     private static List<AgentNodeDto> agentNodeList = new ArrayList<>();
     public static List<AgentNodeDto> getAllList(){
         return agentNodeList;

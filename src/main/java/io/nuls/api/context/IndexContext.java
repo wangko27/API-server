@@ -1,13 +1,12 @@
 package io.nuls.api.context;
 
+import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.utils.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Description: 缓存首页的区块列表和交易列表和全网共识
@@ -17,7 +16,10 @@ import java.util.Map;
 public class IndexContext {
     private static List<BlockHeader> blocks = new ArrayList<>(Constant.INDEX_BLOCK_LIST_COUNT);
     private static List<Transaction> transactions = new ArrayList<>(Constant.INDEX_TX_LIST_COUNT);
+    //全网共识信息，每隔10s在链上加载
     private static Map rpcConsensusData = new HashMap();
+    //全网共识列表，缓存，用于查询，每隔10s在链上加载
+    private static List<LinkedHashMap> agentNodeList = new ArrayList<>();
 
     /*private static Queue<BlockHeader> blockQueue = new LinkedList<BlockHeader>();
     private static Queue<Transaction> transactionsQueue = new LinkedList<Transaction>();
@@ -81,4 +83,41 @@ public class IndexContext {
     public static Map getRpcConsensusData(){
         return rpcConsensusData;
     }
+
+    public static void resetRpcAgentNodeList(List<LinkedHashMap> data){
+        agentNodeList = data;
+    }
+    public static PageInfo getAgentNodeList(int pageNumber,int pageSize,String agentNode){
+        PageInfo<LinkedHashMap> page = new PageInfo<>();
+        List<LinkedHashMap> list = new ArrayList<>();
+        int start = (pageNumber-1)*pageSize;
+        int end = pageNumber*pageSize;
+        if(agentNodeList.size()<pageSize){
+            end = agentNodeList.size();
+        }else{
+            if(end > (agentNodeList.size()-pageSize)){
+                end = agentNodeList.size()-pageSize;
+            }
+        }
+
+        List<LinkedHashMap> tempData = new ArrayList<>();
+        if(StringUtils.isNotBlank(agentNode)){
+            for(LinkedHashMap hashMap: tempData){
+                if(hashMap.get("agentHash").toString().endsWith(agentNode)){
+                    tempData.add(hashMap);
+                }
+            }
+        }else{
+            tempData = agentNodeList;
+        }
+        for(int i =start;i<end;i++){
+            list.add(tempData.get(i));
+        }
+        page.setList(list);
+        page.setSize(tempData.size());
+        page.setPageNum(pageNumber);
+        return page;
+    }
+
+
 }

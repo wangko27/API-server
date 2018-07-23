@@ -48,6 +48,8 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         return RestFulUtils.getInstance().get("/consensus/agent/list", param);
     }
 
+
+
     /**
      * 查询全网共识信息
      *

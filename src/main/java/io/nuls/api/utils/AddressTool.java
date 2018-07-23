@@ -28,11 +28,15 @@ package io.nuls.api.utils;
 
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.NulsContext;
+import io.nuls.api.crypto.ECKey;
+import io.nuls.api.crypto.Hex;
 import io.nuls.api.crypto.script.P2PKHScriptSig;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.Address;
 import io.nuls.api.utils.log.Log;
+
+import java.math.BigInteger;
 
 /**
  * @author: Niels Wang
@@ -61,6 +65,16 @@ public class AddressTool {
         Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
 
         return address.getAddressBytes();
+    }
+
+    public static String getStringAddress(byte[] publicKey) {
+        if (publicKey == null) {
+            return null;
+        }
+        byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
+
+        return address.getBase58();
     }
 
     private static byte getXor(byte[] body) {
@@ -153,5 +167,6 @@ public class AddressTool {
         }
         return true;
     }
+
 
 }

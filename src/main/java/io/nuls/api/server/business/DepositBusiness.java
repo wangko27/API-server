@@ -32,7 +32,6 @@ public class DepositBusiness implements BaseService<Deposit, String> {
 
     /**
      * 委托列表
-     *
      * @param address 账户地址
      * @return
      */
@@ -40,10 +39,8 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
-        if (StringUtils.isNotBlank(agentHash)) {
-            if (StringUtils.validHash(agentHash)) {
-                searchable.addCondition("agent_hash", SearchOperator.eq, address);
-            }
+        if (StringUtils.validHash(agentHash)) {
+            searchable.addCondition("agent_hash", SearchOperator.eq, agentHash);
         }
         searchable.addCondition("delete_hash", SearchOperator.isNull, null);
         PageInfo<Deposit> page = new PageInfo<>(depositMapper.selectList(searchable));

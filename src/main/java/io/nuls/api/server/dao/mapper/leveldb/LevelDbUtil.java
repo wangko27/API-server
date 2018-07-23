@@ -20,12 +20,12 @@ public class LevelDbUtil {
             dbService.createArea(Constant.TRANSACTION_DB_NAME);
             dbService.createArea(Constant.BLOCKHEADER_DB_NAME);
             dbService.createArea(Constant.UTXO_DB_ADDRESS_NAME);
-            System.out.println("-------------休眠开始，20s，让leveldb加载数据");
+            /*System.out.println("-------------休眠开始，20s，让leveldb加载数据");
             try {
                 Thread.sleep(20000L);
             } catch (InterruptedException e) {
             }
-            System.out.println("-------------休眠结束");
+            System.out.println("-------------休眠结束");*/
         }
         return dbService;
     }

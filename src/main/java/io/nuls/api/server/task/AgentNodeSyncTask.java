@@ -26,11 +26,13 @@ public class AgentNodeSyncTask {
      * 去查询最新的节点列表
      */
     public void execute() {
-        List<Object> list = sync(new ArrayList<>(),1,100);
-        int consensusAgentCount = 0;
+        IndexContext.resetRpcAgentNodeList(sync(new ArrayList<>(),1,100));
+        //加载全网节点到list中
+        /*int consensusAgentCount = 0;
         for(Object object: list) {
             LinkedHashMap map = (LinkedHashMap) object;
-            if( map.containsKey("status")){
+            nodeList.add(map);
+            if(map.containsKey("status")){
                 Integer status = Integer.parseInt(map.get("status")+"");
                 if(status == EntityConstant.CONSENSUS_STATUS_CONSENSUSING){
                     consensusAgentCount++;
@@ -38,7 +40,7 @@ public class AgentNodeSyncTask {
             }
         }
         PackingAddressContext.consensusAgentCount = consensusAgentCount;
-
+        */
         //重置共识信息
         RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
         if(rpcClientResult.isSuccess()){
@@ -53,11 +55,11 @@ public class AgentNodeSyncTask {
      * @param pageSize
      * @return
      */
-    public List<Object> sync(List<Object> list,int pageNumber,int pageSize){
+    public List<LinkedHashMap> sync(List<LinkedHashMap> list,int pageNumber,int pageSize){
         RpcClientResult rpcClientResult = agentNodeBusiness.getList(null,pageNumber,pageSize);
         if(rpcClientResult.isSuccess()){
             Map<String,Object> map = (Map<String,Object>)rpcClientResult.getData();
-            List<Object> rpcList = (List<Object>)map.get("list");
+            List<LinkedHashMap> rpcList = (List<LinkedHashMap>)map.get("list");
             list.addAll(rpcList);
             Integer total = Integer.valueOf(map.get("total")+"");
             if(list.size() < total){

@@ -3,7 +3,6 @@ package io.nuls.api.server.resources.impl;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.IndexContext;
-import io.nuls.api.context.PackingAddressContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Balance;
 import io.nuls.api.entity.RpcClientResult;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -52,16 +50,18 @@ public class AgentNodeResource {
         HashMap<String,String> attr = new HashMap<String,String>();
         Long totalDeposit = 0L;
         Integer totalCount = 0;
+        Long consensusAccountNumber = 0L;
         try{
             Map rpcdata = IndexContext.getRpcConsensusData();
             totalDeposit = Long.valueOf(rpcdata.get("totalDeposit")+"");
             totalCount = Integer.valueOf(rpcdata.get("agentCount")+"");
+            consensusAccountNumber = Long.valueOf(rpcdata.get("consensusAccountNumber")+"");
         }catch (NullPointerException e){
             Log.error("获取全网共识信息失败");
         }
         attr.put("agentCount",totalCount+"");
         attr.put("rewardOfDay", HistoryContext.rewardofday+"");
-        attr.put("consensusAccountNumber",PackingAddressContext.consensusAgentCount+"");
+        attr.put("consensusAccountNumber",consensusAccountNumber+"");
         attr.put("totalDeposit",totalDeposit+"");
         result = RpcClientResult.getSuccess();
         result.setData(attr);
@@ -79,6 +79,7 @@ public class AgentNodeResource {
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("agentName") String agentName){
+        RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
@@ -90,7 +91,10 @@ public class AgentNodeResource {
         } else if (pageSize > 100) {
             pageSize = 100;
         }
-        return agentNodeBusiness.getList(agentName,pageNumber,pageSize);
+        result = RpcClientResult.getSuccess();
+        result.setData(IndexContext.getAgentNodeList(pageNumber,pageSize,agentName));
+        //return agentNodeBusiness.getList(agentName,pageNumber,pageSize);
+        return result;
     }
 
     /**
@@ -162,6 +166,13 @@ public class AgentNodeResource {
         Long depositMoney = depositBusiness.selectTotalAmount(address);
         if(null == depositMoney){
             depositMoney = 0L;
+        }
+        //加载我的节点信息(我是否建立了节点)
+        if(null == agentNodeBusiness.getAgentByAddress(address)){
+            attr.put("agentNum","0");
+        }else{
+            //一个人只能建立一个节点
+            attr.put("agentNum","1");
         }
         attr.put("depositMoney",depositMoney+"");
         result.setData(attr);

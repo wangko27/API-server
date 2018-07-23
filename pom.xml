@@ -211,7 +211,12 @@
             <artifactId>guava</artifactId>
             <version>23.0</version>
         </dependency>
-
+        <!-- nuls - sdk -->
+        <dependency>
+            <groupId>io.nuls.sdk</groupId>
+            <artifactId>sdk-all</artifactId>
+            <version>1.0.4</version>
+        </dependency>
         <!-- Ehcache -->
         <dependency>
             <groupId>net.sf.ehcache</groupId>
