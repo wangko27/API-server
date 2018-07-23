@@ -157,11 +157,42 @@ public class TransactionResource {
     @GET
     @Path("/transFee")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getTransFee(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address,@QueryParam("type")int type){
+    public RpcClientResult getTransFee(@QueryParam("address")String address,@QueryParam("money")long money,@QueryParam("remark")long remark,@QueryParam("price")long price){
+        int size = 0;
         RpcClientResult result = null;
+        if(!StringUtils.validAddress(address)){
+            return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+        if(money <= 0){
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
         result = RpcClientResult.getSuccess();
         Map<String,String> attr = new HashMap<String,String>();
-        attr.put("value","100000100");
+        List<Utxo> list = utxoBusiness.getUsableUtxo(address);
+        List<Utxo> useable = new ArrayList<>();
+        long usable = 0;
+        int round = 0;
+        for(int i =0; i< list.size(); i++){
+            Utxo utxo = list.get(i);
+            round = i;
+            usable += utxo.getAmount();
+            if(usable > money){
+                useable.add(utxo);
+                break;
+            }
+        }
+        if(usable > money){
+            //todo 计算手续费，返回前端
+            // (124+50*inputs.length+38*outputs.length + remark.bytes.length)/1024
+            //long base = 124+50*inputs.length+38*outputs.length + remark.bytes.length;
+            long k =(124+(50*useable.size())+38)/1024;
+
+            for(int i = round; i<list.size(); i++){
+
+            }
+        }else{
+            return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+        }
         result.setData(attr);
         return result;
     }
@@ -169,7 +200,6 @@ public class TransactionResource {
     @POST
     @Path("/trans")
     @Produces(MediaType.APPLICATION_JSON)
-    //@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public RpcClientResult trans(Alias alias){
         RpcClientResult result;
         result = RpcClientResult.getSuccess();
