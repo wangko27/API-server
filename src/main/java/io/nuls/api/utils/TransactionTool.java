@@ -4,13 +4,12 @@ import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.NulsConstant;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.Utxo;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 
-import io.nuls.api.model.Alias;
-import io.nuls.api.model.Coin;
-import io.nuls.api.model.CoinData;
-import io.nuls.api.model.Na;
+import io.nuls.api.model.*;
 import io.nuls.api.model.tx.AliasTransaction;
+import io.nuls.api.model.tx.CancelDepositTransaction;
 import io.nuls.api.model.tx.DepositTransaction;
 import io.nuls.api.model.tx.TransferTransaction;
 import io.nuls.sdk.core.contast.SDKConstant;
@@ -137,16 +136,65 @@ public class TransactionTool {
         return null;
     }
 
-    public static DepositTransaction createDepositTx(List<Utxo> utxoList, String address, long amount, long fee) {
+    public static DepositTransaction createDepositTx(List<Utxo> utxoList, String address, String agentHash, long amount, long fee) {
+        NulsDigestData hash = null;
+        try {
+            hash = NulsDigestData.fromDigestHex(agentHash);
+        } catch (NulsException e) {
+            throw new NulsRuntimeException(ErrorCode.HASH_ERROR);
+        }
+
         List<Coin> outputs = new ArrayList<>();
         Coin to = new Coin();
-        to.setLockTime(0);
+        to.setLockTime(-1);
         to.setNa(NulsConstant.ALIAS_NA);
         to.setOwner(AddressTool.getAddress(address));
         outputs.add(to);
 
-        CoinData coinData = createCoinData(utxoList, outputs, amount);
+        Deposit deposit = new Deposit();
+        deposit.setAddress(AddressTool.getAddress(address));
+        deposit.setAgentHash(hash);
+        deposit.setDeposit(Na.valueOf(amount));
+        CoinData coinData = createCoinData(utxoList, outputs, amount + fee);
+        if (coinData != null) {
+            DepositTransaction depositTx = new DepositTransaction();
+            depositTx.setTxData(deposit);
+            depositTx.setCoinData(coinData);
+            return depositTx;
+        }
         return null;
+    }
+
+    public static CancelDepositTransaction createCancelDepositTx(Utxo utxo) {
+        CancelDeposit cancelDeposit = new CancelDeposit();
+        cancelDeposit.setAddress(AddressTool.getAddress(utxo.getAddress()));
+        try {
+            cancelDeposit.setJoinTxHash(NulsDigestData.fromDigestHex(utxo.getTxHash()));
+        } catch (NulsException e) {
+            throw new NulsRuntimeException(ErrorCode.HASH_ERROR);
+        }
+        //组装input
+        Coin from = new Coin();
+        byte[] key = Arrays.concatenate(Hex.decode(utxo.getTxHash()), new VarInt(utxo.getTxIndex()).encode());
+        List<Coin> inputsList = new ArrayList<>();
+        from.setOwner(key);
+        from.setNa(Na.valueOf(utxo.getAmount()));
+        from.setLockTime(-1);
+        inputsList.add(from);
+
+        //手续费
+        Na fee = TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES;
+        //组装output
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(cancelDeposit.getAddress(), Na.valueOf(utxo.getAmount()).subtract(fee), 0));
+        CancelDepositTransaction tx = new CancelDepositTransaction();
+        CoinData coinData = new CoinData();
+        coinData.setFrom(inputsList);
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        tx.setTime(TimeService.currentTimeMillis());
+        tx.setTxData(cancelDeposit);
+        return tx;
     }
 
     private static Na calcFee(List<Utxo> utxoList, int size, long amount, Na unitPrice) {
