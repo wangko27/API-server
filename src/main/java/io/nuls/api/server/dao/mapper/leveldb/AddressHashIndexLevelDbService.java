@@ -30,16 +30,16 @@ public class AddressHashIndexLevelDbService {
 
     private DBService dbService = LevelDbUtil.getInstance();
 
-    /*public void insertList(List<AddressHashIndex> list) {
+    public void insertList(List<AddressHashIndex> list) {
         BatchOperation batch = dbService.createWriteBatch(Constant.UTXO_DB_NAME);
         for (AddressHashIndex addressHashIndex : list) {
             batch.putModel(addressHashIndex.getAddress().getBytes(), addressHashIndex);
         }
         batch.executeBatch();
-    }*/
+    }
 
-    public int insert(String key, Set<String> value) {
-        Result result = dbService.putModel(Constant.UTXO_DB_ADDRESS_NAME, key.getBytes(), value);
+    public int insert(AddressHashIndex addressHashIndex) {
+        Result result = dbService.putModel(Constant.UTXO_DB_ADDRESS_NAME, addressHashIndex.getAddress().getBytes(), addressHashIndex);
         if (result.isSuccess()) {
             return 1;
         }
@@ -54,8 +54,8 @@ public class AddressHashIndexLevelDbService {
         return 0;
     }
 
-    public Set<String> select(String key) {
-        return dbService.getModel(Constant.UTXO_DB_ADDRESS_NAME, key.getBytes(), Set.class);
+    public AddressHashIndex select(String key) {
+        return dbService.getModel(Constant.UTXO_DB_ADDRESS_NAME, key.getBytes(), AddressHashIndex.class);
     }
 
     //查询所有address
@@ -65,6 +65,7 @@ public class AddressHashIndexLevelDbService {
         for(byte[] setAddr : setList){
             try {
                 addressList.add(new String(setAddr,"utf-8"));
+                System.out.println("dizhi:"+new String(setAddr,"utf-8"));
             } catch (UnsupportedEncodingException e) {
                 Log.error("获取addre异常了");
             }

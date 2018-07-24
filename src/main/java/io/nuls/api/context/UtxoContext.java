@@ -19,8 +19,8 @@ public class UtxoContext {
         //重置缓存
         EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
         //重置leveldb
-        //addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
-        addressHashIndexLevelDbService.insert(address,list);
+        addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
+        //addressHashIndexLevelDbService.insert(address,list);
     }
 
     //根据hashIndex，移除某个utxo
@@ -29,7 +29,8 @@ public class UtxoContext {
         if (list != null) {
             list.remove(key);
             //重置leveldb
-            addressHashIndexLevelDbService.insert(address,list);
+            //addressHashIndexLevelDbService.insert(address,list);
+            addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
         }
     }
 
@@ -37,9 +38,14 @@ public class UtxoContext {
     public static Set<String> get(String address) {
         Set<String> setList = (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
         if(null == setList){
-            setList = addressHashIndexLevelDbService.select(address);
-            //AddressHashIndex addressHashIndex = addressHashIndexLevelDbService.select(address);
-            if(null == setList){
+            //setList = addressHashIndexLevelDbService.select(address);
+            AddressHashIndex addressHashIndex = addressHashIndexLevelDbService.select(address);
+            if(null != addressHashIndex){
+                setList = addressHashIndex.getHashIndexSet();
+                if(null == setList){
+                    setList = new HashSet<>();
+                }
+            }else{
                 setList = new HashSet<>();
             }
         }

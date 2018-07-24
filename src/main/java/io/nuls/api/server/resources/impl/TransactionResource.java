@@ -4,7 +4,10 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.*;
+import io.nuls.api.model.tx.AliasTransaction;
+import io.nuls.api.model.tx.CancelDepositTransaction;
 import io.nuls.api.model.tx.DepositTransaction;
+import io.nuls.api.model.tx.TransferTransaction;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
@@ -18,10 +21,10 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
+
+import static io.nuls.api.utils.TransactionTool.createAliasTx;
 
 /**
  * Description:
@@ -194,6 +197,7 @@ public class TransactionResource {
         if(null == na){
             return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
         }
+        //io.nuls.sdk.core.utils.TransactionTool.signTransaction();
         attr.put("fee",na.getValue()+"");
         result.setData(attr);
         return result;
@@ -202,64 +206,70 @@ public class TransactionResource {
     @POST
     @Path("/trans")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult trans(TransactionParam transactionParam){
+    public RpcClientResult trans(TransactionParam transactionParam) throws IOException {
         RpcClientResult result;
         result = RpcClientResult.getSuccess();
+        Map<String,Object> attr = new HashMap<>();
+        attr.put("hash","");
+        attr.put("seri", "");
         if(null == transactionParam){
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-
         List<Utxo> list = utxoBusiness.getUsableUtxo(transactionParam.getAddress());
         io.nuls.api.model.Na na  = null;
         if(transactionParam.getTypes() == EntityConstant.TX_TYPE_TRANSFER){
             //转账
             na = TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice());
+            if(null == na){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            }
             //组装交易
-            TransactionTool.createTransferTx(list,transactionParam.getToAddress(),transactionParam.getMoney(),transactionParam.getRemark(),na.getValue());
+            TransferTransaction transferTransaction = TransactionTool.createTransferTx(list,transactionParam.getToAddress(),transactionParam.getMoney(),transactionParam.getRemark(),na.getValue());
+            attr.put("hash",transferTransaction.getHash().getDigestHex());
+            attr.put("seri", Base64.getEncoder().encodeToString(transferTransaction.serialize()));
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
             //设置别名
             na = TransactionTool.getAliasTxFee(list,transactionParam.getAddress(),transactionParam.getAlias());
+            if(null == na){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            }
             //组装交易
-            TransactionTool.createAliasTx(list,transactionParam.getAddress(),transactionParam.getAlias(),na.getValue());
+            AliasTransaction aliasTransaction = TransactionTool.createAliasTx(list,transactionParam.getAddress(),transactionParam.getAlias(),na.getValue());
+            attr.put("hash",aliasTransaction.getHash().getDigestHex());
+            attr.put("seri", Base64.getEncoder().encodeToString(aliasTransaction.serialize()));
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
             //加入共识
             na = TransactionTool.getJoinAgentTxFee(list,transactionParam.getMoney());
+            if(null == na){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            }
             //组装交易
-            DepositTransaction d=TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
-            //d.getHash()
-
-
-            /*DepositTransaction d = TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
-            try {
-                Hex.encode(d.serialize());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
+            DepositTransaction depositTransaction = TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
+            attr.put("hash",depositTransaction.getHash().getDigestHex());
+            attr.put("seri", Base64.getEncoder().encodeToString(depositTransaction.serialize()));
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
             //退出共识
             na = io.nuls.api.model.Na.CENT;
+            if(null == na){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            }
             //组装交易
             Transaction tx = transactionBusiness.getByHash(transactionParam.getAgentHash());
             if(null != tx.getOutputList()){
                 for(Output output:tx.getOutputList()){
                     Utxo utxo = utxoBusiness.getByKey(output.getKey());
                     if(utxo.getLockTime() == -1){
-                        TransactionTool.createCancelDepositTx(utxo);
+                        CancelDepositTransaction cancelDepositTransaction = TransactionTool.createCancelDepositTx(utxo);
+                        attr.put("hash",cancelDepositTransaction.getHash().getDigestHex());
+                        attr.put("seri", Base64.getEncoder().encodeToString(cancelDepositTransaction.serialize()));
                     }
                 }
             }
-
         }else{
             //其他，暂时不处理
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-
-
-        result.setData(transactionParam);
+        result.setData(attr);
         return result;
     }
-
-
-
-
 }

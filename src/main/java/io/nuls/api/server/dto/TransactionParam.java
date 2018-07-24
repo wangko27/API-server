@@ -72,12 +72,12 @@ public class TransactionParam {
         this.alias = alias;
     }
 
-    public String getAgentHash() {
-        return agentHash;
-    }
-
     public void setAgentHash(String agentHash) {
         this.agentHash = agentHash;
+    }
+
+    public String getAgentHash() {
+        return agentHash;
     }
 
     public long getMoney() {
