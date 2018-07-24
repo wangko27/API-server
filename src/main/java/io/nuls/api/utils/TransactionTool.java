@@ -130,9 +130,9 @@ public class TransactionTool {
         long values = 0;
         Na fee = null;
         boolean enough = false;
-
         for (int i = 0; i < utxoList.size(); i++) {
             size += 50;
+            values += utxoList.get(i).getAmount();
             if (i == 127) {
                 size += 1;
             }
