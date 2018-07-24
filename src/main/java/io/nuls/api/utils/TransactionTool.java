@@ -15,6 +15,7 @@ import io.nuls.api.model.tx.TransferTransaction;
 import io.nuls.sdk.core.contast.SDKConstant;
 import org.spongycastle.util.Arrays;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +77,11 @@ public class TransactionTool {
                 }
             }
             tx.setCoinData(coinData);
+            try {
+                tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            } catch (IOException e) {
+                throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR);
+            }
             return tx;
         }
 
@@ -106,10 +112,15 @@ public class TransactionTool {
 
         CoinData coinData = createCoinData(utxoList, outputs, NulsConstant.ALIAS_NA.getValue() + fee);
         if (coinData != null) {
-            AliasTransaction aliasTransaction = new AliasTransaction();
-            aliasTransaction.setTxData(new Alias(AddressTool.getAddress(address), alias));
-            aliasTransaction.setCoinData(coinData);
-            return aliasTransaction;
+            AliasTransaction aliasTx = new AliasTransaction();
+            aliasTx.setTxData(new Alias(AddressTool.getAddress(address), alias));
+            aliasTx.setCoinData(coinData);
+            try {
+                aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serializeForHash()));
+            } catch (IOException e) {
+                throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR);
+            }
+            return aliasTx;
         }
         return null;
     }
@@ -160,6 +171,11 @@ public class TransactionTool {
             DepositTransaction depositTx = new DepositTransaction();
             depositTx.setTxData(deposit);
             depositTx.setCoinData(coinData);
+            try {
+                depositTx.setHash(NulsDigestData.calcDigestData(depositTx.serializeForHash()));
+            } catch (IOException e) {
+                throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR);
+            }
             return depositTx;
         }
         return null;
@@ -194,6 +210,11 @@ public class TransactionTool {
         tx.setCoinData(coinData);
         tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(cancelDeposit);
+        try {
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        } catch (IOException e) {
+            throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR);
+        }
         return tx;
     }
 
