@@ -25,6 +25,9 @@
 package io.nuls.api.constant;
 
 
+import io.nuls.api.model.Na;
+import io.nuls.sdk.core.utils.AddressTool;
+
 /**
  * 系统常量集合
  * SYSTEM CONSTANT
@@ -33,8 +36,9 @@ package io.nuls.api.constant;
  */
 public interface NulsConstant {
 
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
 
-
+    Na ALIAS_NA = Na.parseNuls(1);
     /**
      * 系统配置文件名称
      * System configuration file name.

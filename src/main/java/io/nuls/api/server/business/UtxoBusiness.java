@@ -69,7 +69,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     public List<Utxo> getUtxoList() {
         List<Utxo> utxoList = new ArrayList<>();
         List<Utxo> list = utxoLevelDbService.getList();
-        if(null == list){
+        if (null == list) {
             return utxoList;
         }
         for (Utxo utxo : list) {
@@ -82,10 +82,11 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     /**
      * 根据地址，获取所有冻结的utxo
+     *
      * @param address
      * @return
      */
-    public PageInfo<Utxo> getListByAddress(String address,int pageNumber,int pageSize){
+    public PageInfo<Utxo> getListByAddress(String address, int pageNumber, int pageSize) {
         List<Utxo> utxoList = new ArrayList<>();
         Set<String> setList = UtxoContext.get(address);
         BlockHeader blockHeader = blockBusiness.getNewest();
@@ -94,11 +95,11 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
         }
-        for(String str: setList){
+        for (String str : setList) {
             Utxo utxo = utxoLevelDbService.select(str);
             if (utxo.getLockTime() == -1) {
                 utxoList.add(utxo);
-            }else {
+            } else {
                 if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
                     if (utxo.getLockTime() > currentTime) {
                         utxoList.add(utxo);
@@ -112,13 +113,13 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         }
         //模拟分页
         PageInfo<Utxo> page = new PageInfo<>();
-        int start = (pageNumber-1)*pageSize;
-        int end = pageNumber*pageSize;
+        int start = (pageNumber - 1) * pageSize;
+        int end = pageNumber * pageSize;
         List<Utxo> tempList = new ArrayList<>();
-        if(utxoList.size()-pageNumber < end){
-            end = utxoList.size()-pageNumber;
+        if (utxoList.size() - pageNumber < end) {
+            end = utxoList.size() - pageNumber;
         }
-        for(int i = start; i < end; i++){
+        for (int i = start; i < end; i++) {
             tempList.add(utxoList.get(i));
         }
         page.setTotal(setList.size());
@@ -129,6 +130,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     /**
      * 查询账户可用的utxo
+     *
      * @param address 用户账户
      * @return
      */
@@ -146,16 +148,18 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         for (Utxo utxo : utxoList) {
             if (utxo.getLockTime() == 0) {
                 list.add(utxo);
-            }else {
-                if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
-                    //根据时间锁定
-                    if (utxo.getLockTime() <= currentTime) {
-                        list.add(utxo);
-                    }
-                } else {
-                    //根据高度锁定
-                    if (utxo.getLockTime() <= bestHeight) {
-                        list.add(utxo);
+            } else {
+                if (utxo.getLockTime() > 0) {
+                    if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
+                        //根据时间锁定
+                        if (utxo.getLockTime() <= currentTime) {
+                            list.add(utxo);
+                        }
+                    } else {
+                        //根据高度锁定
+                        if (utxo.getLockTime() <= bestHeight) {
+                            list.add(utxo);
+                        }
                     }
                 }
             }
@@ -319,19 +323,19 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      * @return
      */
     public List<UtxoDto> getBlockSumTxamount() {
-        Map<String,UtxoDto> mapData = new HashMap<>();
+        Map<String, UtxoDto> mapData = new HashMap<>();
         List<Utxo> utxoList = utxoLevelDbService.getList();
         UtxoDto utxoDto;
         for (Utxo utxo : utxoList) {
-            if(null == utxo.getSpendTxHash()){
-                if(mapData.containsKey(utxo.getAddress())){
+            if (null == utxo.getSpendTxHash()) {
+                if (mapData.containsKey(utxo.getAddress())) {
                     utxoDto = mapData.get(utxo.getAddress());
-                    mapData.get(utxo.getAddress()).setTotal(utxoDto.getTotal()+utxo.getAmount());
-                }else{
+                    mapData.get(utxo.getAddress()).setTotal(utxoDto.getTotal() + utxo.getAmount());
+                } else {
                     utxoDto = new UtxoDto();
                     utxoDto.setAddress(utxo.getAddress());
                     utxoDto.setTotal(utxo.getAmount());
-                    mapData.put(utxo.getAddress(),utxoDto);
+                    mapData.put(utxo.getAddress(), utxoDto);
                 }
             }
         }
