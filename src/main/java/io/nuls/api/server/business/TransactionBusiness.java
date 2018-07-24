@@ -9,6 +9,7 @@ import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.ArraysTool;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -96,17 +97,41 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
      * @param address 地址
      * @return
      */
-    //todo 分页的pageNumber需要修改成long，因为按照目前进度，一天8000块，一块1000笔交易，那么一年就是24亿比交易
+    //todo 分页的pageNumber需要修改成long，因为按照目前进度，一天8000块，一块1000笔交易，那么一年就是24亿笔交易
     public PageInfo<Transaction> getListByAddress(String address, int type, int pageNumber, int pageSize) {
         PageInfo<TransactionRelation> relationPageInfo = transactionRelationBusiness.getListByPage(address, pageNumber, pageSize);
         List<TransactionRelation> relationList = relationPageInfo.getList();
         List<Transaction> transactionList = new ArrayList<>();
         if (null != relationList) {
             for (TransactionRelation relation : relationList) {
-                transactionList.add(transactionLevelDbService.select(relation.getTxHash()));
+                Transaction tx = transactionLevelDbService.select(relation.getTxHash());
+                long calcMoney = 0;
+                int calcType = 0;
+                if(null!=tx.getInputs()){
+                    for(Input input:tx.getInputs()){
+                        if(input.getAddress().equals(address)){
+                            calcType = 1;
+                            calcMoney += input.getValue();
+                        }
+                    }
+                }
+                if(null != tx.getOutputList()){
+                    for(Output output:tx.getOutputList()){
+                        if(output.getAddress().equals(address)){
+                            calcMoney -= output.getValue();
+                        }
+                    }
+                }
+                if(calcType == 1){
+                    //支出
+                    tx.setAmount(0-calcMoney);
+                }else{
+                    tx.setAmount(calcMoney);
+                }
+                transactionList.add(tx);
             }
         }
-        PageInfo<Transaction> page = new PageInfo<>(formatTransaction(transactionList));
+        PageInfo<Transaction> page = new PageInfo<>(transactionList);
         //重置分页相关数据
         page.setPageSize(relationPageInfo.getPageSize());
         page.setSize(relationPageInfo.getSize());

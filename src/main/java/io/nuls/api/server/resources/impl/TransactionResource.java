@@ -1,15 +1,18 @@
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.*;
+import io.nuls.api.model.tx.DepositTransaction;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.server.dto.TransactionDto;
+import io.nuls.api.server.dto.TransactionParam;
 import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.TransactionTool;
 import io.nuls.api.utils.log.Log;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -157,8 +160,7 @@ public class TransactionResource {
     @GET
     @Path("/transFee")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getTransFee(@QueryParam("address")String address,@QueryParam("money")long money,@QueryParam("remark")long remark,@QueryParam("price")long price){
-        int size = 0;
+    public RpcClientResult getTransFee(@QueryParam("address")String address,@QueryParam("money")long money,@QueryParam("remark")String remark,@QueryParam("price")long price,@QueryParam("types")int types,@QueryParam("alias")String alias){
         RpcClientResult result = null;
         if(!StringUtils.validAddress(address)){
             return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
@@ -166,33 +168,33 @@ public class TransactionResource {
         if(money <= 0){
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
+        if(types <= 0){
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
         result = RpcClientResult.getSuccess();
         Map<String,String> attr = new HashMap<String,String>();
         List<Utxo> list = utxoBusiness.getUsableUtxo(address);
-        List<Utxo> useable = new ArrayList<>();
-        long usable = 0;
-        int round = 0;
-        for(int i =0; i< list.size(); i++){
-            Utxo utxo = list.get(i);
-            round = i;
-            usable += utxo.getAmount();
-            if(usable > money){
-                useable.add(utxo);
-                break;
-            }
-        }
-        if(usable > money){
-            //todo 计算手续费，返回前端
-            // (124+50*inputs.length+38*outputs.length + remark.bytes.length)/1024
-            //long base = 124+50*inputs.length+38*outputs.length + remark.bytes.length;
-            long k =(124+(50*useable.size())+38)/1024;
-
-            for(int i = round; i<list.size(); i++){
-
-            }
+        io.nuls.api.model.Na na  = null;
+        if(types == EntityConstant.TX_TYPE_TRANSFER){
+            //转账
+            na = TransactionTool.getTransferTxFee(list,money,remark,price);
+        }else if(types == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
+            //设置别名
+            na = TransactionTool.getAliasTxFee(list,address,alias);
+        }else if(types == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
+            //加入共识
+            na = TransactionTool.getJoinAgentTxFee(list,money);
+        }else if(types == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
+            //退出共识
+            na = io.nuls.api.model.Na.CENT;
         }else{
+            //其他，暂时不处理
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if(null == na){
             return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
         }
+        attr.put("fee",na.getValue()+"");
         result.setData(attr);
         return result;
     }
@@ -200,10 +202,60 @@ public class TransactionResource {
     @POST
     @Path("/trans")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult trans(Alias alias){
+    public RpcClientResult trans(TransactionParam transactionParam){
         RpcClientResult result;
         result = RpcClientResult.getSuccess();
-        result.setData(alias);
+        if(null == transactionParam){
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+        List<Utxo> list = utxoBusiness.getUsableUtxo(transactionParam.getAddress());
+        io.nuls.api.model.Na na  = null;
+        if(transactionParam.getTypes() == EntityConstant.TX_TYPE_TRANSFER){
+            //转账
+            na = TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice());
+            //组装交易
+            TransactionTool.createTransferTx(list,transactionParam.getToAddress(),transactionParam.getMoney(),transactionParam.getRemark(),na.getValue());
+        }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
+            //设置别名
+            na = TransactionTool.getAliasTxFee(list,transactionParam.getAddress(),transactionParam.getAlias());
+            //组装交易
+            TransactionTool.createAliasTx(list,transactionParam.getAddress(),transactionParam.getAlias(),na.getValue());
+        }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
+            //加入共识
+            na = TransactionTool.getJoinAgentTxFee(list,transactionParam.getMoney());
+            //组装交易
+            DepositTransaction d=TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
+            //d.getHash()
+
+
+            /*DepositTransaction d = TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
+            try {
+                Hex.encode(d.serialize());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }*/
+        }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
+            //退出共识
+            na = io.nuls.api.model.Na.CENT;
+            //组装交易
+            Transaction tx = transactionBusiness.getByHash(transactionParam.getAgentHash());
+            if(null != tx.getOutputList()){
+                for(Output output:tx.getOutputList()){
+                    Utxo utxo = utxoBusiness.getByKey(output.getKey());
+                    if(utxo.getLockTime() == -1){
+                        TransactionTool.createCancelDepositTx(utxo);
+                    }
+                }
+            }
+
+        }else{
+            //其他，暂时不处理
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
+
+        result.setData(transactionParam);
         return result;
     }
 

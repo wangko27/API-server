@@ -10,6 +10,7 @@ import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
+import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,9 @@ public class SyncDataBusiness {
                 //存放新的utxo到utxoMap
                 if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
                     for (Utxo utxo : tx.getOutputs()) {
+                        if(StringUtils.isBlank(utxo.getAddress())){
+                            System.out.println(tx.getHash()+"----地址为空"+utxo.getKey());
+                        }
                         utxoMap.put(utxo.getKey(), utxo);
                     }
                 }
