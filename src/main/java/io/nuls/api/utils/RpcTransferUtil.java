@@ -252,7 +252,7 @@ public class RpcTransferUtil {
 
     }
 
-
+    @Deprecated
     public static Transaction toTransaction(Map<String, Object> map) throws Exception {
         Transaction tx = new Transaction();
         tx.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
@@ -292,7 +292,6 @@ public class RpcTransferUtil {
             output.setAmount(Long.parseLong(dataMap.get("value").toString()));
             outputs.add(output);
         }
-
         return tx;
     }
 }

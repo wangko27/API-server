@@ -1,31 +1,20 @@
 package io.nuls.api.server;
 
-import io.nuls.api.constant.Constant;
-import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
-import io.nuls.api.model.NulsDigestData;
-import io.nuls.api.model.Result;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.SyncDataBusiness;
 import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
-import io.nuls.api.server.leveldb.manager.LevelDBManager;
-import io.nuls.api.server.leveldb.service.DBService;
-import io.nuls.api.server.leveldb.service.impl.LevelDBServiceImpl;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.RestFulUtils;
-import net.sf.ehcache.util.FindBugsSuppressWarnings;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -38,12 +27,24 @@ public class SyncTest {
     private SyncDataBusiness syncDataBusiness;
     @Autowired
     private BlockBusiness blockBusiness;
-    @Autowired
-    private BlockHeaderLevelDbService headerLevelDbService;
-    @Autowired
-    private TransactionLevelDbService transactionLevelDbService;
-    @Autowired
-    private UtxoLevelDbService utxoLevelDbService;
+    private BlockHeaderLevelDbService headerLevelDbService = BlockHeaderLevelDbService.getInstance();
+    private TransactionLevelDbService transactionLevelDbService = TransactionLevelDbService.getInstance();
+    private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+
+    @Test
+    public void testBlockSync() {
+        RestFulUtils.getInstance().init("http://192.168.1.109:8001/api");
+        BlockHeader header = new BlockHeader();
+        header.setHash("002082492ad4b7d56fdfd4f78b7a2f34868d4fc3064bd3d33f99fa9bfbae6d348505");
+        try {
+            RpcClientResult<Block> rpcClientResult = syncDataHandler.getBlock(header);
+            Block block = rpcClientResult.getData();
+            List<Transaction> txList = block.getTxList();
+            System.out.println(txList.size());
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     @Test

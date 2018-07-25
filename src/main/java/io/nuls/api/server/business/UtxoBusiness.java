@@ -279,9 +279,9 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     public List<Utxo> getListByFrom(Transaction tx, Map<String, Utxo> utxoMap) {
         //coinBase交易，红黄牌交易没有inputs
-        List<Utxo> txlist = new ArrayList<>();
+        List<Utxo> utxoList = new ArrayList<>();
         if (tx.getInputs() == null || tx.getInputs().isEmpty()) {
-            return txlist;
+            return utxoList;
         }
         Utxo utxo;
         String key;
@@ -289,7 +289,10 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             //重置需要添加的数据的spend_hash
             key = input.getKey();
             if (utxoMap.containsKey(key)) {
-                utxoMap.get(key).setSpendTxHash(tx.getHash());
+                utxo = utxoMap.get(key);
+                utxo.setSpendTxHash(tx.getHash());
+                input.setAddress(utxo.getAddress());
+                input.setValue(utxo.getAmount());
                 continue;
             }
 
@@ -298,10 +301,10 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
                 utxo.setSpendTxHash(tx.getHash());
                 input.setAddress(utxo.getAddress());
                 input.setValue(utxo.getAmount());
-                txlist.add(utxo);
+                utxoList.add(utxo);
             }
         }
-        return txlist;
+        return utxoList;
     }
 
     public void rollbackByTo(List<Utxo> outputs) {
