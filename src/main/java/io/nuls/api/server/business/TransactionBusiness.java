@@ -109,7 +109,7 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
                 int calcType = 0;
                 if(null!=tx.getInputs()){
                     for(Input input:tx.getInputs()){
-                        if(input.getAddress().equals(address)){
+                        if(address.equals(input.getAddress())){
                             calcType = 1;
                             calcMoney += input.getValue();
                         }

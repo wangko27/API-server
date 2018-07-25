@@ -24,8 +24,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.*;
 
-import static io.nuls.api.utils.TransactionTool.createAliasTx;
-
 /**
  * Description:
  * Author: zsj
