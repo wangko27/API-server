@@ -9,11 +9,21 @@ public class TransactionRelation {
         this.address = address;
         this.txHash = txHash;
     }
+    public TransactionRelation(String address,String txHash,int type,long createTime){
+        this.address = address;
+        this.txHash = txHash;
+        this.type = type;
+        this.createTime = createTime;
+    }
     private Long id;
 
     private String address;
 
     private String txHash;
+
+    private Integer type;
+
+    private Long createTime;
 
     public Long getId() {
         return id;
@@ -37,5 +47,21 @@ public class TransactionRelation {
 
     public void setTxHash(String txHash) {
         this.txHash = txHash == null ? null : txHash.trim();
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
     }
 }

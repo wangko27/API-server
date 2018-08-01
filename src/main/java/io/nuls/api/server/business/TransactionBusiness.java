@@ -81,12 +81,15 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     public List<Transaction> getList(BlockHeader header) {
         List<Transaction> txList = new ArrayList<>();
         Transaction tx;
-        for (String txHash : header.getTxHashList()) {
-            tx = transactionLevelDbService.select(txHash);
-            if (tx != null) {
-                txList.add(tx);
+        if(null != header.getTxHashList()){
+            for (String txHash : header.getTxHashList()) {
+                tx = transactionLevelDbService.select(txHash);
+                if (tx != null) {
+                    txList.add(tx);
+                }
             }
         }
+
         return txList;
     }
 
@@ -98,48 +101,44 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
      * @return
      */
     //todo 分页的pageNumber需要修改成long，因为按照目前进度，一天8000块，一块1000笔交易，那么一年就是24亿笔交易
-    public PageInfo<Transaction> getListByAddress(String address, int type, int pageNumber, int pageSize) {
-        PageInfo<TransactionRelation> relationPageInfo = transactionRelationBusiness.getListByPage(address, pageNumber, pageSize);
-        List<TransactionRelation> relationList = relationPageInfo.getList();
+    public PageInfo<Transaction> getListByAddress(String address, int type,long startTime,long endTime, int pageNumber, int pageSize) {
         List<Transaction> transactionList = new ArrayList<>();
-        if (null != relationList) {
-            for (TransactionRelation relation : relationList) {
-                Transaction tx = transactionLevelDbService.select(relation.getTxHash());
-                long calcMoney = 0;
-                int calcType = 0;
-                if(null!=tx.getInputs()){
-                    for(Input input:tx.getInputs()){
-                        if(address.equals(input.getAddress())){
-                            calcType = 1;
-                            calcMoney += input.getValue();
-                        }
-                    }
-                }
-                if(null != tx.getOutputList()){
-                    for(Output output:tx.getOutputList()){
-                        if(output.getAddress().equals(address)){
-                            calcMoney -= output.getValue();
-                        }
-                    }
-                }
-                if(calcType == 1){
-                    //支出
-                    tx.setAmount(0-calcMoney);
-                }else{
-                    tx.setAmount(calcMoney);
-                }
-                transactionList.add(tx);
-            }
+        PageHelper.startPage(pageNumber, pageSize);
+        PageInfo<TransactionRelation> transactionRelationPageInfo = transactionRelationBusiness.getListByPage(address,type,startTime,endTime,pageNumber,pageSize);
+        for (TransactionRelation relation : transactionRelationPageInfo.getList()) {
+            Transaction tx = transactionLevelDbService.select(relation.getTxHash());
+            caclTx(tx,address);
+            transactionList.add(tx);
         }
         PageInfo<Transaction> page = new PageInfo<>(transactionList);
-        //重置分页相关数据
-        page.setPageSize(relationPageInfo.getPageSize());
-        page.setSize(relationPageInfo.getSize());
-        page.setStartRow(relationPageInfo.getStartRow());
-        page.setEndRow(relationPageInfo.getEndRow());
-        page.setTotal(relationPageInfo.getTotal());
-        page.setPages(relationPageInfo.getPages());
+        page.setPageNum(transactionRelationPageInfo.getPageNum());
+        page.setSize(transactionRelationPageInfo.getSize());
+        page.setTotal(transactionRelationPageInfo.getTotal());
+        page.setStartRow(transactionRelationPageInfo.getStartRow());
+        page.setEndRow(transactionRelationPageInfo.getEndRow());
+        page.setPages(transactionRelationPageInfo.getPages());
         return page;
+    }
+    private void caclTx(Transaction tx,String address){
+        long calcMoney = 0;
+        if(null!=tx.getInputs()){
+            for(Input input:tx.getInputs()){
+                if(address.equals(input.getAddress())){
+                    calcMoney += input.getValue();
+                }
+            }
+        }
+        if(null != tx.getOutputList()){
+            for(Output output:tx.getOutputList()){
+                if(address.equals(output.getAddress())){
+                    calcMoney -= output.getValue();
+                }
+            }
+        }
+        tx.setTxData(null);
+        tx.setTxDataList(null);
+        tx.setScriptSign(null);
+        tx.setAmount(0-calcMoney);
     }
 
     /**
@@ -228,7 +227,9 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteList(List<String> txHashList) {
-        transactionMapper.deleteList(txHashList);
+        if(null != txHashList){
+            transactionMapper.deleteList(txHashList);
+        }
     }
 
 

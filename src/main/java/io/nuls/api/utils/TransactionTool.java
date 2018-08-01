@@ -6,7 +6,6 @@ import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
-
 import io.nuls.api.model.*;
 import io.nuls.api.model.tx.AliasTransaction;
 import io.nuls.api.model.tx.CancelDepositTransaction;
@@ -69,6 +68,7 @@ public class TransactionTool {
         CoinData coinData = createCoinData(utxoList, outputs, amount + fee);
         if (coinData != null) {
             TransferTransaction tx = new TransferTransaction();
+            tx.setTime(TimeService.currentTimeMillis());
             if (StringUtils.isNotBlank(remark)) {
                 try {
                     tx.setRemark(remark.getBytes(SDKConstant.DEFAULT_ENCODING));
@@ -113,6 +113,7 @@ public class TransactionTool {
         CoinData coinData = createCoinData(utxoList, outputs, NulsConstant.ALIAS_NA.getValue() + fee);
         if (coinData != null) {
             AliasTransaction aliasTx = new AliasTransaction();
+            aliasTx.setTime(TimeService.currentTimeMillis());
             aliasTx.setTxData(new Alias(AddressTool.getAddress(address), alias));
             aliasTx.setCoinData(coinData);
             try {
@@ -158,7 +159,7 @@ public class TransactionTool {
         List<Coin> outputs = new ArrayList<>();
         Coin to = new Coin();
         to.setLockTime(-1);
-        to.setNa(NulsConstant.ALIAS_NA);
+        to.setNa(Na.valueOf(amount));
         to.setOwner(AddressTool.getAddress(address));
         outputs.add(to);
 
@@ -169,6 +170,7 @@ public class TransactionTool {
         CoinData coinData = createCoinData(utxoList, outputs, amount + fee);
         if (coinData != null) {
             DepositTransaction depositTx = new DepositTransaction();
+            depositTx.setTime(TimeService.currentTimeMillis());
             depositTx.setTxData(deposit);
             depositTx.setCoinData(coinData);
             try {

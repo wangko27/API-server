@@ -20,6 +20,8 @@ public class LevelDbUtil {
             dbService.createArea(Constant.TRANSACTION_DB_NAME);
             dbService.createArea(Constant.BLOCKHEADER_DB_NAME);
             dbService.createArea(Constant.UTXO_DB_ADDRESS_NAME);
+            dbService.createArea(Constant.WEBWALLETUTXO_DB_NAME);
+            dbService.createArea(Constant.WEBWALLETTRANSACTION_DB_NAME);
             /*System.out.println("-------------休眠开始，20s，让leveldb加载数据");
             try {
                 Thread.sleep(20000L);

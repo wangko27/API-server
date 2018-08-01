@@ -27,6 +27,7 @@ public class AccountResource {
     @Path("/getAddress/{publicKey}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getAlias(@PathParam("publicKey") String publicKey){
+        //todo 之后用js获取
         RpcClientResult result = null;
         try {
             if(StringUtils.isBlank(publicKey)){

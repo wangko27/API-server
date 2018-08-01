@@ -62,11 +62,20 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
      * @param pageSize
      * @return
      */
-    public PageInfo<TransactionRelation> getListByPage(String address, int pageNumber, int pageSize) {
+    public PageInfo<TransactionRelation> getListByPage(String address,int type,long startTime,long endTime,int pageNumber,int pageSize) {
+
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if (StringUtils.isNotBlank(address)) {
-            searchable.addCondition("address", SearchOperator.eq, address);
+        searchable.addCondition("address", SearchOperator.eq, address);
+        if(type > 0){
+            searchable.addCondition("type", SearchOperator.eq, type);
+        }
+        if(startTime > 0){
+            searchable.addCondition("create_time", SearchOperator.gte, startTime);
+
+        }
+        if(endTime > 0){
+            searchable.addCondition("create_time", SearchOperator.lte, endTime);
         }
         PageHelper.orderBy("id desc");
         PageInfo<TransactionRelation> page = new PageInfo<>(relationMapper.selectList(searchable));
@@ -91,7 +100,7 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         }
         List<TransactionRelation> relationList = new ArrayList<>();
         for (String address : addressSet) {
-            TransactionRelation key = new TransactionRelation(address, tx.getHash());
+            TransactionRelation key = new TransactionRelation(address, tx.getHash(),tx.getType(),tx.getCreateTime());
             relationList.add(key);
         }
         return relationList;

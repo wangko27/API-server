@@ -8,10 +8,7 @@ import io.nuls.api.server.leveldb.service.DBService;
 import io.nuls.api.utils.log.Log;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Description:

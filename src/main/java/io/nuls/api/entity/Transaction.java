@@ -1,10 +1,6 @@
 package io.nuls.api.entity;
 
-import io.nuls.api.utils.JSONUtils;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Transaction {
 

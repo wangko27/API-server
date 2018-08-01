@@ -3,10 +3,12 @@ package io.nuls.api.context;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.AddressHashIndex;
 import io.nuls.api.server.dao.mapper.leveldb.AddressHashIndexLevelDbService;
-import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.util.EhcacheUtil;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class UtxoContext {
 
@@ -20,11 +22,19 @@ public class UtxoContext {
         EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
         //重置leveldb
         addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
-        //addressHashIndexLevelDbService.insert(address,list);
+    }
+
+    public static void putMap(Map<String,AddressHashIndex> attrMapList){
+        for(AddressHashIndex addressHashIndex:attrMapList.values()){
+            //重置缓存
+            EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, addressHashIndex.getAddress(), addressHashIndex.getHashIndexSet());
+            //重置leveldb
+            addressHashIndexLevelDbService.insert(addressHashIndex);
+        }
     }
 
     //根据hashIndex，移除某个utxo
-    public static void remove(String address, String key) {
+    /*public static void remove(String address, String key) {
         Set<String> list = get(address);
         if (list != null) {
             list.remove(key);
@@ -32,7 +42,7 @@ public class UtxoContext {
             //addressHashIndexLevelDbService.insert(address,list);
             addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
         }
-    }
+    }*/
 
     //根据地址，获取该地址所有的未花费的hashIndex
     public static Set<String> get(String address) {

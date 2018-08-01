@@ -119,5 +119,14 @@ public class IndexContext {
         return page;
     }
 
+    public static LinkedHashMap getNodeByAgentHash(String agentHash){
+        for(LinkedHashMap map:agentNodeList){
+            if(map.get("agentHash").toString().equals(agentHash)){
+                return map;
+            }
+        }
+        return null;
+    }
+
 
 }

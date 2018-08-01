@@ -40,6 +40,17 @@ public class TransactionParam {
      */
     private int types;
 
+    /**
+     * 签名串
+     */
+    private String sign;
+
+    /**
+     * 组装完成交易包之后，发送给前段
+     */
+    private String serializ;
+
+
     public String getAddress() {
         return address;
     }
@@ -102,5 +113,21 @@ public class TransactionParam {
 
     public void setTypes(int types) {
         this.types = types;
+    }
+
+    public String getSign() {
+        return sign;
+    }
+
+    public void setSign(String sign) {
+        this.sign = sign;
+    }
+
+    public String getSerializ() {
+        return serializ;
+    }
+
+    public void setSerializ(String serializ) {
+        this.serializ = serializ;
     }
 }

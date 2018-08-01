@@ -1,6 +1,9 @@
 package io.nuls.api.server.business;
 
+import com.github.pagehelper.PageInfo;
+import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.AgentNode;
+import io.nuls.api.entity.Deposit;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.dao.mapper.AgentNodeMapper;
 import io.nuls.api.server.dao.mapper.DepositMapper;
@@ -11,13 +14,10 @@ import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Description: 节点
@@ -31,6 +31,9 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     private AgentNodeMapper agentNodeMapper;
     @Autowired
     private DepositMapper depositMapper;
+    @Autowired
+    private DepositBusiness depositBusiness;
+
 
     /**
      * 根据页数查询节点列表，由于信用值没办法及时获取，只能每次调用都去链上查询
@@ -47,7 +50,28 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         param.put("pageSize", pageSize + "");
         return RestFulUtils.getInstance().get("/consensus/agent/list", param);
     }
+    //PageInfo<Deposit> page = depositBusiness.getList(address,null,pageNumber,pageSize);
+    public PageInfo<LinkedHashMap> getMy(String address, int pageNumber, int pageSize){
+        PageInfo<Deposit> page = depositBusiness.getList(address,null,pageNumber,pageSize);
+        List<LinkedHashMap> agentNodeList = new ArrayList<>();
+        if(null != page.getList()){
+            for(Deposit deposit:page.getList()){
+                LinkedHashMap map = IndexContext.getNodeByAgentHash(deposit.getAgentHash());
+                if(null != map){
+                    agentNodeList.add(map);
+                }
+            }
+        }
 
+        PageInfo<LinkedHashMap> pageAgent = new PageInfo<>(agentNodeList);
+        pageAgent.setPageNum(page.getPageNum());
+        pageAgent.setSize(page.getSize());
+        pageAgent.setTotal(page.getTotal());
+        pageAgent.setStartRow(page.getStartRow());
+        pageAgent.setEndRow(page.getEndRow());
+        pageAgent.setPages(page.getPages());
+        return pageAgent;
+    }
 
 
     /**

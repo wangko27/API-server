@@ -98,6 +98,36 @@ public class AgentNodeResource {
     }
 
     /**
+     * 我委托了的共识节点列表
+     * @param pageNumber
+     * @param pageSize
+     * @param address
+     * @return
+     */
+    @GET
+    @Path("/list/address")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getMyConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address") String address){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+
+        result = RpcClientResult.getSuccess();
+        result.setData(agentNodeBusiness.getMy(address,pageNumber,pageSize));
+        //return agentNodeBusiness.getList(agentName,pageNumber,pageSize);
+        return result;
+    }
+
+    /**
      * 根据agentAddress获取节点详情(由于需要展示共识状态等信息，需要链上直接查询加上本地查询)
      * @param address
      * @return

@@ -3,10 +3,12 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
+import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.UtxoDto;
@@ -30,9 +32,13 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     private UtxoMapper utxoMapper;
     @Autowired
     private BlockBusiness blockBusiness;
+    @Autowired
+    private WebwalletTransactionBusiness webwalletTransactionBusiness;
+
 
 
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+    private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
 
     /**
      * 获取列表 数据库查询
@@ -95,16 +101,18 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
         }
+
         for (String str : setList) {
             Utxo utxo = utxoLevelDbService.select(str);
             if (utxo.getLockTime() == -1) {
                 utxoList.add(utxo);
-            } else {
+            } else if (utxo.getLockTime() != 0) {
                 if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
                     if (utxo.getLockTime() > currentTime) {
                         utxoList.add(utxo);
                     }
                 } else {
+                    //根据高度锁定
                     if (utxo.getLockTime() > bestHeight) {
                         utxoList.add(utxo);
                     }
@@ -130,7 +138,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     /**
      * 查询账户可用的utxo
-     *
      * @param address 用户账户
      * @return
      */
@@ -145,25 +152,48 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
         Set<String> keyList = UtxoContext.get(address);
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
+        //还需要过滤数据库中所有交易的input列表中的utxo
+        List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
+        Set<String> lockedUtxo = new HashSet<>();
+        for(WebwalletTransaction tx: webwalletTransactionList){
+            if(null != tx.getInputs()){
+                for(Input input:tx.getInputs()){
+                    lockedUtxo.add(input.getKey());
+                }
+            }
+
+        }
         for (Utxo utxo : utxoList) {
+            //排除掉已经锁定的Utxo
+            if(lockedUtxo.contains(utxo.getKey())){
+                continue;
+            }
             if (utxo.getLockTime() == 0) {
                 list.add(utxo);
-            } else {
-                if (utxo.getLockTime() > 0) {
-                    if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
-                        //根据时间锁定
-                        if (utxo.getLockTime() <= currentTime) {
-                            list.add(utxo);
-                        }
-                    } else {
-                        //根据高度锁定
-                        if (utxo.getLockTime() <= bestHeight) {
-                            list.add(utxo);
-                        }
+                continue;
+            }
+            if (utxo.getLockTime() > 0) {
+                if (utxo.getLockTime() > Constant.BlOCKHEIGHT_TIME_DIVIDE) {
+                    //根据时间锁定
+                    if (utxo.getLockTime() <= currentTime) {
+                        list.add(utxo);
+                        continue;
+                    }
+                } else {
+                    //根据高度锁定
+                    if (utxo.getLockTime() <= bestHeight) {
+                        list.add(utxo);
+                        continue;
                     }
                 }
             }
         }
+        //把上一次花费剩下的utxo加入到可用里面
+        Utxo temp = webwalletUtxoLevelDbService.select(address);
+        if(null != temp){
+            list.add(temp);
+        }
+
         //排序
         Collections.sort(list, new Comparator<Utxo>() {
             @Override
@@ -308,10 +338,25 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }
 
     public void rollbackByTo(List<Utxo> outputs) {
-        for (Utxo utxo : outputs) {
-            utxoLevelDbService.delete(utxo.getKey());
-            UtxoContext.remove(utxo.getAddress(), utxo.getKey());
+        Map<String,AddressHashIndex> attrMapList = new HashMap<>();
+        for (Utxo utxoKey : outputs) {
+            AddressHashIndex addressHashIndex = null;
+            utxoLevelDbService.delete(utxoKey.getKey());
+            if(attrMapList.containsKey(utxoKey.getAddress())){
+                //已经存在，直接移除
+                attrMapList.get(utxoKey.getAddress()).getHashIndexSet().remove(utxoKey.getKey());
+            }else{
+                //不存在，新建一个，去leveldb获取数据，然后删除
+                addressHashIndex = new AddressHashIndex();
+                addressHashIndex.setAddress(utxoKey.getAddress());
+                Set<String> setList = UtxoContext.get(utxoKey.getAddress());
+                setList.remove(utxoKey.getKey());
+                addressHashIndex.setHashIndexSet(setList);
+                attrMapList.put(utxoKey.getAddress(),addressHashIndex);
+            }
         }
+        //重置缓存和leveldb
+        UtxoContext.putMap(attrMapList);
     }
 
 

@@ -73,6 +73,11 @@ public class SyncDataHandler {
         return result;
     }
 
+    public RpcClientResult broadcast(Map<String, String> params){
+        RpcClientResult result = restFulUtils.post("/accountledger/transaction/broadcast", params);
+        return result;
+    }
+
 
     public RpcClientResult<Transaction> getTransaction(String hash) {
         RpcClientResult result = restFulUtils.get("/tx/hash/" + hash, null);

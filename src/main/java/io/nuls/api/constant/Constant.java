@@ -101,6 +101,8 @@ public interface Constant {
 
 
     String UTXO_DB_NAME = "utxo";
+    String WEBWALLETUTXO_DB_NAME = "webutxodb";
+    String WEBWALLETTRANSACTION_DB_NAME = "webtransactiondb";
     String TRANSACTION_DB_NAME="transaction";
     String BLOCKHEADER_DB_NAME="blockheader";
     String UTXO_DB_ADDRESS_NAME="blockAddress";

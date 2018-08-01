@@ -100,6 +100,31 @@ public class RpcTransferUtil {
         return tx;
     }
 
+    public static Transaction toTransaction(io.nuls.api.model.Transaction txModel) throws Exception {
+        Transaction tx = transferTx(txModel);
+        if (txModel.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
+            AliasTransaction aliasTx = (AliasTransaction) txModel;
+            tx.setTxData(toAlias(aliasTx));
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
+            CreateAgentTransaction createAgentTx = (CreateAgentTransaction) txModel;
+            AgentNode agentNode = toAgentNode(createAgentTx);
+            tx.setTxData(agentNode);
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
+            DepositTransaction depositTx = (DepositTransaction) txModel;
+            Deposit deposit = toDeposit(depositTx);
+            tx.setTxData(deposit);
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT) {
+            CancelDepositTransaction cancelDepositTx = (CancelDepositTransaction) txModel;
+            Deposit deposit = toCancelDeposit(cancelDepositTx);
+            tx.setTxData(deposit);
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_STOP_AGENT) {
+            StopAgentTransaction stopAgentTx = (StopAgentTransaction) txModel;
+            AgentNode agentNode = toStopAgent(stopAgentTx);
+            tx.setTxData(agentNode);
+        }
+        return tx;
+    }
+
     private static Transaction transferTx(io.nuls.api.model.Transaction txModel) throws Exception {
         Transaction tx = new Transaction();
         tx.setHash(txModel.getHash().getDigestHex());

@@ -7,7 +7,7 @@
     <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, hash, block_height
+    id, hash, block_height, type, create_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select
@@ -20,14 +20,15 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.Transaction" >
-    insert into transaction (id, hash, block_height
-    )
-    values (#{id,jdbcType=BIGINT}, #{hash,jdbcType=VARCHAR}, #{blockHeight,jdbcType=BIGINT})
+    insert into transaction (id, hash, block_height,
+      type, create_time)
+    values (#{id,jdbcType=BIGINT}, #{hash,jdbcType=VARCHAR}, #{blockHeight,jdbcType=BIGINT},
+      #{type,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT})
   </insert>
   <insert id="insertByBatch" parameterType="java.util.List">
-    insert into transaction (hash, block_height)values
+    insert into transaction (hash, block_height,type, create_time)values
     <foreach collection="list" item="item" index="index" separator=",">
-      (#{item.hash,jdbcType=VARCHAR}, #{item.blockHeight,jdbcType=BIGINT})
+      (#{item.hash,jdbcType=VARCHAR}, #{item.blockHeight,jdbcType=BIGINT}, #{item.type,jdbcType=BIGINT}, #{item.createTime,jdbcType=BIGINT})
     </foreach>
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Transaction" >
@@ -42,6 +43,12 @@
       <if test="blockHeight != null" >
         block_height,
       </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -52,6 +59,12 @@
       </if>
       <if test="blockHeight != null" >
         #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -64,13 +77,21 @@
       <if test="blockHeight != null" >
         block_height = #{blockHeight,jdbcType=BIGINT},
       </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Transaction" >
     update transaction
     set hash = #{hash,jdbcType=VARCHAR},
-      block_height = #{blockHeight,jdbcType=BIGINT}
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      type = #{type,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
@@ -85,7 +106,6 @@
     from transaction
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
-
   <delete id="deleteList" parameterType="java.util.List">
     delete from transaction where hash in
     <foreach collection="list" item="item" open="(" separator="," close=")">

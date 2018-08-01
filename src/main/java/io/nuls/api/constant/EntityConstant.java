@@ -84,5 +84,13 @@ public class EntityConstant {
      * 搜索 高度
      */
     public static int SEARCH_HEADER_HEIGHT = 4;
+    /**
+     * 网页钱包交易状态 未确认
+     */
+    public static int WEBWALLET_STATUS_NOTCONFIRM = 1;
+    /**
+     * 网页钱包交易状态 已确认
+     */
+    public static int WEBWALLET_STATUS_CONFIRM = 2;
 
 }

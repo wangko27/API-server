@@ -3,6 +3,7 @@ package io.nuls.api.server.resources.impl;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.IndexContext;
+import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.*;
 import io.nuls.api.model.tx.AliasTransaction;
 import io.nuls.api.model.tx.CancelDepositTransaction;
@@ -11,8 +12,12 @@ import io.nuls.api.model.tx.TransferTransaction;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
+import io.nuls.api.server.business.WebwalletTransactionBusiness;
 import io.nuls.api.server.dto.TransactionDto;
 import io.nuls.api.server.dto.TransactionParam;
+import io.nuls.api.server.resources.SyncDataHandler;
+import io.nuls.api.utils.NulsByteBuffer;
+import io.nuls.api.utils.RpcTransferUtil;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.TransactionTool;
 import io.nuls.api.utils.log.Log;
@@ -39,6 +44,10 @@ public class TransactionResource {
     private BlockBusiness blockBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
+    @Autowired
+    private SyncDataHandler syncDataHandler;
+    @Autowired
+    private WebwalletTransactionBusiness webwalletTransactionBusiness;
 
     @GET
     @Path("/index")
@@ -75,7 +84,7 @@ public class TransactionResource {
     @GET
     @Path("/list/address")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address,@QueryParam("type")int type){
+    public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address,@QueryParam("type")int type,@QueryParam("startTime")long startTime,@QueryParam("endTime")long endTime){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -94,7 +103,33 @@ public class TransactionResource {
             return result;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(transactionBusiness.getListByAddress(address,type,pageNumber,pageSize));
+        result.setData(transactionBusiness.getListByAddress(address,type,startTime,endTime,pageNumber,pageSize));
+        return result;
+    }
+
+    @GET
+    @Path("/list/webwallet/address")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult listWebWallet(@QueryParam("address")String address,@QueryParam("status") int status,@QueryParam("type") int type,@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        if(!StringUtils.validAddress(address)){
+            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            return result;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(webwalletTransactionBusiness.getAll(address,EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,type,pageNumber,pageSize));
         return result;
     }
 
@@ -268,6 +303,76 @@ public class TransactionResource {
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         result.setData(attr);
+        return result;
+    }
+
+    @POST
+    @Path("/broadcast")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult broadcast(TransactionParam transactionParam) throws Exception {
+        RpcClientResult result;
+        if(StringUtils.isBlank(transactionParam.getSerializ())){
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if(StringUtils.isBlank(transactionParam.getSign())){
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+        if(transactionParam.getTypes() == EntityConstant.TX_TYPE_TRANSFER){
+            //转账
+            byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
+            TransferTransaction transaction = new TransferTransaction();
+            transaction.parse(new NulsByteBuffer(data));
+            transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
+            Map<String, String> params = new HashMap<>();
+            params.put("txHex", Hex.encode(transaction.serialize()));
+            return broadCaseSave(params,transaction);
+
+        }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
+            //设置别名
+            byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
+            AliasTransaction transaction = new AliasTransaction();
+            transaction.parse(new NulsByteBuffer(data));
+            transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
+            Map<String, String> params = new HashMap<>();
+            params.put("txHex", Hex.encode(transaction.serialize()));
+            return broadCaseSave(params,transaction);
+        }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
+            //加入共识
+            byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
+            DepositTransaction transaction = new DepositTransaction();
+            transaction.parse(new NulsByteBuffer(data));
+            transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
+            Map<String, String> params = new HashMap<>();
+            params.put("txHex", Hex.encode(transaction.serialize()));
+            return broadCaseSave(params,transaction);
+        }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
+            //退出共识
+            byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
+            CancelDepositTransaction transaction = new CancelDepositTransaction();
+            transaction.parse(new NulsByteBuffer(data));
+            transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
+            Map<String, String> params = new HashMap<>();
+            params.put("txHex", Hex.encode(transaction.serialize()));
+            return broadCaseSave(params,transaction);
+        }else{
+            //其他，暂时不处理
+            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+    }
+
+    private RpcClientResult broadCaseSave(Map<String, String> params,io.nuls.api.model.Transaction transaction) throws Exception {
+        RpcClientResult result = syncDataHandler.broadcast(params);
+        if(result.isSuccess()){
+            Transaction tx = RpcTransferUtil.toTransaction(transaction);
+            //保存交易和新生成的Utxo，同时，删除掉已经花费的utxo
+            Utxo utxoKey = utxoBusiness.getByKey(tx.getInputs().get(0).getKey());
+            WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx,params.get("txHex"),utxoKey.getAddress());
+            if(webwalletTransactionBusiness.save(webwalletTransaction,utxoKey.getAddress()) > 0){
+                return result;
+            }
+        }else{
+            return result;
+        }
         return result;
     }
 }

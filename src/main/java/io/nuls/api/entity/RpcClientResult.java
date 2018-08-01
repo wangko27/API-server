@@ -23,6 +23,7 @@
  */
 package io.nuls.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nuls.api.constant.ErrorCode;
@@ -115,6 +116,7 @@ public class RpcClientResult<T> {
         return success;
     }
 
+    @JsonIgnore
     public boolean isFailed() {
         if (success) return false;
         if (data != null) {

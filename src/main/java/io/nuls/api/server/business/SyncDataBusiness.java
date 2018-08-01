@@ -6,10 +6,10 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
-import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
+import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class SyncDataBusiness {
@@ -43,9 +40,10 @@ public class SyncDataBusiness {
     private DepositBusiness depositBusiness;
     @Autowired
     private AgentNodeBusiness agentNodeBusiness;
+    @Autowired
+    private WebwalletTransactionBusiness webwalletTransactionBusiness;
 
-    private BlockHeaderLevelDbService blockHeaderLevelDbService = BlockHeaderLevelDbService.getInstance();
-    private TransactionLevelDbService transactionLevelDbService = TransactionLevelDbService.getInstance();
+    private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
 
     /**
@@ -74,9 +72,6 @@ public class SyncDataBusiness {
                 //存放新的utxo到utxoMap
                 if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
                     for (Utxo utxo : tx.getOutputs()) {
-                        if(StringUtils.isBlank(utxo.getAddress())){
-                            System.out.println(tx.getHash()+"----地址为空"+utxo.getKey());
-                        }
                         utxoMap.put(utxo.getKey(), utxo);
                     }
                 }
@@ -109,11 +104,12 @@ public class SyncDataBusiness {
                         PunishLog log = (PunishLog) data;
                         punishLogList.add(log);
                     }
-                }
+                 }
             }
 
             blockBusiness.save(block.getHeader());
             transactionBusiness.saveAll(txList);
+            webwalletTransactionBusiness.updateStatusByList(txList);
             transactionRelationBusiness.saveAll(txRelationList);
             utxoBusiness.saveAll(utxoMap);
             utxoBusiness.updateAll(fromList);
@@ -123,18 +119,45 @@ public class SyncDataBusiness {
             punishLogBusiness.saveAll(punishLogList);
             depositBusiness.saveAll(depositList);
 
-            //存入leveldb
-
-//            transactionLevelDbService.insertList(txList);
-
-            for (Utxo utxo : fromList) {
-                UtxoContext.remove(utxo.getAddress(), utxo.getKey());
-            }
+            //为了让存入leveldb更快，这里直接做map，全部处理完成之后，再存入leveldb
+            Map<String,AddressHashIndex> attrMapList = new HashMap<>();
             for (Utxo utxo : utxoMap.values()) {
                 if (utxo.getSpendTxHash() == null) {
-                    UtxoContext.put(utxo.getAddress(), utxo.getKey());
+                    AddressHashIndex addressHashIndex = null;
+                    if(attrMapList.containsKey(utxo.getAddress())){
+                        //已经存在，直接再新增一个
+                        attrMapList.get(utxo.getAddress()).getHashIndexSet().add(utxo.getKey());
+                    }else{
+                        //不存在，新建一个，去leveldb获取数据
+                        addressHashIndex = new AddressHashIndex();
+                        addressHashIndex.setAddress(utxo.getAddress());
+                        Set<String> setList = UtxoContext.get(utxo.getAddress());
+                        setList.add(utxo.getKey());
+                        addressHashIndex.setHashIndexSet(setList);
+                        attrMapList.put(utxo.getAddress(),addressHashIndex);
+                    }
+                    //UtxoContext.put(utxo.getAddress(), utxo.getKey());
                 }
             }
+            for (Utxo utxo : fromList) {
+                AddressHashIndex addressHashIndex = null;
+                if(attrMapList.containsKey(utxo.getAddress())){
+                    //已经存在，直接移除
+                    attrMapList.get(utxo.getAddress()).getHashIndexSet().remove(utxo.getKey());
+                    //删除转账时临时产生的utxo
+                    webwalletUtxoLevelDbService.delete(utxo.getKey());
+                }else{
+                    //不存在，新建一个，去leveldb获取数据，然后删除
+                    addressHashIndex = new AddressHashIndex();
+                    addressHashIndex.setAddress(utxo.getAddress());
+                    Set<String> setList = UtxoContext.get(utxo.getAddress());
+                    setList.remove(utxo.getKey());
+                    addressHashIndex.setHashIndexSet(setList);
+                    attrMapList.put(utxo.getAddress(),addressHashIndex);
+                }
+            }
+            UtxoContext.putMap(attrMapList);
+            attrMapList = null;
 
             //所有修改缓存的需要等数据库的保存成功后，再做修改，避免回滚
             //缓存新块 首页数据展示用
@@ -223,6 +246,8 @@ public class SyncDataBusiness {
             if (null != pageInfo.getList()) {
                 IndexContext.initTransactions(pageInfo.getList());
             }
+            //回滚块时，删除所有临时utxo
+            webwalletUtxoLevelDbService.deleteAll();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
