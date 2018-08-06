@@ -12,7 +12,7 @@ MySQL - 5.5.49-log : Database - nuls_apiserver
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`nuls_apiserver` /*!40100 DEFAULT CHARACTER SET utf8 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/`nuls_apiserver` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
 USE `nuls_apiserver`;
 
@@ -32,6 +32,10 @@ CREATE TABLE `address_reward_detail` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='账户奖励明细表';
 
 /*Data for the table `address_reward_detail` */
+
+LOCK TABLES `address_reward_detail` WRITE;
+
+UNLOCK TABLES;
 
 /*Table structure for table `agent_node` */
 
@@ -60,6 +64,10 @@ CREATE TABLE `agent_node` (
 
 /*Data for the table `agent_node` */
 
+LOCK TABLES `agent_node` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `alias` */
 
 DROP TABLE IF EXISTS `alias`;
@@ -73,6 +81,10 @@ CREATE TABLE `alias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='别名表';
 
 /*Data for the table `alias` */
+
+LOCK TABLES `alias` WRITE;
+
+UNLOCK TABLES;
 
 /*Table structure for table `balance` */
 
@@ -91,6 +103,10 @@ CREATE TABLE `balance` (
 
 /*Data for the table `balance` */
 
+LOCK TABLES `balance` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `block_header` */
 
 DROP TABLE IF EXISTS `block_header`;
@@ -104,6 +120,10 @@ CREATE TABLE `block_header` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='区块头';
 
 /*Data for the table `block_header` */
+
+LOCK TABLES `block_header` WRITE;
+
+UNLOCK TABLES;
 
 /*Table structure for table `deposit` */
 
@@ -123,6 +143,10 @@ CREATE TABLE `deposit` (
 
 /*Data for the table `deposit` */
 
+LOCK TABLES `deposit` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `punish_log` */
 
 DROP TABLE IF EXISTS `punish_log`;
@@ -141,6 +165,10 @@ CREATE TABLE `punish_log` (
 
 /*Data for the table `punish_log` */
 
+LOCK TABLES `punish_log` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `transaction` */
 
 DROP TABLE IF EXISTS `transaction`;
@@ -149,10 +177,17 @@ CREATE TABLE `transaction` (
   `id` bigint(15) NOT NULL AUTO_INCREMENT,
   `hash` varchar(80) NOT NULL COMMENT '交易hash',
   `block_height` bigint(15) NOT NULL COMMENT '区块高度',
-  PRIMARY KEY (`id`)
+  `type` int(2) DEFAULT NULL COMMENT '交易类型',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '时间',
+  PRIMARY KEY (`id`),
+  KEY `relation_create_time_idx` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='交易记录表';
 
 /*Data for the table `transaction` */
+
+LOCK TABLES `transaction` WRITE;
+
+UNLOCK TABLES;
 
 /*Table structure for table `transaction_relation` */
 
@@ -162,11 +197,17 @@ CREATE TABLE `transaction_relation` (
   `id` bigint(15) NOT NULL AUTO_INCREMENT,
   `address` varchar(40) NOT NULL COMMENT 'address',
   `tx_hash` varchar(80) NOT NULL COMMENT 'tx_hash',
+  `type` int(2) NOT NULL,
+  `create_time` bigint(15) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `relation_address_idx` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `transaction_relation` */
+
+LOCK TABLES `transaction_relation` WRITE;
+
+UNLOCK TABLES;
 
 /*Table structure for table `utxo` */
 
@@ -179,6 +220,29 @@ CREATE TABLE `utxo` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='UTXO';
 
 /*Data for the table `utxo` */
+
+LOCK TABLES `utxo` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `webwallet_transaction` */
+
+DROP TABLE IF EXISTS `webwallet_transaction`;
+
+CREATE TABLE `webwallet_transaction` (
+  `hash` varchar(80) NOT NULL,
+  `type` int(2) DEFAULT NULL COMMENT '交易类型',
+  `status` int(2) DEFAULT NULL COMMENT '状态1待确认，2已确认',
+  `time` bigint(15) DEFAULT NULL COMMENT '时间',
+  `address` varchar(40) DEFAULT NULL COMMENT '发起者',
+  PRIMARY KEY (`hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `webwallet_transaction` */
+
+LOCK TABLES `webwallet_transaction` WRITE;
+
+UNLOCK TABLES;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
