@@ -2,7 +2,6 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
@@ -11,9 +10,9 @@ import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.FreezeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.StringUtils;
-import io.nuls.api.utils.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,8 +33,8 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     private BlockBusiness blockBusiness;
     @Autowired
     private WebwalletTransactionBusiness webwalletTransactionBusiness;
-
-
+    @Autowired
+    private TransactionBusiness transactionBusiness;
 
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
@@ -92,11 +91,10 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      * @param address
      * @return
      */
-    public PageInfo<Utxo> getListByAddress(String address, int pageNumber, int pageSize) {
+    public PageInfo<FreezeDto> getListByAddress(String address, int pageNumber, int pageSize) {
         List<Utxo> utxoList = new ArrayList<>();
         Set<String> setList = UtxoContext.get(address);
         BlockHeader blockHeader = blockBusiness.getNewest();
-        long currentTime = TimeService.currentTimeMillis();
         long bestHeight = 0L;
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
@@ -104,32 +102,30 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
         for (String str : setList) {
             Utxo utxo = utxoLevelDbService.select(str);
-            if (utxo.getLockTime() == -1) {
+            if(!utxo.usable(bestHeight)){
                 utxoList.add(utxo);
-            } else if (utxo.getLockTime() != 0) {
-                if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
-                    if (utxo.getLockTime() > currentTime) {
-                        utxoList.add(utxo);
-                    }
-                } else {
-                    //根据高度锁定
-                    if (utxo.getLockTime() > bestHeight) {
-                        utxoList.add(utxo);
-                    }
-                }
             }
         }
+        Utxo temp = webwalletUtxoLevelDbService.select(address);
+        if(null != temp && !temp.usable(bestHeight)){
+            utxoList.add(temp);
+        }
         //模拟分页
-        PageInfo<Utxo> page = new PageInfo<>();
+        PageInfo<FreezeDto> page = new PageInfo<>();
         int start = (pageNumber - 1) * pageSize;
         int end = pageNumber * pageSize;
-        List<Utxo> tempList = new ArrayList<>();
+        List<FreezeDto> tempList = new ArrayList<>();
         if (utxoList.size() - pageNumber < end) {
             end = utxoList.size() - pageNumber;
         }
+        temp = null;
         for (int i = start; i < end; i++) {
-            tempList.add(utxoList.get(i));
+            temp = utxoList.get(i);
+            Transaction transaction = transactionBusiness.getByHash(temp.getTxHash());
+            FreezeDto freezeDto = new FreezeDto(transaction.getCreateTime(),temp.getLockTime(),transaction.getHash(),transaction.getType(),temp.getAmount());
+            tempList.add(freezeDto);
         }
+        page.setList(tempList);
         page.setTotal(setList.size());
         page.setPageNum(pageNumber);
         page.setSize(pageSize);
@@ -144,12 +140,13 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     public List<Utxo> getUsableUtxo(String address) {
         List<Utxo> list = new ArrayList<>();
         BlockHeader blockHeader = blockBusiness.getNewest();
-        long currentTime = TimeService.currentTimeMillis();
         long bestHeight = 0L;
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
         }
-
+        if(bestHeight < 0){
+            return list;
+        }
         Set<String> keyList = UtxoContext.get(address);
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
         //还需要过滤数据库中所有交易的input列表中的utxo
@@ -161,36 +158,19 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
                     lockedUtxo.add(input.getKey());
                 }
             }
-
         }
         for (Utxo utxo : utxoList) {
-            //排除掉已经锁定的Utxo
+            //排除掉未确认交易中已经锁定的Utxo
             if(lockedUtxo.contains(utxo.getKey())){
                 continue;
             }
-            if (utxo.getLockTime() == 0) {
+            if(utxo.usable(bestHeight)){
                 list.add(utxo);
-                continue;
-            }
-            if (utxo.getLockTime() > 0) {
-                if (utxo.getLockTime() > Constant.BlOCKHEIGHT_TIME_DIVIDE) {
-                    //根据时间锁定
-                    if (utxo.getLockTime() <= currentTime) {
-                        list.add(utxo);
-                        continue;
-                    }
-                } else {
-                    //根据高度锁定
-                    if (utxo.getLockTime() <= bestHeight) {
-                        list.add(utxo);
-                        continue;
-                    }
-                }
             }
         }
-        //把上一次花费剩下的utxo加入到可用里面
+        //把上一次花费剩下的可用utxo加入到可用里面
         Utxo temp = webwalletUtxoLevelDbService.select(address);
-        if(null != temp){
+        if(null != temp && temp.usable(bestHeight)){
             list.add(temp);
         }
 

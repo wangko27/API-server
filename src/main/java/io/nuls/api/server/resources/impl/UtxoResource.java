@@ -47,7 +47,7 @@ public class UtxoResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        utxoBusiness.getListByAddress(address,pageNumber,pageSize);
+        result.setData(utxoBusiness.getListByAddress(address,pageNumber,pageSize));
         return result;
     }
 }

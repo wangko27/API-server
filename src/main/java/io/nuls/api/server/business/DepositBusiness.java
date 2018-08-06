@@ -11,7 +11,6 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +40,26 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         searchable.addCondition("address", SearchOperator.eq, address);
         if (StringUtils.validHash(agentHash)) {
             searchable.addCondition("agent_hash", SearchOperator.eq, agentHash);
+        }
+        searchable.addCondition("delete_hash", SearchOperator.isNull, null);
+        PageInfo<Deposit> page = new PageInfo<>(depositMapper.selectList(searchable));
+        return page;
+    }
+
+    /**
+     * 获取列表，agentHash模糊匹配
+     * @param address
+     * @param agentHash
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<Deposit> getListWithSearch(String address, String agentHash, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, address);
+        if (StringUtils.validHash(agentHash)) {
+            searchable.addCondition("agent_hash", SearchOperator.suffixLike, agentHash);
         }
         searchable.addCondition("delete_hash", SearchOperator.isNull, null);
         PageInfo<Deposit> page = new PageInfo<>(depositMapper.selectList(searchable));
@@ -152,14 +171,6 @@ public class DepositBusiness implements BaseService<Deposit, String> {
         agentNode.setTotalDeposit(agentNode.getTotalDeposit() + deposit.getAmount());
         agentNode.setDepositCount(agentNode.getDepositCount() + 1);
         agentNodeMapper.updateByPrimaryKey(agentNode);
-    }
-
-    /**
-     * 根据Searchable 查询数据条数
-     * @return
-     */
-    public Integer selectTotalCount(){
-        return depositMapper.selectTotalCount(new Searchable());
     }
 
     /**

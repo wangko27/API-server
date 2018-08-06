@@ -51,4 +51,6 @@ public class PunishLogResource {
         result.setData(punishLogBusiness.getList(address,pageNumber,pageSize));
         return result;
     }
+
+
 }

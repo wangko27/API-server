@@ -1,15 +1,14 @@
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Balance;
 import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.server.business.AddressRewardDetailBusiness;
-import io.nuls.api.server.business.AgentNodeBusiness;
-import io.nuls.api.server.business.BalanceBusiness;
-import io.nuls.api.server.business.DepositBusiness;
+import io.nuls.api.server.business.*;
+import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +36,8 @@ public class AgentNodeResource {
     private BalanceBusiness balanceBusiness;
     @Autowired
     private DepositBusiness depositBusiness;
+    @Autowired
+    private PunishLogBusiness punishLogBusiness;
 
     /**
      * 统计全网共识信息
@@ -78,7 +79,7 @@ public class AgentNodeResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("agentName") String agentName){
+    public RpcClientResult getConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("agentName") String agentName,@QueryParam("status") Integer status,@QueryParam("sort") int sort){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -92,7 +93,7 @@ public class AgentNodeResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(IndexContext.getAgentNodeList(pageNumber,pageSize,agentName));
+        result.setData(IndexContext.getAgentNodeList(pageNumber,pageSize,agentName,status,sort));
         //return agentNodeBusiness.getList(agentName,pageNumber,pageSize);
         return result;
     }
@@ -107,7 +108,7 @@ public class AgentNodeResource {
     @GET
     @Path("/list/address")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getMyConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address") String address){
+    public RpcClientResult getMyConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address") String address,@QueryParam("agentName")String agentName){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -122,7 +123,7 @@ public class AgentNodeResource {
         }
 
         result = RpcClientResult.getSuccess();
-        result.setData(agentNodeBusiness.getMy(address,pageNumber,pageSize));
+        result.setData(agentNodeBusiness.getMy(address,agentName,pageNumber,pageSize));
         //return agentNodeBusiness.getList(agentName,pageNumber,pageSize);
         return result;
     }
@@ -153,8 +154,9 @@ public class AgentNodeResource {
             Integer status = Integer.parseInt(attr.get("status")+"");
             agentNode.setStatus(status);
         }
-        //AgentNodeDto agentNodeDto = new AgentNodeDto(agentNode);
-        result.setData(agentNode);
+
+        AgentNodeDto agentNodeDto = new AgentNodeDto(agentNode,punishLogBusiness.getCountByStatus(EntityConstant.PUBLISH_YELLOW,address));
+        result.setData(agentNodeDto);
         return result;
 
     }

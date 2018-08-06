@@ -1,5 +1,8 @@
 package io.nuls.api.entity;
 
+import io.nuls.api.constant.NulsConstant;
+import io.nuls.api.utils.TimeService;
+
 import java.util.Objects;
 
 public class Utxo {
@@ -116,5 +119,35 @@ public class Utxo {
             key = txHash + "_" + txIndex;
         }
         return key;
+    }
+    /**
+     * 根据当前时间和当前最新高度，判断coin是否可用
+     *
+     * @return boolean
+     */
+    public boolean usable(Long bestHeight) {
+        if (lockTime < 0) {
+            return false;
+        }
+        if (lockTime == 0) {
+            return true;
+        }
+
+        long currentTime = TimeService.currentTimeMillis();
+        //long bestHeight = NulsContext.getInstance().getBestHeight();
+
+        if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+            if (lockTime <= currentTime) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (lockTime <= bestHeight) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 }

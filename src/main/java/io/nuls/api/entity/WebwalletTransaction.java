@@ -23,6 +23,53 @@ public class WebwalletTransaction {
         this.outputList = tx.getOutputList();
     }
 
+    public void caclTx(WebwalletTransaction tx,String address){
+        if(tx.getType() == EntityConstant.TX_TYPE_COINBASE){
+            if(null != tx.getOutputList()){
+                for(Output output:tx.getOutputList()){
+                    if(address.equals(output.getAddress())){
+                        tx.setAmount(tx.getAmount()+output.getValue());
+                    }
+                }
+            }
+        }else if(tx.getType() == EntityConstant.TX_TYPE_TRANSFER){
+            if(null!=tx.getInputs()){
+                for(Input input:tx.getInputs()){
+                    if(address.equals(input.getAddress())){
+                        tx.setAmount(tx.getAmount()-input.getValue());
+                    }
+                }
+            }
+            if(null != tx.getOutputList()){
+                for(Output output:tx.getOutputList()){
+                    if(address.equals(output.getAddress())){
+                        tx.setAmount(tx.getAmount()+output.getValue());
+                    }
+                }
+            }
+        }else if(tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
+            tx.setAmount(Na.NA.getValue());
+        }else if(tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS || tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT){
+            for(Utxo utxo:tx.getOutputs()){
+                if(address.equals(utxo.getAddress()) && utxo.getLockTime()==-1){
+                    tx.setAmount(0-tx.getAmount());
+                }
+            }
+        }else if(tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
+            for(Utxo utxo:tx.getOutputs()){
+                if(address.equals(utxo.getAddress()) && utxo.getLockTime()==0){
+                    tx.setAmount(tx.getAmount());
+                }
+            }
+        }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT){
+            for(Utxo utxo:tx.getOutputs()){
+                if(address.equals(utxo.getAddress())){
+                    tx.setAmount(tx.getAmount());
+                }
+            }
+        }
+    }
+
     private String hash;
 
     private Integer type;

@@ -47,7 +47,6 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
 
     /**
      * 根据高度删除某高度所有数据
-     *
      * @param height
      * @return
      */
@@ -70,6 +69,11 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
         return addressRewardDetailMapper.insert(addressRewardDetail);
     }
 
+    /**
+     * 根据交易，获取该交易中，所有奖励的list
+     * @param tx
+     * @return
+     */
     public List<AddressRewardDetail> getRewardList(Transaction tx) {
         List<AddressRewardDetail> utxoList = new ArrayList<>();
         if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
@@ -80,7 +84,6 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
                 detail.setAmount(utxo.getAmount());
                 detail.setBlockHeight(tx.getBlockHeight());
                 detail.setTxHash(tx.getHash());
-                //addressRewardDetailMapper.insert(detail);
                 utxoList.add(detail);
             }
         }
@@ -156,6 +159,11 @@ public class AddressRewardDetailBusiness implements BaseService<AddressRewardDet
         return addressRewardDetailMapper.selectSumReward(searchable);
     }
 
+    /**
+     * 获取某地址最后奖励的高度
+     * @param address
+     * @return
+     */
     public Long getLastRewardHeight(String address) {
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);

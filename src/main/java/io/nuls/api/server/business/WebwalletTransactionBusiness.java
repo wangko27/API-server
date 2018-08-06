@@ -65,8 +65,13 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
                     webwalletUtxoLevelDbService.insert(utxo);
                 }
             }
-
             return webwalletTransactionLevelDbService.insert(webwalletTransaction);
+        }else{
+            try {
+                throw new Exception("保存失败");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return 0;
     }
@@ -75,6 +80,12 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(WebwalletTransaction webwalletTransaction) {
         return 0;
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int deleteConfirmTx() {
+        return webwalletTransactionMapper.deleteConfirmTx();
     }
 
     @Override
@@ -128,7 +139,8 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
         List<WebwalletTransaction> webwalletTransactionList = formatWebwalletTransaction(page.getList());
         if (StringUtils.isNotBlank(address)) {
             for(WebwalletTransaction wtx: webwalletTransactionList){
-                caclTx(wtx,address);
+                wtx.caclTx(wtx,address);
+                wtx.setSignData(null);
             }
         }
         page.setList(webwalletTransactionList);
@@ -157,24 +169,5 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
             }
         }
         return dataList;
-    }
-    private void caclTx(WebwalletTransaction tx,String address){
-        long calcMoney = 0;
-        if(null!=tx.getInputs()){
-            for(Input input:tx.getInputs()){
-                if(address.equals(input.getAddress())){
-                    calcMoney += input.getValue();
-                }
-            }
-        }
-        if(null != tx.getOutputList()){
-            for(Output output:tx.getOutputList()){
-                if(address.equals(output.getAddress())){
-                    calcMoney -= output.getValue();
-                }
-            }
-        }
-        tx.setSignData(null);
-        tx.setAmount(0-calcMoney);
     }
 }

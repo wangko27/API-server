@@ -54,25 +54,6 @@ public class AliasBusiness implements BaseService<Alias, String> {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(Alias alias) {
-//        if(null == alias){
-//            return 2;
-//        }
-//        if(StringUtils.validAddress(alias.getAddress())){
-//            return 3;
-//        }
-//        if(alias.getBlockHeight() < 0){
-//            return 4;
-//        }
-//        if(StringUtils.isBlank(alias.getAlias())){
-//            return 5;
-//        }
-//        if(getAliasByAddress(alias.getAddress())!=null){
-//            return 6;
-//        }
-//        if(getByKey(alias.getAlias())!=null){
-//            return 7;
-//        }
-
         int result = aliasMapper.insert(alias);
         if (result == 1) {
             //保存成功后，同步别名到静态缓存中

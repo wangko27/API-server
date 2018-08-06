@@ -325,6 +325,7 @@ public class TransactionResource {
             transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
             Map<String, String> params = new HashMap<>();
             params.put("txHex", Hex.encode(transaction.serialize()));
+            System.out.println("time1:"+transaction.getTime());
             return broadCaseSave(params,transaction);
 
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
@@ -335,6 +336,7 @@ public class TransactionResource {
             transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
             Map<String, String> params = new HashMap<>();
             params.put("txHex", Hex.encode(transaction.serialize()));
+            System.out.println("time2:"+transaction.getTime());
             return broadCaseSave(params,transaction);
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
             //加入共识
@@ -344,6 +346,7 @@ public class TransactionResource {
             transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
             Map<String, String> params = new HashMap<>();
             params.put("txHex", Hex.encode(transaction.serialize()));
+            System.out.println("time3:"+transaction.getTime());
             return broadCaseSave(params,transaction);
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
             //退出共识
@@ -353,6 +356,7 @@ public class TransactionResource {
             transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
             Map<String, String> params = new HashMap<>();
             params.put("txHex", Hex.encode(transaction.serialize()));
+            System.out.println("time4:"+transaction.getTime());
             return broadCaseSave(params,transaction);
         }else{
             //其他，暂时不处理

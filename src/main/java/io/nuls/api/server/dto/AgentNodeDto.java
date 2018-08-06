@@ -1,5 +1,7 @@
 package io.nuls.api.server.dto;
 
+import io.nuls.api.entity.AgentNode;
+
 import java.math.BigDecimal;
 
 /**
@@ -42,8 +44,41 @@ public class AgentNodeDto{
 
     private Long totalReward;
 
+    /**
+     * 黄牌数量
+     */
+    private long yellowCardNum;
+
     public AgentNodeDto(){
 
+    }
+
+    public AgentNodeDto(AgentNode node,long yellowCardNum) {
+        this.txHash = node.getTxHash();
+        this.agentAddress = node.getAgentAddress();
+        this.packingAddress = node.getPackingAddress();
+        this.rewardAddress = node.getRewardAddress();
+        this.deposit = node.getDeposit();
+        this.commissionRate = node.getCommissionRate();
+        this.createTime = node.getCreateTime();
+        this.blockHeight = node.getBlockHeight();
+        this.status = node.getStatus();
+        this.totalDeposit = node.getTotalDeposit();
+        this.depositCount = node.getDepositCount();
+        this.creditValue = node.getCreditValue();
+        this.totalPackingCount = node.getTotalPackingCount();
+        this.lastRewardHeight = node.getLastRewardHeight();
+        this.deleteHash = node.getDeleteHash();
+        this.totalReward = node.getTotalReward();
+        this.yellowCardNum = yellowCardNum;
+    }
+
+    public long getYellowCardNum() {
+        return yellowCardNum;
+    }
+
+    public void setYellowCardNum(long yellowCardNum) {
+        this.yellowCardNum = yellowCardNum;
     }
 
     public Long getSumTotalPackingCount() {

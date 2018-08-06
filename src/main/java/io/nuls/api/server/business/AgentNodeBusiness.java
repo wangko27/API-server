@@ -9,6 +9,7 @@ import io.nuls.api.server.dao.mapper.AgentNodeMapper;
 import io.nuls.api.server.dao.mapper.DepositMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.AgentDto;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
@@ -50,20 +51,29 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         param.put("pageSize", pageSize + "");
         return RestFulUtils.getInstance().get("/consensus/agent/list", param);
     }
-    //PageInfo<Deposit> page = depositBusiness.getList(address,null,pageNumber,pageSize);
-    public PageInfo<LinkedHashMap> getMy(String address, int pageNumber, int pageSize){
-        PageInfo<Deposit> page = depositBusiness.getList(address,null,pageNumber,pageSize);
-        List<LinkedHashMap> agentNodeList = new ArrayList<>();
+
+    /**
+     * 获取我委托了的节点的列表
+     * @param address
+     * @param agentName
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<AgentDto> getMy(String address, String agentName, int pageNumber, int pageSize){
+        PageInfo<Deposit> page = depositBusiness.getListWithSearch(address,agentName,pageNumber,pageSize);
+        Set<AgentDto> agentDtoSet = new HashSet<>();
         if(null != page.getList()){
             for(Deposit deposit:page.getList()){
-                LinkedHashMap map = IndexContext.getNodeByAgentHash(deposit.getAgentHash());
-                if(null != map){
-                    agentNodeList.add(map);
+                AgentDto map = IndexContext.getNodeByAgentHash(deposit.getAgentHash());
+                if(null != map && !agentDtoSet.contains(map)){
+                    agentDtoSet.add(map);
                 }
             }
         }
-
-        PageInfo<LinkedHashMap> pageAgent = new PageInfo<>(agentNodeList);
+        List<AgentDto> agentNodeList = new ArrayList<>();
+        agentNodeList.addAll(agentDtoSet);
+        PageInfo<AgentDto> pageAgent = new PageInfo<>(agentNodeList);
         pageAgent.setPageNum(page.getPageNum());
         pageAgent.setSize(page.getSize());
         pageAgent.setTotal(page.getTotal());
@@ -207,14 +217,5 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         searchable.addCondition("delete_hash", SearchOperator.isNull, null);
         List<AgentNodeDto> agentNodeDtoList = agentNodeMapper.selectTotalpackingCount(searchable);
         return agentNodeDtoList;
-    }
-
-    /**
-     * 根据Searchable 查询数据条数 不传就查询全部全部共识信息数据
-     *
-     * @return
-     */
-    public Integer selectTotalCount() {
-        return agentNodeMapper.selectTotalCount(new Searchable());
     }
 }

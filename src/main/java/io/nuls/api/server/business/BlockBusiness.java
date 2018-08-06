@@ -7,7 +7,6 @@ import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.exception.NulsException;
 import io.nuls.api.server.dao.mapper.BlockHeaderMapper;
 import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -179,22 +178,6 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         return blockHeader;
     }
 
-    /**
-     * 根据最新传入的区块信息，验证当前区块和前一区块的连续性
-     *
-     * @param blockHeader
-     * @return
-     */
-//    public boolean validatePreBlock(BlockHeader blockHeader) {
-//        BlockHeader preBlock = getBlockByHeight(blockHeader.getHeight() - 1);
-//        if (preBlock == null) {
-//            return false;
-//        }
-//        if (preBlock.getHeight() != blockHeader.getHeight() - 1) {
-//            return false;
-//        }
-//        return true;
-//    }
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int save(BlockHeader blockHeader) {

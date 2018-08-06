@@ -14,8 +14,6 @@ public interface DepositMapper extends BaseMapper<Deposit, String> {
 
     void rollbackStopAgent(@Param("deleteHash") String deleteHash);
 
-    Integer selectTotalCount(Searchable searchable);
-
     Long selectTotalAmount(Searchable searchable);
 
     int insertByBatch(@Param("list") List<Deposit> list);

@@ -1,24 +1,18 @@
 package io.nuls.api.server.business;
 
-import io.nuls.api.constant.Constant;
 import io.nuls.api.context.UtxoContext;
-import io.nuls.api.entity.*;
-import io.nuls.api.exception.NulsException;
+import io.nuls.api.entity.Balance;
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.BalanceMapper;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
-import io.nuls.api.server.resources.impl.BlockResource;
+import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.utils.StringUtils;
-import io.nuls.api.utils.TimeService;
-import io.nuls.api.utils.log.Log;
-import org.spongycastle.util.Times;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.ConnectException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +30,7 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
     private BalanceMapper balanceMapper;
 
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+    private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
 
     /**
      * 查询账户资产
@@ -45,7 +40,6 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
      */
     public Balance getBalance(String address) {
         BlockHeader blockHeader = blockBusiness.getNewest();
-        long currentTime = TimeService.currentTimeMillis();
         long bestHeight = 0L;
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
@@ -56,27 +50,15 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
 
         Set<String> keyList = UtxoContext.get(address);
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
+        Utxo temp = webwalletUtxoLevelDbService.select(address);
+        if(null != temp){
+            utxoList.add(temp);
+        }
         for (Utxo utxo : utxoList) {
-            if (utxo.getLockTime() == -1) {
-                locked += utxo.getAmount();
-            } else if (utxo.getLockTime() == 0) {
+            if(utxo.usable(bestHeight)){
                 usable += utxo.getAmount();
-            } else {
-                if (utxo.getLockTime() >= Constant.BlOCKHEIGHT_TIME_DIVIDE) {
-                    //根据时间锁定
-                    if (utxo.getLockTime() <= currentTime) {
-                        usable += utxo.getAmount();
-                    } else {
-                        locked += utxo.getAmount();
-                    }
-                } else {
-                    //根据高度锁定
-                    if (utxo.getLockTime() <= bestHeight) {
-                        usable += utxo.getAmount();
-                    } else {
-                        locked += utxo.getAmount();
-                    }
-                }
+            }else{
+                locked += utxo.getAmount();
             }
         }
         balance.setAddress(address);

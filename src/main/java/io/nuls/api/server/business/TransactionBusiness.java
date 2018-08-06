@@ -9,7 +9,6 @@ import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.utils.ArraysTool;
-import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -107,7 +106,10 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         PageInfo<TransactionRelation> transactionRelationPageInfo = transactionRelationBusiness.getListByPage(address,type,startTime,endTime,pageNumber,pageSize);
         for (TransactionRelation relation : transactionRelationPageInfo.getList()) {
             Transaction tx = transactionLevelDbService.select(relation.getTxHash());
-            caclTx(tx,address);
+            tx.caclTx(tx,address);
+            tx.setTxData(null);
+            tx.setTxDataList(null);
+            tx.setScriptSign(null);
             transactionList.add(tx);
         }
         PageInfo<Transaction> page = new PageInfo<>(transactionList);
@@ -118,27 +120,6 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         page.setEndRow(transactionRelationPageInfo.getEndRow());
         page.setPages(transactionRelationPageInfo.getPages());
         return page;
-    }
-    private void caclTx(Transaction tx,String address){
-        long calcMoney = 0;
-        if(null!=tx.getInputs()){
-            for(Input input:tx.getInputs()){
-                if(address.equals(input.getAddress())){
-                    calcMoney += input.getValue();
-                }
-            }
-        }
-        if(null != tx.getOutputList()){
-            for(Output output:tx.getOutputList()){
-                if(address.equals(output.getAddress())){
-                    calcMoney -= output.getValue();
-                }
-            }
-        }
-        tx.setTxData(null);
-        tx.setTxDataList(null);
-        tx.setScriptSign(null);
-        tx.setAmount(0-calcMoney);
     }
 
     /**

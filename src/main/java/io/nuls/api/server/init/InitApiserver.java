@@ -8,6 +8,7 @@ import io.nuls.api.server.business.*;
 import io.nuls.api.server.dao.mapper.leveldb.AddressHashIndexLevelDbService;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
+import io.nuls.api.utils.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +56,7 @@ public class InitApiserver {
 
 
         /*加载24小时奖励*/
-        Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
+        Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(TimeService.currentTimeMillis());
         HistoryContext.rewardofday = rewardOfDay == null ? 0L : rewardOfDay;
 
         /*加载别名到缓存*/

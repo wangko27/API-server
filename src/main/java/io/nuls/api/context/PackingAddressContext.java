@@ -11,17 +11,10 @@ import java.util.List;
  * Date:  2018/6/5 0005
  */
 public class PackingAddressContext {
-    /**
-     * 当前正在共识的节点数量
-     */
-    public static int consensusAgentCount = 0;
+
     private static List<AgentNodeDto> agentNodeList = new ArrayList<>();
     public static List<AgentNodeDto> getAllList(){
         return agentNodeList;
-    }
-    public static void clear(){
-        //agentNodeMap.clear();
-        agentNodeList.clear();
     }
     public static void reset(List<AgentNodeDto> list){
         agentNodeList = list;

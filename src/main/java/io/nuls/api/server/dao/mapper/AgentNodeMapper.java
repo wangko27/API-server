@@ -20,12 +20,5 @@ public interface AgentNodeMapper extends BaseMapper<AgentNode, String>{
      */
     List<AgentNodeDto> selectTotalpackingCount(Searchable searchable);
 
-    /**
-     * 根据Searchable 查询数据条数
-     * @param searchable
-     * @return
-     */
-    Integer selectTotalCount(Searchable searchable);
-
     int insertByBatch(@Param("list") List<AgentNode> list);
 }

@@ -4,7 +4,9 @@ import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Transaction;
+import io.nuls.api.server.dto.AgentDto;
 import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.comparator.AgentComparator;
 
 import java.util.*;
 
@@ -14,23 +16,27 @@ import java.util.*;
  * Date:  2018/7/4 0004
  */
 public class IndexContext {
+    /**
+     * 区块链浏览器首页区块列表缓存
+     */
     private static List<BlockHeader> blocks = new ArrayList<>(Constant.INDEX_BLOCK_LIST_COUNT);
+    /**
+     * 区块链浏览器首页，交易缓存
+     */
     private static List<Transaction> transactions = new ArrayList<>(Constant.INDEX_TX_LIST_COUNT);
-    //全网共识信息，每隔10s在链上加载
+    /**
+     * 全网共识信息，每隔10s在链上加载
+     */
     private static Map rpcConsensusData = new HashMap();
-    //全网共识列表，缓存，用于查询，每隔10s在链上加载
-    private static List<LinkedHashMap> agentNodeList = new ArrayList<>();
+    /**
+     * 全网节点列表，缓存，用于查询，每隔10s在链上加载
+     */
+    private static List<AgentDto> agentNodeList = new ArrayList<>();
 
-    /*private static Queue<BlockHeader> blockQueue = new LinkedList<BlockHeader>();
-    private static Queue<Transaction> transactionsQueue = new LinkedList<Transaction>();
-
-    public static BlockHeader getQueue(){
-        return blockQueue.poll();
-    }
-    public static boolean addQueue(BlockHeader blockHeader){
-        return blockQueue.offer(blockHeader);
-    }*/
-
+    /**
+     * 从缓存中获取最新块
+     * @return
+     */
     public static BlockHeader getBestNewBlock(){
         if(blocks.size()>0){
             return blocks.get(0);
@@ -84,44 +90,46 @@ public class IndexContext {
         return rpcConsensusData;
     }
 
-    public static void resetRpcAgentNodeList(List<LinkedHashMap> data){
+    public static void resetRpcAgentNodeList(List<AgentDto> data){
         agentNodeList = data;
     }
-    public static PageInfo getAgentNodeList(int pageNumber,int pageSize,String agentNode){
-        PageInfo<LinkedHashMap> page = new PageInfo<>();
-        List<LinkedHashMap> list = new ArrayList<>();
+    public static PageInfo<AgentDto> getAgentNodeList(int pageNumber,int pageSize,String agentNode,Integer status,int sort){
+        PageInfo<AgentDto> page = new PageInfo<>();
+        List<AgentDto> list = new ArrayList<>();
         int start = (pageNumber-1)*pageSize;
         int end = pageNumber*pageSize;
-        if(agentNodeList.size()<pageSize){
-            end = agentNodeList.size();
-        }else{
-            if(end > (agentNodeList.size()-pageSize)){
-                end = agentNodeList.size()-pageSize;
-            }
-        }
 
-        List<LinkedHashMap> tempData = new ArrayList<>();
-        if(StringUtils.isNotBlank(agentNode)){
-            for(LinkedHashMap hashMap: tempData){
-                if(hashMap.get("agentHash").toString().endsWith(agentNode)){
-                    tempData.add(hashMap);
-                }
+
+        List<AgentDto> tempData = new ArrayList<>();
+        for(AgentDto hashMap: agentNodeList){
+            if(StringUtils.isNotBlank(agentNode) && !hashMap.getAgentName().equals(agentNode)){
+                continue;
             }
+            if(null != status && hashMap.getStatus()!=status){
+                continue;
+            }
+            tempData.add(hashMap);
+        }
+        if(tempData.size()<pageSize){
+            end = tempData.size();
         }else{
-            tempData = agentNodeList;
+            if(end > (tempData.size()-pageSize)){
+                end = tempData.size()-pageSize;
+            }
         }
         for(int i =start;i<end;i++){
             list.add(tempData.get(i));
         }
+        Collections.sort(list, AgentComparator.getInstance(sort));
         page.setList(list);
         page.setSize(tempData.size());
         page.setPageNum(pageNumber);
         return page;
     }
 
-    public static LinkedHashMap getNodeByAgentHash(String agentHash){
-        for(LinkedHashMap map:agentNodeList){
-            if(map.get("agentHash").toString().equals(agentHash)){
+    public static AgentDto getNodeByAgentHash(String agentHash){
+        for(AgentDto map:agentNodeList){
+            if(map.getTxHash().equals(agentHash)){
                 return map;
             }
         }

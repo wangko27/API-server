@@ -6,8 +6,10 @@ import io.nuls.api.context.PackingAddressContext;
 import io.nuls.api.server.business.AgentNodeBusiness;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
+import io.nuls.api.server.business.WebwalletTransactionBusiness;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.UtxoDto;
+import io.nuls.api.utils.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,8 @@ public class BalanceTask {
     private AgentNodeBusiness agentNodeBusiness;
     @Autowired
     private BlockBusiness blockBusiness;
+    @Autowired
+    private WebwalletTransactionBusiness webwalletTransactionBusiness;
 
     public void execute() {
         /*加载持币账户排行榜*/
@@ -37,7 +41,10 @@ public class BalanceTask {
         PackingAddressContext.reset(agentNodeDtoList);
 
         /*加载24小时奖励*/
-        Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(new Date().getTime());
+        Long rewardOfDay = blockBusiness.getBlockSumRewardByTime(TimeService.currentTimeMillis());
         HistoryContext.rewardofday = rewardOfDay==null?0L:rewardOfDay;
+
+        /*每隔1小时清除掉已经确认的交易*/
+        webwalletTransactionBusiness.deleteConfirmTx();
     }
 }
