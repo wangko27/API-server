@@ -246,7 +246,6 @@ public class TransactionTool {
                 break;
             }
         }
-
         if (enough) {
             return fee;
         }

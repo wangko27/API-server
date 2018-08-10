@@ -94,7 +94,6 @@ public class AgentNodeResource {
         }
         result = RpcClientResult.getSuccess();
         result.setData(IndexContext.getAgentNodeList(pageNumber,pageSize,agentName,status,sort));
-        //return agentNodeBusiness.getList(agentName,pageNumber,pageSize);
         return result;
     }
 
@@ -124,7 +123,6 @@ public class AgentNodeResource {
 
         result = RpcClientResult.getSuccess();
         result.setData(agentNodeBusiness.getMy(address,agentName,pageNumber,pageSize));
-        //return agentNodeBusiness.getList(agentName,pageNumber,pageSize);
         return result;
     }
 
@@ -149,13 +147,17 @@ public class AgentNodeResource {
         result = RpcClientResult.getSuccess();
         //链上加载共识状态
         RpcClientResult rpcClientResult = agentNodeBusiness.getAgentByAddressWithRpc(agentNode.getTxHash());
+        String agentName = "";
         if(rpcClientResult.isSuccess()){
             Map<String,Object> attr = (Map)rpcClientResult.getData();
             Integer status = Integer.parseInt(attr.get("status")+"");
+            agentName = attr.get("agentName")+"";
             agentNode.setStatus(status);
         }
-
-        AgentNodeDto agentNodeDto = new AgentNodeDto(agentNode,punishLogBusiness.getCountByStatus(EntityConstant.PUBLISH_YELLOW,address));
+        if(StringUtils.isBlank(agentName)){
+            agentName = agentNode.getAgentAddress();
+        }
+        AgentNodeDto agentNodeDto = new AgentNodeDto(agentNode,punishLogBusiness.getCountByStatus(EntityConstant.PUBLISH_YELLOW,address),agentName);
         result.setData(agentNodeDto);
         return result;
 
@@ -182,8 +184,10 @@ public class AgentNodeResource {
         AgentNode agentNode = agentNodeBusiness.getAgentByAddress(address);
         if(null != agentNode){
             attr.put("totalDeposit",agentNode.getTotalDeposit().toString());
+            attr.put("packingAddress",agentNode.getPackingAddress());
         }else{
             attr.put("totalDeposit","0");
+            attr.put("packingAddress","");
         }
         //加载可用余额和冻结余额
         Balance balance = balanceBusiness.getBalance(address);
@@ -198,13 +202,6 @@ public class AgentNodeResource {
         Long depositMoney = depositBusiness.selectTotalAmount(address);
         if(null == depositMoney){
             depositMoney = 0L;
-        }
-        //加载我的节点信息(我是否建立了节点)
-        if(null == agentNodeBusiness.getAgentByAddress(address)){
-            attr.put("agentNum","0");
-        }else{
-            //一个人只能建立一个节点
-            attr.put("agentNum","1");
         }
         attr.put("depositMoney",depositMoney+"");
         result.setData(attr);

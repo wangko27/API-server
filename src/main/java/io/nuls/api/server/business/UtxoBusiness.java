@@ -99,24 +99,35 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
         }
+        //还需要过滤数据库中所有未确认交易的input列表中的utxo
+        List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
+        Set<String> lockedUtxo = new HashSet<>();
+        for(WebwalletTransaction tx: webwalletTransactionList){
+            if(null != tx.getInputs()){
+                for(Input input:tx.getInputs()){
+                    lockedUtxo.add(input.getKey());
+                }
+            }
+        }
 
         for (String str : setList) {
             Utxo utxo = utxoLevelDbService.select(str);
-            if(!utxo.usable(bestHeight)){
+            if(!utxo.usable(bestHeight) && !lockedUtxo.contains(utxo.getKey())){
                 utxoList.add(utxo);
             }
         }
-        Utxo temp = webwalletUtxoLevelDbService.select(address);
+        Utxo temp = null;
+        /*Utxo temp = webwalletUtxoLevelDbService.select(address);
         if(null != temp && !temp.usable(bestHeight)){
             utxoList.add(temp);
-        }
+        }*/
         //模拟分页
         PageInfo<FreezeDto> page = new PageInfo<>();
         int start = (pageNumber - 1) * pageSize;
         int end = pageNumber * pageSize;
         List<FreezeDto> tempList = new ArrayList<>();
-        if (utxoList.size() - pageNumber < end) {
-            end = utxoList.size() - pageNumber;
+        if (utxoList.size() - pageSize < end) {
+            end = utxoList.size();
         }
         temp = null;
         for (int i = start; i < end; i++) {
@@ -149,7 +160,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         }
         Set<String> keyList = UtxoContext.get(address);
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
-        //还需要过滤数据库中所有交易的input列表中的utxo
+        //还需要过滤数据库中所有未确认交易的input列表中的utxo
         List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
         Set<String> lockedUtxo = new HashSet<>();
         for(WebwalletTransaction tx: webwalletTransactionList){
@@ -170,7 +181,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         }
         //把上一次花费剩下的可用utxo加入到可用里面
         Utxo temp = webwalletUtxoLevelDbService.select(address);
-        if(null != temp && temp.usable(bestHeight)){
+        if(null != temp){
             list.add(temp);
         }
 

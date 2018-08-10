@@ -101,9 +101,8 @@ public class StringUtils {
             return false;
         }
         return true;*/
-        //todo 验证格式，现在临时去掉，因为需要v0.9.12版本钱包测试，地址格式有冲突
-        //return AddressTool.validAddress(address);
-        return true;
+        return AddressTool.validAddress(address);
+        //return true;
     }
 
     protected static void checkXOR(byte[] hashs) {
@@ -162,5 +161,29 @@ public class StringUtils {
         return true;
     }
 
+    /**
+     * 验证是否包含特殊字符 true为包含，false为不包含
+     * @param str 要验证的字符串
+     * @return
+     */
+    public static boolean isSpecialChar(String str) {
+        String regEx = "[ _`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n|\r|\t";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+        return m.find();
+    }
+
+    /**
+     * 验证别名是否合法
+     * @param str
+     * @return
+     */
+    public static boolean valiAlias(String str){
+        String regEx = "^[a-z0-9]{1}[a-z0-9_]{1,98}[a-z0-9]{1}$";
+        return str.matches(regEx);
+        /*Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+        return m.find();*/
+    }
 
 }

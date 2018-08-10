@@ -1,9 +1,8 @@
 package io.nuls.api.server.business;
 
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.UtxoContext;
-import io.nuls.api.entity.Balance;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.BalanceMapper;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,6 +28,10 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
 
     @Autowired
     private BalanceMapper balanceMapper;
+
+    @Autowired
+    private WebwalletTransactionBusiness webwalletTransactionBusiness;
+
 
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
@@ -49,18 +53,35 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
         Long locked = 0L;
 
         Set<String> keyList = UtxoContext.get(address);
+        //还需要过滤数据库中所有未确认交易的input列表中的utxo
+        List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
-        Utxo temp = webwalletUtxoLevelDbService.select(address);
-        if(null != temp){
-            utxoList.add(temp);
+        Set<String> lockedUtxo = new HashSet<>();
+        if(webwalletTransactionList.size() > 0){
+            for(WebwalletTransaction tx: webwalletTransactionList){
+                if(null != tx.getInputs()){
+                    for(Input input:tx.getInputs()){
+                        lockedUtxo.add(input.getKey());
+                    }
+                }
+            }
+            Utxo temp = webwalletUtxoLevelDbService.select(address);
+            if(null != temp){
+                usable+=temp.getAmount();
+            }
         }
+
         for (Utxo utxo : utxoList) {
+            if(lockedUtxo.contains(utxo.getKey())){
+               continue;
+            }
             if(utxo.usable(bestHeight)){
                 usable += utxo.getAmount();
             }else{
                 locked += utxo.getAmount();
             }
         }
+
         balance.setAddress(address);
         balance.setUsable(usable);
         balance.setLocked(locked);

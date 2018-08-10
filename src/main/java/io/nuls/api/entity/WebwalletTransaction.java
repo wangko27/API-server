@@ -21,47 +21,29 @@ public class WebwalletTransaction {
         this.signData = signData;
         this.address = address;
         this.outputList = tx.getOutputList();
+        this.fee = tx.getFee();
     }
 
     public void caclTx(WebwalletTransaction tx,String address){
-        if(tx.getType() == EntityConstant.TX_TYPE_COINBASE){
+        //未确认的交易，我自己发起的，只有转账、设置别名、委托、退出委托四种
+        tx.setAmount(0L);
+        if(tx.getType() == EntityConstant.TX_TYPE_TRANSFER){
             if(null != tx.getOutputList()){
                 for(Output output:tx.getOutputList()){
-                    if(address.equals(output.getAddress())){
-                        tx.setAmount(tx.getAmount()+output.getValue());
-                    }
-                }
-            }
-        }else if(tx.getType() == EntityConstant.TX_TYPE_TRANSFER){
-            if(null!=tx.getInputs()){
-                for(Input input:tx.getInputs()){
-                    if(address.equals(input.getAddress())){
-                        tx.setAmount(tx.getAmount()-input.getValue());
-                    }
-                }
-            }
-            if(null != tx.getOutputList()){
-                for(Output output:tx.getOutputList()){
-                    if(address.equals(output.getAddress())){
-                        tx.setAmount(tx.getAmount()+output.getValue());
+                    if(!address.equals(output.getAddress())){
+                        tx.setAmount(tx.getAmount()-output.getValue());
                     }
                 }
             }
         }else if(tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
-            tx.setAmount(Na.NA.getValue());
-        }else if(tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS || tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT){
+            tx.setAmount(-Na.NA.getValue());
+        }else if(tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
             for(Utxo utxo:tx.getOutputs()){
-                if(address.equals(utxo.getAddress()) && utxo.getLockTime()==-1){
-                    tx.setAmount(0-tx.getAmount());
-                }
-            }
-        }else if(tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
-            for(Utxo utxo:tx.getOutputs()){
-                if(address.equals(utxo.getAddress()) && utxo.getLockTime()==0){
+                if(address.equals(utxo.getAddress()) && utxo.getLockTime() == -1){
                     tx.setAmount(tx.getAmount());
                 }
             }
-        }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT){
+        }else if(tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
             for(Utxo utxo:tx.getOutputs()){
                 if(address.equals(utxo.getAddress())){
                     tx.setAmount(tx.getAmount());
@@ -90,7 +72,17 @@ public class WebwalletTransaction {
 
     private String signData;
 
+    private long fee;
+
     private long amount = 0;
+
+    public long getFee() {
+        return fee;
+    }
+
+    public void setFee(long fee) {
+        this.fee = fee;
+    }
 
     public long getAmount() {
         return amount;

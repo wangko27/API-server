@@ -73,6 +73,9 @@ public class SyncDataBusiness {
                 if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
                     for (Utxo utxo : tx.getOutputs()) {
                         utxoMap.put(utxo.getKey(), utxo);
+                        //删除转账时临时产生的utxo
+                        System.out.println("删除临时utxo："+utxo.getAddress());
+                        webwalletUtxoLevelDbService.delete(utxo.getAddress());
                     }
                 }
                 //存放被花费的utxo
@@ -144,8 +147,6 @@ public class SyncDataBusiness {
                 if(attrMapList.containsKey(utxo.getAddress())){
                     //已经存在，直接移除
                     attrMapList.get(utxo.getAddress()).getHashIndexSet().remove(utxo.getKey());
-                    //删除转账时临时产生的utxo
-                    webwalletUtxoLevelDbService.delete(utxo.getKey());
                 }else{
                     //不存在，新建一个，去leveldb获取数据，然后删除
                     addressHashIndex = new AddressHashIndex();

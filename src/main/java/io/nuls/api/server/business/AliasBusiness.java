@@ -31,8 +31,24 @@ public class AliasBusiness implements BaseService<Alias, String> {
      * @return
      */
     public Alias getAliasByAddress(String address) {
+        Alias alias = AliasContext.get(address);
+        if(null == alias){
+            Searchable searchable = new Searchable();
+            searchable.addCondition("address", SearchOperator.eq, address);
+            alias = aliasMapper.selectBySearchable(searchable);
+        }
+        return alias;
+    }
+
+    /**
+     * 根据别名获取地址
+     *
+     * @param str 别名
+     * @return
+     */
+    public Alias getAliasByAlias(String str) {
         Searchable searchable = new Searchable();
-        searchable.addCondition("address", SearchOperator.eq, address);
+        searchable.addCondition("alias", SearchOperator.eq, str);
         return aliasMapper.selectBySearchable(searchable);
     }
 
@@ -65,7 +81,10 @@ public class AliasBusiness implements BaseService<Alias, String> {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int saveAll(List<Alias> list) {
         if (list.size() > 0) {
-            return aliasMapper.insertByBatch(list);
+            int i = aliasMapper.insertByBatch(list);
+            if(i > 0){
+                AliasContext.putList(list);
+            }
         }
         return 0;
     }

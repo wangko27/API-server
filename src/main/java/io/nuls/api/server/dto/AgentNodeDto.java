@@ -44,6 +44,8 @@ public class AgentNodeDto{
 
     private Long totalReward;
 
+    private String agentName;
+
     /**
      * 黄牌数量
      */
@@ -53,7 +55,7 @@ public class AgentNodeDto{
 
     }
 
-    public AgentNodeDto(AgentNode node,long yellowCardNum) {
+    public AgentNodeDto(AgentNode node,long yellowCardNum,String agentName) {
         this.txHash = node.getTxHash();
         this.agentAddress = node.getAgentAddress();
         this.packingAddress = node.getPackingAddress();
@@ -71,6 +73,15 @@ public class AgentNodeDto{
         this.deleteHash = node.getDeleteHash();
         this.totalReward = node.getTotalReward();
         this.yellowCardNum = yellowCardNum;
+        this.agentName = agentName;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
     }
 
     public long getYellowCardNum() {

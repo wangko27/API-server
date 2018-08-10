@@ -36,7 +36,6 @@ public class UtxoContext {
         }
     }
 
-
     //根据地址，获取该地址所有的未花费的hashIndex
     public static Set<String> get(String address) {
         Set<String> setList = (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);

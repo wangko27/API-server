@@ -31,6 +31,8 @@ import io.nuls.api.i18n.I18nUtils;
  */
 public enum ErrorCode {
 
+
+
     /**
      * ----------  System Exception code   ---------
      */
@@ -135,6 +137,21 @@ public enum ErrorCode {
     LACK_OF_CREDIT("cs006", 60006),
     DELEGATE_OVER_COUNT("cs007", 60007),
     DEPOSIT_TOO_MUCH("cs008", 60008),
+
+    /**
+     * api-server user dec
+     */
+    TX_TYPE_NULL("91001",91001),//交易类型不存在
+    TX_MONEY_NULL("91002",91002),//转账金额不正确 小于等于0
+    TX_PRICE_NULL("91003",91003),//转账手续费不正确
+    TX_TOADDRESS_NULL("91004",91004),//收款地址不正确
+    TX_SAVETEMPUTXO_ERROR("91005",91005),//保存交易后的utxo错误 保存交易失败
+    TX_BROADCAST_ERROR("91007",91007),//广播失败
+    TX_REMARK_ERROR("94008",94008),//备注不能包含特殊字符
+    TX_ALIAS_ERROR("94009",94009),//别名格式不正确
+    TX_ALIAS_USED_ERROR("94010",94010),//别名已占用
+
+
 
     /**
      * ------------  Ledger Exception code   --------------

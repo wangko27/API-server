@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.WebwalletTransactionMapper;
@@ -33,35 +34,30 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     private WebwalletTransactionLevelDbService webwalletTransactionLevelDbService = WebwalletTransactionLevelDbService.getInstance();
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
 
+    @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int save(WebwalletTransaction webwalletTransaction,String address) {
+    public int save(WebwalletTransaction webwalletTransaction) {
         int i = webwalletTransactionMapper.insert(webwalletTransaction);
         if(i == 1){
             //保存leveldb
             List<Utxo> utxoList = webwalletTransaction.getOutputs();
-            List<Input> inputList = webwalletTransaction.getInputs();
+            /*List<Input> inputList = webwalletTransaction.getInputs();
             Map<String,AddressHashIndex> attrMapList = new HashMap<>();
+            AddressHashIndex addressHashIndex = new AddressHashIndex();
+            addressHashIndex.setAddress(webwalletTransaction.getAddress());
+            Set<String> setList = UtxoContext.get(webwalletTransaction.getAddress());
+
             for (Input input: inputList) {
-                AddressHashIndex addressHashIndex = null;
                 Utxo utxoKey = utxoBusiness.getByKey(input.getKey());
-                if(attrMapList.containsKey(utxoKey.getAddress())){
-                    //已经存在，直接移除
-                    attrMapList.get(utxoKey.getAddress()).getHashIndexSet().remove(utxoKey.getKey());
-                }else{
-                    //不存在，新建一个，去leveldb获取数据，然后删除
-                    addressHashIndex = new AddressHashIndex();
-                    addressHashIndex.setAddress(utxoKey.getAddress());
-                    Set<String> setList = UtxoContext.get(utxoKey.getAddress());
-                    setList.remove(utxoKey.getKey());
-                    addressHashIndex.setHashIndexSet(setList);
-                    attrMapList.put(utxoKey.getAddress(),addressHashIndex);
-                }
+                setList.remove(utxoKey.getKey());
             }
-            //重置缓存和leveldb
-            UtxoContext.putMap(attrMapList);
-            //修改待确认交易的状态
+            addressHashIndex.setHashIndexSet(setList);
+            attrMapList.put(webwalletTransaction.getAddress(),addressHashIndex);
+            UtxoContext.putMap(attrMapList);*/
+            //如果有输出，则直接放入 这里只有四种类型，转账、设置别名、委托、退出委托
             for(Utxo utxo : utxoList){
-                if(address.equals(utxo.getAddress())){
+                if(webwalletTransaction.getAddress().equals(utxo.getAddress()) && utxo.getLockTime() == 0){
+                    System.out.println("保存临时utxo："+utxo.getAddress());
                     webwalletUtxoLevelDbService.insert(utxo);
                 }
             }
@@ -73,12 +69,6 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
                 e.printStackTrace();
             }
         }
-        return 0;
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int save(WebwalletTransaction webwalletTransaction) {
         return 0;
     }
 

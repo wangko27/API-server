@@ -23,7 +23,10 @@ public class AliasContext {
         return EhcacheUtil.getInstance().get(Constant.ALIAS_CACHE_NAME).getSize();
     }
     public static void put(Alias alias) {
-        if(null != alias && StringUtils.isNotBlank(alias.getAddress())){
+        EhcacheUtil.getInstance().put(Constant.ALIAS_CACHE_NAME,alias.getAddress(),alias);
+    }
+    public static void putList(List<Alias> aliasList) {
+        for(Alias alias: aliasList){
             EhcacheUtil.getInstance().put(Constant.ALIAS_CACHE_NAME,alias.getAddress(),alias);
         }
     }
