@@ -8,6 +8,7 @@ import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Balance;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.*;
+import io.nuls.api.server.dto.AgentDto;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
@@ -181,10 +182,11 @@ public class AgentNodeResource {
         HashMap<String,String> attr = new HashMap<>();
         //加载奖励
         attr.put("reward",addressRewardDetailBusiness.selectSumReward(address)+"");
-        AgentNode agentNode = agentNodeBusiness.getAgentByAddress(address);
-        if(null != agentNode){
-            attr.put("totalDeposit",agentNode.getTotalDeposit().toString());
-            attr.put("packingAddress",agentNode.getPackingAddress());
+        //AgentNode agentNode = agentNodeBusiness.getAgentByAddress(address);
+        AgentDto agentDto = IndexContext.getNodeByAgentAddress(address);
+        if(null != agentDto){
+            attr.put("totalDeposit",agentDto.getTotalDeposit()+"");
+            attr.put("packingAddress",agentDto.getPackingAddress());
         }else{
             attr.put("totalDeposit","0");
             attr.put("packingAddress","");

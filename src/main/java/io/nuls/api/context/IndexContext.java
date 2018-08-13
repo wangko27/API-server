@@ -136,5 +136,14 @@ public class IndexContext {
         return null;
     }
 
+    public static AgentDto getNodeByAgentAddress(String agentAddress){
+        for(AgentDto map:agentNodeList){
+            if(map.getAgentAddress().equals(agentAddress)){
+                return map;
+            }
+        }
+        return null;
+    }
+
 
 }

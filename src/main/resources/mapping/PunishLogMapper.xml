@@ -159,6 +159,11 @@
     from punish_log
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+  <select id="selectCountSearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM punish_log
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
   <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

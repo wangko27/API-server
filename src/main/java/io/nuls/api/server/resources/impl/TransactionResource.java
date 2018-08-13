@@ -10,6 +10,7 @@ import io.nuls.api.model.tx.CancelDepositTransaction;
 import io.nuls.api.model.tx.DepositTransaction;
 import io.nuls.api.model.tx.TransferTransaction;
 import io.nuls.api.server.business.*;
+import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.dto.TransactionDto;
 import io.nuls.api.server.dto.TransactionParam;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -44,6 +45,8 @@ public class TransactionResource {
     private WebwalletTransactionBusiness webwalletTransactionBusiness;
     @Autowired
     private AliasBusiness aliasBusiness;
+
+    private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
 
     @GET
     @Path("/index")
@@ -372,61 +375,44 @@ public class TransactionResource {
         if(StringUtils.isBlank(transactionParam.getSign())){
             return RpcClientResult.getFailed(ErrorCode.NULL_PARAMETER);
         }
+        if(StringUtils.isBlank(transactionParam.getAddress())){
+            return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+        }
+        byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
+        io.nuls.api.model.Transaction transaction = null;
         if(transactionParam.getTypes() == EntityConstant.TX_TYPE_TRANSFER){
             //转账
-            byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
-            TransferTransaction transaction = new TransferTransaction();
-            transaction.parse(new NulsByteBuffer(data));
-            transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
-            Map<String, String> params = new HashMap<>();
-            params.put("txHex", Hex.encode(transaction.serialize()));
-            return broadCaseSave(params,transaction);
-
+            transaction = new TransferTransaction();
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
             //设置别名
-            byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
-            AliasTransaction transaction = new AliasTransaction();
-            transaction.parse(new NulsByteBuffer(data));
-            transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
-            Map<String, String> params = new HashMap<>();
-            params.put("txHex", Hex.encode(transaction.serialize()));
-            return broadCaseSave(params,transaction);
+            transaction = new AliasTransaction();
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
             //加入共识
-            byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
-            DepositTransaction transaction = new DepositTransaction();
-            transaction.parse(new NulsByteBuffer(data));
-            transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
-            Map<String, String> params = new HashMap<>();
-            params.put("txHex", Hex.encode(transaction.serialize()));
-            return broadCaseSave(params,transaction);
+            transaction = new DepositTransaction();
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
             //退出共识
-            byte[] data = Base64.getDecoder().decode(transactionParam.getSerializ());
-            CancelDepositTransaction transaction = new CancelDepositTransaction();
-            transaction.parse(new NulsByteBuffer(data));
-            transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
-            Map<String, String> params = new HashMap<>();
-            params.put("txHex", Hex.encode(transaction.serialize()));
-            return broadCaseSave(params,transaction);
+            transaction = new CancelDepositTransaction();
         }else{
             //其他，暂时不处理
             return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-    }
-
-    private RpcClientResult broadCaseSave(Map<String, String> params,io.nuls.api.model.Transaction transaction) throws Exception {
-        RpcClientResult result = syncDataHandler.broadcast(params);
+        transaction.parse(new NulsByteBuffer(data));
+        transaction.setScriptSig(Hex.decode(transactionParam.getSign()));
+        Map<String, String> params = new HashMap<>();
+        params.put("txHex", Hex.encode(transaction.serialize()));
+        result = syncDataHandler.broadcast(params);
         if(result.isSuccess()){
             Transaction tx = RpcTransferUtil.toTransaction(transaction);
-            //保存交易和新生成的Utxo，同时，删除掉已经花费的utxo
             Utxo utxoKey = null;
             for(Input input:tx.getInputs()){
                 utxoKey = utxoBusiness.getByKey(input.getKey());
+                if(utxoKey == null){
+                    utxoKey = webwalletUtxoLevelDbService.select(transactionParam.getAddress());
+                }
                 input.setAddress(utxoKey.getAddress());
                 input.setValue(utxoKey.getAmount());
             }
-            WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx,params.get("txHex"),utxoKey.getAddress());
+            WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx,params.get("txHex"),transactionParam.getAddress());
             if(webwalletTransactionBusiness.save(webwalletTransaction) > 0){
                 return result;
             }else{

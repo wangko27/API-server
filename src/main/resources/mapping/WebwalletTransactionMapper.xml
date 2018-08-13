@@ -21,6 +21,9 @@
     delete from webwallet_transaction
     where hash = #{hash,jdbcType=VARCHAR}
   </delete>
+  <delete id="deleteConfirmTx" parameterType="java.lang.String" >
+    DELETE FROM webwallet_transaction WHERE STATUS = 2
+  </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.WebwalletTransaction" >
     insert into webwallet_transaction (hash, type, status, 
       time, address)

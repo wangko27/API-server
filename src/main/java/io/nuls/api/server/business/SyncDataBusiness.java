@@ -74,7 +74,6 @@ public class SyncDataBusiness {
                     for (Utxo utxo : tx.getOutputs()) {
                         utxoMap.put(utxo.getKey(), utxo);
                         //删除转账时临时产生的utxo
-                        System.out.println("删除临时utxo："+utxo.getAddress());
                         webwalletUtxoLevelDbService.delete(utxo.getAddress());
                     }
                 }

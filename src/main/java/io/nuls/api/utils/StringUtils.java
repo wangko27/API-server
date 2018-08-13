@@ -179,7 +179,7 @@ public class StringUtils {
      * @return
      */
     public static boolean valiAlias(String str){
-        String regEx = "^[a-z0-9]{1}[a-z0-9_]{1,98}[a-z0-9]{1}$";
+        String regEx = "^[a-z0-9]{1}[a-z0-9_]{0,98}[a-z0-9]{1}$";
         return str.matches(regEx);
         /*Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);

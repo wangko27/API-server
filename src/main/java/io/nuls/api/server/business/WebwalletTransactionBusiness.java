@@ -57,7 +57,6 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
             //如果有输出，则直接放入 这里只有四种类型，转账、设置别名、委托、退出委托
             for(Utxo utxo : utxoList){
                 if(webwalletTransaction.getAddress().equals(utxo.getAddress()) && utxo.getLockTime() == 0){
-                    System.out.println("保存临时utxo："+utxo.getAddress());
                     webwalletUtxoLevelDbService.insert(utxo);
                 }
             }
