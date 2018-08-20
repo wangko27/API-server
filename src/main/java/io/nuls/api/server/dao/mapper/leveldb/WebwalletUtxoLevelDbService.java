@@ -7,6 +7,7 @@ import io.nuls.api.server.leveldb.service.DBService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Description: 未确认交易的utxo
@@ -40,6 +41,16 @@ public class WebwalletUtxoLevelDbService {
         }
         return 0;
     }
+    /*public int deleteByMap(Map<String, Utxo> map) {
+        int i = 0;
+        for (Utxo utxo : map.values()) {
+            i = delete(utxo.getAddress());
+            if(i == 0){
+                return i;
+            }
+        }
+        return i;
+    }*/
 
     public void deleteAll(){
         dbService.clearArea(Constant.WEBWALLETUTXO_DB_NAME);

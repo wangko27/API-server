@@ -14,7 +14,7 @@ public class WebwalletTransaction {
         this.hash = tx.getHash();
         this.type = tx.getType();
         this.status = EntityConstant.WEBWALLET_STATUS_NOTCONFIRM;
-        this.time = tx.getCreateTime();
+        this.createTime = tx.getCreateTime();
         this.inputs = tx.getInputs();
         this.outputs = tx.getOutputs();
         this.remark = tx.getRemark();
@@ -34,19 +34,20 @@ public class WebwalletTransaction {
                         tx.setAmount(tx.getAmount()-output.getValue());
                     }
                 }
+                tx.setAmount(tx.getAmount()-tx.getFee());
             }
         }else if(tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
             tx.setAmount(-Na.NA.getValue());
         }else if(tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
             for(Utxo utxo:tx.getOutputs()){
                 if(address.equals(utxo.getAddress()) && utxo.getLockTime() == -1){
-                    tx.setAmount(tx.getAmount());
+                    tx.setAmount(utxo.getAmount());
                 }
             }
         }else if(tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
             for(Utxo utxo:tx.getOutputs()){
                 if(address.equals(utxo.getAddress())){
-                    tx.setAmount(tx.getAmount());
+                    tx.setAmount(utxo.getAmount()+tx.getFee());
                 }
             }
         }
@@ -58,7 +59,7 @@ public class WebwalletTransaction {
 
     private Integer status;
 
-    private Long time;
+    private Long createTime;
 
     private String remark;
 
@@ -124,12 +125,12 @@ public class WebwalletTransaction {
         this.status = status;
     }
 
-    public Long getTime() {
-        return time;
+    public Long getCreateTime() {
+        return createTime;
     }
 
-    public void setTime(Long time) {
-        this.time = time;
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
     }
 
     public String getRemark() {

@@ -93,16 +93,26 @@ public class IndexContext {
     public static void resetRpcAgentNodeList(List<AgentDto> data){
         agentNodeList = data;
     }
-    public static PageInfo<AgentDto> getAgentNodeList(int pageNumber,int pageSize,String agentNode,Integer status,int sort){
+    public static PageInfo<AgentDto> getAgentNodeList(int pageNumber,int pageSize,String keyword,Integer status,int sort){
         PageInfo<AgentDto> page = new PageInfo<>();
         List<AgentDto> list = new ArrayList<>();
         int start = (pageNumber-1)*pageSize;
-        int end = pageNumber*pageSize;
+        int end = start+pageSize;
 
 
         List<AgentDto> tempData = new ArrayList<>();
         for(AgentDto hashMap: agentNodeList){
-            if(StringUtils.isNotBlank(agentNode) && !hashMap.getAgentName().equals(agentNode)){
+            if(StringUtils.isNotBlank(keyword)){
+                //搜索
+                keyword = keyword.toUpperCase();
+                boolean b = hashMap.getAgentId().indexOf(keyword) >= 0;
+                b = b || hashMap.getAgentAddress().toUpperCase().equals(keyword) || hashMap.getPackingAddress().toUpperCase().equals(keyword);
+                if (StringUtils.isNotBlank(hashMap.getAgentName())) {
+                    b = b || hashMap.getAgentName().toUpperCase().indexOf(keyword) >= 0;
+                }
+                if (b) {
+                    tempData.add(hashMap);
+                }
                 continue;
             }
             if(null != status && hashMap.getStatus()!=status){
@@ -112,17 +122,14 @@ public class IndexContext {
         }
         if(tempData.size()<pageSize){
             end = tempData.size();
-        }else{
-            if(end > (tempData.size()-pageSize)){
-                end = tempData.size()-pageSize;
-            }
         }
         for(int i =start;i<end;i++){
             list.add(tempData.get(i));
         }
         Collections.sort(list, AgentComparator.getInstance(sort));
         page.setList(list);
-        page.setSize(tempData.size());
+        page.setTotal(tempData.size());
+        page.setPageSize(pageSize);
         page.setPageNum(pageNumber);
         return page;
     }

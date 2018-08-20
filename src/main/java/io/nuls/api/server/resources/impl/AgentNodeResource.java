@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -152,13 +153,21 @@ public class AgentNodeResource {
         if(rpcClientResult.isSuccess()){
             Map<String,Object> attr = (Map)rpcClientResult.getData();
             Integer status = Integer.parseInt(attr.get("status")+"");
-            agentName = attr.get("agentName")+"";
+            if(null != attr.get("creditVal")){
+                agentNode.setCreditValue(new BigDecimal(attr.get("creditVal")+""));
+            }
+            if(null != attr.get("agentName")){
+                agentName = attr.get("agentName")+"";
+            }
+            if(null != attr.get("agentId")){
+                agentNode.setAgendId(attr.get("agentId")+"");
+            }
             agentNode.setStatus(status);
         }
         if(StringUtils.isBlank(agentName)){
             agentName = agentNode.getAgentAddress();
         }
-        AgentNodeDto agentNodeDto = new AgentNodeDto(agentNode,punishLogBusiness.getCountByStatus(EntityConstant.PUBLISH_YELLOW,address),agentName);
+        AgentNodeDto agentNodeDto = new AgentNodeDto(agentNode,punishLogBusiness.getCountByStatus(EntityConstant.PUBLISH_YELLOW,agentNode.getAgentAddress()),agentName);
         result.setData(agentNodeDto);
         return result;
 

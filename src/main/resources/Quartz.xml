@@ -10,6 +10,13 @@
         <property name="targetMethod" value="execute" />
         <property name="concurrent" value="false" /><!-- 作业不并发调度 -->
     </bean>
+    <bean id="webwalletTransactionSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="webwalletTransactionsyncTask"/>
+        </property>
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" />
+    </bean>
     <bean id="agentNodeSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject">
             <ref bean="agentNodeSyncTask"/>
@@ -49,6 +56,11 @@
         <property name="startDelay" value="0" /><!-- 调度工厂实例化后，经过0秒开始执行调度 -->
         <property name="repeatInterval" value="10000" /><!-- 每10秒调度一次 -->
     </bean>
+    <bean id="webwalletTransactionTaskTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="webwalletTransactionSync" />
+        <property name="startDelay" value="0" />
+        <property name="repeatInterval" value="600000" /><!-- 每10分钟调度一次 -->
+    </bean>
     <bean id="agentNodeSyncTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="agentNodeSync" />
         <property name="startDelay" value="0" />
@@ -60,6 +72,7 @@
         <property name="triggers">
             <list>
                 <ref bean="blockSyncTrigger"/>
+                <ref bean="webwalletTransactionTaskTrigger"/>
                 <ref bean="agentNodeSyncTrigger"/>
                 <ref bean="balanceTaskTrigger"/>
                 <ref bean="transactionHistoryTaskTrigger"/>

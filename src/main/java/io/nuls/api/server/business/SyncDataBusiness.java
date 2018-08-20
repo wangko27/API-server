@@ -73,8 +73,6 @@ public class SyncDataBusiness {
                 if (tx.getOutputs() != null && !tx.getOutputs().isEmpty()) {
                     for (Utxo utxo : tx.getOutputs()) {
                         utxoMap.put(utxo.getKey(), utxo);
-                        //删除转账时临时产生的utxo
-                        webwalletUtxoLevelDbService.delete(utxo.getAddress());
                     }
                 }
                 //存放被花费的utxo
@@ -105,13 +103,15 @@ public class SyncDataBusiness {
                     for (TxData data : tx.getTxDataList()) {
                         PunishLog log = (PunishLog) data;
                         punishLogList.add(log);
+                        TransactionRelation key = new TransactionRelation(log.getAddress(), tx.getHash(),tx.getType(),tx.getCreateTime());
+                        txRelationList.add(key);
                     }
                  }
             }
 
             blockBusiness.save(block.getHeader());
             transactionBusiness.saveAll(txList);
-            webwalletTransactionBusiness.updateStatusByList(txList);
+            webwalletTransactionBusiness.deleteStatusByList(txList);
             transactionRelationBusiness.saveAll(txRelationList);
             utxoBusiness.saveAll(utxoMap);
             utxoBusiness.updateAll(fromList);

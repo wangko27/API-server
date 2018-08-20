@@ -5,7 +5,7 @@
     <id column="hash" property="hash" jdbcType="VARCHAR" />
     <result column="type" property="type" jdbcType="INTEGER" />
     <result column="status" property="status" jdbcType="INTEGER" />
-    <result column="time" property="time" jdbcType="BIGINT" />
+    <result column="time" property="createTime" jdbcType="BIGINT" />
     <result column="address" property="address" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -28,7 +28,7 @@
     insert into webwallet_transaction (hash, type, status, 
       time, address)
     values (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
-      #{time,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR})
+      #{createTime,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.WebwalletTransaction" >
     insert into webwallet_transaction
@@ -42,7 +42,7 @@
       <if test="status != null" >
         status,
       </if>
-      <if test="time != null" >
+      <if test="createTime != null" >
         time,
       </if>
       <if test="address != null" >
@@ -59,7 +59,7 @@
       <if test="status != null" >
         #{status,jdbcType=INTEGER},
       </if>
-      <if test="time != null" >
+      <if test="createTime != null" >
         #{time,jdbcType=BIGINT},
       </if>
       <if test="address != null" >
@@ -76,8 +76,8 @@
       <if test="status != null" >
         status = #{status,jdbcType=INTEGER},
       </if>
-      <if test="time != null" >
-        time = #{time,jdbcType=BIGINT},
+      <if test="createTime != null" >
+        time = #{createTime,jdbcType=BIGINT},
       </if>
       <if test="address != null" >
         address = #{address,jdbcType=VARCHAR},
@@ -89,7 +89,7 @@
     update webwallet_transaction
     set type = #{type,jdbcType=INTEGER},
       status = #{status,jdbcType=INTEGER},
-      time = #{time,jdbcType=BIGINT},
+      time = #{createTime,jdbcType=BIGINT},
       address = #{address,jdbcType=VARCHAR}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>

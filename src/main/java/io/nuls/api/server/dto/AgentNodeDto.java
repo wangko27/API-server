@@ -46,6 +46,16 @@ public class AgentNodeDto{
 
     private String agentName;
 
+    private String agentId;
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
     /**
      * 黄牌数量
      */
@@ -74,6 +84,7 @@ public class AgentNodeDto{
         this.totalReward = node.getTotalReward();
         this.yellowCardNum = yellowCardNum;
         this.agentName = agentName;
+        this.agentId = node.getAgendId();
     }
 
     public String getAgentName() {

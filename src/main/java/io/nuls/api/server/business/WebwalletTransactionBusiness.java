@@ -37,23 +37,12 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(WebwalletTransaction webwalletTransaction) {
-        int i = webwalletTransactionMapper.insert(webwalletTransaction);
-        if(i == 1){
+        if(webwalletTransactionMapper.insert(webwalletTransaction) == 1){
+            return webwalletTransactionLevelDbService.insert(webwalletTransaction);
+        }
+        /*if(i == 1){
             //保存leveldb
             List<Utxo> utxoList = webwalletTransaction.getOutputs();
-            /*List<Input> inputList = webwalletTransaction.getInputs();
-            Map<String,AddressHashIndex> attrMapList = new HashMap<>();
-            AddressHashIndex addressHashIndex = new AddressHashIndex();
-            addressHashIndex.setAddress(webwalletTransaction.getAddress());
-            Set<String> setList = UtxoContext.get(webwalletTransaction.getAddress());
-
-            for (Input input: inputList) {
-                Utxo utxoKey = utxoBusiness.getByKey(input.getKey());
-                setList.remove(utxoKey.getKey());
-            }
-            addressHashIndex.setHashIndexSet(setList);
-            attrMapList.put(webwalletTransaction.getAddress(),addressHashIndex);
-            UtxoContext.putMap(attrMapList);*/
             //如果有输出，则直接放入 这里只有四种类型，转账、设置别名、委托、退出委托
             for(Utxo utxo : utxoList){
                 if(webwalletTransaction.getAddress().equals(utxo.getAddress()) && utxo.getLockTime() == 0){
@@ -67,7 +56,7 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }*/
         return 0;
     }
 
@@ -82,15 +71,29 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     public int update(WebwalletTransaction webwalletTransaction) {
         int i = webwalletTransactionMapper.updateByPrimaryKey(webwalletTransaction);
         if(i == 1){
+            //保存leveldb
+            List<Utxo> utxoList = webwalletTransaction.getOutputs();
+            //如果有输出，则直接放入 这里只有四种类型，转账、设置别名、委托、退出委托
+            for(Utxo utxo : utxoList){
+                if(webwalletTransaction.getAddress().equals(utxo.getAddress()) && utxo.getLockTime() == 0){
+                    webwalletUtxoLevelDbService.insert(utxo);
+                }
+            }
             return webwalletTransactionLevelDbService.insert(webwalletTransaction);
         }
         return 0;
     }
 
-    public void updateStatusByList(List<Transaction> list){
+    /**
+     * 交易确认后，删除leveldb的缓存和数据库的数据
+     * @param list
+     */
+    public void deleteStatusByList(List<Transaction> list){
         if(null != list){
             for(Transaction tx:list){
-                webwalletTransactionMapper.updateStatusByPrimaryKey(tx.getHash());
+                //webwalletTransactionMapper.updateStatusByPrimaryKey(tx.getHash());
+                webwalletTransactionMapper.deleteByPrimaryKey(tx.getHash());
+                webwalletTransactionLevelDbService.delete(tx.getHash());
             }
         }
 
@@ -147,6 +150,25 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
         if(type > 0){
             searchable.addCondition("type", SearchOperator.eq, type);
         }
+        PageHelper.orderBy("time asc");
+        return formatWebwalletTransaction(webwalletTransactionMapper.selectList(searchable));
+    }
+
+    /**
+     * 查询十分钟前的未确认交易
+     * @param status
+     * @param endTime
+     * @return
+     */
+    public List<WebwalletTransaction> getListByTime(int status,long endTime){
+        Searchable searchable = new Searchable();
+        if(status > 0){
+            searchable.addCondition("status", SearchOperator.eq, status);
+        }
+        if(endTime > 0){
+            searchable.addCondition("time", SearchOperator.lte, endTime);
+        }
+        PageHelper.orderBy("time asc");
         return formatWebwalletTransaction(webwalletTransactionMapper.selectList(searchable));
     }
 
@@ -154,7 +176,7 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
         List<WebwalletTransaction> dataList = new ArrayList<>();
         if(null != list && list.size() > 0){
             for(WebwalletTransaction tx: list){
-                dataList.add(getByKey(tx.getAddress()));
+                dataList.add(getByKey(tx.getHash()));
             }
         }
         return dataList;

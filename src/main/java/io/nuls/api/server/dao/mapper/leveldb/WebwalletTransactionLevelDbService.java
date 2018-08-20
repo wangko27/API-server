@@ -27,7 +27,7 @@ public class WebwalletTransactionLevelDbService {
 
 
     public int insert(WebwalletTransaction webwalletUtxo) {
-        Result result = dbService.putModel(Constant.WEBWALLETTRANSACTION_DB_NAME, webwalletUtxo.getAddress().getBytes(), webwalletUtxo);
+        Result result = dbService.putModel(Constant.WEBWALLETTRANSACTION_DB_NAME, webwalletUtxo.getHash().getBytes(), webwalletUtxo);
         if (result.isSuccess()) {
             return 1;
         }

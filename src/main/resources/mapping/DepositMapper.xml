@@ -171,4 +171,9 @@
     SELECT sum(amount) FROM deposit
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+  <select id="selectDepositedAgentByAddress" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.String">
+    SELECT a1.tx_hash FROM agent_node a1 LEFT JOIN deposit a2 ON a1.tx_hash = a2.agent_hash
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+     group by a1.tx_hash
+  </select>
 </mapper>

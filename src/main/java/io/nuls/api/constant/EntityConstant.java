@@ -93,4 +93,8 @@ public class EntityConstant {
      */
     public static int WEBWALLET_STATUS_CONFIRM = 2;
 
+    public static int TRANSFEE_NOTENOUGHT_OK = 1;
+    public static int TRANSFEE_NOTENOUGHT_UTXO = 2;
+    public static int TRANSFEE_NOTENOUGHT_MONEY = 3;
+
 }

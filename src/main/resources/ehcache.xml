@@ -22,18 +22,19 @@
        clearOnFlush：内存数量最大时是否清除。
     -->
     <defaultCache
-            maxElementsInMemory="10000000"
+            maxElementsInMemory="0"
             eternal="false"
             timeToIdleSeconds="120"
-            timeToLiveSeconds="120"
+            timeToLiveSeconds="86400"
             overflowToDisk="false"
             maxElementsOnDisk="10000000"
             diskPersistent="false"
             diskExpiryThreadIntervalSeconds="120"
-            memoryStoreEvictionPolicy="LRU"
+            memoryStoreEvictionPolicy="FIFO"
     />
     <cache name="apiServerCache"
-           maxElementsInMemory="10000000"
+           maxElementsInMemory="0"
+           timeToIdleSeconds="120"
            timeToLiveSeconds="86400"
            diskPersistent="false"
            overflowToDisk="false"

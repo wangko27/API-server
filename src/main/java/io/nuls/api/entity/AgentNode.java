@@ -35,6 +35,19 @@ public class AgentNode extends TxData {
 
     private Long totalReward;
 
+    /**
+     * 不存入数据库，节点id，展示用，hash的最后八位
+     */
+    private String agendId;
+
+    public String getAgendId() {
+        return agendId;
+    }
+
+    public void setAgendId(String agendId) {
+        this.agendId = agendId;
+    }
+
     public String getTxHash() {
         return txHash;
     }

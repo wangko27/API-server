@@ -20,7 +20,6 @@ public class RequestCounter {
                     new CacheLoader<String, AtomicInteger>() {
                         @Override
                         public AtomicInteger load(String key) {
-                            Log.info("load ip " + key);
                             return new AtomicInteger(0);
                         }
                     }

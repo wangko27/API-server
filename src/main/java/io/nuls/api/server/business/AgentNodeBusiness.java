@@ -61,25 +61,30 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @return
      */
     public PageInfo<AgentDto> getMy(String address, String agentName, int pageNumber, int pageSize){
-        PageInfo<Deposit> page = depositBusiness.getListWithSearch(address,agentName,pageNumber,pageSize);
-        Set<AgentDto> agentDtoSet = new HashSet<>();
-        if(null != page.getList()){
-            for(Deposit deposit:page.getList()){
-                AgentDto map = IndexContext.getNodeByAgentHash(deposit.getAgentHash());
-                if(null != map && !agentDtoSet.contains(map)){
-                    agentDtoSet.add(map);
+        List<String> depositedHashList = depositBusiness.getDepositedAgentByAddress(address);
+        //PageInfo<Deposit> page = depositBusiness.getListWithSearch(address,agentName,pageNumber,pageSize);
+        List<AgentDto> agentDtoList = new ArrayList<>();
+        if(null != depositedHashList){
+            for(String hash:depositedHashList){
+                AgentDto map = IndexContext.getNodeByAgentHash(hash);
+                if(null != map){
+                    agentDtoList.add(map);
                 }
             }
         }
+        int start = (pageNumber-1)*pageSize;
+        int end = start+pageSize;
         List<AgentDto> agentNodeList = new ArrayList<>();
-        agentNodeList.addAll(agentDtoSet);
+        if(agentDtoList.size()<pageSize){
+            end = agentDtoList.size();
+        }
+        for(int i =start;i<end;i++){
+            agentNodeList.add(agentDtoList.get(i));
+        }
         PageInfo<AgentDto> pageAgent = new PageInfo<>(agentNodeList);
-        pageAgent.setPageNum(page.getPageNum());
-        pageAgent.setSize(page.getSize());
-        pageAgent.setTotal(page.getTotal());
-        pageAgent.setStartRow(page.getStartRow());
-        pageAgent.setEndRow(page.getEndRow());
-        pageAgent.setPages(page.getPages());
+        pageAgent.setPageSize(pageSize);
+        pageAgent.setPageNum(pageNumber);
+        pageAgent.setTotal(agentDtoList.size());
         return pageAgent;
     }
 

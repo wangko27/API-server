@@ -220,6 +220,28 @@ public class TransactionTool {
         return tx;
     }
 
+    public static Na calcMaxFee(List<Utxo> utxoList,int initSize, long unitPrice) {
+        Na max = Na.ZERO;
+        int maxSize = TransactionFeeCalculator.MAX_TX_SIZE - initSize;
+        //将所有余额从小到大排序后，累计未花费的余额
+        int size = 0;
+        for (int i = 0; i < utxoList.size(); i++) {
+            Utxo coin = utxoList.get(i);
+
+            if (coin.getAmount().equals(Na.ZERO)) {
+                continue;
+            }
+            size += 50;
+            if (size > maxSize) {
+                break;
+            }
+            max = max.add(Na.valueOf(coin.getAmount()));
+        }
+        Na fee = TransactionFeeCalculator.getFee(size, Na.valueOf(unitPrice));
+        max = max.subtract(fee);
+        return max;
+    }
+
     private static Na calcFee(List<Utxo> utxoList, int size, long amount, Na unitPrice) {
         long values = 0;
         Utxo utxo;
@@ -237,10 +259,12 @@ public class TransactionTool {
             //每次累加一条未花费余额时，需要重新计算手续费
             fee = TransactionFeeCalculator.getFee(size, unitPrice);
             //需要判断是否找零，如果有找零，则需要重新计算手续费
-            if (values > amount + fee.getValue()) {
-                fee = TransactionFeeCalculator.getFee(size + 38, unitPrice);
-                if (values < amount + fee.getValue()) {
-                    continue;
+            if (values >= amount + fee.getValue()) {
+                if(values > amount + fee.getValue()){
+                    fee = TransactionFeeCalculator.getFee(size + 38, unitPrice);
+                    if (values < amount + fee.getValue()) {
+                        continue;
+                    }
                 }
                 enough = true;
                 break;

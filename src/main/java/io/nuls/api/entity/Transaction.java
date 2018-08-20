@@ -56,6 +56,7 @@ public class Transaction {
                         tx.setAmount(tx.getAmount()-output.getValue());
                     }
                 }
+                tx.setAmount(tx.getAmount()-tx.getFee());
             }else{
                 //收到
                 for(Output output:tx.getOutputList()){
@@ -72,10 +73,16 @@ public class Transaction {
                     tx.setAmount(utxo.getAmount());
                 }
             }
-        }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT ||tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
+        }else if(tx.getType() == EntityConstant.TX_TYPE_STOP_AGENT){
+            for(Utxo utxo:tx.getOutputs()) {
+                if (address.equals(utxo.getAddress()) && utxo.getLockTime()>0) {
+                    tx.setAmount(utxo.getAmount()+tx.getFee());
+                }
+            }
+        }else if(tx.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
             for(Utxo utxo:tx.getOutputs()) {
                 if (address.equals(utxo.getAddress())) {
-                    tx.setAmount(utxo.getAmount());
+                    tx.setAmount(utxo.getAmount()+tx.getFee());
                 }
             }
         }

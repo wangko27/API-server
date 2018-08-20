@@ -3,6 +3,7 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
+import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
@@ -37,6 +38,11 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     private UtxoBusiness utxoBusiness;
 
     private TransactionLevelDbService transactionLevelDbService = TransactionLevelDbService.getInstance();
+
+    public List<Transaction> getIndexTransaction(){
+        List<Transaction> list = IndexContext.getTransactions();
+        return formatTransaction(list);
+    }
 
     /**
      * 交易列表

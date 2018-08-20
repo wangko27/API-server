@@ -17,4 +17,7 @@ public interface DepositMapper extends BaseMapper<Deposit, String> {
     Long selectTotalAmount(Searchable searchable);
 
     int insertByBatch(@Param("list") List<Deposit> list);
+
+    List<String> selectDepositedAgentByAddress(Searchable searchable);
+
 }

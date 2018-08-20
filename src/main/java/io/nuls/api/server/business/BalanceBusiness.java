@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,47 +44,50 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
      * @return
      */
     public Balance getBalance(String address) {
+        Balance balance = new Balance();
+        Long usable = 0L;
+        Long locked = 0L;
         BlockHeader blockHeader = blockBusiness.getNewest();
         long bestHeight = 0L;
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
         }
-        Balance balance = new Balance();
-        Long usable = 0L;
-        Long locked = 0L;
-
+        if(bestHeight < 0){
+            balance.setAddress(address);
+            balance.setUsable(usable);
+            balance.setLocked(locked);
+            return balance;
+        }
         Set<String> keyList = UtxoContext.get(address);
+        List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
         //还需要过滤数据库中所有未确认交易的input列表中的utxo
         List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
-        List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
-        Set<String> lockedUtxo = new HashSet<>();
-        if(webwalletTransactionList.size() > 0){
-            for(WebwalletTransaction tx: webwalletTransactionList){
-                if(null != tx.getInputs()){
-                    for(Input input:tx.getInputs()){
-                        lockedUtxo.add(input.getKey());
+        long usedMoney = 0;
+        for(WebwalletTransaction tx: webwalletTransactionList){
+            if(null != tx.getOutputs()){
+                for(Utxo utxo:tx.getOutputs()){
+                    if(utxo.getAddress().equals(address)){//自己
+                        if(utxo.getLockTime()==-1){//委托，创建节点锁定
+                            locked+= utxo.getAmount();
+                        }
                     }
+                    else{
+                        usedMoney += utxo.getAmount();
+                    }
+
                 }
             }
-            Utxo temp = webwalletUtxoLevelDbService.select(address);
-            if(null != temp){
-                usable+=temp.getAmount();
-            }
         }
-
+        usable-=locked;//去掉委托、创建节点的锁定金额
         for (Utxo utxo : utxoList) {
-            if(lockedUtxo.contains(utxo.getKey())){
-               continue;
-            }
             if(utxo.usable(bestHeight)){
                 usable += utxo.getAmount();
             }else{
                 locked += utxo.getAmount();
             }
         }
-
         balance.setAddress(address);
-        balance.setUsable(usable);
+        balance.setUsable(usable-usedMoney);
         balance.setLocked(locked);
         return balance;
     }

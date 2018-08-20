@@ -47,16 +47,16 @@ public class PunishLogBusiness implements BaseService<PunishLog, Long> {
 
     /**
      * 根据状态，统计数量
-     * @param status
+     * @param type
      * @return
      */
-    public int getCountByStatus(Integer status,String address){
+    public int getCountByStatus(Integer type,String address){
         Searchable searchable = new Searchable();
-        if(!StringUtils.validAddress(address)){
+        if(StringUtils.validAddress(address)){
             searchable.addCondition("address", SearchOperator.eq, address);
         }
-        if(null != status){
-            searchable.addCondition("type", SearchOperator.eq, status);
+        if(null != type){
+            searchable.addCondition("type", SearchOperator.eq, type);
         }
         return punishLogMapper.selectCountSearchable(searchable);
     }

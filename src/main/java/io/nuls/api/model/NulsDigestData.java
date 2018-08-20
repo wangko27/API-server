@@ -34,6 +34,7 @@ import io.nuls.api.utils.log.Log;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 
@@ -130,6 +131,25 @@ public class NulsDigestData extends BaseNulsData {
 
     public static NulsDigestData calcDigestData(byte[] data) {
         return calcDigestData(data, (byte) 0);
+    }
+
+
+    public static void main(String[] args) {
+        //0020eb7a0eefda27c1a074320dbf8902b03b4382a8ff16bb0f16eb9a8d3ecfc8ffb5
+        String seri = "AgDkdkhVZQEDMTIz/////wIjACB1yTUHz+cB7FnzFb5HVLwVnfDW552YAKuUs24y/8+afgBNreYkAAAAAAAAAAAAACMAIL9+flqM8eCcEYoajWZplumIp6lPKOKPftXsQ5d4DnJ4AE2t5iQAAAAAAAAAAAAAAhcEIwFA1ojWa9ERnx0bocWxTVFOpNmJXgDKmjsAAAAAAAAAAAAAFwQjAfqY0JKGFOxxTk2NLN4+te67IDAXGnYsDgAAAAAAAAAAAAAA";
+        NulsDigestData digestData = new NulsDigestData();
+        digestData.setDigestAlgType((byte) 1);
+        byte[] data = Base64.getDecoder().decode(seri);
+        byte[] content = Sha256Hash.hashTwice(data);
+        digestData.digestBytes = content;
+        byte tbyte = 0;
+        try {
+            System.out.println(Hex.encode(digestData.serialize()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //System.out.println("base64:"+Hex.encode(data));
     }
 
     public static NulsDigestData calcDigestData(byte[] data, byte digestAlgType) {

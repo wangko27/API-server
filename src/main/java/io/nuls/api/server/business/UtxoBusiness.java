@@ -99,45 +99,49 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
         }
-        //还需要过滤数据库中所有未确认交易的input列表中的utxo
+        //还需要加上output中，状态为-1的utxo
         List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
-        Set<String> lockedUtxo = new HashSet<>();
         for(WebwalletTransaction tx: webwalletTransactionList){
-            if(null != tx.getInputs()){
-                for(Input input:tx.getInputs()){
-                    lockedUtxo.add(input.getKey());
+            if(null != tx.getOutputs()){
+                for(Utxo utxo:tx.getOutputs()){
+                    if(utxo.getAddress().equals(address) && utxo.getLockTime()==-1){
+                        utxoList.add(utxo);
+                    }
                 }
             }
         }
-
+        List<FreezeDto> tempList = new ArrayList<>();
         for (String str : setList) {
             Utxo utxo = utxoLevelDbService.select(str);
-            if(!utxo.usable(bestHeight) && !lockedUtxo.contains(utxo.getKey())){
-                utxoList.add(utxo);
+            if(!utxo.usable(bestHeight)){
+                Transaction transaction = transactionBusiness.getByHash(utxo.getTxHash());
+                FreezeDto freezeDto = new FreezeDto(transaction.getCreateTime(),utxo.getLockTime(),transaction.getHash(),transaction.getType(),utxo.getAmount());
+                tempList.add(freezeDto);
             }
         }
-        Utxo temp = null;
-        /*Utxo temp = webwalletUtxoLevelDbService.select(address);
-        if(null != temp && !temp.usable(bestHeight)){
-            utxoList.add(temp);
-        }*/
+        Collections.sort(tempList, new Comparator<FreezeDto>() {
+            @Override
+            public int compare(FreezeDto o1, FreezeDto o2) {
+                return o2.getCreateTime().compareTo(o1.getCreateTime());
+            }
+        });
+
         //模拟分页
         PageInfo<FreezeDto> page = new PageInfo<>();
         int start = (pageNumber - 1) * pageSize;
-        int end = pageNumber * pageSize;
-        List<FreezeDto> tempList = new ArrayList<>();
-        if (utxoList.size() - pageSize < end) {
-            end = utxoList.size();
+        if(start > tempList.size()){
+            return page;
         }
-        temp = null;
-        for (int i = start; i < end; i++) {
-            temp = utxoList.get(i);
-            Transaction transaction = transactionBusiness.getByHash(temp.getTxHash());
-            FreezeDto freezeDto = new FreezeDto(transaction.getCreateTime(),temp.getLockTime(),transaction.getHash(),transaction.getType(),temp.getAmount());
-            tempList.add(freezeDto);
+        int end = start + pageSize;
+        if(end > tempList.size()){
+            end = tempList.size();
         }
-        page.setList(tempList);
-        page.setTotal(setList.size());
+        List<FreezeDto> freezeDtoList = new ArrayList<>();
+        for(int i = start;i<end;i++){
+            freezeDtoList.add(tempList.get(i));
+        }
+        page.setList(freezeDtoList);
+        page.setTotal(tempList.size());
         page.setPageNum(pageNumber);
         page.setSize(pageSize);
         return page;
@@ -184,7 +188,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         if(null != temp){
             list.add(temp);
         }
-
         //排序
         Collections.sort(list, new Comparator<Utxo>() {
             @Override

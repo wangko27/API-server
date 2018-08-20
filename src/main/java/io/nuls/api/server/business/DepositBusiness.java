@@ -30,6 +30,17 @@ public class DepositBusiness implements BaseService<Deposit, String> {
     private AgentNodeMapper agentNodeMapper;
 
     /**
+     * 根据地址，获取某地址已委托的列表
+     * @param address
+     * @return
+     */
+    public List<String> getDepositedAgentByAddress(String address){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, address);
+        return depositMapper.selectDepositedAgentByAddress(searchable);
+    }
+
+    /**
      * 委托列表
      * @param address 账户地址
      * @return
