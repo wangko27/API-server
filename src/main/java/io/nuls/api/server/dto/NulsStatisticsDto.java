@@ -89,6 +89,10 @@ public class NulsStatisticsDto {
         this.consensusNodes = ts.getConsensusNodes();
     }
 
+    public NulsStatisticsDto(){
+
+    }
+
     public double getTotalAssets() {
         return totalAssets;
     }
