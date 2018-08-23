@@ -10,7 +10,7 @@ public class WebwalletTransaction {
 
     }
 
-    public WebwalletTransaction(Transaction tx,String signData,String address){
+    public WebwalletTransaction(Transaction tx,String signData,String address,String temp){
         this.hash = tx.getHash();
         this.type = tx.getType();
         this.status = EntityConstant.WEBWALLET_STATUS_NOTCONFIRM;
@@ -22,6 +22,7 @@ public class WebwalletTransaction {
         this.address = address;
         this.outputList = tx.getOutputList();
         this.fee = tx.getFee();
+        this.temp = temp;
     }
 
     public void caclTx(WebwalletTransaction tx,String address){
@@ -72,6 +73,8 @@ public class WebwalletTransaction {
     private List<Output> outputList;
 
     private String signData;
+
+    private String temp;//自定义值
 
     private long fee;
 
@@ -171,5 +174,13 @@ public class WebwalletTransaction {
 
     public void setSignData(String signData) {
         this.signData = signData;
+    }
+
+    public String getTemp() {
+        return temp;
+    }
+
+    public void setTemp(String temp) {
+        this.temp = temp;
     }
 }

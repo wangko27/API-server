@@ -7,9 +7,10 @@
     <result column="status" property="status" jdbcType="INTEGER" />
     <result column="time" property="createTime" jdbcType="BIGINT" />
     <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="temp" property="temp" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    hash, type, status, time, address
+    hash, type, status, time, address,temp
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -26,9 +27,9 @@
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.WebwalletTransaction" >
     insert into webwallet_transaction (hash, type, status, 
-      time, address)
+      time, address,temp)
     values (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
-      #{createTime,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR})
+      #{createTime,jdbcType=BIGINT}, #{address,jdbcType=VARCHAR},#{temp,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.WebwalletTransaction" >
     insert into webwallet_transaction
@@ -48,6 +49,9 @@
       <if test="address != null" >
         address,
       </if>
+      <if test="temp != null" >
+        temp,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="hash != null" >
@@ -64,6 +68,9 @@
       </if>
       <if test="address != null" >
         #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="temp != null" >
+        #{temp,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -82,6 +89,9 @@
       <if test="address != null" >
         address = #{address,jdbcType=VARCHAR},
       </if>
+      <if test="temp != null" >
+        temp = #{temp,jdbcType=VARCHAR},
+      </if>
     </set>
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
@@ -90,7 +100,8 @@
     set type = #{type,jdbcType=INTEGER},
       status = #{status,jdbcType=INTEGER},
       time = #{createTime,jdbcType=BIGINT},
-      address = #{address,jdbcType=VARCHAR}
+      address = #{address,jdbcType=VARCHAR},
+      temp = #{temp,jdbcType=VARCHAR}
     where hash = #{hash,jdbcType=VARCHAR}
   </update>
   <update id="updateStatusByPrimaryKey" parameterType="java.lang.String" >
@@ -100,6 +111,10 @@
     select
     <include refid="Base_Column_List"/>
     from webwallet_transaction
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectCountBySearch" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    select count(1) from webwallet_transaction
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
 </mapper>

@@ -186,4 +186,15 @@ public class StringUtils {
         return m.find();*/
     }
 
+    /**
+     * 验证字符串是否为数字
+     * @param str
+     * @return
+     */
+    public static boolean valiNumber(String str){
+        Pattern pattern = Pattern.compile("[0-9]{1,}");
+        Matcher matcher = pattern.matcher((CharSequence)str);
+        return matcher.matches();
+    }
+
 }

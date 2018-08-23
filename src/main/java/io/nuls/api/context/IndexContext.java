@@ -95,7 +95,6 @@ public class IndexContext {
     }
     public static PageInfo<AgentDto> getAgentNodeList(int pageNumber,int pageSize,String keyword,Integer status,int sort){
         PageInfo<AgentDto> page = new PageInfo<>();
-        List<AgentDto> list = new ArrayList<>();
         int start = (pageNumber-1)*pageSize;
         int end = start+pageSize;
 
@@ -111,18 +110,34 @@ public class IndexContext {
                     b = b || hashMap.getAgentName().toUpperCase().indexOf(keyword) >= 0;
                 }
                 if (b) {
-                    tempData.add(hashMap);
+                    if(null != status){
+                        if(hashMap.getStatus()==status){
+                            tempData.add(hashMap);
+                        }else{
+                            continue;
+                        }
+                    }else{
+                        tempData.add(hashMap);
+                    }
                 }
                 continue;
+            }else{
+                if(null != status){
+                    if(hashMap.getStatus()==status){
+                        tempData.add(hashMap);
+                    }else{
+                        continue;
+                    }
+                }else{
+                    tempData.add(hashMap);
+                }
             }
-            if(null != status && hashMap.getStatus()!=status){
-                continue;
-            }
-            tempData.add(hashMap);
+            //tempData.add(hashMap);
         }
-        if(tempData.size()<pageSize){
+        if(tempData.size()<end){
             end = tempData.size();
         }
+        List<AgentDto> list = new ArrayList<>();
         for(int i =start;i<end;i++){
             list.add(tempData.get(i));
         }

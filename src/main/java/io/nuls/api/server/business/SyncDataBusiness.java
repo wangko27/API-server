@@ -123,6 +123,7 @@ public class SyncDataBusiness {
 
             //为了让存入leveldb更快，这里直接做map，全部处理完成之后，再存入leveldb
             Map<String,AddressHashIndex> attrMapList = new HashMap<>();
+            //新的未花费
             for (Utxo utxo : utxoMap.values()) {
                 if (utxo.getSpendTxHash() == null) {
                     AddressHashIndex addressHashIndex = null;
@@ -141,6 +142,7 @@ public class SyncDataBusiness {
                     //UtxoContext.put(utxo.getAddress(), utxo.getKey());
                 }
             }
+            //已经花费了的
             for (Utxo utxo : fromList) {
                 AddressHashIndex addressHashIndex = null;
                 if(attrMapList.containsKey(utxo.getAddress())){

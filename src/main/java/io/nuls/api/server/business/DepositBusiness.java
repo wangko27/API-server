@@ -37,6 +37,7 @@ public class DepositBusiness implements BaseService<Deposit, String> {
     public List<String> getDepositedAgentByAddress(String address){
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
+        searchable.addCondition("a2.delete_hash", SearchOperator.isNull, null);
         return depositMapper.selectDepositedAgentByAddress(searchable);
     }
 

@@ -3,8 +3,9 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
-import io.nuls.api.context.UtxoContext;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.WebwalletTransaction;
 import io.nuls.api.server.dao.mapper.WebwalletTransactionMapper;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletTransactionLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Description:
@@ -28,8 +30,6 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
 
     @Autowired
     private WebwalletTransactionMapper webwalletTransactionMapper;
-    @Autowired
-    private UtxoBusiness utxoBusiness;
 
     private WebwalletTransactionLevelDbService webwalletTransactionLevelDbService = WebwalletTransactionLevelDbService.getInstance();
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
@@ -38,9 +38,6 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(WebwalletTransaction webwalletTransaction) {
         if(webwalletTransactionMapper.insert(webwalletTransaction) == 1){
-            return webwalletTransactionLevelDbService.insert(webwalletTransaction);
-        }
-        /*if(i == 1){
             //保存leveldb
             List<Utxo> utxoList = webwalletTransaction.getOutputs();
             //如果有输出，则直接放入 这里只有四种类型，转账、设置别名、委托、退出委托
@@ -50,13 +47,7 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
                 }
             }
             return webwalletTransactionLevelDbService.insert(webwalletTransaction);
-        }else{
-            try {
-                throw new Exception("保存失败");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }*/
+        }
         return 0;
     }
 
@@ -69,16 +60,7 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int update(WebwalletTransaction webwalletTransaction) {
-        int i = webwalletTransactionMapper.updateByPrimaryKey(webwalletTransaction);
-        if(i == 1){
-            //保存leveldb
-            List<Utxo> utxoList = webwalletTransaction.getOutputs();
-            //如果有输出，则直接放入 这里只有四种类型，转账、设置别名、委托、退出委托
-            for(Utxo utxo : utxoList){
-                if(webwalletTransaction.getAddress().equals(utxo.getAddress()) && utxo.getLockTime() == 0){
-                    webwalletUtxoLevelDbService.insert(utxo);
-                }
-            }
+        if(webwalletTransactionMapper.updateByPrimaryKey(webwalletTransaction) == 1){
             return webwalletTransactionLevelDbService.insert(webwalletTransaction);
         }
         return 0;
@@ -137,6 +119,51 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
         }
         page.setList(webwalletTransactionList);
         return page;
+    }
+
+    /**
+     * 验证用户是否已经设置过别名 未确认交易中
+     * @param address
+     * @return
+     */
+    public Integer getAliasByAddress(String address){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("type", SearchOperator.eq, EntityConstant.TX_TYPE_ACCOUNT_ALIAS);
+        if (StringUtils.isNotBlank(address)) {
+            searchable.addCondition("address", SearchOperator.eq, address);
+        }
+
+        return webwalletTransactionMapper.selectCountBySearch(searchable);
+    }
+
+    /**
+     * 验证别名是否已经设置过 未确认交易中
+     * @param alias
+     * @return
+     */
+    public Integer getAliasByAlias(String alias){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("type", SearchOperator.eq, EntityConstant.TX_TYPE_ACCOUNT_ALIAS);
+        if (StringUtils.isNotBlank(alias)) {
+            searchable.addCondition("temp", SearchOperator.eq, alias);
+        }
+
+        return webwalletTransactionMapper.selectCountBySearch(searchable);
+    }
+
+    /**
+     * 验证委托是否已经退出过 未确认交易中
+     * @param hash
+     * @return
+     */
+    public Integer getDepositCoutByAddressAgentHash(String hash){
+        Searchable searchable = new Searchable();
+        searchable.addCondition("type", SearchOperator.eq, EntityConstant.TX_TYPE_CANCEL_DEPOSIT);
+        if (StringUtils.isNotBlank(hash)) {
+            searchable.addCondition("temp", SearchOperator.eq, hash);
+        }
+
+        return webwalletTransactionMapper.selectCountBySearch(searchable);
     }
 
     public List<WebwalletTransaction> getAll(String address,int status,int type){

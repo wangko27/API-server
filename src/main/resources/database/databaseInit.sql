@@ -232,9 +232,10 @@ DROP TABLE IF EXISTS `webwallet_transaction`;
 CREATE TABLE `webwallet_transaction` (
   `hash` varchar(80) NOT NULL,
   `type` int(2) DEFAULT NULL COMMENT '交易类型',
-  `status` int(2) DEFAULT NULL COMMENT '状态1待确认，2已确认',
+  `status` int(2) DEFAULT NULL COMMENT '状态1待确认，2已确认，3未广播',
   `time` bigint(15) DEFAULT NULL COMMENT '时间',
   `address` varchar(40) DEFAULT NULL COMMENT '发起者',
+  `temp` varchar(80) DEFAULT NULL COMMENT '自定义值，可以是别名，备注，地址等',
   PRIMARY KEY (`hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

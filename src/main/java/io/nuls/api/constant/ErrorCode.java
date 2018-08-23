@@ -61,6 +61,7 @@ public enum ErrorCode {
     SIGNATURE_ERROR("SYS021", 20021),
     ADDRESS_ERROR("SYS022", 20022),
     SERIALIZE_ERROR("SYS032", 20032),
+    BLOCK_NOT_SYNC("SYS033", 20033),//正在同步区块，暂时无法交易
     /**
      * ----------  Consensus Network code   ---------
      */
@@ -150,6 +151,8 @@ public enum ErrorCode {
     TX_REMARK_ERROR("94008",94008),//备注不能包含特殊字符
     TX_ALIAS_ERROR("94009",94009),//别名格式不正确
     TX_ALIAS_USED_ERROR("94010",94010),//别名已占用
+    TX_ALIAS_SETED_ERROR("94011",94011),//该地址已经设置过别名
+    TX_ALIAS_CANCEL_DEPOSIT_ERROR("94013",94013),//退出中
 
 
 
@@ -162,6 +165,7 @@ public enum ErrorCode {
     INVALID_OUTPUT("LED004", 70004),
     INVALID_AMOUNT("LED005", 70005),
     ORPHAN_TX("LED006", 70006),
+    BALANCE_TOO_MUCH("LED007", 70007),
     /**
      * messages
      */

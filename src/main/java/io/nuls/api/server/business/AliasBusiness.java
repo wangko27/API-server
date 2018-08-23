@@ -30,7 +30,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
      * @param address 账户地址
      * @return
      */
-    public Alias getAliasByAddress(String address) {
+    public Alias  getAliasByAddress(String address) {
         Alias alias = AliasContext.get(address);
         if(null == alias){
             Searchable searchable = new Searchable();

@@ -4,12 +4,14 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.*;
+import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.tx.AliasTransaction;
 import io.nuls.api.model.tx.CancelDepositTransaction;
 import io.nuls.api.model.tx.DepositTransaction;
 import io.nuls.api.model.tx.TransferTransaction;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
+import io.nuls.api.server.dto.TransFeeDto;
 import io.nuls.api.server.dto.TransactionDto;
 import io.nuls.api.server.dto.TransactionParam;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -201,6 +203,16 @@ public class TransactionResource {
         if(!StringUtils.validAddress(address)){
             return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
+        //没有同步到最新高度，禁止交易
+        BlockHeader blockHeader = blockBusiness.getNewest();
+        try {
+            RpcClientResult<BlockHeader> newestBlock = syncDataHandler.getNewest();
+            if(!newestBlock.isSuccess() || (newestBlock.getData().getHeight()-blockHeader.getHeight())>1){
+                return RpcClientResult.getFailed(ErrorCode.BLOCK_NOT_SYNC);
+            }
+        } catch (NulsException e) {
+            return RpcClientResult.getFailed(ErrorCode.BLOCK_NOT_SYNC);
+        }
         result = RpcClientResult.getSuccess();
         Map<String,String> attr = new HashMap<String,String>();
         int feeType = EntityConstant.TRANSFEE_NOTENOUGHT_OK;
@@ -209,14 +221,19 @@ public class TransactionResource {
         for(Utxo utxo : list){
             totalAmount += utxo.getAmount();
         }
-        io.nuls.api.model.Na na  = null;
-        io.nuls.api.model.Na maxMoney  = io.nuls.api.model.Na.ZERO;
+        if(totalAmount <= 0){
+            return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+        }
+        TransFeeDto transFeeDto = null;
         int inputSize = list.size();
         if(types == EntityConstant.TX_TYPE_TRANSFER){
             if(money <= 0){
                 return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             }
-            int initSize = 276;//200=124+38*2,76 = 38*2
+            if(totalAmount <= money){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            }//307200
+            int initSize = 200;//200=124+38*2
             int maxSize = initSize+(inputSize*50)+(inputSize>126?50:0);
             if(StringUtils.isNotBlank(remark)){
                 try {
@@ -225,26 +242,32 @@ public class TransactionResource {
                     e.printStackTrace();
                 }
             }
-            if(totalAmount <= money || maxSize > TransactionFeeCalculator.MAX_TX_SIZE){
+            if(maxSize > TransactionFeeCalculator.MAX_TX_SIZE){
                 //交易大小超过300kb
                 //计算最大可转多少
-                maxMoney = TransactionTool.calcMaxFee(list,initSize,price);
+                /*maxMoney = TransactionTool.calcMaxFee(list,initSize,price);
                 feeType = EntityConstant.TRANSFEE_NOTENOUGHT_UTXO;
-                na = io.nuls.api.model.Na.valueOf(totalAmount).subtract(maxMoney);
+                na = io.nuls.api.model.Na.valueOf(totalAmount).subtract(maxMoney);*/
+                //零钱太多，无法转账
+                //feeType = EntityConstant.TRANSFEE_NOTENOUGHT_UTXO;
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
             }else{
                 //转账
-                na = TransactionTool.getTransferTxFee(list,money,remark,price);
+                transFeeDto = TransactionTool.getTransferTxFee(list,money,remark,price);
             }
         }else if(types == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
             //设置别名
-            na = TransactionTool.getAliasTxFee(list,address,alias);
+            transFeeDto = TransactionTool.getAliasTxFee(list,address,alias);
         }else if(types == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
             //加入共识
             if(money <= 0){
                 return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             }
+            if(totalAmount <= money){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            }
             //余额足够，但是零钱太多，计算一次性最多可以委托多少
-            int initSize = 288;
+            /*int initSize = 288;
             int maxSize = initSize+(inputSize*50)+(inputSize>126?50:0);
             if(totalAmount <= money ||maxSize > TransactionFeeCalculator.MAX_TX_SIZE){
                 //交易大小超过300kb
@@ -257,21 +280,23 @@ public class TransactionResource {
                 na = io.nuls.api.model.Na.valueOf(totalAmount).subtract(maxMoney);
             }else{
                 na = TransactionTool.getJoinAgentTxFee(list,money);
-            }
+            }*/
+            transFeeDto = TransactionTool.getJoinAgentTxFee(list,money);
         }else if(types == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
             //退出共识
-            na = io.nuls.api.model.Na.CENT;
+            transFeeDto = new TransFeeDto();
+            transFeeDto.setSize(1024);//1kb
+            transFeeDto.setNa(io.nuls.api.model.Na.CENT);
         }else{
             //其他，暂时不处理
             return RpcClientResult.getFailed(ErrorCode.TX_TYPE_NULL);
         }
-        if(null == na){
-            feeType = EntityConstant.TRANSFEE_NOTENOUGHT_MONEY;
+        if(null == transFeeDto){
             return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
         }
-        attr.put("fee",na.getValue()+"");
+        attr.put("fee",transFeeDto.getNa().getValue()+"");
         attr.put("feeType",feeType+"");
-        attr.put("maxMoney",maxMoney.getValue()+"");
+        attr.put("feeSize",transFeeDto.getSize()+"");
         result.setData(attr);
         return result;
     }
@@ -293,9 +318,20 @@ public class TransactionResource {
         if(transactionParam.getTypes() <= 0){
             return RpcClientResult.getFailed(ErrorCode.TX_TYPE_NULL);
         }
+        //没有同步到最新高度，禁止交易
+        BlockHeader blockHeader = blockBusiness.getNewest();
+        try {
+            RpcClientResult<BlockHeader> newestBlock = syncDataHandler.getNewest();
+            if(!newestBlock.isSuccess() || (newestBlock.getData().getHeight()-blockHeader.getHeight())>1){
+                return RpcClientResult.getFailed(ErrorCode.BLOCK_NOT_SYNC);
+            }
+        } catch (NulsException e) {
+            return RpcClientResult.getFailed(ErrorCode.BLOCK_NOT_SYNC);
+        }
         List<Utxo> list = utxoBusiness.getUsableUtxo(transactionParam.getAddress());
         io.nuls.api.model.Na na  = null;
         io.nuls.api.model.Transaction transaction = null;
+        String temp = "";
         if(transactionParam.getTypes() == EntityConstant.TX_TYPE_TRANSFER){
             //金额不正确
             if(transactionParam.getMoney()<=0){
@@ -314,7 +350,7 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(ErrorCode.TX_REMARK_ERROR);
             }
             //转账
-            na = TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice());
+            na = TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice()).getNa();
             if(null == na){
                 return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
@@ -322,18 +358,29 @@ public class TransactionResource {
             transaction = TransactionTool.createTransferTx(list,transactionParam.getToAddress(),transactionParam.getMoney(),transactionParam.getRemark(),na.getValue());
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
             //设置别名
-
             //别名格式不正确
             if(StringUtils.isBlank(transactionParam.getAlias()) || !StringUtils.valiAlias(transactionParam.getAlias())){
                 return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_ERROR);
             }
-            if(null!=aliasBusiness.getAliasByAlias(transactionParam.getAddress())){
+            //别名长度不正确
+            if(transactionParam.getAlias().length() > 20){
+                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_ERROR);
+            }
+            //别名已存在
+            if(webwalletTransactionBusiness.getAliasByAlias(transactionParam.getAlias()) > 0
+                    || null!=aliasBusiness.getAliasByAlias(transactionParam.getAlias())){
                 return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_USED_ERROR);
             }
-            na = TransactionTool.getAliasTxFee(list,transactionParam.getAddress(),transactionParam.getAlias());
-            if(null == na){
-                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            //该用户已经设置过别名了
+            if(null!=aliasBusiness.getAliasByAddress(transactionParam.getAddress())
+                    || webwalletTransactionBusiness.getAliasByAddress(transactionParam.getAddress()) > 0){
+                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_USED_ERROR);
             }
+            na = TransactionTool.getAliasTxFee(list,transactionParam.getAddress(),transactionParam.getAlias()).getNa();
+            if(null == na){
+                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
+            }
+            temp = transactionParam.getAlias();
             //组装交易
             transaction = TransactionTool.createAliasTx(list,transactionParam.getAddress(),transactionParam.getAlias(),na.getValue());
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
@@ -346,7 +393,7 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(ErrorCode.HASH_ERROR);
             }
             //加入共识
-            na = TransactionTool.getJoinAgentTxFee(list,transactionParam.getMoney());
+            na = TransactionTool.getJoinAgentTxFee(list,transactionParam.getMoney()).getNa();
             if(null == na){
                 return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
@@ -357,6 +404,10 @@ public class TransactionResource {
             if(!StringUtils.validHash(transactionParam.getAgentHash())){
                 return RpcClientResult.getFailed(ErrorCode.HASH_ERROR);
             }
+            if(webwalletTransactionBusiness.getDepositCoutByAddressAgentHash(transactionParam.getAgentHash()) > 0){
+                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_CANCEL_DEPOSIT_ERROR);
+            }
+            temp = transactionParam.getAgentHash();
             //退出共识
             na = io.nuls.api.model.Na.CENT;
             if(null == na){
@@ -378,8 +429,8 @@ public class TransactionResource {
         }
         if(null != transaction){
             attr.put("hash",transaction.getHash().getDigestHex());
-            attr.put("dobj",transaction);
-            attr.put("seri",Base64.getEncoder().encodeToString(transaction.serialize()));
+            /*attr.put("dobj",transaction);
+            attr.put("seri",Base64.getEncoder().encodeToString(transaction.serialize()));*/
             Transaction tx = RpcTransferUtil.toTransaction(transaction);
             Utxo utxoKey = null;
             for(Input input:tx.getInputs()){
@@ -390,7 +441,7 @@ public class TransactionResource {
                 input.setAddress(utxoKey.getAddress());
                 input.setValue(utxoKey.getAmount());
             }
-            WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx,Base64.getEncoder().encodeToString(transaction.serialize()),transactionParam.getAddress());
+            WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx,Base64.getEncoder().encodeToString(transaction.serialize()),transactionParam.getAddress(),temp);
             if(webwalletTransactionBusiness.save(webwalletTransaction) != 1){
                 return RpcClientResult.getFailed(ErrorCode.TX_SAVETEMPUTXO_ERROR);
             }
@@ -398,7 +449,6 @@ public class TransactionResource {
             //为空，说明有系统异常
             return RpcClientResult.getFailed(ErrorCode.FAILED);
         }
-
         result.setData(attr);
         return result;
     }
@@ -440,25 +490,33 @@ public class TransactionResource {
             boradTx.parse(new NulsByteBuffer(data));
             boradTx.setScriptSig(Hex.decode(transactionParam.getSign()));
             Map<String, String> params = new HashMap<>();
-            params.put("txHex", Hex.encode(boradTx.serialize()));
+            String txHex = Hex.encode(boradTx.serialize());
+            params.put("txHex", txHex);
             result = syncDataHandler.valiTransaction(params);//广播前，先验证，验证通过了，再广播
             if(result.isSuccess()){
                 result = syncDataHandler.broadcast(params);
             }else{
                 //Map<String,String> attr = new HashMap<>();
-                System.out.println(result.getData());
+                Log.error("交易"+transaction.getHash()+"验证失败，原因："+result.getData());
+                //删除交易和缓存
+                webwalletTransactionBusiness.deleteByKey(boradTx.getHash().getDigestHex());
+                webwalletUtxoLevelDbService.delete(transaction.getAddress());
                 result = new RpcClientResult(false, ErrorCode.TX_BROADCAST_ERROR.getCode(), result.getMsg());
                 return result;
             }
             if(result.isSuccess()){
                 //广播成功，签名数据update回去，同时保存utxo到leveldb
-                transaction.setSignData(params.get("txHex"));
+                transaction.setSignData(txHex);
                 if(webwalletTransactionBusiness.update(transaction) > 0){
                     return result;
                 }else{
                     return RpcClientResult.getFailed(ErrorCode.TX_SAVETEMPUTXO_ERROR);
                 }
             }else{
+                Log.error("交易"+transaction.getHash()+"广播失败，原因："+result.getData());
+                //删除交易和缓存
+                webwalletTransactionBusiness.deleteByKey(boradTx.getHash().getDigestHex());
+                webwalletUtxoLevelDbService.delete(transaction.getAddress());
                 return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
             }
         }else{

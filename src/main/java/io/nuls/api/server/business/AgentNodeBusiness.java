@@ -62,7 +62,6 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      */
     public PageInfo<AgentDto> getMy(String address, String agentName, int pageNumber, int pageSize){
         List<String> depositedHashList = depositBusiness.getDepositedAgentByAddress(address);
-        //PageInfo<Deposit> page = depositBusiness.getListWithSearch(address,agentName,pageNumber,pageSize);
         List<AgentDto> agentDtoList = new ArrayList<>();
         if(null != depositedHashList){
             for(String hash:depositedHashList){
@@ -74,14 +73,14 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         }
         int start = (pageNumber-1)*pageSize;
         int end = start+pageSize;
-        List<AgentDto> agentNodeList = new ArrayList<>();
-        if(agentDtoList.size()<pageSize){
+        List<AgentDto> list = new ArrayList<>();
+        if(agentDtoList.size()<end){
             end = agentDtoList.size();
         }
         for(int i =start;i<end;i++){
-            agentNodeList.add(agentDtoList.get(i));
+            list.add(agentDtoList.get(i));
         }
-        PageInfo<AgentDto> pageAgent = new PageInfo<>(agentNodeList);
+        PageInfo<AgentDto> pageAgent = new PageInfo<>(list);
         pageAgent.setPageSize(pageSize);
         pageAgent.setPageNum(pageNumber);
         pageAgent.setTotal(agentDtoList.size());

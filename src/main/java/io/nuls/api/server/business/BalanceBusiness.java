@@ -62,32 +62,44 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
         //还需要过滤数据库中所有未确认交易的input列表中的utxo
         List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
-        long usedMoney = 0;
+        Set<String> lockedUtxo = new HashSet<>();
         for(WebwalletTransaction tx: webwalletTransactionList){
-            if(null != tx.getOutputs()){
+            //未确认交易只有四种类型，只把锁定加入冻结
+            if(tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
                 for(Utxo utxo:tx.getOutputs()){
-                    if(utxo.getAddress().equals(address)){//自己
-                        if(utxo.getLockTime()==-1){//委托，创建节点锁定
-                            locked+= utxo.getAmount();
-                        }
+                    if(utxo.getAddress().equals(address) && utxo.getLockTime()==-1){
+                        locked+= utxo.getAmount();
                     }
-                    else{
-                        usedMoney += utxo.getAmount();
-                    }
-
                 }
             }
+            for(Input input: tx.getInputs()){
+                lockedUtxo.add(input.getKey());
+            }
         }
-        usable-=locked;//去掉委托、创建节点的锁定金额
         for (Utxo utxo : utxoList) {
+            if(lockedUtxo.contains(utxo.getKey())){
+                continue;
+            }
             if(utxo.usable(bestHeight)){
                 usable += utxo.getAmount();
             }else{
                 locked += utxo.getAmount();
             }
         }
+        Utxo temp = webwalletUtxoLevelDbService.select(address);
+        if(null != temp) {
+            usable += temp.getAmount();
+            for (Utxo utxo : utxoList) {
+                if(utxo.getKey().equals(temp.getKey())){
+                    //删除转账时临时产生的utxo
+                    webwalletUtxoLevelDbService.delete(utxo.getAddress());
+                    usable -= temp.getAmount();
+                    break;
+                }
+            }
+        }
         balance.setAddress(address);
-        balance.setUsable(usable-usedMoney);
+        balance.setUsable(usable);
         balance.setLocked(locked);
         return balance;
     }

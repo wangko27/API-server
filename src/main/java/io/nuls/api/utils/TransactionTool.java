@@ -11,6 +11,7 @@ import io.nuls.api.model.tx.AliasTransaction;
 import io.nuls.api.model.tx.CancelDepositTransaction;
 import io.nuls.api.model.tx.DepositTransaction;
 import io.nuls.api.model.tx.TransferTransaction;
+import io.nuls.api.server.dto.TransFeeDto;
 import io.nuls.sdk.core.contast.SDKConstant;
 import org.spongycastle.util.Arrays;
 
@@ -33,7 +34,7 @@ public class TransactionTool {
      * @param unitPrice 手续费单价
      * @return
      */
-    public static Na getTransferTxFee(List<Utxo> utxoList, long amount, String remark, long unitPrice) {
+    public static TransFeeDto getTransferTxFee(List<Utxo> utxoList, long amount, String remark, long unitPrice) {
         int size = 162;                  // 124 + 38;
         if (StringUtils.isNotBlank(remark)) {
             try {
@@ -88,7 +89,7 @@ public class TransactionTool {
         return null;
     }
 
-    public static Na getAliasTxFee(List<Utxo> utxoList, String address, String alias) {
+    public static TransFeeDto getAliasTxFee(List<Utxo> utxoList, String address, String alias) {
         int size = 0;
         byte[] addressBytes = AddressTool.getAddress(address);
         size += VarInt.sizeOf((addressBytes).length) + (addressBytes).length;
@@ -126,7 +127,8 @@ public class TransactionTool {
         return null;
     }
 
-    public static Na getJoinAgentTxFee(List<Utxo> utxoList, long amount) {
+    public static TransFeeDto getJoinAgentTxFee(List<Utxo> utxoList, long amount) {
+        TransFeeDto transFeeDto = new TransFeeDto();
         int size = 288;
         long values = 0;
         Na fee = null;
@@ -138,12 +140,14 @@ public class TransactionTool {
                 size += 1;
             }
             fee = TransactionFeeCalculator.getFee(size, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            transFeeDto.setNa(fee);
+            transFeeDto.setSize(size);
             if (values >= amount + fee.getValue()) {
                 enough = true;
             }
         }
         if (enough) {
-            return fee;
+            return transFeeDto;
         }
         return null;
     }
@@ -242,7 +246,8 @@ public class TransactionTool {
         return max;
     }
 
-    private static Na calcFee(List<Utxo> utxoList, int size, long amount, Na unitPrice) {
+    private static TransFeeDto calcFee(List<Utxo> utxoList, int size, long amount, Na unitPrice) {
+        TransFeeDto transFeeDto = new TransFeeDto();
         long values = 0;
         Utxo utxo;
         Na fee = null;
@@ -258,10 +263,14 @@ public class TransactionTool {
 
             //每次累加一条未花费余额时，需要重新计算手续费
             fee = TransactionFeeCalculator.getFee(size, unitPrice);
+            transFeeDto.setSize(size);
+            transFeeDto.setNa(fee);
             //需要判断是否找零，如果有找零，则需要重新计算手续费
             if (values >= amount + fee.getValue()) {
                 if(values > amount + fee.getValue()){
                     fee = TransactionFeeCalculator.getFee(size + 38, unitPrice);
+                    transFeeDto.setSize(size);
+                    transFeeDto.setNa(fee);
                     if (values < amount + fee.getValue()) {
                         continue;
                     }
@@ -271,7 +280,7 @@ public class TransactionTool {
             }
         }
         if (enough) {
-            return fee;
+            return transFeeDto;
         }
         return null;
     }

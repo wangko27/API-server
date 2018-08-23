@@ -9,7 +9,7 @@ import io.nuls.api.model.Na;
  */
 public class TransFeeDto {
     private Na na = Na.ZERO;
-    private int type = 1;//1正常 2零钱太多，无法全部转账 3钱不够
+    private int size = 1;//交易大小
 
     public Na getNa() {
         return na;
@@ -19,15 +19,11 @@ public class TransFeeDto {
         this.na = na;
     }
 
-    public int getType() {
-        return type;
+    public int getSize() {
+        return size;
     }
 
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public void tooManyUtxo(){
-        this.type = 2;
+    public void setSize(int size) {
+        this.size = size;
     }
 }

@@ -34,8 +34,6 @@ public class UtxoContext {
         EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
         //重置leveldb
         addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
-        //删除转账时临时产生的utxo
-        webwalletUtxoLevelDbService.delete(address);
     }
 
     public static void putMap(Map<String,AddressHashIndex> attrMapList){

@@ -1,7 +1,9 @@
 package io.nuls.api.server.task;
 
 import io.nuls.api.constant.EntityConstant;
+import io.nuls.api.entity.Input;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.entity.Utxo;
 import io.nuls.api.entity.WebwalletTransaction;
 import io.nuls.api.server.business.WebwalletTransactionBusiness;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -41,6 +43,25 @@ public class WebwalletTransactionsyncTask {
             if(result.isSuccess()){
                 syncDataHandler.broadcast(params);
             }else{
+                /*验证失败，需要删除，删除前也需要验证，找到这个地址的所有未确认交易，
+                如果有交易的input使用了这个地址的output，那么相应的交易也需要删除
+                */
+                if(null != webwalletTransaction.getOutputs()){
+                    StringBuilder splitStr = new StringBuilder();
+                    List<Utxo> outputList = webwalletTransaction.getOutputs();
+                    for(Utxo utxo:outputList){
+                        splitStr.append(utxo.getTxHash()).append(",");
+                    }
+                    List<WebwalletTransaction> addrWebTransList = webwalletTransactionBusiness.getAll(webwalletTransaction.getAddress(),EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
+                    for(WebwalletTransaction addrWeb:addrWebTransList){
+                        for(Input attrInput : addrWeb.getInputs()){
+                            if(attrInput.getFromHash().indexOf(splitStr.toString()) > 0){
+                                webwalletTransactionBusiness.deleteByKey(addrWeb.getHash());
+                                break;
+                            }
+                        }
+                    }
+                }
                 webwalletTransactionBusiness.deleteByKey(webwalletTransaction.getHash());
             }
         }

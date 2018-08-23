@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Transaction;
@@ -71,12 +72,17 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         if(type > 0){
             searchable.addCondition("type", SearchOperator.eq, type);
         }
-        if(startTime > 0){
+        if(startTime==endTime && startTime > 0){
+            //特殊情况，前段传过来的两个一样的日期，都是当天的00:00:00，就查询这一天的交易即可
             searchable.addCondition("create_time", SearchOperator.gte, startTime);
-
-        }
-        if(endTime > 0){
-            searchable.addCondition("create_time", SearchOperator.lte, endTime);
+            searchable.addCondition("create_time", SearchOperator.lte, startTime+ Constant.MILLISECONDS_TIME_DAY);
+        }else{
+            if(startTime > 0){
+                searchable.addCondition("create_time", SearchOperator.gte, startTime);
+            }
+            if(endTime > 0){
+                searchable.addCondition("create_time", SearchOperator.lte, endTime);
+            }
         }
         PageHelper.orderBy("id desc");
         PageInfo<TransactionRelation> page = new PageInfo<>(relationMapper.selectList(searchable));

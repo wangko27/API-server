@@ -174,19 +174,26 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
                 }
             }
         }
+        //把上一次花费剩下的可用utxo加入到可用里面
+        Utxo temp = webwalletUtxoLevelDbService.select(address);
+        if(null != temp){
+            list.add(temp);
+            for (Utxo utxo : utxoList) {
+                if(utxo.getKey().equals(temp.getKey())){
+                    //删除转账时临时产生的utxo
+                    webwalletUtxoLevelDbService.delete(utxo.getAddress());
+                    list.remove(temp);
+                    break;
+                }
+            }
+        }
         for (Utxo utxo : utxoList) {
-            //排除掉未确认交易中已经锁定的Utxo
             if(lockedUtxo.contains(utxo.getKey())){
                 continue;
             }
             if(utxo.usable(bestHeight)){
                 list.add(utxo);
             }
-        }
-        //把上一次花费剩下的可用utxo加入到可用里面
-        Utxo temp = webwalletUtxoLevelDbService.select(address);
-        if(null != temp){
-            list.add(temp);
         }
         //排序
         Collections.sort(list, new Comparator<Utxo>() {
