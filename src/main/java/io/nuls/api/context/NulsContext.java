@@ -24,6 +24,10 @@
  */
 package io.nuls.api.context;
 
+import io.nuls.api.constant.Constant;
+import io.nuls.api.entity.NulsStatistics;
+import io.nuls.api.server.dao.util.EhcacheUtil;
+
 /**
  * 系统上下文，提供核心数据共享、服务访问等功能
  * System context provides core data sharing, service access and other functions.
@@ -51,4 +55,13 @@ public class NulsContext {
      */
     public static String CHAIN_NAME = "NULS";
 
+
+    public static void CacheNulsStatistics(NulsStatistics nulsStatistics){
+        EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, Constant.TOKEN_CACHE_KEY, nulsStatistics);
+    }
+
+    public static NulsStatistics getNulsStatistics(){
+        NulsStatistics nulsStatistics = (NulsStatistics)EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, Constant.TOKEN_CACHE_KEY);
+        return nulsStatistics;
+    }
 }

@@ -98,6 +98,9 @@ public interface Constant {
     String BALANCE_CACHE_NAME = "balance";
     String HISTORY_CACHE_NAME="history";
     String PACKINGADDRESS_CACHE_NAME = "packingaddress";
+    String TOKEN_CACHE_NAME = "tokenStatistics";
+
+    String TOKEN_CACHE_KEY = "token";
 
 
     String UTXO_DB_NAME = "utxo";
