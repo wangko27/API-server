@@ -23,6 +23,9 @@
  */
 package io.nuls.api.utils;
 
+import io.nuls.api.cfg.NulsConfig;
+
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -195,6 +198,20 @@ public class StringUtils {
         Pattern pattern = Pattern.compile("[0-9]{1,}");
         Matcher matcher = pattern.matcher((CharSequence)str);
         return matcher.matches();
+    }
+    public static boolean validTxRemark(String remark) {
+        if (StringUtils.isBlank(remark)) {
+            return true;
+        }
+        try {
+            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
+            if (bytes.length > 100) {
+                return false;
+            }
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
     }
 
 }

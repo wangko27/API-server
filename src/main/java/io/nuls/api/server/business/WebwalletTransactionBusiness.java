@@ -26,7 +26,7 @@ import java.util.List;
  * Date:  2018/7/30 0030
  */
 @Service
-public class WebwalletTransactionBusiness implements BaseService<WebwalletTransaction,String> {
+public class WebwalletTransactionBusiness implements BaseService<WebwalletTransaction, String> {
 
     @Autowired
     private WebwalletTransactionMapper webwalletTransactionMapper;
@@ -37,12 +37,12 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(WebwalletTransaction webwalletTransaction) {
-        if(webwalletTransactionMapper.insert(webwalletTransaction) == 1){
+        if (webwalletTransactionMapper.insert(webwalletTransaction) == 1) {
             //保存leveldb
             List<Utxo> utxoList = webwalletTransaction.getOutputs();
             //如果有输出，则直接放入 这里只有四种类型，转账、设置别名、委托、退出委托
-            for(Utxo utxo : utxoList){
-                if(webwalletTransaction.getAddress().equals(utxo.getAddress()) && utxo.getLockTime() == 0){
+            for (Utxo utxo : utxoList) {
+                if (webwalletTransaction.getAddress().equals(utxo.getAddress()) && utxo.getLockTime() == 0) {
                     webwalletUtxoLevelDbService.insert(utxo);
                 }
             }
@@ -60,7 +60,7 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int update(WebwalletTransaction webwalletTransaction) {
-        if(webwalletTransactionMapper.updateByPrimaryKey(webwalletTransaction) == 1){
+        if (webwalletTransactionMapper.updateByPrimaryKey(webwalletTransaction) == 1) {
             return webwalletTransactionLevelDbService.insert(webwalletTransaction);
         }
         return 0;
@@ -68,11 +68,12 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
 
     /**
      * 交易确认后，删除leveldb的缓存和数据库的数据
+     *
      * @param list
      */
-    public void deleteStatusByList(List<Transaction> list){
-        if(null != list){
-            for(Transaction tx:list){
+    public void deleteStatusByList(List<Transaction> list) {
+        if (null != list) {
+            for (Transaction tx : list) {
                 //webwalletTransactionMapper.updateStatusByPrimaryKey(tx.getHash());
                 webwalletTransactionMapper.deleteByPrimaryKey(tx.getHash());
                 webwalletTransactionLevelDbService.delete(tx.getHash());
@@ -85,7 +86,7 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByKey(String s) {
         int i = webwalletTransactionMapper.deleteByPrimaryKey(s);
-        if(i == 1){
+        if (i == 1) {
             return webwalletTransactionLevelDbService.delete(s);
         }
         return 0;
@@ -96,24 +97,24 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
         return webwalletTransactionLevelDbService.select(s);
     }
 
-    public PageInfo<WebwalletTransaction> getAll(String address,int status,int type,int pageNumber,int pageSize){
+    public PageInfo<WebwalletTransaction> getAll(String address, int status, int type, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
         }
-        if(status > 0){
+        if (status > 0) {
             searchable.addCondition("status", SearchOperator.eq, status);
         }
-        if(type > 0){
+        if (type > 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
         PageHelper.orderBy("time desc");
         PageInfo<WebwalletTransaction> page = new PageInfo<>(webwalletTransactionMapper.selectList(searchable));
         List<WebwalletTransaction> webwalletTransactionList = formatWebwalletTransaction(page.getList());
         if (StringUtils.isNotBlank(address)) {
-            for(WebwalletTransaction wtx: webwalletTransactionList){
-                wtx.caclTx(wtx,address);
+            for (WebwalletTransaction wtx : webwalletTransactionList) {
+                wtx.caclTx(wtx, address);
                 wtx.setSignData(null);
             }
         }
@@ -123,10 +124,11 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
 
     /**
      * 验证用户是否已经设置过别名 未确认交易中
+     *
      * @param address
      * @return
      */
-    public Integer getAliasByAddress(String address){
+    public Integer getAliasByAddress(String address) {
         Searchable searchable = new Searchable();
         searchable.addCondition("type", SearchOperator.eq, EntityConstant.TX_TYPE_ACCOUNT_ALIAS);
         if (StringUtils.isNotBlank(address)) {
@@ -138,10 +140,11 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
 
     /**
      * 验证别名是否已经设置过 未确认交易中
+     *
      * @param alias
      * @return
      */
-    public Integer getAliasByAlias(String alias){
+    public Integer getAliasByAlias(String alias) {
         Searchable searchable = new Searchable();
         searchable.addCondition("type", SearchOperator.eq, EntityConstant.TX_TYPE_ACCOUNT_ALIAS);
         if (StringUtils.isNotBlank(alias)) {
@@ -153,10 +156,11 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
 
     /**
      * 验证委托是否已经退出过 未确认交易中
+     *
      * @param hash
      * @return
      */
-    public Integer getDepositCoutByAddressAgentHash(String hash){
+    public Integer getDepositCoutByAddressAgentHash(String hash) {
         Searchable searchable = new Searchable();
         searchable.addCondition("type", SearchOperator.eq, EntityConstant.TX_TYPE_CANCEL_DEPOSIT);
         if (StringUtils.isNotBlank(hash)) {
@@ -166,15 +170,15 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
         return webwalletTransactionMapper.selectCountBySearch(searchable);
     }
 
-    public List<WebwalletTransaction> getAll(String address,int status,int type){
+    public List<WebwalletTransaction> getAll(String address, int status, int type) {
         Searchable searchable = new Searchable();
         if (StringUtils.isNotBlank(address)) {
             searchable.addCondition("address", SearchOperator.eq, address);
         }
-        if(status > 0){
+        if (status > 0) {
             searchable.addCondition("status", SearchOperator.eq, status);
         }
-        if(type > 0){
+        if (type > 0) {
             searchable.addCondition("type", SearchOperator.eq, type);
         }
         PageHelper.orderBy("time asc");
@@ -183,26 +187,27 @@ public class WebwalletTransactionBusiness implements BaseService<WebwalletTransa
 
     /**
      * 查询十分钟前的未确认交易
+     *
      * @param status
      * @param endTime
      * @return
      */
-    public List<WebwalletTransaction> getListByTime(int status,long endTime){
+    public List<WebwalletTransaction> getListByTime(int status, long endTime) {
         Searchable searchable = new Searchable();
-        if(status > 0){
+        if (status > 0) {
             searchable.addCondition("status", SearchOperator.eq, status);
         }
-        if(endTime > 0){
+        if (endTime > 0) {
             searchable.addCondition("time", SearchOperator.lte, endTime);
         }
         PageHelper.orderBy("time asc");
         return formatWebwalletTransaction(webwalletTransactionMapper.selectList(searchable));
     }
 
-    private List<WebwalletTransaction> formatWebwalletTransaction(List<WebwalletTransaction> list){
+    private List<WebwalletTransaction> formatWebwalletTransaction(List<WebwalletTransaction> list) {
         List<WebwalletTransaction> dataList = new ArrayList<>();
-        if(null != list && list.size() > 0){
-            for(WebwalletTransaction tx: list){
+        if (null != list && list.size() > 0) {
+            for (WebwalletTransaction tx : list) {
                 dataList.add(getByKey(tx.getHash()));
             }
         }

@@ -123,6 +123,22 @@ public class SyncDataBusiness {
 
             //为了让存入leveldb更快，这里直接做map，全部处理完成之后，再存入leveldb
             Map<String,AddressHashIndex> attrMapList = new HashMap<>();
+            //已经花费了的
+            for (Utxo utxo : fromList) {
+                AddressHashIndex addressHashIndex = null;
+                if(attrMapList.containsKey(utxo.getAddress())){
+                    //已经存在，直接移除
+                    attrMapList.get(utxo.getAddress()).getHashIndexSet().remove(utxo.getKey());
+                }else{
+                    //不存在，新建一个，去leveldb获取数据，然后删除
+                    addressHashIndex = new AddressHashIndex();
+                    addressHashIndex.setAddress(utxo.getAddress());
+                    Set<String> setList = UtxoContext.get(utxo.getAddress());
+                    setList.remove(utxo.getKey());
+                    addressHashIndex.setHashIndexSet(setList);
+                    attrMapList.put(utxo.getAddress(),addressHashIndex);
+                }
+            }
             //新的未花费
             for (Utxo utxo : utxoMap.values()) {
                 if (utxo.getSpendTxHash() == null) {
@@ -139,23 +155,6 @@ public class SyncDataBusiness {
                         addressHashIndex.setHashIndexSet(setList);
                         attrMapList.put(utxo.getAddress(),addressHashIndex);
                     }
-                    //UtxoContext.put(utxo.getAddress(), utxo.getKey());
-                }
-            }
-            //已经花费了的
-            for (Utxo utxo : fromList) {
-                AddressHashIndex addressHashIndex = null;
-                if(attrMapList.containsKey(utxo.getAddress())){
-                    //已经存在，直接移除
-                    attrMapList.get(utxo.getAddress()).getHashIndexSet().remove(utxo.getKey());
-                }else{
-                    //不存在，新建一个，去leveldb获取数据，然后删除
-                    addressHashIndex = new AddressHashIndex();
-                    addressHashIndex.setAddress(utxo.getAddress());
-                    Set<String> setList = UtxoContext.get(utxo.getAddress());
-                    setList.remove(utxo.getKey());
-                    addressHashIndex.setHashIndexSet(setList);
-                    attrMapList.put(utxo.getAddress(),addressHashIndex);
                 }
             }
             UtxoContext.putMap(attrMapList);

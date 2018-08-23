@@ -324,7 +324,7 @@ public class TransactionTool {
         Coin coin = new Coin();
         byte[] txHashBytes = Hex.decode(utxo.getTxHash());
         coin.setOwner(Arrays.concatenate(txHashBytes, new VarInt(utxo.getTxIndex()).encode()));
-        coin.setLockTime(0);
+        coin.setLockTime(utxo.getLockTime());
         coin.setNa(Na.valueOf(utxo.getAmount()));
         return coin;
     }

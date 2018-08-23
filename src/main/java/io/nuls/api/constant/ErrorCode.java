@@ -153,6 +153,7 @@ public enum ErrorCode {
     TX_ALIAS_USED_ERROR("94010",94010),//别名已占用
     TX_ALIAS_SETED_ERROR("94011",94011),//该地址已经设置过别名
     TX_ALIAS_CANCEL_DEPOSIT_ERROR("94013",94013),//退出中
+    TX_REMARK_LENTH_ERROR("94014",94014),//备注太长
 
 
 

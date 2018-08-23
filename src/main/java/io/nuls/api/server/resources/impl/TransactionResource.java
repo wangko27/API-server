@@ -17,14 +17,11 @@ import io.nuls.api.server.dto.TransactionParam;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.*;
 import io.nuls.api.utils.log.Log;
-import io.nuls.sdk.core.contast.SDKConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -225,36 +222,17 @@ public class TransactionResource {
             return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
         }
         TransFeeDto transFeeDto = null;
-        int inputSize = list.size();
         if(types == EntityConstant.TX_TYPE_TRANSFER){
             if(money <= 0){
                 return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             }
             if(totalAmount <= money){
                 return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
-            }//307200
-            int initSize = 200;//200=124+38*2
-            int maxSize = initSize+(inputSize*50)+(inputSize>126?50:0);
-            if(StringUtils.isNotBlank(remark)){
-                try {
-                    maxSize += remark.getBytes(SDKConstant.DEFAULT_ENCODING).length;
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
             }
-            if(maxSize > TransactionFeeCalculator.MAX_TX_SIZE){
-                //交易大小超过300kb
-                //计算最大可转多少
-                /*maxMoney = TransactionTool.calcMaxFee(list,initSize,price);
-                feeType = EntityConstant.TRANSFEE_NOTENOUGHT_UTXO;
-                na = io.nuls.api.model.Na.valueOf(totalAmount).subtract(maxMoney);*/
-                //零钱太多，无法转账
-                //feeType = EntityConstant.TRANSFEE_NOTENOUGHT_UTXO;
-                return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
-            }else{
-                //转账
-                transFeeDto = TransactionTool.getTransferTxFee(list,money,remark,price);
+            if (!StringUtils.validTxRemark(remark)) {
+                return RpcClientResult.getFailed(ErrorCode.TX_REMARK_LENTH_ERROR);
             }
+            transFeeDto = TransactionTool.getTransferTxFee(list,money,remark,price);
         }else if(types == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
             //设置别名
             transFeeDto = TransactionTool.getAliasTxFee(list,address,alias);
@@ -266,21 +244,6 @@ public class TransactionResource {
             if(totalAmount <= money){
                 return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
-            //余额足够，但是零钱太多，计算一次性最多可以委托多少
-            /*int initSize = 288;
-            int maxSize = initSize+(inputSize*50)+(inputSize>126?50:0);
-            if(totalAmount <= money ||maxSize > TransactionFeeCalculator.MAX_TX_SIZE){
-                //交易大小超过300kb
-                //计算最大可委托多少
-                maxMoney = TransactionTool.calcMaxFee(list,initSize,price);
-                feeType = EntityConstant.TRANSFEE_NOTENOUGHT_UTXO;
-                if(maxMoney.isLessThan(io.nuls.api.model.Na.parseNuls(2000))){
-                    feeType = EntityConstant.TRANSFEE_NOTENOUGHT_MONEY;
-                }
-                na = io.nuls.api.model.Na.valueOf(totalAmount).subtract(maxMoney);
-            }else{
-                na = TransactionTool.getJoinAgentTxFee(list,money);
-            }*/
             transFeeDto = TransactionTool.getJoinAgentTxFee(list,money);
         }else if(types == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
             //退出共识
@@ -293,6 +256,9 @@ public class TransactionResource {
         }
         if(null == transFeeDto){
             return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+        }
+        if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
+            return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
         }
         attr.put("fee",transFeeDto.getNa().getValue()+"");
         attr.put("feeType",feeType+"");
@@ -332,6 +298,7 @@ public class TransactionResource {
         io.nuls.api.model.Na na  = null;
         io.nuls.api.model.Transaction transaction = null;
         String temp = "";
+        TransFeeDto transFeeDto = null;
         if(transactionParam.getTypes() == EntityConstant.TX_TYPE_TRANSFER){
             //金额不正确
             if(transactionParam.getMoney()<=0){
@@ -345,14 +312,23 @@ public class TransactionResource {
             if(!StringUtils.validAddress(transactionParam.getToAddress())){
                 return RpcClientResult.getFailed(ErrorCode.TX_TOADDRESS_NULL);
             }
-            //转入地址不正确
             if(StringUtils.isNotBlank(transactionParam.getRemark()) && StringUtils.isSpecialChar(transactionParam.getRemark())){
                 return RpcClientResult.getFailed(ErrorCode.TX_REMARK_ERROR);
             }
+            if (!StringUtils.validTxRemark(transactionParam.getRemark())) {
+                return RpcClientResult.getFailed(ErrorCode.TX_REMARK_LENTH_ERROR);
+            }
             //转账
-            na = TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice()).getNa();
+            transFeeDto =TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice());
+            if(null == transFeeDto){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            }
+            na = transFeeDto.getNa();
             if(null == na){
                 return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+            }
+            if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
             }
             //组装交易
             transaction = TransactionTool.createTransferTx(list,transactionParam.getToAddress(),transactionParam.getMoney(),transactionParam.getRemark(),na.getValue());
@@ -376,7 +352,11 @@ public class TransactionResource {
                     || webwalletTransactionBusiness.getAliasByAddress(transactionParam.getAddress()) > 0){
                 return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_USED_ERROR);
             }
-            na = TransactionTool.getAliasTxFee(list,transactionParam.getAddress(),transactionParam.getAlias()).getNa();
+            transFeeDto = TransactionTool.getAliasTxFee(list,transactionParam.getAddress(),transactionParam.getAlias());
+            if(null == transFeeDto){
+                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
+            }
+            na = transFeeDto.getNa();
             if(null == na){
                 return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
             }
@@ -393,9 +373,13 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(ErrorCode.HASH_ERROR);
             }
             //加入共识
-            na = TransactionTool.getJoinAgentTxFee(list,transactionParam.getMoney()).getNa();
+            transFeeDto = TransactionTool.getJoinAgentTxFee(list,transactionParam.getMoney());
+            if(null == transFeeDto){
+                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
+            }
+            na = transFeeDto.getNa();
             if(null == na){
-                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
             }
             //组装交易
             transaction = TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
@@ -408,11 +392,6 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_CANCEL_DEPOSIT_ERROR);
             }
             temp = transactionParam.getAgentHash();
-            //退出共识
-            na = io.nuls.api.model.Na.CENT;
-            if(null == na){
-                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
-            }
             //组装交易
             Transaction tx = transactionBusiness.getByHash(transactionParam.getAgentHash());
             if(null != tx.getOutputList()){
@@ -497,12 +476,13 @@ public class TransactionResource {
                 result = syncDataHandler.broadcast(params);
             }else{
                 //Map<String,String> attr = new HashMap<>();
-                Log.error("交易"+transaction.getHash()+"验证失败，原因："+result.getData());
+                Log.error("交易"+transaction.getHash()+"验证失败，原因："+result.getData()+"，code:"+result.getCode());
                 //删除交易和缓存
                 webwalletTransactionBusiness.deleteByKey(boradTx.getHash().getDigestHex());
                 webwalletUtxoLevelDbService.delete(transaction.getAddress());
-                result = new RpcClientResult(false, ErrorCode.TX_BROADCAST_ERROR.getCode(), result.getMsg());
-                return result;
+                //result = new RpcClientResult(false, ErrorCode.TX_BROADCAST_ERROR.getCode(), result.getMsg());
+                return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
+                //return result;
             }
             if(result.isSuccess()){
                 //广播成功，签名数据update回去，同时保存utxo到leveldb
@@ -513,7 +493,7 @@ public class TransactionResource {
                     return RpcClientResult.getFailed(ErrorCode.TX_SAVETEMPUTXO_ERROR);
                 }
             }else{
-                Log.error("交易"+transaction.getHash()+"广播失败，原因："+result.getData());
+                Log.error("交易"+transaction.getHash()+"验证失败，原因："+result.getData()+"，code:"+result.getCode());
                 //删除交易和缓存
                 webwalletTransactionBusiness.deleteByKey(boradTx.getHash().getDigestHex());
                 webwalletUtxoLevelDbService.delete(transaction.getAddress());
