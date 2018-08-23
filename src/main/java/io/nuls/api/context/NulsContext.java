@@ -27,6 +27,7 @@ package io.nuls.api.context;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.NulsStatistics;
 import io.nuls.api.server.dao.util.EhcacheUtil;
+import io.nuls.api.server.dto.NulsStatisticsDto;
 
 /**
  * 系统上下文，提供核心数据共享、服务访问等功能
@@ -56,12 +57,12 @@ public class NulsContext {
     public static String CHAIN_NAME = "NULS";
 
 
-    public static void CacheNulsStatistics(NulsStatistics nulsStatistics){
-        EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, Constant.TOKEN_CACHE_KEY, nulsStatistics);
+    public static void CacheNulsStatistics(String key, NulsStatistics nulsStatistics){
+        EhcacheUtil.getInstance().put(Constant.TOKEN_CACHE_NAME, key, nulsStatistics);
     }
 
-    public static NulsStatistics getNulsStatistics(){
-        NulsStatistics nulsStatistics = (NulsStatistics)EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, Constant.TOKEN_CACHE_KEY);
+    public static NulsStatistics getNulsStatistics(String key){
+        NulsStatistics nulsStatistics = (NulsStatistics)EhcacheUtil.getInstance().get(Constant.TOKEN_CACHE_NAME, key);
         return nulsStatistics;
     }
 }
