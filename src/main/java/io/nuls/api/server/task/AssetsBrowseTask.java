@@ -1,18 +1,26 @@
 package io.nuls.api.server.task;
 
+import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
+import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.IndexContext;
-import io.nuls.api.entity.Balance;
-import io.nuls.api.entity.Na;
-import io.nuls.api.entity.NulsStatistics;
+import io.nuls.api.context.NulsContext;
+import io.nuls.api.entity.*;
 import io.nuls.api.server.business.BalanceBusiness;
+import io.nuls.api.server.business.TransactionBusiness;
+import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
+import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.server.dto.AgentDto;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Flyglede on 2018/8/23.
@@ -48,6 +56,12 @@ public class AssetsBrowseTask {
     @Autowired
     private BalanceBusiness balanceBusiness;
 
+    @Autowired
+    private TransactionBusiness transactionBusiness;
+
+    @Autowired
+    private UtxoLevelDbService utxoLevelDbService;
+
     private static NulsStatistics nulsStatistics = NulsStatistics.getInstance();
 
     /**
@@ -55,35 +69,75 @@ public class AssetsBrowseTask {
      */
     public void execute() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("Count Data Write Time>>>>>>>>>>>>>>>>"+(sdf.format(new Date())));
-
-
+        System.out.println("Count Data Write Time>>>>>>>>>>>>>>>>" + (sdf.format(new Date())));
 
         List<AgentDto> agentNodeList = IndexContext.getAgentNodeList();
         //总节点数量
         nulsStatistics.setTotalNodes(agentNodeList.size());
 
         int consensusNumber = 0;
-        for (AgentDto agent : agentNodeList){
-            if(agent.getStatus() == EntityConstant.CONSENSUS_STATUS_CONSENSUSING){
+        for (AgentDto agent : agentNodeList) {
+            if (agent.getStatus() == EntityConstant.CONSENSUS_STATUS_CONSENSUSING) {
                 consensusNumber++;
             }
         }
         //共识节点数量
         nulsStatistics.setConsensusNodes(consensusNumber);
 
-        //资产总量
-        //实际流通量
+        //每日共识奖励 总额
+        nulsStatistics.setDailyReward(Na.valueOf(HistoryContext.rewardofday));
+
+        //委托总额
+        Map consensusData = IndexContext.getRpcConsensusData();
+        Na totalDeposit = Na.valueOf(Long.valueOf(consensusData.get("totalDeposit") + ""));
+        nulsStatistics.setDeposit(totalDeposit);
+
+        //总交易次数
+        nulsStatistics.setTrades(transactionBusiness.selectTotalCount());
+
         //商务合作持有量
         Balance balance = balanceBusiness.getBalance(BUSINESS_ADDRESS);
         Na business = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
         nulsStatistics.setBusiness(business);
-        //团队持有量
-        //社区持有量
-        //待映射总量
-        //每日共识奖励 总额
-        //委托总额
-        //总交易次数
 
+        //团队持有量
+        balance = balanceBusiness.getBalance(TEAM_ADDRESS);
+        Na team = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
+        nulsStatistics.setTeam(team);
+
+        //社区持有量
+        balance = balanceBusiness.getBalance(COMMUNITY_ADDRESS);
+        Na community = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
+        nulsStatistics.setCommunity(community);
+
+        //待映射总量
+        balance = balanceBusiness.getBalance(MAPPING_ADDRESS_1);
+        Na mapping1 = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
+
+        balance = balanceBusiness.getBalance(MAPPING_ADDRESS_2);
+        Na mapping2 = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
+
+        nulsStatistics.setCommunity(mapping1.add(mapping2));
+
+        //资产总量
+        long amount = 0L;
+        Cache cache = EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME);
+        Map<Object, Element> map = cache.getAll(cache.getKeys());
+        for (Element e : map.values()) {
+            AddressHashIndex addressHashIndex = (AddressHashIndex) e.getObjectValue();
+            Set<String> addrs = addressHashIndex.getHashIndexSet();
+            for(String address : addrs){
+                Utxo utxo = utxoLevelDbService.select(address);
+                amount += utxo.getAmount().longValue();
+            }
+        }
+        Na total = Na.valueOf(amount);
+        nulsStatistics.setTotalAssets(total);
+
+        //实际流通量=总量-商务合作余额-社区账户余额-团队账户余额
+        Na circulation = total.minus(business).minus(team).minus(community);
+        nulsStatistics.setCirculation(circulation);
+
+        NulsContext.CacheNulsStatistics(Constant.TOKEN_CACHE_KEY, nulsStatistics);
     }
 }

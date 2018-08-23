@@ -285,4 +285,8 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         transaction.setTxDataList(null);
         return transaction;
     }
+
+    public int selectTotalCount(){
+        return transactionMapper.selectTotalCount();
+    }
 }

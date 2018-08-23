@@ -112,4 +112,7 @@
       #{item,jdbcType=VARCHAR}
     </foreach>
   </delete>
+  <select id="selectTotalCount" resultType="java.lang.Integer">
+    select count(1) from transaction
+  </select>
 </mapper>
