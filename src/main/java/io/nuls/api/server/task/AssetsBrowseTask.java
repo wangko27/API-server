@@ -11,6 +11,7 @@ import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.server.dto.AgentDto;
+import io.nuls.api.utils.JSONUtils;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +60,7 @@ public class AssetsBrowseTask {
     @Autowired
     private TransactionBusiness transactionBusiness;
 
-    @Autowired
-    private UtxoLevelDbService utxoLevelDbService;
+    private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
 
     private static NulsStatistics nulsStatistics = NulsStatistics.getInstance();
 
@@ -124,19 +124,30 @@ public class AssetsBrowseTask {
         Cache cache = EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME);
         Map<Object, Element> map = cache.getAll(cache.getKeys());
         for (Element e : map.values()) {
-            AddressHashIndex addressHashIndex = (AddressHashIndex) e.getObjectValue();
-            Set<String> addrs = addressHashIndex.getHashIndexSet();
+            Set<String> addrs = (Set<String>) e.getObjectValue();
+            if(null == addrs || addrs.isEmpty()){
+                break;
+            }
             for(String address : addrs){
                 Utxo utxo = utxoLevelDbService.select(address);
                 amount += utxo.getAmount().longValue();
             }
         }
+        System.out.println("amount: " +amount);
         Na total = Na.valueOf(amount);
         nulsStatistics.setTotalAssets(total);
 
         //实际流通量=总量-商务合作余额-社区账户余额-团队账户余额
         Na circulation = total.minus(business).minus(team).minus(community);
         nulsStatistics.setCirculation(circulation);
+        /**
+         * 测试
+         */
+        try {
+            System.out.println(JSONUtils.obj2json(nulsStatistics));
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
         NulsContext.CacheNulsStatistics(Constant.TOKEN_CACHE_KEY, nulsStatistics);
     }
