@@ -114,4 +114,7 @@ public interface NulsConstant {
      * 大于该值表示按照时间锁定
      */
     long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
+
+
+
 }

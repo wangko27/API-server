@@ -3,6 +3,7 @@ package io.nuls.main;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.i18n.I18nUtils;
 import io.nuls.api.server.ApiApplication;
+import io.nuls.api.server.task.AssetsBrowseTask;
 import io.nuls.api.utils.PropertiesUtils;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
@@ -27,6 +28,10 @@ public enum Main {
         this.remotePort = PropertiesUtils.readProperty(Constant.CFG_RPC_REMOTE_SERVER_PORT);
         this.remoteModuleUrl = PropertiesUtils.readProperty(Constant.CFG_RPC_REMOTE_SERVER_URL);
         this.language = PropertiesUtils.readProperty(Constant.CFG_SYSTEM_LANGUAGE);
+        AssetsBrowseTask.businessAddress = PropertiesUtils.readProperty(Constant.BUSINESS_ADDRESS);
+        AssetsBrowseTask.teamAddress = PropertiesUtils.readProperty(Constant.TEAM_ADDRESS);
+        AssetsBrowseTask.communityAddress = PropertiesUtils.readProperty(Constant.COMMUNITY_ADDRESS);
+        AssetsBrowseTask.mappingAddress = PropertiesUtils.readProperty(Constant.MAPPING_ADDRESS).split(",");
         this.entry = ApiApplication.ENTRY;
     }
 
