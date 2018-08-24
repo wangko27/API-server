@@ -23,18 +23,17 @@
     -->
     <defaultCache
             maxElementsInMemory="0"
-            eternal="false"
-            timeToIdleSeconds="120"
+            timeToIdleSeconds="0"
             timeToLiveSeconds="86400"
-            overflowToDisk="false"
-            maxElementsOnDisk="10000000"
             diskPersistent="false"
-            diskExpiryThreadIntervalSeconds="120"
+            overflowToDisk="false"
+            eternal="false"
             memoryStoreEvictionPolicy="FIFO"
+            transactionalMode="off"
     />
     <cache name="apiServerCache"
            maxElementsInMemory="0"
-           timeToIdleSeconds="120"
+           timeToIdleSeconds="0"
            timeToLiveSeconds="86400"
            diskPersistent="false"
            overflowToDisk="false"

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 每隔10s去链上查询出块节点信息
+ * 每隔20s去链上查询出块节点信息
  */
 @Component
 public class AgentNodeSyncTask {

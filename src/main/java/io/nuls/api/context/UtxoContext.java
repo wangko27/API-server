@@ -21,15 +21,15 @@ public class UtxoContext {
     public static void put(String address, String key) {
         Set<String> list = get(address);
         list.add(key);
-        //重置缓存
-        EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
+        //重置缓存，有效期为一小时
+        EhcacheUtil.getInstance().putWithTime(Constant.UTXO_CACHE_NAME, address, list,Constant.SECONDS_TIME_HOUR_SECOND);
         //重置leveldb
         addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
     }
 
     public static void put(String address, Set<String> list){
         //重置缓存
-        EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, address, list);
+        EhcacheUtil.getInstance().putWithTime(Constant.UTXO_CACHE_NAME, address, list,Constant.SECONDS_TIME_HOUR_SECOND);
         //重置leveldb
         addressHashIndexLevelDbService.insert(new AddressHashIndex(address, list));
     }
@@ -37,7 +37,7 @@ public class UtxoContext {
     public static void putMap(Map<String,AddressHashIndex> attrMapList){
         for(AddressHashIndex addressHashIndex:attrMapList.values()){
             //重置缓存
-            EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, addressHashIndex.getAddress(), addressHashIndex.getHashIndexSet());
+            EhcacheUtil.getInstance().putWithTime(Constant.UTXO_CACHE_NAME, addressHashIndex.getAddress(), addressHashIndex.getHashIndexSet(),Constant.SECONDS_TIME_HOUR_SECOND);
             //重置leveldb
             addressHashIndexLevelDbService.insert(addressHashIndex);
         }
@@ -47,6 +47,7 @@ public class UtxoContext {
     public static Set<String> get(String address) {
         Set<String> setList = (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
         if(null == setList){
+            System.out.println("获取UTXO，来自leveldb，地址："+address);
             AddressHashIndex addressHashIndex = addressHashIndexLevelDbService.select(address);
             if(null != addressHashIndex){
                 setList = addressHashIndex.getHashIndexSet();

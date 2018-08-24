@@ -75,12 +75,12 @@
     <bean id="agentNodeSyncTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="agentNodeSync" />
         <property name="startDelay" value="0" />
-        <property name="repeatInterval" value="10000" />
+        <property name="repeatInterval" value="20000" />
     </bean>
     <bean id="assetsBrowseTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="assetsBrowseSyn" />
-        <property name="startDelay" value="0" />
-        <property name="repeatInterval" value="15000" />
+        <property name="startDelay" value="10000" />
+        <property name="repeatInterval" value="1800000" />
     </bean>
 
     <bean id="SpringJobSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">

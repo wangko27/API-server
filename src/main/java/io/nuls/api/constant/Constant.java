@@ -88,6 +88,8 @@ public interface Constant {
 
     int SECONDS_TIME_DAY=86400000;
 
+    int SECONDS_TIME_HOUR_SECOND=3600;
+
     int INDEX_BLOCK_LIST_COUNT = 6;
     int INDEX_TX_LIST_COUNT = 5;
 
