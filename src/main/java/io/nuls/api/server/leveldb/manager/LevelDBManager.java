@@ -514,7 +514,9 @@ public class LevelDBManager {
             byte[] bytes = getModelSerialize(value);
             return put(area, key, bytes);
         } catch (Exception e) {
-            Log.error(e);
+            //抛出异常，让系统回滚
+            e.printStackTrace();
+            //Log.error(e);
             return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }

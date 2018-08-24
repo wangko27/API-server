@@ -480,8 +480,13 @@ public class TransactionResource {
                 //删除交易和缓存
                 webwalletTransactionBusiness.deleteByKey(boradTx.getHash().getDigestHex());
                 webwalletUtxoLevelDbService.delete(transaction.getAddress());
-                //result = new RpcClientResult(false, ErrorCode.TX_BROADCAST_ERROR.getCode(), result.getMsg());
-                return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
+                try{
+                    Map resultAttr = (Map)result.getData();
+                    return new RpcClientResult(false, resultAttr.get("code")+"", result.getMsg());
+                }catch (Exception e){
+                    return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
+                }
+                //return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
                 //return result;
             }
             if(result.isSuccess()){
@@ -497,7 +502,13 @@ public class TransactionResource {
                 //删除交易和缓存
                 webwalletTransactionBusiness.deleteByKey(boradTx.getHash().getDigestHex());
                 webwalletUtxoLevelDbService.delete(transaction.getAddress());
-                return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
+                try{
+                    Map resultAttr = (Map)result.getData();
+                    return new RpcClientResult(false, resultAttr.get("code")+"", result.getMsg());
+                }catch (Exception e){
+                    return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
+                }
+                //return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
             }
         }else{
             return RpcClientResult.getFailed();

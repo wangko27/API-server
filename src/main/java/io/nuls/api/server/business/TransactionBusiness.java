@@ -221,8 +221,10 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
 
 
     public void deleteLevelDBList(List<String> txHashList) {
-        for (String txHash : txHashList) {
-            transactionLevelDbService.delete(txHash);
+        if(null != txHashList){
+            for (String txHash : txHashList) {
+                transactionLevelDbService.delete(txHash);
+            }
         }
     }
 

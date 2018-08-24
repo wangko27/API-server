@@ -62,7 +62,6 @@ public class AddressHashIndexLevelDbService {
         for(byte[] setAddr : setList){
             try {
                 addressList.add(new String(setAddr,"utf-8"));
-                System.out.println("dizhi:"+new String(setAddr,"utf-8"));
             } catch (UnsupportedEncodingException e) {
                 Log.error("获取addre异常了");
             }

@@ -137,11 +137,11 @@ public class IndexContext {
         if(tempData.size()<end){
             end = tempData.size();
         }
+        Collections.sort(tempData, AgentComparator.getInstance(sort));
         List<AgentDto> list = new ArrayList<>();
         for(int i =start;i<end;i++){
             list.add(tempData.get(i));
         }
-        Collections.sort(list, AgentComparator.getInstance(sort));
         page.setList(list);
         page.setTotal(tempData.size());
         page.setPageSize(pageSize);

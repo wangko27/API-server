@@ -140,7 +140,9 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteList(List<String> txHashList) {
-        relationMapper.deleteList(txHashList);
+        if(null != txHashList){
+            relationMapper.deleteList(txHashList);
+        }
     }
 
     @Override

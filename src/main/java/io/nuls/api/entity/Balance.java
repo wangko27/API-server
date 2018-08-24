@@ -1,6 +1,14 @@
 package io.nuls.api.entity;
 
 public class Balance {
+    public Balance(){
+
+    }
+    public Balance(String address,Long locked,Long usable){
+        this.address = address;
+        this.locked = locked;
+        this.usable = usable;
+    }
     private Long id;
 
     private String address;

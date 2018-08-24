@@ -213,16 +213,18 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         BlockHeader header = blockHeaderMapper.selectByPrimaryKey(blockHeight);
         if (null != header) {
             header = blockHeaderLevelDbService.select(header.getHash());
-            AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
-            if (agentNode != null) {
-                Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
-                agentNode.setLastRewardHeight(height);
-                agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
-                agentNode.setTotalReward(agentNode.getTotalReward() - header.getReward());
-                agentNodeBusiness.update(agentNode);
+            if(null != header){
+                AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
+                if (agentNode != null) {
+                    Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
+                    agentNode.setLastRewardHeight(height);
+                    agentNode.setTotalPackingCount(agentNode.getTotalPackingCount() - 1);
+                    agentNode.setTotalReward(agentNode.getTotalReward() - header.getReward());
+                    agentNodeBusiness.update(agentNode);
+                }
+                blockHeaderLevelDbService.delete(header.getHash());
+                return blockHeaderMapper.deleteByPrimaryKey(blockHeight);
             }
-            blockHeaderLevelDbService.delete(header.getHash());
-            return blockHeaderMapper.deleteByPrimaryKey(blockHeight);
         }
         return 0;
     }

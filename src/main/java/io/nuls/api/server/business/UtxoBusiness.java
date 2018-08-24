@@ -67,25 +67,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }
 
     /**
-     * 通过leveldb查询全部，未花费
-     *
-     * @return
-     */
-    public List<Utxo> getUtxoList() {
-        List<Utxo> utxoList = new ArrayList<>();
-        List<Utxo> list = utxoLevelDbService.getList();
-        if (null == list) {
-            return utxoList;
-        }
-        for (Utxo utxo : list) {
-            if (StringUtils.isBlank(utxo.getSpendTxHash())) {
-                utxoList.add(utxo);
-            }
-        }
-        return utxoList;
-    }
-
-    /**
      * 根据地址，获取所有冻结的utxo
      *
      * @param address
@@ -94,12 +75,15 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     public PageInfo<FreezeDto> getListByAddress(String address, int pageNumber, int pageSize) {
         List<Utxo> utxoList = new ArrayList<>();
         Set<String> setList = UtxoContext.get(address);
+        if(setList.size() == 0){
+            return new PageInfo<>();
+        }
         BlockHeader blockHeader = blockBusiness.getNewest();
         long bestHeight = 0L;
         if (blockHeader != null) {
             bestHeight = blockHeader.getHeight();
         }
-        //还需要加上output中，状态为-1的utxo
+        //还需要加上所有未确认交易的output中，状态为锁定的utxo
         List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);
         for(WebwalletTransaction tx: webwalletTransactionList){
             if(null != tx.getOutputs()){
@@ -163,6 +147,9 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             return list;
         }
         Set<String> keyList = UtxoContext.get(address);
+        if(keyList.size() == 0){
+            return list;
+        }
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
         //还需要过滤数据库中所有未确认交易的input列表中的utxo
         List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);

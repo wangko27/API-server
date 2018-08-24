@@ -53,12 +53,12 @@ public class BalanceBusiness implements BaseService<Balance, Long> {
             bestHeight = blockHeader.getHeight();
         }
         if(bestHeight < 0){
-            balance.setAddress(address);
-            balance.setUsable(usable);
-            balance.setLocked(locked);
-            return balance;
+            return new Balance(address,0L,0L);
         }
         Set<String> keyList = UtxoContext.get(address);
+        if(keyList.size() == 0){
+            return new Balance(address,0L,0L);
+        }
         List<Utxo> utxoList = utxoLevelDbService.selectList(keyList);
         //还需要过滤数据库中所有未确认交易的input列表中的utxo
         List<WebwalletTransaction> webwalletTransactionList = webwalletTransactionBusiness.getAll(address, EntityConstant.WEBWALLET_STATUS_NOTCONFIRM,0);

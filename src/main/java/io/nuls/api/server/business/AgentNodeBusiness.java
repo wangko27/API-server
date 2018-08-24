@@ -55,12 +55,12 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
     /**
      * 获取我委托了的节点的列表
      * @param address
-     * @param agentName
+     * @param keyword
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<AgentDto> getMy(String address, String agentName, int pageNumber, int pageSize){
+    public PageInfo<AgentDto> getMy(String address, String keyword, int pageNumber, int pageSize){
         List<String> depositedHashList = depositBusiness.getDepositedAgentByAddress(address);
         List<AgentDto> agentDtoList = new ArrayList<>();
         if(null != depositedHashList){
@@ -74,16 +74,34 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
         int start = (pageNumber-1)*pageSize;
         int end = start+pageSize;
         List<AgentDto> list = new ArrayList<>();
-        if(agentDtoList.size()<end){
-            end = agentDtoList.size();
+        if(StringUtils.isNotBlank(keyword)){
+            for(AgentDto agentDto:agentDtoList){
+                //搜索
+                keyword = keyword.toUpperCase();
+                boolean b = agentDto.getAgentId().indexOf(keyword) >= 0;
+                b = b || agentDto.getAgentAddress().toUpperCase().equals(keyword) || agentDto.getPackingAddress().toUpperCase().equals(keyword);
+                if (StringUtils.isNotBlank(agentDto.getAgentName())) {
+                    b = b || agentDto.getAgentName().toUpperCase().indexOf(keyword) >= 0;
+                }
+                if (b) {
+                    list.add(agentDto);
+                }
+                continue;
+            }
+        }else{
+            list = agentDtoList;
         }
+        if(list.size()<end){
+            end = list.size();
+        }
+        List<AgentDto> returnList = new ArrayList<>();
         for(int i =start;i<end;i++){
-            list.add(agentDtoList.get(i));
+            returnList.add(list.get(i));
         }
-        PageInfo<AgentDto> pageAgent = new PageInfo<>(list);
+        PageInfo<AgentDto> pageAgent = new PageInfo<>(returnList);
         pageAgent.setPageSize(pageSize);
         pageAgent.setPageNum(pageNumber);
-        pageAgent.setTotal(agentDtoList.size());
+        pageAgent.setTotal(list.size());
         return pageAgent;
     }
 

@@ -26,7 +26,6 @@
 
 package io.nuls.api.utils.comparator;
 
-import io.nuls.api.model.Agent;
 import io.nuls.api.server.dto.AgentDto;
 
 import java.util.Comparator;

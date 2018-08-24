@@ -3,7 +3,6 @@ package io.nuls.api.context;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.AddressHashIndex;
 import io.nuls.api.server.dao.mapper.leveldb.AddressHashIndexLevelDbService;
-import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.dao.util.EhcacheUtil;
 
 import java.util.HashSet;
@@ -17,7 +16,6 @@ import java.util.Set;
 public class UtxoContext {
 
     private static AddressHashIndexLevelDbService addressHashIndexLevelDbService = AddressHashIndexLevelDbService.getInstance();
-    private static WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
 
     //根据地址，把List<key> 放入缓存
     public static void put(String address, String key) {
@@ -70,4 +68,5 @@ public class UtxoContext {
             EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, hashIndex.getAddress(), hashIndex.getHashIndexSet());
         }
     }
+
 }
