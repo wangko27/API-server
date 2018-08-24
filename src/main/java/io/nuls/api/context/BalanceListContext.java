@@ -18,6 +18,10 @@ public class BalanceListContext {
         blockDtos.add(block);
     }
 
+    public static List<UtxoDto> getAllUtxoDtos(){
+        return blockDtos;
+    }
+
     public static List<UtxoDto> getAll(){
         Collections.sort(blockDtos, new Comparator<UtxoDto>() {
             @Override

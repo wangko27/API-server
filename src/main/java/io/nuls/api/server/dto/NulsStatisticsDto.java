@@ -1,6 +1,10 @@
 package io.nuls.api.server.dto;
 
+import io.nuls.api.entity.Na;
 import io.nuls.api.entity.NulsStatistics;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @author: Charlie
@@ -74,10 +78,14 @@ public class NulsStatisticsDto {
      */
     private int consensusNodes;
 
-
     public NulsStatisticsDto(NulsStatistics ts){
-        this.totalAssets = ts.getTotalAssets().toDouble();
-        this.circulation = ts.getCirculation().toDouble();
+
+        this.totalAssets = new BigDecimal(ts.getTotalAssets())
+                .movePointLeft(Na.SMALLEST_UNIT_EXPONENT)
+                .setScale(Na.SMALLEST_UNIT_EXPONENT, RoundingMode.HALF_DOWN).doubleValue();
+        this.circulation = new BigDecimal(ts.getCirculation())
+                .movePointLeft(Na.SMALLEST_UNIT_EXPONENT)
+                .setScale(Na.SMALLEST_UNIT_EXPONENT, RoundingMode.HALF_DOWN).doubleValue();
         this.business = ts.getBusiness().toDouble();
         this.team = ts.getTeam().toDouble();
         this.community = ts.getCommunity().toDouble();
