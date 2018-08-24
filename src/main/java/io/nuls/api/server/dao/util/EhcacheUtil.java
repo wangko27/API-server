@@ -32,6 +32,7 @@ public class EhcacheUtil {
         manager.addCache(Constant.HISTORY_CACHE_NAME);
         manager.addCache(Constant.PACKINGADDRESS_CACHE_NAME);
         manager.addCache(Constant.ADDRESS_REWARD_DETAIL);
+        manager.addCache(Constant.TOKEN_CACHE_NAME);
 
     }
     //得到缓存实例

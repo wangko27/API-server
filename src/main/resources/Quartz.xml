@@ -42,6 +42,17 @@
         </property>
         <property name="concurrent" value="false" />
     </bean>
+    <bean id="assetsBrowseSyn" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="assetsBrowseTask" />
+        </property>
+        <property name="targetMethod">
+            <value>execute</value>
+        </property>
+        <property name="concurrent">
+            <value>false</value>
+        </property>
+    </bean>
 
     <bean id="balanceTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="balanceTaskSync" />
@@ -66,7 +77,11 @@
         <property name="startDelay" value="0" />
         <property name="repeatInterval" value="10000" />
     </bean>
-
+    <bean id="assetsBrowseTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="assetsBrowseSyn" />
+        <property name="startDelay" value="0" />
+        <property name="repeatInterval" value="15000" />
+    </bean>
 
     <bean id="SpringJobSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
@@ -76,11 +91,9 @@
                 <ref bean="agentNodeSyncTrigger"/>
                 <ref bean="balanceTaskTrigger"/>
                 <ref bean="transactionHistoryTaskTrigger"/>
+                <ref bean="assetsBrowseTrigger" />
             </list>
         </property>
     </bean>
-
-
-
 
 </beans>

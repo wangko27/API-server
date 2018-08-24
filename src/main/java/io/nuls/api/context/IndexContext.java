@@ -33,6 +33,10 @@ public class IndexContext {
      */
     private static List<AgentDto> agentNodeList = new ArrayList<>();
 
+    public static List<AgentDto> getAgentNodeList(){
+        return agentNodeList;
+    }
+
     /**
      * 从缓存中获取最新块
      * @return
