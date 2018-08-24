@@ -125,4 +125,24 @@ public interface Constant {
     Na AGENT_DEPOSIT_LOWER_LIMIT = Na.parseNuls(20000);
     Na AGENT_DEPOSIT_UPPER_LIMIT = Na.parseNuls(200000);
     Na ENTRUSTER_DEPOSIT_LOWER_LIMIT = Na.parseNuls(2000);
+
+    /**
+     * 商务合作账户地址
+     */
+    String BUSINESS_ADDRESS = "businessAddress";
+
+    /**
+     * 团队持有账户地址
+     */
+    String TEAM_ADDRESS = "teamAddress";
+
+    /**
+     * 社区基金账户地址
+     */
+    String COMMUNITY_ADDRESS = "communityAddress";
+
+    /**
+     * 映射地址1
+     */
+    String MAPPING_ADDRESS = "mappingAddress";
 }

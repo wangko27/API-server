@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType;
 /**
  * Created by inchain on 2018/8/23.
  */
-@Path("assets")
+@Path("/assets")
 @Component
 public class AssetsResource {
     @Autowired

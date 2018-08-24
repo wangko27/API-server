@@ -9,21 +9,14 @@ import io.nuls.api.context.NulsContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.business.BalanceBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
-import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
-import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.server.dto.AgentDto;
 import io.nuls.api.server.dto.UtxoDto;
-import io.nuls.api.utils.JSONUtils;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
+import io.nuls.api.utils.PropertiesUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Flyglede on 2018/8/23.
@@ -34,27 +27,23 @@ public class AssetsBrowseTask {
     /**
      * 商务合作账户地址
      */
-    private static final String BUSINESS_ADDRESS = "Nse3uLgeCBWP48GCGh8L54gnELfpnSG9";
+    private static final String BUSINESS_ADDRESS = PropertiesUtils.readProperty(Constant.BUSINESS_ADDRESS);
 
     /**
      * 团队持有账户地址
      */
-    private static final String TEAM_ADDRESS = "Nse1vKX9QHF7A84MHqrh4rRubVHAPc18";
+    private static final String TEAM_ADDRESS = PropertiesUtils.readProperty(Constant.TEAM_ADDRESS);
 
     /**
      * 社区基金账户地址
      */
-    private static final String COMMUNITY_ADDRESS = "Nse9U8qaLcV7b6uFy3nr8pD3z7mKgo9u";
+    private static final String COMMUNITY_ADDRESS = PropertiesUtils.readProperty(Constant.COMMUNITY_ADDRESS);
 
     /**
-     * 映射地址1
+     * 映射地址(s)
      */
-    private static final String MAPPING_ADDRESS_1 = "Nse2vWaSC6P14VQ4ykhdcj83ohdj63fd";
+    private static final String[] MAPPING_ADDRESS = PropertiesUtils.readProperty(Constant.MAPPING_ADDRESS).split(",");
 
-    /**
-     * 映射地址2
-     */
-    private static final String MAPPING_ADDRESS_2 = "Nse6Qqteaid77Htn9S7vgW7guN4Q5MVs";
 
     @Autowired
     private BalanceBusiness balanceBusiness;
@@ -62,17 +51,12 @@ public class AssetsBrowseTask {
     @Autowired
     private TransactionBusiness transactionBusiness;
 
-    private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
-
     private static NulsStatistics nulsStatistics = NulsStatistics.getInstance();
 
     /**
      * 定时从数据库中将统计数据写入Ehcache缓存
      */
     public void execute() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("Count Data Write Time>>>>>>>>>>>>>>>>" + (sdf.format(new Date())));
-
         List<AgentDto> agentNodeList = IndexContext.getAgentNodeList();
         //总节点数量
         nulsStatistics.setTotalNodes(agentNodeList.size());
@@ -113,28 +97,17 @@ public class AssetsBrowseTask {
         nulsStatistics.setCommunity(community);
 
         //待映射总量
-        balance = balanceBusiness.getBalance(MAPPING_ADDRESS_1);
-        Na mapping1 = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
+        long maps = 0L;
+        for(String addr : MAPPING_ADDRESS){
+            balance = balanceBusiness.getBalance(addr.trim());
+            maps += (balance.getUsable() + balance.getLocked());
+        }
+        Na unmapped = Na.valueOf(maps);
 
-        balance = balanceBusiness.getBalance(MAPPING_ADDRESS_2);
-        Na mapping2 = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
-
-        nulsStatistics.setCommunity(mapping1.add(mapping2));
+        nulsStatistics.setUnmapped(unmapped);
 
         //资产总量
         long total = 0L;
-        /*Cache cache = EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME);
-        Map<Object, Element> map = cache.getAll(cache.getKeys());
-        for (Element e : map.values()) {
-            Set<String> addrs = (Set<String>) e.getObjectValue();
-            if(null == addrs || addrs.isEmpty()){
-                break;
-            }
-            for(String address : addrs){
-                Utxo utxo = utxoLevelDbService.select(address);
-                amount += utxo.getAmount().longValue();
-            }
-        }*/
         List<UtxoDto> listUtxoDtos = BalanceListContext.getAllUtxoDtos();
         for (UtxoDto utxoDto : listUtxoDtos){
             total += utxoDto.getTotal();
@@ -144,15 +117,6 @@ public class AssetsBrowseTask {
         //实际流通量=总量-商务合作余额-社区账户余额-团队账户余额
         long circulation = total - business.getValue() - team.getValue() - community.getValue();
         nulsStatistics.setCirculation(circulation);
-
-        /**
-         * 测试
-         */
-        try {
-            System.out.println(JSONUtils.obj2json(nulsStatistics));
-        } catch (Exception e){
-            e.printStackTrace();
-        }
 
         NulsContext.CacheNulsStatistics(Constant.TOKEN_CACHE_KEY, nulsStatistics);
     }
