@@ -447,6 +447,9 @@ public class TransactionResource {
             return RpcClientResult.getFailed(ErrorCode.NULL_PARAMETER);
         }
         WebwalletTransaction transaction = webwalletTransactionBusiness.getByKey(transactionParam.getAgentHash());
+        if(null != transactionBusiness.getByHash(transaction.getHash())){
+            return RpcClientResult.getFailed(ErrorCode.TX_HASH_CONFIRMED_ERROR);
+        }
         if(null != transaction){
             byte[] data = Base64.getDecoder().decode(transaction.getSignData());
             io.nuls.api.model.Transaction boradTx = null;
@@ -466,6 +469,8 @@ public class TransactionResource {
                 //其他，暂时不处理
                 return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
             }
+            //94015
+
             boradTx.parse(new NulsByteBuffer(data));
             boradTx.setScriptSig(Hex.decode(transactionParam.getSign()));
             Map<String, String> params = new HashMap<>();

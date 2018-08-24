@@ -154,6 +154,7 @@ public enum ErrorCode {
     TX_ALIAS_SETED_ERROR("94011",94011),//该地址已经设置过别名
     TX_ALIAS_CANCEL_DEPOSIT_ERROR("94013",94013),//退出中
     TX_REMARK_LENTH_ERROR("94014",94014),//备注太长
+    TX_HASH_CONFIRMED_ERROR("94015",94015),//交易已确认
 
 
 

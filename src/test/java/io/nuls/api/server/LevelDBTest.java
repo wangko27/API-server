@@ -32,8 +32,7 @@ public class LevelDBTest {
     @Test
     public void testPut() {
         Utxo utxo = new Utxo();
-        utxo.setTxHash("testHash123");
-        utxo.setTxIndex(1);
+        utxo.setHashIndex("testHash123_1");
         utxo.setAddress("testAddress321");
         utxo.setAmount(12345678L);
         utxo.setLockTime(2345678976L);
@@ -66,22 +65,20 @@ public class LevelDBTest {
         BatchOperation batch = dbService.createWriteBatch(areaName);
 
         Utxo utxo = new Utxo();
-        utxo.setTxHash("testHash111");
-        utxo.setTxIndex(1);
+        utxo.setHashIndex("testHash123_1");
         utxo.setAddress("testAddress111");
         utxo.setAmount(111111111L);
         utxo.setLockTime(1234556789L);
         utxo.setSpendTxHash("testSpendHash111");
-        batch.putModel(utxo.getKey().getBytes(), utxo);
+        batch.putModel(utxo.getHashIndex().getBytes(), utxo);
 
         Utxo utxo2 = new Utxo();
-        utxo2.setTxHash("testHash222");
-        utxo2.setTxIndex(1);
+        utxo.setHashIndex("testHash123_1");
         utxo2.setAddress("testAddress222");
         utxo2.setAmount(222222222L);
         utxo2.setLockTime(987654321L);
         utxo2.setSpendTxHash("testSpendHash222");
-        batch.putModel(utxo2.getKey().getBytes(), utxo2);
+        batch.putModel(utxo2.getHashIndex().getBytes(), utxo2);
         batch.executeBatch();
     }
 
@@ -90,22 +87,20 @@ public class LevelDBTest {
         BatchOperation batch = dbService.createWriteBatch(areaName);
 
         Utxo utxo = new Utxo();
-        utxo.setTxHash("testHash333");
-        utxo.setTxIndex(1);
+        utxo.setHashIndex("testHash123_1");
         utxo.setAddress("testAddress333");
         utxo.setAmount(33333333L);
         utxo.setLockTime(1234556789L);
         utxo.setSpendTxHash("testSpendHash333");
-        batch.putModel(utxo.getKey().getBytes(), utxo);
+        batch.putModel(utxo.getHashIndex().getBytes(), utxo);
 
         Utxo utxo2 = new Utxo();
-        utxo2.setTxHash("testHash444");
-        utxo2.setTxIndex(1);
+        utxo.setHashIndex("testHash123_1");
         utxo2.setAddress("testAddress444");
         utxo2.setAmount(44444444L);
         utxo2.setLockTime(987654321L);
         utxo2.setSpendTxHash("testSpendHash444");
-        batch.putModel(utxo2.getKey().getBytes(), utxo2);
+        batch.putModel(utxo2.getHashIndex().getBytes(), utxo2);
         batch.executeBatch();
     }
 
@@ -114,7 +109,7 @@ public class LevelDBTest {
         List<Utxo> list = dbService.values(areaName, Utxo.class);
         System.out.println(list.size());
         Utxo utxo1 = list.get(1);
-        System.out.println(utxo1.getKey());
+        System.out.println(utxo1.getHashIndex());
     }
 
     @Test
