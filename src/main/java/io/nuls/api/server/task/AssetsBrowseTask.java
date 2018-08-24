@@ -2,6 +2,7 @@ package io.nuls.api.server.task;
 
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
+import io.nuls.api.context.BalanceListContext;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.NulsContext;
@@ -11,6 +12,7 @@ import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.util.EhcacheUtil;
 import io.nuls.api.server.dto.AgentDto;
+import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.JSONUtils;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -120,8 +122,8 @@ public class AssetsBrowseTask {
         nulsStatistics.setCommunity(mapping1.add(mapping2));
 
         //资产总量
-        long amount = 0L;
-        Cache cache = EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME);
+        long total = 0L;
+        /*Cache cache = EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME);
         Map<Object, Element> map = cache.getAll(cache.getKeys());
         for (Element e : map.values()) {
             Set<String> addrs = (Set<String>) e.getObjectValue();
@@ -132,14 +134,17 @@ public class AssetsBrowseTask {
                 Utxo utxo = utxoLevelDbService.select(address);
                 amount += utxo.getAmount().longValue();
             }
+        }*/
+        List<UtxoDto> listUtxoDtos = BalanceListContext.getAllUtxoDtos();
+        for (UtxoDto utxoDto : listUtxoDtos){
+            total += utxoDto.getTotal();
         }
-        System.out.println("amount: " +amount);
-        Na total = Na.valueOf(amount);
         nulsStatistics.setTotalAssets(total);
 
         //实际流通量=总量-商务合作余额-社区账户余额-团队账户余额
-        Na circulation = total.minus(business).minus(team).minus(community);
+        long circulation = total - business.getValue() - team.getValue() - community.getValue();
         nulsStatistics.setCirculation(circulation);
+
         /**
          * 测试
          */

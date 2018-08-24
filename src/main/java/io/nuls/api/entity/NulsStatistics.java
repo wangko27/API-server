@@ -19,13 +19,13 @@ public class NulsStatistics {
      * 资产总量
      * Total token
      */
-    private transient Na totalAssets;
+    private long totalAssets;
 
     /**
      * 实际流通量
      * The actual circulation amount of token
      */
-    private Na circulation;
+    private long circulation;
 
     /**
      * 商务合作持有量
@@ -86,19 +86,19 @@ public class NulsStatistics {
 
     }
 
-    public Na getTotalAssets() {
+    public long getTotalAssets() {
         return totalAssets;
     }
 
-    public void setTotalAssets(Na totalAssets) {
+    public void setTotalAssets(long totalAssets) {
         this.totalAssets = totalAssets;
     }
 
-    public Na getCirculation() {
+    public long getCirculation() {
         return circulation;
     }
 
-    public void setCirculation(Na circulation) {
+    public void setCirculation(long circulation) {
         this.circulation = circulation;
     }
 
