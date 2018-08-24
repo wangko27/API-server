@@ -11,11 +11,9 @@ import io.nuls.api.server.business.BalanceBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.dto.AgentDto;
 import io.nuls.api.server.dto.UtxoDto;
-import io.nuls.api.utils.PropertiesUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
@@ -28,22 +26,22 @@ public class AssetsBrowseTask {
     /**
      * 商务合作账户地址
      */
-    private String businessAddress;
+    public static String businessAddress;
 
     /**
      * 团队持有账户地址
      */
-    private String teamAddress;
+    public static String teamAddress;
 
     /**
      * 社区基金账户地址
      */
-    private String communityAddress;
+    public static String communityAddress;
 
     /**
      * 映射地址(s)
      */
-    private String[] mappingAddress;
+    public static String[] mappingAddress;
 
 
     @Autowired
@@ -54,13 +52,6 @@ public class AssetsBrowseTask {
 
     private static NulsStatistics nulsStatistics = NulsStatistics.getInstance();
 
-    @PostConstruct
-    public void init() {
-        businessAddress = PropertiesUtils.readProperty(Constant.BUSINESS_ADDRESS);
-        teamAddress = PropertiesUtils.readProperty(Constant.TEAM_ADDRESS);
-        communityAddress = PropertiesUtils.readProperty(Constant.COMMUNITY_ADDRESS);
-        mappingAddress = PropertiesUtils.readProperty(Constant.MAPPING_ADDRESS).split(",");
-    }
 
     /**
      * 定时从数据库中将统计数据写入Ehcache缓存
