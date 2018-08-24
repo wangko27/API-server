@@ -28,22 +28,22 @@ public class AssetsBrowseTask {
     /**
      * 商务合作账户地址
      */
-    private String businessAddress = PropertiesUtils.readProperty(Constant.BUSINESS_ADDRESS);
+    private String businessAddress;
 
     /**
      * 团队持有账户地址
      */
-    private String teamAddress = PropertiesUtils.readProperty(Constant.TEAM_ADDRESS);
+    private String teamAddress;
 
     /**
      * 社区基金账户地址
      */
-    private String communityAddress = PropertiesUtils.readProperty(Constant.COMMUNITY_ADDRESS);
+    private String communityAddress;
 
     /**
      * 映射地址(s)
      */
-    private String[] mappingAddress = PropertiesUtils.readProperty(Constant.MAPPING_ADDRESS).split(",");
+    private String[] mappingAddress;
 
 
     @Autowired
