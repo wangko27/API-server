@@ -106,6 +106,7 @@ public interface Constant {
     String TRANSACTION_DB_NAME="transaction";
     String BLOCKHEADER_DB_NAME="blockheader";
     String UTXO_DB_ADDRESS_NAME="blockAddress";
+    String UTXO_DB_ALIAS_NAME="aliasdb";
 
     String ADDRESS_REWARD_DETAIL = "reward";
     /**

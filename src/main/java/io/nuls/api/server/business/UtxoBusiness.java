@@ -362,7 +362,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
         Map<String, UtxoDto> mapData = new HashMap<>();
         List<Utxo> utxoList = utxoLevelDbService.getList();
         UtxoDto utxoDto;
-        for (Utxo utxo : utxoList) {
+        for(Utxo utxo : utxoList) {
             if (null == utxo.getSpendTxHash()) {
                 if (mapData.containsKey(utxo.getAddress())) {
                     utxoDto = mapData.get(utxo.getAddress());
@@ -373,6 +373,8 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
                     utxoDto.setTotal(utxo.getAmount());
                     mapData.put(utxo.getAddress(), utxoDto);
                 }
+            }else{
+                utxoLevelDbService.delete(utxo.getKey());
             }
         }
         return new ArrayList<UtxoDto>(mapData.values());

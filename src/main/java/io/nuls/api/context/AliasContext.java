@@ -3,9 +3,6 @@ package io.nuls.api.context;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.server.dao.util.EhcacheUtil;
-import io.nuls.api.utils.StringUtils;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
 
 import java.util.List;
 
@@ -31,7 +28,7 @@ public class AliasContext {
         }
     }
 
-    public static void remove(String address) {
-        EhcacheUtil.getInstance().remove(Constant.ALIAS_CACHE_NAME,address);
+    public static void remove() {
+        EhcacheUtil.getInstance().get(Constant.ALIAS_CACHE_NAME).removeAll();
     }
 }

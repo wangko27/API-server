@@ -36,6 +36,9 @@ public class AliasBusiness implements BaseService<Alias, String> {
             Searchable searchable = new Searchable();
             searchable.addCondition("address", SearchOperator.eq, address);
             alias = aliasMapper.selectBySearchable(searchable);
+            if(null != alias){
+                AliasContext.put(alias);
+            }
         }
         return alias;
     }
@@ -89,6 +92,11 @@ public class AliasBusiness implements BaseService<Alias, String> {
         return 0;
     }
 
+    /**
+     * 别名不能修改
+     * @param alias
+     * @return
+     */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int update(Alias alias) {
@@ -96,7 +104,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
     }
 
     /**
-     * 删除别名，根据账户地址删除
+     * 别名不能删除
      *
      * @param id 账户地址
      * @return
@@ -115,12 +123,20 @@ public class AliasBusiness implements BaseService<Alias, String> {
      */
     @Override
     public Alias getByKey(String id) {
-        return aliasMapper.selectByPrimaryKey(id);
+        Alias alias = AliasContext.get(id);
+        if(null == alias){
+            alias = aliasMapper.selectByPrimaryKey(id);
+            if(null != alias){
+                //写入缓存
+                AliasContext.put(alias);
+            }
+        }
+        return alias;
     }
 
 
     /**
-     * 删除别名，根据高度删除
+     * 删除别名，根据高度删除，只有回滚的时候才会调用，这时候，直接清空缓存
      *
      * @param height
      * @return
@@ -129,14 +145,7 @@ public class AliasBusiness implements BaseService<Alias, String> {
     public void deleteByHeight(long height) {
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
-        //删除缓存中的别名
-        //AliasContext.removeByHeight(height);
-        List<Alias> list = aliasMapper.selectList(searchable);
-        if (!list.isEmpty()) {
-            for (Alias alias : list) {
-                aliasMapper.deleteByPrimaryKey(alias.getAlias());
-                AliasContext.remove(alias.getAddress());
-            }
-        }
+        //回滚，直接清空别名缓存
+        AliasContext.remove();
     }
 }
