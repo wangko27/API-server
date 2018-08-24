@@ -278,8 +278,10 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         } else {
             for (Input input : transaction.getInputs()) {
                 Utxo utxo = utxoBusiness.getByKey(input.getFromHash(), input.getFromIndex());
-                input.setAddress(utxo.getAddress());
-                input.setValue(utxo.getAmount());
+                if(null != utxo){
+                    input.setAddress(utxo.getAddress());
+                    input.setValue(utxo.getAmount());
+                }
             }
         }
         transaction.setTxData(null);

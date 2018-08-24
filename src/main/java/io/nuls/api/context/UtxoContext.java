@@ -47,7 +47,6 @@ public class UtxoContext {
     public static Set<String> get(String address) {
         Set<String> setList = (Set<String>) EhcacheUtil.getInstance().get(Constant.UTXO_CACHE_NAME, address);
         if(null == setList){
-            System.out.println("获取UTXO，来自leveldb，地址："+address);
             AddressHashIndex addressHashIndex = addressHashIndexLevelDbService.select(address);
             if(null != addressHashIndex){
                 setList = addressHashIndex.getHashIndexSet();

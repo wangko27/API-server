@@ -79,8 +79,10 @@ public class SyncDataBusiness {
                 fromList.addAll(utxoBusiness.getListByFrom(tx, utxoMap));
 
                 txList.add(tx);
-                txRelationList.addAll(transactionRelationBusiness.getListByTx(tx));
-
+                //如果是红牌惩罚，不能放入relation，只能单独处理
+                if(tx.getType()!=EntityConstant.TX_TYPE_RED_PUNISH){
+                    txRelationList.addAll(transactionRelationBusiness.getListByTx(tx));
+                }
                 if (tx.getType() == EntityConstant.TX_TYPE_COINBASE) {
                     addressRewardDetailList.addAll(detailBusiness.getRewardList(tx));
                 } else if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
@@ -98,6 +100,8 @@ public class SyncDataBusiness {
                 } else if (tx.getType() == EntityConstant.TX_TYPE_RED_PUNISH) {
                     PunishLog punishLog = (PunishLog) tx.getTxData();
                     punishLogList.add(punishLog);
+                    TransactionRelation key = new TransactionRelation(punishLog.getAddress(), tx.getHash(),tx.getType(),tx.getCreateTime());
+                    txRelationList.add(key);
                     agentNodeBusiness.stopAgentByRedPublish(punishLog.getAddress(), tx.getHash());
                 } else if (tx.getType() == EntityConstant.TX_TYPE_YELLOW_PUNISH) {
                     for (TxData data : tx.getTxDataList()) {
