@@ -15,6 +15,7 @@ import io.nuls.api.utils.PropertiesUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
@@ -27,22 +28,22 @@ public class AssetsBrowseTask {
     /**
      * 商务合作账户地址
      */
-    private static final String BUSINESS_ADDRESS = PropertiesUtils.readProperty(Constant.BUSINESS_ADDRESS);
+    private String businessAddress = PropertiesUtils.readProperty(Constant.BUSINESS_ADDRESS);
 
     /**
      * 团队持有账户地址
      */
-    private static final String TEAM_ADDRESS = PropertiesUtils.readProperty(Constant.TEAM_ADDRESS);
+    private String teamAddress = PropertiesUtils.readProperty(Constant.TEAM_ADDRESS);
 
     /**
      * 社区基金账户地址
      */
-    private static final String COMMUNITY_ADDRESS = PropertiesUtils.readProperty(Constant.COMMUNITY_ADDRESS);
+    private String communityAddress = PropertiesUtils.readProperty(Constant.COMMUNITY_ADDRESS);
 
     /**
      * 映射地址(s)
      */
-    private static final String[] MAPPING_ADDRESS = PropertiesUtils.readProperty(Constant.MAPPING_ADDRESS).split(",");
+    private String[] mappingAddress = PropertiesUtils.readProperty(Constant.MAPPING_ADDRESS).split(",");
 
 
     @Autowired
@@ -52,6 +53,14 @@ public class AssetsBrowseTask {
     private TransactionBusiness transactionBusiness;
 
     private static NulsStatistics nulsStatistics = NulsStatistics.getInstance();
+
+    @PostConstruct
+    public void init() {
+        businessAddress = PropertiesUtils.readProperty(Constant.BUSINESS_ADDRESS);
+        teamAddress = PropertiesUtils.readProperty(Constant.TEAM_ADDRESS);
+        communityAddress = PropertiesUtils.readProperty(Constant.COMMUNITY_ADDRESS);
+        mappingAddress = PropertiesUtils.readProperty(Constant.MAPPING_ADDRESS).split(",");
+    }
 
     /**
      * 定时从数据库中将统计数据写入Ehcache缓存
@@ -82,23 +91,23 @@ public class AssetsBrowseTask {
         nulsStatistics.setTrades(transactionBusiness.selectTotalCount());
 
         //商务合作持有量
-        Balance balance = balanceBusiness.getBalance(BUSINESS_ADDRESS);
+        Balance balance = balanceBusiness.getBalance(businessAddress);
         Na business = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
         nulsStatistics.setBusiness(business);
 
         //团队持有量
-        balance = balanceBusiness.getBalance(TEAM_ADDRESS);
+        balance = balanceBusiness.getBalance(teamAddress);
         Na team = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
         nulsStatistics.setTeam(team);
 
         //社区持有量
-        balance = balanceBusiness.getBalance(COMMUNITY_ADDRESS);
+        balance = balanceBusiness.getBalance(communityAddress);
         Na community = Na.valueOf(balance.getUsable()).add(Na.valueOf(balance.getLocked()));
         nulsStatistics.setCommunity(community);
 
         //待映射总量
         long maps = 0L;
-        for(String addr : MAPPING_ADDRESS){
+        for(String addr : mappingAddress){
             balance = balanceBusiness.getBalance(addr.trim());
             maps += (balance.getUsable() + balance.getLocked());
         }
