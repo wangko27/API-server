@@ -373,8 +373,6 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
                     utxoDto.setTotal(utxo.getAmount());
                     mapData.put(utxo.getAddress(), utxoDto);
                 }
-            }else{
-                utxoLevelDbService.delete(utxo.getKey());
             }
         }
         return new ArrayList<UtxoDto>(mapData.values());

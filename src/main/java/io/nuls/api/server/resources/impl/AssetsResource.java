@@ -5,6 +5,7 @@ import io.nuls.api.entity.NulsStatistics;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.AssetsBusiness;
 import io.nuls.api.server.dto.NulsStatisticsDto;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,7 @@ public class AssetsResource {
             }
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
+            Log.error(e);
         }
         return result;
     }

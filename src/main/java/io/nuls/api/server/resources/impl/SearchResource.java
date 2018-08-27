@@ -8,6 +8,7 @@ import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.TransactionRelationBusiness;
 import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,6 +64,7 @@ public class SearchResource {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.error(e);
         }
         return result;
     }

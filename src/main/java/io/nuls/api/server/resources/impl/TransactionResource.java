@@ -354,11 +354,11 @@ public class TransactionResource {
             }
             transFeeDto = TransactionTool.getAliasTxFee(list,transactionParam.getAddress(),transactionParam.getAlias());
             if(null == transFeeDto){
-                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
             na = transFeeDto.getNa();
             if(null == na){
-                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
             temp = transactionParam.getAlias();
             //组装交易
@@ -375,11 +375,11 @@ public class TransactionResource {
             //加入共识
             transFeeDto = TransactionTool.getJoinAgentTxFee(list,transactionParam.getMoney());
             if(null == transFeeDto){
-                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
             na = transFeeDto.getNa();
             if(null == na){
-                return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_SETED_ERROR);
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
             //组装交易
             transaction = TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
@@ -406,10 +406,11 @@ public class TransactionResource {
             //其他，暂时不处理
             return RpcClientResult.getFailed(ErrorCode.TX_TYPE_NULL);
         }
+        if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
+            return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+        }
         if(null != transaction){
             attr.put("hash",transaction.getHash().getDigestHex());
-            /*attr.put("dobj",transaction);
-            attr.put("seri",Base64.getEncoder().encodeToString(transaction.serialize()));*/
             Transaction tx = RpcTransferUtil.toTransaction(transaction);
             Utxo utxoKey = null;
             for(Input input:tx.getInputs()){
@@ -518,6 +519,5 @@ public class TransactionResource {
         }else{
             return RpcClientResult.getFailed();
         }
-
     }
 }
