@@ -112,6 +112,7 @@ public interface Constant {
     String BLOCKHEADER_DB_NAME="blockheader";
     String UTXO_DB_ADDRESS_NAME="blockAddress";
     String UTXO_DB_ALIAS_NAME="aliasdb";
+    String HISTORY_DB_NAME="hsitorydb";
 
     String ADDRESS_REWARD_DETAIL = "reward";
     /**

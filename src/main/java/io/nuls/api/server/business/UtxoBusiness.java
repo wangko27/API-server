@@ -6,6 +6,7 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.UtxoMapper;
+import io.nuls.api.server.dao.mapper.leveldb.AddressHashIndexLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -13,6 +14,7 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.FreezeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -38,6 +40,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
 
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
+    private AddressHashIndexLevelDbService addressHashIndexLevelDbService = AddressHashIndexLevelDbService.getInstance();
 
     /**
      * 获取列表 数据库查询
@@ -62,8 +65,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      * @return
      */
     public List<Utxo> getList() {
-        List<Utxo> list = utxoLevelDbService.getList();
-        return list;
+        return utxoLevelDbService.getList();
     }
 
     /**
@@ -360,7 +362,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      */
     public List<UtxoDto> getBlockSumTxamount() {
         Map<String, UtxoDto> mapData = new HashMap<>();
-        List<Utxo> utxoList = utxoLevelDbService.getList();
+        List<Utxo> utxoList = getList();
         UtxoDto utxoDto;
         for(Utxo utxo : utxoList) {
             if (null == utxo.getSpendTxHash()) {

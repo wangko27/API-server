@@ -46,7 +46,6 @@ public enum Main {
                 serverUri = Constant.HTTP + remoteIp + Constant.COLON + Integer.parseInt(remotePort) + Constant.URI_SEPARATOR + remoteModuleUrl;
             }
         }
-        serverUri += "/api";
 
         RestFulUtils.getInstance().init(serverUri);
         if(StringUtils.isBlank(language)) {

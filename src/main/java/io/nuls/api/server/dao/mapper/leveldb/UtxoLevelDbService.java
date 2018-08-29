@@ -84,6 +84,5 @@ public class UtxoLevelDbService {
             list = new ArrayList<>();
         }
         return list;
-
     }
 }

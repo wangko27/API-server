@@ -330,6 +330,9 @@ public class TransactionResource {
             if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
                 return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
             }
+            if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+            }
             //组装交易
             transaction = TransactionTool.createTransferTx(list,transactionParam.getToAddress(),transactionParam.getMoney(),transactionParam.getRemark(),na.getValue());
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
@@ -360,6 +363,9 @@ public class TransactionResource {
             if(null == na){
                 return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
+            if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+            }
             temp = transactionParam.getAlias();
             //组装交易
             transaction = TransactionTool.createAliasTx(list,transactionParam.getAddress(),transactionParam.getAlias(),na.getValue());
@@ -381,6 +387,9 @@ public class TransactionResource {
             if(null == na){
                 return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
             }
+            if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
+                return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+            }
             //组装交易
             transaction = TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
         }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
@@ -399,15 +408,13 @@ public class TransactionResource {
                     Utxo utxo = utxoBusiness.getByKey(output.getKey());
                     if(utxo.getLockTime() == -1){
                         transaction = TransactionTool.createCancelDepositTx(utxo);
+                        break;
                     }
                 }
             }
         }else{
             //其他，暂时不处理
             return RpcClientResult.getFailed(ErrorCode.TX_TYPE_NULL);
-        }
-        if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
-            return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
         }
         if(null != transaction){
             attr.put("hash",transaction.getHash().getDigestHex());

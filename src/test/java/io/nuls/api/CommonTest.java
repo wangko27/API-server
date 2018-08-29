@@ -3,6 +3,7 @@ package io.nuls.api;
 import io.nuls.api.crypto.ECKey;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.utils.JSONUtils;
+import io.nuls.api.utils.SerializeUtils;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -22,14 +23,23 @@ public class CommonTest {
 
     @Test
     public void testAddress() {
-        String priKey = "bf55ed1e8665187f5b9ed7f74fc09e92f28e1619a07493b70be781192d796054";
+        String priKey = "1184cd2cdd640ca42cfc3a091c51d549b2f016d454b2774019c2b2d2e08529fd";
         String pubKey = "03e8d5cec36087d1432133ccd773f48a1e57aa41854eebe77deb312559f67d3555";
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
-        System.out.println(ecKey.getPublicKeyAsHex(false));
+        //System.out.println(ecKey.getPublicKeyAsHex(false));
         System.out.println(ecKey.getPublicKeyAsHex(true));
         System.out.println("xxxxxxxxxxxx");
-        /*byte[] hash160 = SerializeUtils.sha256hash160(ecKey.getPubKey());
-        byte[] hash1602 = SerializeUtils.sha256hash160(Hex.decode(pubKey));
+        byte[] hash160 = SerializeUtils.sha256hash160(ecKey.getPubKey());
+
+        String str = Hex.encode(hash160);
+        System.out.println("str:"+str);
+        char[] strChar=str.toCharArray();
+        String result="";
+        for(int i=0;i<strChar.length;i++){
+            result +=Integer.toBinaryString(strChar[i])+ " ";
+        }
+        System.out.println(result);
+        /*byte[] hash1602 = SerializeUtils.sha256hash160(Hex.decode(pubKey));
 
         Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
         Address address2 = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash1602);

@@ -283,20 +283,22 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
      * 统计出块历史
      */
     public void initHistory() {
-        String[] historyList = new String[14];
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DATE, cal.get(Calendar.DATE));
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        long time = cal.getTime().getTime();
-        for (int i = 13; i >= 0; i--) {
-            Integer count = getTxcountByTime(time - Constant.MILLISECONDS_TIME_DAY, time);
-            time = time - Constant.MILLISECONDS_TIME_DAY;
-            String values = null == count ? time + "-0" : time + "-" + count;
-            historyList[i] = values;
+        if(null == HistoryContext.getAll()){
+            String[] historyList = new String[14];
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.DATE, cal.get(Calendar.DATE));
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            long time = cal.getTime().getTime();
+            for (int i = 13; i >= 0; i--) {
+                Integer count = getTxcountByTime(time - Constant.MILLISECONDS_TIME_DAY, time);
+                time = time - Constant.MILLISECONDS_TIME_DAY;
+                String values = null == count ? time + "-0" : time + "-" + count;
+                historyList[i] = values;
+            }
+            HistoryContext.reset(historyList);
         }
-        HistoryContext.reset(historyList);
     }
 
     /**
