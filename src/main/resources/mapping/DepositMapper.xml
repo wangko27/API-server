@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.DepositMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Deposit" >
+    <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="BIGINT" />
+    <result column="agent_hash" property="agentHash" jdbcType="VARCHAR" />
+    <result column="agent_name" property="agentName" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
+    <result column="delete_hash" property="deleteHash" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    tx_hash, amount, agent_hash, agent_name, address, create_time, block_height, delete_hash
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from deposit
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from deposit
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </delete>
+
+  <update id="deleteByAgentHash">
+    update deposit
+    set delete_hash = #{deleteHash,jdbcType=VARCHAR}
+    where agent_hash = #{agentHash,jdbcType=VARCHAR} and delete_hash is null
+  </update>
+
+  <insert id="insert" parameterType="io.nuls.api.entity.Deposit" >
+    insert into deposit (tx_hash, amount, agent_hash,
+    agent_name, address, create_time,
+    block_height, delete_hash)
+    values (#{txHash,jdbcType=VARCHAR}, #{amount,jdbcType=BIGINT}, #{agentHash,jdbcType=VARCHAR},
+    #{agentName,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
+    #{blockHeight,jdbcType=BIGINT}, #{deleteHash,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into deposit (tx_hash, amount, agent_hash,
+    agent_name, address, create_time,
+    block_height, delete_hash)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.amount,jdbcType=BIGINT}, #{item.agentHash,jdbcType=VARCHAR},
+      #{item.agentName,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT},
+      #{item.blockHeight,jdbcType=BIGINT}, #{item.deleteHash,jdbcType=VARCHAR})
+    </foreach>
+    on duplicate key update create_time = values(create_time)
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.Deposit" >
+    insert into deposit
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        tx_hash,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="agentHash != null" >
+        agent_hash,
+      </if>
+      <if test="agentName != null" >
+        agent_name,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="blockHeight != null" >
+        block_height,
+      </if>
+      <if test="deleteHash != null" >
+        delete_hash,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        #{txHash,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="agentHash != null" >
+        #{agentHash,jdbcType=VARCHAR},
+      </if>
+      <if test="agentName != null" >
+        #{agentName,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHash != null" >
+        #{deleteHash,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Deposit" >
+    update deposit
+    <set >
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="agentHash != null" >
+        agent_hash = #{agentHash,jdbcType=VARCHAR},
+      </if>
+      <if test="agentName != null" >
+        agent_name = #{agentName,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        block_height = #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHash != null" >
+        delete_hash = #{deleteHash,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Deposit" >
+    update deposit
+    set amount = #{amount,jdbcType=BIGINT},
+    agent_hash = #{agentHash,jdbcType=VARCHAR},
+    agent_name = #{agentName,jdbcType=VARCHAR},
+    address = #{address,jdbcType=VARCHAR},
+    create_time = #{createTime,jdbcType=BIGINT},
+    block_height = #{blockHeight,jdbcType=BIGINT},
+    delete_hash = #{deleteHash,jdbcType=VARCHAR}
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from deposit
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+
+  </select>
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from deposit
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+
+  </select>
+
+  <update id="rollbackStopAgent" parameterType="java.lang.String">
+    update deposit
+    set delete_hash = NULL
+    where delete_hash = #{deleteHash,jdbcType=VARCHAR}
+  </update>
+  <select id="selectTotalCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM deposit
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectTotalAmount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Long">
+    SELECT sum(amount) FROM deposit
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectDepositedAgentByAddress" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.String">
+    SELECT a1.tx_hash FROM agent_node a1 LEFT JOIN deposit a2 ON a1.tx_hash = a2.agent_hash
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+     group by a1.tx_hash
+  </select>
+</mapper>

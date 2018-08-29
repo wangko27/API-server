@@ -12,19 +12,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RequestCounter {
     private static LoadingCache<String, AtomicInteger> IP_COUNTER_CACHE = CacheBuilder.newBuilder()
-                .concurrencyLevel(8)
-                .expireAfterWrite(1, TimeUnit.SECONDS)
-                .initialCapacity(10)
-                .maximumSize(100)
-                .build(
-                        new CacheLoader<String, AtomicInteger>() {
-                            @Override
-                            public AtomicInteger load(String key) {
-                                Log.info("load ip " + key);
-                                return new AtomicInteger(0);
-                            }
+            .concurrencyLevel(8)
+            .expireAfterWrite(1, TimeUnit.SECONDS)
+            .initialCapacity(10)
+            .maximumSize(100)
+            .build(
+                    new CacheLoader<String, AtomicInteger>() {
+                        @Override
+                        public AtomicInteger load(String key) {
+                            return new AtomicInteger(0);
                         }
-                );
+                    }
+            );
 
     public static int increment(String ip) throws ExecutionException {
         return IP_COUNTER_CACHE.get(ip).incrementAndGet();

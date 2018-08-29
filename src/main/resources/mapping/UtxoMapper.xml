@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.UtxoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.Utxo" >
+    <id column="hash_index" property="hashIndex" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    hash_index, address
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from utxo
+    where hash_index = #{hashIndex,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from utxo
+    where hash_index = #{hashIndex,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.Utxo" >
+    insert into utxo (hash_index, address)
+    values (#{hashIndex,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into utxo (hash_index, address)values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.hashIndex,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.Utxo" >
+    insert into utxo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="hashIndex != null" >
+        hash_index,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="hashIndex != null" >
+        #{hashIndex,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.Utxo" >
+    update utxo
+    <set >
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where hash_index = #{hashIndex,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.Utxo" >
+    update utxo
+    set address = #{address,jdbcType=VARCHAR}
+    where hash_index = #{hashIndex,jdbcType=VARCHAR}
+  </update>
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from utxo
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from utxo
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <delete id="deleteBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable">
+    DELETE from utxo
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </delete>
+</mapper>

@@ -27,6 +27,7 @@ import io.nuls.api.constant.ErrorCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Nuls unit
@@ -100,7 +101,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static Na parseNuls(final String str) {
         try {
-            long value = new BigDecimal(str).movePointRight(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().longValue();
+            long value = new BigDecimal(str).movePointRight(SMALLEST_UNIT_EXPONENT).setScale(SMALLEST_UNIT_EXPONENT, RoundingMode.HALF_DOWN).longValue();
             return Na.valueOf(value);
         } catch (ArithmeticException e) {
             throw new IllegalArgumentException(e);
@@ -109,7 +110,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static Na parseNuls(final double nuls) {
         try {
-            long value = new BigDecimal(nuls).movePointRight(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().longValue();
+            long value = new BigDecimal(nuls).movePointRight(SMALLEST_UNIT_EXPONENT).setScale(SMALLEST_UNIT_EXPONENT, RoundingMode.HALF_DOWN).longValue();
             return Na.valueOf(value);
         } catch (ArithmeticException e) {
             throw new IllegalArgumentException(e);
@@ -117,7 +118,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public double toDouble() {
-        return new BigDecimal(this.value).movePointLeft(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().doubleValue();
+        return new BigDecimal(this.value).movePointLeft(SMALLEST_UNIT_EXPONENT).setScale(SMALLEST_UNIT_EXPONENT, RoundingMode.HALF_DOWN).doubleValue();
     }
 
     public Na add(final Na value) {

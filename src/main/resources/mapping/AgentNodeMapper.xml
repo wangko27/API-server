@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.AgentNodeMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.AgentNode" >
+    <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+    <result column="agent_address" property="agentAddress" jdbcType="VARCHAR" />
+    <result column="packing_address" property="packingAddress" jdbcType="VARCHAR" />
+    <result column="reward_address" property="rewardAddress" jdbcType="VARCHAR" />
+    <result column="deposit" property="deposit" jdbcType="BIGINT" />
+    <result column="commission_rate" property="commissionRate" jdbcType="DECIMAL" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="total_deposit" property="totalDeposit" jdbcType="BIGINT" />
+    <result column="deposit_count" property="depositCount" jdbcType="INTEGER" />
+    <result column="credit_value" property="creditValue" jdbcType="DECIMAL" />
+    <result column="total_packing_count" property="totalPackingCount" jdbcType="BIGINT" />
+    <result column="last_reward_height" property="lastRewardHeight" jdbcType="BIGINT" />
+    <result column="total_reward" property="totalReward" jdbcType="BIGINT" />
+    <result column="delete_hash" property="deleteHash" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapDto" type="io.nuls.api.server.dto.AgentNodeDto" extends="BaseResultMap" >
+    <result column="totalPackingCount" property="totalPackingCount" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    tx_hash, agent_address, packing_address, reward_address, deposit, commission_rate,
+    create_time, block_height, status, total_deposit, deposit_count, credit_value, total_packing_count,
+    last_reward_height, total_reward, delete_hash
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from agent_node
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from agent_node
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.AgentNode" >
+    insert into agent_node (tx_hash, agent_address, packing_address,
+    reward_address, deposit, commission_rate,
+    create_time, block_height, status,
+    total_deposit, deposit_count, credit_value,
+    total_packing_count, last_reward_height, total_reward,
+    delete_hash)
+    values (#{txHash,jdbcType=VARCHAR}, #{agentAddress,jdbcType=VARCHAR}, #{packingAddress,jdbcType=VARCHAR},
+    #{rewardAddress,jdbcType=VARCHAR}, #{deposit,jdbcType=BIGINT}, #{commissionRate,jdbcType=DECIMAL},
+    #{createTime,jdbcType=BIGINT}, #{blockHeight,jdbcType=BIGINT}, #{status,jdbcType=INTEGER},
+    #{totalDeposit,jdbcType=BIGINT}, #{depositCount,jdbcType=INTEGER}, #{creditValue,jdbcType=DECIMAL},
+    #{totalPackingCount,jdbcType=BIGINT}, #{lastRewardHeight,jdbcType=BIGINT}, #{totalReward,jdbcType=BIGINT},
+    #{deleteHash,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into agent_node (tx_hash, agent_address, packing_address,
+    reward_address, deposit, commission_rate,
+    create_time, block_height, status,
+    total_deposit, deposit_count, credit_value,
+    total_packing_count, last_reward_height, total_reward,
+    delete_hash)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.agentAddress,jdbcType=VARCHAR}, #{item.packingAddress,jdbcType=VARCHAR},
+      #{item.rewardAddress,jdbcType=VARCHAR}, #{item.deposit,jdbcType=BIGINT}, #{item.commissionRate,jdbcType=DECIMAL},
+      #{item.createTime,jdbcType=BIGINT}, #{item.blockHeight,jdbcType=BIGINT}, #{item.status,jdbcType=INTEGER},
+      #{item.totalDeposit,jdbcType=BIGINT}, #{item.depositCount,jdbcType=INTEGER}, #{item.creditValue,jdbcType=DECIMAL},
+      #{item.totalPackingCount,jdbcType=BIGINT}, #{item.lastRewardHeight,jdbcType=BIGINT}, #{item.totalReward,jdbcType=BIGINT},
+      #{item.deleteHash,jdbcType=VARCHAR})
+    </foreach>
+    on duplicate key update delete_hash = values(delete_hash)
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
+    insert into agent_node
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        tx_hash,
+      </if>
+      <if test="agentAddress != null" >
+        agent_address,
+      </if>
+      <if test="packingAddress != null" >
+        packing_address,
+      </if>
+      <if test="rewardAddress != null" >
+        reward_address,
+      </if>
+      <if test="deposit != null" >
+        deposit,
+      </if>
+      <if test="commissionRate != null" >
+        commission_rate,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="blockHeight != null" >
+        block_height,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="totalDeposit != null" >
+        total_deposit,
+      </if>
+      <if test="depositCount != null" >
+        deposit_count,
+      </if>
+      <if test="creditValue != null" >
+        credit_value,
+      </if>
+      <if test="totalPackingCount != null" >
+        total_packing_count,
+      </if>
+      <if test="lastRewardHeight != null" >
+        last_reward_height,
+      </if>
+      <if test="totalReward != null" >
+        total_reward,
+      </if>
+      <if test="deleteHash != null" >
+        delete_hash,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        #{txHash,jdbcType=VARCHAR},
+      </if>
+      <if test="agentAddress != null" >
+        #{agentAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="packingAddress != null" >
+        #{packingAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="rewardAddress != null" >
+        #{rewardAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="deposit != null" >
+        #{deposit,jdbcType=BIGINT},
+      </if>
+      <if test="commissionRate != null" >
+        #{commissionRate,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="totalDeposit != null" >
+        #{totalDeposit,jdbcType=BIGINT},
+      </if>
+      <if test="depositCount != null" >
+        #{depositCount,jdbcType=INTEGER},
+      </if>
+      <if test="creditValue != null" >
+        #{creditValue,jdbcType=DECIMAL},
+      </if>
+      <if test="totalPackingCount != null" >
+        #{totalPackingCount,jdbcType=BIGINT},
+      </if>
+      <if test="lastRewardHeight != null" >
+        #{lastRewardHeight,jdbcType=BIGINT},
+      </if>
+      <if test="totalReward != null" >
+        #{totalReward,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHash != null" >
+        #{deleteHash,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.AgentNode" >
+    update agent_node
+    <set >
+      <if test="agentAddress != null" >
+        agent_address = #{agentAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="packingAddress != null" >
+        packing_address = #{packingAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="rewardAddress != null" >
+        reward_address = #{rewardAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="deposit != null" >
+        deposit = #{deposit,jdbcType=BIGINT},
+      </if>
+      <if test="commissionRate != null" >
+        commission_rate = #{commissionRate,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="blockHeight != null" >
+        block_height = #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="totalDeposit != null" >
+        total_deposit = #{totalDeposit,jdbcType=BIGINT},
+      </if>
+      <if test="depositCount != null" >
+        deposit_count = #{depositCount,jdbcType=INTEGER},
+      </if>
+      <if test="creditValue != null" >
+        credit_value = #{creditValue,jdbcType=DECIMAL},
+      </if>
+      <if test="totalPackingCount != null" >
+        total_packing_count = #{totalPackingCount,jdbcType=BIGINT},
+      </if>
+      <if test="lastRewardHeight != null" >
+        last_reward_height = #{lastRewardHeight,jdbcType=BIGINT},
+      </if>
+      <if test="totalReward != null" >
+        total_reward = #{totalReward,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHash != null" >
+        delete_hash = #{deleteHash,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.AgentNode" >
+    update agent_node
+    set agent_address = #{agentAddress,jdbcType=VARCHAR},
+      packing_address = #{packingAddress,jdbcType=VARCHAR},
+      reward_address = #{rewardAddress,jdbcType=VARCHAR},
+      deposit = #{deposit,jdbcType=BIGINT},
+      commission_rate = #{commissionRate,jdbcType=DECIMAL},
+      create_time = #{createTime,jdbcType=BIGINT},
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      status = #{status,jdbcType=INTEGER},
+      total_deposit = #{totalDeposit,jdbcType=BIGINT},
+      deposit_count = #{depositCount,jdbcType=INTEGER},
+      credit_value = #{creditValue,jdbcType=DECIMAL},
+      total_packing_count = #{totalPackingCount,jdbcType=BIGINT},
+      last_reward_height = #{lastRewardHeight,jdbcType=BIGINT},
+      total_reward = #{totalReward,jdbcType=BIGINT},
+      delete_hash = #{deleteHash,jdbcType=VARCHAR}
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from agent_node
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from agent_node
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <update id="rollbackStopAgent" parameterType="java.lang.String">
+    update agent_node
+    set delete_hash = NULL
+    where delete_hash = #{deleteHash,jdbcType=VARCHAR}
+  </update>
+  <select id="selectTotalpackingCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="ResultMapDto">
+    SELECT
+    <include refid="Base_Column_List" />,
+    SUM(total_packing_count) sumTotalPackingCount FROM agent_node
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+    GROUP BY agent_address ORDER BY sumTotalPackingCount DESC
+  </select>
+  <select id="selectTotalCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT count(1) FROM agent_node
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+</mapper>

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,6 +30,8 @@ import io.nuls.api.i18n.I18nUtils;
  * Created by Niels on 2017/9/27.
  */
 public enum ErrorCode {
+
+
 
     /**
      * ----------  System Exception code   ---------
@@ -57,6 +59,9 @@ public enum ErrorCode {
     DATA_NOT_FOUND("SYS019", 10019),
     FILE_BROKEN("SYS020", 20020),
     SIGNATURE_ERROR("SYS021", 20021),
+    ADDRESS_ERROR("SYS022", 20022),
+    SERIALIZE_ERROR("SYS032", 20032),
+    BLOCK_NOT_SYNC("SYS033", 20033),//正在同步区块，暂时无法交易
     /**
      * ----------  Consensus Network code   ---------
      */
@@ -88,7 +93,7 @@ public enum ErrorCode {
     PASSWORD_IS_WRONG("ACT000", 45000),
     ACCOUNT_NOT_EXIST("ACT001", 45001),
     ACCOUNT_IS_ALREADY_ENCRYPTED("ACT002", 45002),
-    ACCOUNT_EXIST("ACT003",45003),
+    ACCOUNT_EXIST("ACT003", 45003),
 
     /**
      * ----------  DB Exception code   ---------
@@ -103,6 +108,14 @@ public enum ErrorCode {
     DB_SAVE_ERROR("DB006", 20006),
     DB_UPDATE_ERROR("DB007", 20007),
     DB_ROLLBACK_ERROR("DB008", 20008),
+
+    DB_AREA_EXIST("DB001", 20009),
+    DB_AREA_NOT_EXIST("DB002", 20010),
+    DB_AREA_CREATE_EXCEED_LIMIT("DB003", 20011),
+    DB_AREA_CREATE_ERROR("DB004", 20012),
+    DB_AREA_CREATE_PATH_ERROR("DB005", 20013),
+    DB_AREA_DESTROY_ERROR("DB006", 20014),
+    DB_BATCH_CLOSE("DB007", 20015),
     /**
      * ----------  MQ Exception code   ---------
      */
@@ -127,14 +140,34 @@ public enum ErrorCode {
     DEPOSIT_TOO_MUCH("cs008", 60008),
 
     /**
+     * api-server user dec
+     */
+    TX_TYPE_NULL("91001",91001),//交易类型不存在
+    TX_MONEY_NULL("91002",91002),//转账金额不正确 小于等于0
+    TX_PRICE_NULL("91003",91003),//转账手续费不正确
+    TX_TOADDRESS_NULL("91004",91004),//收款地址不正确
+    TX_SAVETEMPUTXO_ERROR("91005",91005),//保存交易后的utxo错误 保存交易失败
+    TX_BROADCAST_ERROR("91007",91007),//广播失败
+    TX_REMARK_ERROR("94008",94008),//备注不能包含特殊字符
+    TX_ALIAS_ERROR("94009",94009),//别名格式不正确
+    TX_ALIAS_USED_ERROR("94010",94010),//别名已占用
+    TX_ALIAS_SETED_ERROR("94011",94011),//该地址已经设置过别名
+    TX_ALIAS_CANCEL_DEPOSIT_ERROR("94013",94013),//退出中
+    TX_REMARK_LENTH_ERROR("94014",94014),//备注太长
+    TX_HASH_CONFIRMED_ERROR("94015",94015),//交易已确认
+
+
+
+    /**
      * ------------  Ledger Exception code   --------------
      */
     UTXO_SPENT("LED001", 70001),
     UTXO_STATUS_CHANGE("LED002", 70002),
     BALANCE_NOT_ENOUGH("LED003", 70003),
-    INVALID_OUTPUT("LED004",70004 ),
-    INVALID_AMOUNT("LED005",70005 ),
-    ORPHAN_TX("LED006",70006),
+    INVALID_OUTPUT("LED004", 70004),
+    INVALID_AMOUNT("LED005", 70005),
+    ORPHAN_TX("LED006", 70006),
+    BALANCE_TOO_MUCH("LED007", 70007),
     /**
      * messages
      */
@@ -143,15 +176,15 @@ public enum ErrorCode {
     CREATE_AN_ACCOUNT("MSG003", 80003),
     CHANGE_DEFAULT_ACCOUNT("MSG004", 80004),
     WALLET_PASSWORD_CHANGED("MSG005", 80005),
-    SET_AN_ALIAS("MSG006",80006 ),
-    IMPORTED_AN_ACCOUNT("MSG007",80007),
-    START_PACKED_BLOCK("MSG008",80008 ),
-    REGISTER_AGENT("MSG009",80009),
-    ASSEMBLED_BLOCK("MSG010",80010),
-    JOIN_CONSENSUS("MSG011",80011 ),
-    EXIT_CONSENSUS("MSG012",80012 ),
-    CANCEL_CONSENSUS("MSG013",80013 ),
-    BALANCE_CHANGE("MSG014",80014 );
+    SET_AN_ALIAS("MSG006", 80006),
+    IMPORTED_AN_ACCOUNT("MSG007", 80007),
+    START_PACKED_BLOCK("MSG008", 80008),
+    REGISTER_AGENT("MSG009", 80009),
+    ASSEMBLED_BLOCK("MSG010", 80010),
+    JOIN_CONSENSUS("MSG011", 80011),
+    EXIT_CONSENSUS("MSG012", 80012),
+    CANCEL_CONSENSUS("MSG013", 80013),
+    BALANCE_CHANGE("MSG014", 80014);
     private final int msg;
     private final String code;
 

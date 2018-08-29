@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.BlockHeaderMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.BlockHeader" >
+    <id column="height" property="height" jdbcType="BIGINT" />
+    <result column="hash" property="hash" jdbcType="VARCHAR" />
+    <result column="consensus_address" property="consensusAddress" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    height, hash, consensus_address, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from block_header
+    where height = #{height,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from block_header
+    where height = #{height,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.BlockHeader" >
+    insert into block_header (height, hash, consensus_address,
+    create_time)
+    values (#{height,jdbcType=BIGINT}, #{hash,jdbcType=VARCHAR}, #{consensusAddress,jdbcType=VARCHAR},
+    #{createTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.BlockHeader" >
+    insert into block_header
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="height != null" >
+        height,
+      </if>
+      <if test="hash != null" >
+        hash,
+      </if>
+      <if test="consensusAddress != null" >
+        consensus_address,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="height != null" >
+        #{height,jdbcType=BIGINT},
+      </if>
+      <if test="hash != null" >
+        #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="consensusAddress != null" >
+        #{consensusAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.BlockHeader" >
+    update block_header
+    <set >
+      <if test="hash != null" >
+        hash = #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="consensusAddress != null" >
+        consensus_address = #{consensusAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where height = #{height,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.BlockHeader" >
+    update block_header
+    set hash = #{hash,jdbcType=VARCHAR},
+      consensus_address = #{consensusAddress,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=BIGINT}
+    where height = #{height,jdbcType=BIGINT}
+  </update>
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from block_header
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from block_header
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="getBestBlock" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from block_header
+    WHERE height = (SELECT height FROM block_header ORDER BY height DESC LIMIT 1)
+  </select>
+</mapper>

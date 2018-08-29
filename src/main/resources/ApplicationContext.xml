@@ -77,12 +77,15 @@
 	 <!--MyBatis 数据源和bean配置-->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <property name="typeAliasesPackage" value="io.nuls.api.entity"/>
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath:mapping/*.xml"></property>
     </bean>
 
     <!-- MyBatis自动扫描mapper和xml文件 -->
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="io.nuls.api.server.dao.mapper" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+		<property name="annotationClass" value="io.nuls.api.server.dao.mapper.MyBatisMapper"/>
     </bean>
 
     <import resource="classpath:Quartz.xml" />

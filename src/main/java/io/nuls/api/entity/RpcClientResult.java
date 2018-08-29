@@ -23,23 +23,25 @@
  */
 package io.nuls.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nuls.api.constant.ErrorCode;
 
+import java.util.Map;
+
 /**
- *
  * @author Niels
  * @date 2017/10/31
- *
  */
-public class RpcClientResult {
+public class RpcClientResult<T> {
     private boolean success;
     private String code;
     private String msg;
-    private Object data;
+    private T data;
 
-    public RpcClientResult(){}
+    public RpcClientResult() {
+    }
 
     public RpcClientResult(boolean success, String code, String msg) {
         this.success = success;
@@ -47,7 +49,7 @@ public class RpcClientResult {
         this.msg = msg;
     }
 
-    public RpcClientResult(boolean success, String code, String msg, Object data) {
+    public RpcClientResult(boolean success, String code, String msg, T data) {
         this.success = success;
         this.code = code;
         this.msg = msg;
@@ -76,11 +78,11 @@ public class RpcClientResult {
         this.msg = msg;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(T data) {
         this.data = data;
     }
 
@@ -112,6 +114,18 @@ public class RpcClientResult {
 
     public boolean isSuccess() {
         return success;
+    }
+
+    @JsonIgnore
+    public boolean isFailed() {
+        if (success) return false;
+        if (data != null) {
+            Map<String, Object> errorMap = (Map<String, Object>) data;
+            code = (String) errorMap.get("code");
+            msg = (String) errorMap.get("msg");
+            data = null;
+        }
+        return true;
     }
 
     public void setSuccess(boolean success) {

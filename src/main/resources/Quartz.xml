@@ -3,59 +3,98 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <!-- account balance top -->
-    <bean id="nulsBalanceTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+    <bean id="blockSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="blockSyncTask"/>
+        </property>
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" /><!-- 作业不并发调度 -->
+    </bean>
+    <bean id="webwalletTransactionSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="webwalletTransactionsyncTask"/>
+        </property>
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" />
+    </bean>
+    <bean id="agentNodeSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="agentNodeSyncTask"/>
+        </property>
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" />
+    </bean>
+    <bean id="transactionHistoryTaskSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="transactionHistoryTask"/>
+        </property>
+        <property name="targetMethod">
+            <value>execute</value>
+        </property>
+        <property name="concurrent" value="false" />
+    </bean>
+    <bean id="balanceTaskSync" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject">
             <ref bean="balanceTask"/>
         </property>
         <property name="targetMethod">
             <value>execute</value>
         </property>
+        <property name="concurrent" value="false" />
     </bean>
-    <bean id="DailyTaskBalance" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="nulsBalanceTask" />
-        <property name="cronExpression" value="0 15 0 * * ? *" />
-    </bean>
-
-    <!-- daily txCount  -->
-    <bean id="nulsTxHistoryTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+    <bean id="assetsBrowseSyn" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject">
-            <ref bean="txHistoryTask"/>
+            <ref bean="assetsBrowseTask" />
         </property>
         <property name="targetMethod">
             <value>execute</value>
         </property>
-    </bean>
-    <bean id="DailyTaskTxHistory" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="nulsTxHistoryTask" />
-        <property name="cronExpression" value="0 30 0 * * ? *" />
+        <property name="concurrent">
+            <value>false</value>
+        </property>
     </bean>
 
-    <!-- mined blocks top -->
-    <bean id="nulsMinedTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <property name="targetObject">
-            <ref bean="minedTask"/>
-        </property>
-        <property name="targetMethod">
-            <value>execute</value>
-        </property>
+    <bean id="balanceTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="balanceTaskSync" />
+        <property name="cronExpression" value="0 0 * * * ?" />
     </bean>
-    <bean id="DailyTaskMined" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="nulsMinedTask" />
-        <property name="cronExpression" value="0 45 0 * * ? *" />
+    <bean id="transactionHistoryTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="transactionHistoryTaskSync" />
+        <property name="cronExpression" value="0 0 0 * * ?" />
+    </bean>
+    <bean id="blockSyncTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="blockSync" />
+        <property name="startDelay" value="0" /><!-- 调度工厂实例化后，经过0秒开始执行调度 -->
+        <property name="repeatInterval" value="10000" /><!-- 每10秒调度一次 -->
+    </bean>
+    <bean id="webwalletTransactionTaskTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="webwalletTransactionSync" />
+        <property name="startDelay" value="0" />
+        <property name="repeatInterval" value="600000" /><!-- 每10分钟调度一次 -->
+    </bean>
+    <bean id="agentNodeSyncTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="agentNodeSync" />
+        <property name="startDelay" value="0" />
+        <property name="repeatInterval" value="20000" />
+    </bean>
+    <bean id="assetsBrowseTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="assetsBrowseSyn" />
+        <property name="startDelay" value="10000" />
+        <!--<property name="repeatInterval" value="1800000" />-->
+        <property name="repeatInterval" value="1800000" />
     </bean>
 
     <bean id="SpringJobSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
-                <ref bean="DailyTaskBalance"/>
-                <ref bean="DailyTaskTxHistory"/>
-                <ref bean="DailyTaskMined"/>
+                <ref bean="blockSyncTrigger"/>
+                <ref bean="webwalletTransactionTaskTrigger"/>
+                <ref bean="agentNodeSyncTrigger"/>
+                <ref bean="balanceTaskTrigger"/>
+                <ref bean="transactionHistoryTaskTrigger"/>
+                <ref bean="assetsBrowseTrigger" />
             </list>
         </property>
     </bean>
-
-
-
 
 </beans>

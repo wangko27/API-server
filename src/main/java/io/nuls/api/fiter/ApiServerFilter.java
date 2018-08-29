@@ -66,14 +66,14 @@ public class ApiServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
-        Log.info(
+        /*Log.info(
                 "url:{},Remote_IP:{},useTime:{}, params:{},result:{}",
-                requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), request.getRemoteAddr(), (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
+                requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), request.getRemoteAddr(), (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, null);*/
     }
 
     @Override
     public Response toResponse(Exception e) {
-        Log.error(e);
+        //Log.error(e.getMessage());
         RpcClientResult result = RpcClientResult.getFailed(e.getMessage());
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }

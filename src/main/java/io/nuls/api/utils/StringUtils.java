@@ -23,9 +23,14 @@
  */
 package io.nuls.api.utils;
 
+import io.nuls.api.cfg.NulsConfig;
+
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Created by Niels on 2017/10/9.
@@ -75,8 +80,13 @@ public class StringUtils {
 
     private static final int HASH_LENGTH = 23;
 
+    public static byte[] bytes(String value) {
+        return (value == null) ? null : value.getBytes(UTF_8);
+    }
+
     public static boolean validAddress(String address) {
-        if (StringUtils.isBlank(address)) {
+        //由于生成地址的格式已经修改更新，此处调用AddressTool的方法验证
+        /*if (StringUtils.isBlank(address)) {
             return false;
         }
         byte[] bytes = null;
@@ -93,7 +103,9 @@ public class StringUtils {
         } catch (Exception e) {
             return false;
         }
-        return true;
+        return true;*/
+        return AddressTool.validAddress(address);
+        //return true;
     }
 
     protected static void checkXOR(byte[] hashs) {
@@ -116,7 +128,13 @@ public class StringUtils {
         if (isBlank(hash)){
             return false;
         }
+        /*修改于2018-06-05 因为新版本的hash长度为68位，现在的判断是
         if (hash.length() != 70) {
+            return false;
+        }
+        导致验证不过，此处改成长度小于100即可
+        */
+        if (hash.length() > 100) {
             return false;
         }
         return true;
@@ -146,5 +164,54 @@ public class StringUtils {
         return true;
     }
 
+    /**
+     * 验证是否包含特殊字符 true为包含，false为不包含
+     * @param str 要验证的字符串
+     * @return
+     */
+    public static boolean isSpecialChar(String str) {
+        String regEx = "[ _`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n|\r|\t";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+        return m.find();
+    }
+
+    /**
+     * 验证别名是否合法
+     * @param str
+     * @return
+     */
+    public static boolean valiAlias(String str){
+        String regEx = "^[a-z0-9]{1}[a-z0-9_]{0,98}[a-z0-9]{1}$";
+        return str.matches(regEx);
+        /*Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+        return m.find();*/
+    }
+
+    /**
+     * 验证字符串是否为数字
+     * @param str
+     * @return
+     */
+    public static boolean valiNumber(String str){
+        Pattern pattern = Pattern.compile("[0-9]{1,}");
+        Matcher matcher = pattern.matcher((CharSequence)str);
+        return matcher.matches();
+    }
+    public static boolean validTxRemark(String remark) {
+        if (StringUtils.isBlank(remark)) {
+            return true;
+        }
+        try {
+            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
+            if (bytes.length > 100) {
+                return false;
+            }
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
+    }
 
 }

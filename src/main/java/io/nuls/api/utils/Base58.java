@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,14 +20,18 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 package io.nuls.api.utils;
+
+import io.nuls.api.crypto.Sha256Hash;
+
+import java.math.BigInteger;
 import java.util.Arrays;
 
 public class Base58 {
-
     public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
-
+    private static final char ENCODED_ZERO = ALPHABET[0];
     private static final int[] INDEXES = new int[128];
     static {
         Arrays.fill(INDEXES, -1);
@@ -36,6 +40,41 @@ public class Base58 {
         }
     }
 
+    /**
+     * Encodes the given bytes as a base58 string (no checksum is appended).
+     *
+     * @param input the bytes to encode
+     * @return the base58-encoded string
+     */
+    public static String encode(byte[] input) {
+        if (input.length == 0) {
+            return "";
+        }       
+        // Count leading zeros.
+        int zeros = 0;
+        while (zeros < input.length && input[zeros] == 0) {
+            ++zeros;
+        }
+        // Convert base-256 digits to base-58 digits (plus conversion to ASCII characters)
+        input = Arrays.copyOf(input, input.length); // since we modify it in-place
+        char[] encoded = new char[input.length * 2]; // upper bound
+        int outputStart = encoded.length;
+        for (int inputStart = zeros; inputStart < input.length; ) {
+            encoded[--outputStart] = ALPHABET[divmod(input, inputStart, 256, 58)];
+            if (input[inputStart] == 0) {
+                ++inputStart; // optimization - skip leading zeros
+            }
+        }
+        // Preserve exactly as many leading encoded zeros in output as there were leading zeros in input.
+        while (outputStart < encoded.length && encoded[outputStart] == ENCODED_ZERO) {
+            ++outputStart;
+        }
+        while (--zeros >= 0) {
+            encoded[--outputStart] = ENCODED_ZERO;
+        }
+        // Return encoded string (including encoded leading zeros).
+        return new String(encoded, outputStart, encoded.length - outputStart);
+    }
 
     /**
      * Decodes the given base58 string into the original data bytes.
@@ -80,6 +119,31 @@ public class Base58 {
         return Arrays.copyOfRange(decoded, outputStart - zeros, decoded.length);
     }
     
+    public static BigInteger decodeToBigInteger(String input) throws Exception {
+        return new BigInteger(1, decode(input));
+    }
+
+    /**
+     * Decodes the given base58 string into the original data bytes, using the checksum in the
+     * last 4 bytes of the decoded data to verify that the rest are correct. The checksum is
+     * removed from the returned data.
+     *
+     * @param input the base58-encoded string to decode (which should include the checksum)
+     * @throws Exception if the input is not base 58 or the checksum does not validate.
+     */
+    public static byte[] decodeChecked(String input) throws Exception {
+        byte[] decoded  = decode(input);
+        if (decoded.length < 4) {
+            throw new Exception( "Input too short");
+        }
+        byte[] data = Arrays.copyOfRange(decoded, 0, decoded.length - 4);
+        byte[] checksum = Arrays.copyOfRange(decoded, decoded.length - 4, decoded.length);
+        byte[] actualChecksum = Arrays.copyOfRange(Sha256Hash.hashTwice(data), 0, 4);
+        if (!Arrays.equals(checksum, actualChecksum)) {
+            throw new Exception( "Checksum does not validate");
+        }
+        return data;
+    }
 
     /**
      * Divides a number, represented as an array of bytes each containing a single digit
