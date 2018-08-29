@@ -1,5 +1,7 @@
 package io.nuls.api.context;
 
+import io.nuls.api.constant.Constant;
+import io.nuls.api.server.dao.mapper.leveldb.BalanceLevelDbService;
 import io.nuls.api.server.dto.UtxoDto;
 
 import java.util.ArrayList;
@@ -13,17 +15,23 @@ import java.util.List;
  * Date:  2018/6/5 0005
  */
 public class BalanceListContext {
-    private static List<UtxoDto> blockDtos = new ArrayList<>();
+
+    private static BalanceLevelDbService balanceLevelDbService = BalanceLevelDbService.getInstance();
+
+    private static List<UtxoDto> blockDtos = null;
     public static void add(UtxoDto block){
         blockDtos.add(block);
     }
 
     public static List<UtxoDto> getAllUtxoDtos(){
+        if(null == blockDtos){
+            blockDtos = balanceLevelDbService.select(Constant.BALANCE_DB_NAME);
+        }
         return blockDtos;
     }
 
     public static List<UtxoDto> getAll(){
-        Collections.sort(blockDtos, new Comparator<UtxoDto>() {
+        Collections.sort(getAllUtxoDtos(), new Comparator<UtxoDto>() {
             @Override
             public int compare(UtxoDto o1, UtxoDto o2) {
                 return o2.getTotal().compareTo(o1.getTotal());
@@ -32,9 +40,15 @@ public class BalanceListContext {
         return blockDtos;
     }
     public static void reset(List<UtxoDto> list){
+        if(null != list){
+            balanceLevelDbService.insert(Constant.BALANCE_DB_NAME,list);
+        }
         blockDtos = list;
     }
     public static int getSize(){
-        return blockDtos.size();
+        if(null != blockDtos){
+            return blockDtos.size();
+        }
+        return 0;
     }
 }

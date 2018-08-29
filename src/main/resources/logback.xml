@@ -25,7 +25,7 @@
 		<appender-ref ref="systemLog" />
 	</logger>
 
-	<root level="ERROR">
+	<root level="info">
 		<appender-ref ref="systemLog" />
 		<appender-ref ref="STDOUT" />
 	</root>

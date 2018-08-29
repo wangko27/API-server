@@ -52,10 +52,12 @@ public class InitApiserver {
         time2 = TimeService.currentTimeMillis();
         Log.info("14天交易历史加载完成，耗时："+(time2-time));
         /*加载持币账户排行榜*/
-        List<UtxoDto> blockDtoList = utxoBusiness.getBlockSumTxamount();
+        if(null == BalanceListContext.getAllUtxoDtos()){
+            List<UtxoDto> blockDtoList = utxoBusiness.getBlockSumTxamount();
+            BalanceListContext.reset(blockDtoList);
+        }
         time = TimeService.currentTimeMillis();
         Log.info("持币账户排行榜加载完成，耗时："+(time-time2));
-        BalanceListContext.reset(blockDtoList);
         /*加载出块账户排行榜*/
         List<AgentNodeDto> agentNodeDtoList = agentNodeBusiness.selectTotalpackingCount();
         PackingAddressContext.reset(agentNodeDtoList);

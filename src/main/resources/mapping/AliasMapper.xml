@@ -31,6 +31,7 @@
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.alias,jdbcType=VARCHAR}, #{item.address,jdbcType=VARCHAR}, #{item.blockHeight,jdbcType=BIGINT})
         </foreach>
+        on duplicate key update alias = values(alias)
     </insert>
     <insert id="insertSelective" parameterType="io.nuls.api.entity.Alias" >
         insert into alias

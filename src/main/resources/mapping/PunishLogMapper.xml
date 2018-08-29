@@ -49,6 +49,7 @@
       #{item.time,jdbcType=BIGINT}, #{item.blockHeight,jdbcType=BIGINT}, #{item.roundIndex,jdbcType=BIGINT},
       #{item.reason,jdbcType=VARCHAR}, #{item.evidence,jdbcType=LONGVARBINARY})
     </foreach>
+    on duplicate key update time = values(time)
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.PunishLog" >
     insert into punish_log

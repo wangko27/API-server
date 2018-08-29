@@ -30,6 +30,7 @@
     <foreach collection="list" item="item" index="index" separator=",">
       (#{item.hash,jdbcType=VARCHAR}, #{item.blockHeight,jdbcType=BIGINT}, #{item.type,jdbcType=BIGINT}, #{item.createTime,jdbcType=BIGINT})
     </foreach>
+    on duplicate key update create_time = values(create_time)
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.Transaction" >
     insert into transaction

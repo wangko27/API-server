@@ -67,6 +67,7 @@
       #{item.totalPackingCount,jdbcType=BIGINT}, #{item.lastRewardHeight,jdbcType=BIGINT}, #{item.totalReward,jdbcType=BIGINT},
       #{item.deleteHash,jdbcType=VARCHAR})
     </foreach>
+    on duplicate key update delete_hash = values(delete_hash)
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.AgentNode" >
     insert into agent_node

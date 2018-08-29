@@ -58,7 +58,7 @@ public class AgentNodeResource {
             Map rpcdata = IndexContext.getRpcConsensusData();
             totalDeposit = Long.valueOf(rpcdata.get("totalDeposit")+"");
             totalCount = Integer.valueOf(rpcdata.get("agentCount")+"");
-            consensusAccountNumber = Long.valueOf(rpcdata.get("consensusAccountNumber")+"");
+            consensusAccountNumber = Long.valueOf(rpcdata.get("packingAgentCount")+"");
         }catch (NullPointerException e){
             Log.error("获取全网共识信息失败");
         }
