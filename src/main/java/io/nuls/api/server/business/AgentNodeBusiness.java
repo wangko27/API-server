@@ -1,5 +1,6 @@
 package io.nuls.api.server.business;
 
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.AgentNode;
@@ -11,6 +12,7 @@ import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.AgentDto;
 import io.nuls.api.server.dto.AgentNodeDto;
+import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,17 +229,52 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
 
     /**
      * 统计出块排名 没出块的就不排名，只统计已经在出块的
-     *
      * @return
      */
     public List<AgentNodeDto> selectTotalpackingCount() {
+        Map<String,AgentNodeDto> agentNodeDtoMap = new HashMap<>();
         Searchable searchable = new Searchable();
         /**
          * 出块数量大于零的 没有删除的节点
          */
+        List<AgentNodeDto>  agentNodeDtoList = new ArrayList<>();
         searchable.addCondition("total_packing_count", SearchOperator.gt, 0);
         searchable.addCondition("delete_hash", SearchOperator.isNull, null);
-        List<AgentNodeDto> agentNodeDtoList = agentNodeMapper.selectTotalpackingCount(searchable);
+        List<AgentNode> agentNodeList = agentNodeMapper.selectList(searchable);
+        long packIngAccount = 0;
+        long totalReward = 0;
+        long lastRewardHeight = 0;
+        AgentNodeDto agentNodeDto = null;
+        AgentNodeDto mapAgentNodeDto = null;
+        /*统计出块数量和总收益*/
+        for(AgentNode agentNode:agentNodeList){
+            /*已经存在，统计出块数量，总收益，重置最后收益区块*/
+            if(agentNodeDtoMap.containsKey(agentNode.getAgentAddress())){
+                packIngAccount = agentNode.getTotalPackingCount()==null?0:agentNode.getTotalPackingCount();
+                totalReward = agentNode.getTotalReward()==null?0:agentNode.getTotalReward();
+                lastRewardHeight = agentNode.getLastRewardHeight()==null?0:agentNode.getLastRewardHeight();
+                mapAgentNodeDto = agentNodeDtoMap.get(agentNode.getAgentAddress());
+                mapAgentNodeDto.setTotalPackingCount(agentNodeDto.getTotalPackingCount()+packIngAccount);
+                mapAgentNodeDto.setTotalReward(agentNodeDto.getTotalReward()+totalReward);
+                if(mapAgentNodeDto.getLastRewardHeight() < lastRewardHeight){
+                    mapAgentNodeDto.setLastRewardHeight(lastRewardHeight);
+                }
+                agentNodeDtoMap.put(agentNode.getAgentAddress(),mapAgentNodeDto);
+            }else{
+                /*不存在，直接新增*/
+                agentNodeDto = new AgentNodeDto(agentNode,0,"");
+                agentNodeDtoMap.put(agentNode.getAgentAddress(),agentNodeDto);
+            }
+
+        }
+        agentNodeDtoList =new ArrayList<>(agentNodeDtoMap.values());
+        /*根据出块数量从高到底排序*/
+        Collections.sort(agentNodeDtoList, new Comparator<AgentNodeDto>() {
+            @Override
+            public int compare(AgentNodeDto o1, AgentNodeDto o2) {
+                return o2.getTotalPackingCount().compareTo(o1.getTotalPackingCount());
+            }
+        });
         return agentNodeDtoList;
     }
 }
