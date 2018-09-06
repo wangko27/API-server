@@ -9,12 +9,12 @@ import net.sf.ehcache.Element;
 
 /**
  * Description:
- * Author: zsj
+ * Author: moon
  * Date:  2018/7/2 0002
  */
 public class EhcacheUtil {
 
-    private static final String path = "/ehcache.xml";
+    private static final String PATH = "/ehcache.xml";
 
     private URL url;
 
@@ -38,7 +38,7 @@ public class EhcacheUtil {
     //得到缓存实例
     public static EhcacheUtil getInstance() {
         if (ehCache == null) {
-            ehCache = new EhcacheUtil(path);
+            ehCache = new EhcacheUtil(PATH);
         }
         return ehCache;
     }

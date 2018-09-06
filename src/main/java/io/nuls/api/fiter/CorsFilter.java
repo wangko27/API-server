@@ -6,7 +6,7 @@ import javax.ws.rs.container.ContainerResponseFilter;
 
 /**
  * Description:
- * Author: zsj
+ * Author: moon
  * Date:  2018/3/15 0015
  */
 public class CorsFilter implements ContainerResponseFilter {

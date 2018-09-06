@@ -4,7 +4,7 @@ import io.nuls.api.entity.BlockHeader;
 
 /**
  * Description:
- * Author: zsj
+ * Author: moon
  * Date:  2018/6/7 0007
  */
 public class BlockHeaderDto extends BlockHeader {

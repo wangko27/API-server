@@ -2,7 +2,7 @@ package io.nuls.api.server.dto;
 
 /**
  * Description:
- * Author: zsj
+ * Author: moon
  * Date:  2018/8/2 0002
  */
 public class FreezeDto {

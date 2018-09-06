@@ -4,6 +4,7 @@ import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.AgentNodeBusiness;
 import io.nuls.api.server.dto.AgentDto;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +26,16 @@ public class AgentNodeSyncTask {
      * 去查询最新的节点列表
      */
     public void execute() {
-        IndexContext.resetRpcAgentNodeList(sync(new ArrayList<>(),1,100));
-        //重置共识信息
-        RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
-        if(rpcClientResult.isSuccess()){
-            IndexContext.resetRpcConsensusData((Map)rpcClientResult.getData());
+        try{
+            IndexContext.resetRpcAgentNodeList(sync(new ArrayList<>(),1,100));
+            //重置共识信息
+            RpcClientResult rpcClientResult = agentNodeBusiness.getConsensus();
+            if(rpcClientResult.isSuccess()){
+                IndexContext.resetRpcConsensusData((Map)rpcClientResult.getData());
+            }
+        }catch (Exception e){
+            Log.error("查询节点列表异常");
+            Log.error(e);
         }
     }
 

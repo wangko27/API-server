@@ -4,7 +4,7 @@ import io.nuls.api.model.Na;
 
 /**
  * Description: 实体类里面的状态字段表示的值
- * Author: zsj
+ * Author: moon
  * Date:  2018/5/31 0031
  */
 public class EntityConstant {

@@ -55,8 +55,10 @@ public class SyncDataBusiness {
     public void syncData(Block block) throws Exception {
         long time1 = System.currentTimeMillis(), time2;
         /*list*/
-        Map<String, Utxo> utxoMap = new HashMap<>();                            //存放区块内交易新生成的utxo
-        List<Utxo> fromList = new ArrayList<>();                                //存放区块内交易引用到的utxo
+        //存放区块内交易新生成的utxo
+        Map<String, Utxo> utxoMap = new HashMap<>();
+        //存放区块内交易引用到的utxo
+        List<Utxo> fromList = new ArrayList<>();
         List<Transaction> txList = new ArrayList<>();
         List<TransactionRelation> txRelationList = new ArrayList<>();
         List<AddressRewardDetail> addressRewardDetailList = new ArrayList<>();
@@ -88,7 +90,6 @@ public class SyncDataBusiness {
                 } else if (tx.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS) {
                     aliasList.add((Alias) tx.getTxData());
                 } else if (tx.getType() == EntityConstant.TX_TYPE_REGISTER_AGENT) {
-                    //agentNodeList.add((AgentNode) tx.getTxData());
                     agentNodeBusiness.save((AgentNode) tx.getTxData());
                 } else if (tx.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS) {
                     depositList.add((Deposit) tx.getTxData());
@@ -110,7 +111,7 @@ public class SyncDataBusiness {
                         TransactionRelation key = new TransactionRelation(log.getAddress(), tx.getHash(),tx.getType(),tx.getCreateTime());
                         txRelationList.add(key);
                     }
-                 }
+                }
             }
 
             blockBusiness.save(block.getHeader());

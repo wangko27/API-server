@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * Description: 初始化 第一次启动的时候加载一些信息
- * Author: zsj
+ * Author: moon
  * Date:  2018/6/5 0005
  */
 @Service
@@ -48,7 +48,7 @@ public class InitApiserver {
         Log.info("--------启动类加载开始-------");
         long time = TimeService.currentTimeMillis(),time2;
         /*加载14天历史*/
-        blockBusiness.initHistory();
+        blockBusiness.initHistory(1);
         time2 = TimeService.currentTimeMillis();
         Log.info("14天交易历史加载完成，耗时："+(time2-time));
         /*加载持币账户排行榜*/

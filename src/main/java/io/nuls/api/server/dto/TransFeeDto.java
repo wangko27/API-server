@@ -4,12 +4,15 @@ import io.nuls.api.model.Na;
 
 /**
  * Description:
- * Author: zsj
+ * Author: moon
  * Date:  2018/8/17 0017
  */
 public class TransFeeDto {
     private Na na = Na.ZERO;
-    private int size = 1;//交易大小
+    //交易大小
+    private int size = 1;
+    //最多可转多少
+    private Na money = Na.ZERO;
 
     public Na getNa() {
         return na;
@@ -25,5 +28,13 @@ public class TransFeeDto {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public Na getMoney() {
+        return money;
+    }
+
+    public void setMoney(Na money) {
+        this.money = money;
     }
 }

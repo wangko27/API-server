@@ -118,7 +118,9 @@ public class RpcClientResult<T> {
 
     @JsonIgnore
     public boolean isFailed() {
-        if (success) return false;
+        if (success) {
+            return false;
+        }
         if (data != null) {
             Map<String, Object> errorMap = (Map<String, Object>) data;
             code = (String) errorMap.get("code");

@@ -91,8 +91,12 @@ public class Utxo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Utxo)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Utxo)) {
+            return false;
+        }
         Utxo utxo = (Utxo) o;
         return Objects.equals(getKey(), utxo.getKey());
     }
@@ -136,7 +140,7 @@ public class Utxo {
         long currentTime = TimeService.currentTimeMillis();
         //long bestHeight = NulsContext.getInstance().getBestHeight();
 
-        if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+        if (lockTime > NulsConstant.BLOCKHEIGHT_TIME_DIVIDE) {
             if (lockTime <= currentTime) {
                 return true;
             } else {

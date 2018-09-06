@@ -24,7 +24,7 @@ import java.util.*;
 
 /**
  * Description: UTXO
- * Author: zsj
+ * Author: moon
  * Date:  2018/5/29 0029
  */
 @Service
@@ -236,6 +236,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      * @param entity
      * @return 1操作成功，其他失败
      */
+    @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(Utxo entity) {
         return utxoLevelDbService.insert(entity);
@@ -243,6 +244,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     }
 
 
+    @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int update(Utxo entity) {
         return utxoLevelDbService.insert(entity);

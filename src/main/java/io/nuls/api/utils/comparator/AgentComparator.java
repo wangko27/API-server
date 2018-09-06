@@ -62,8 +62,8 @@ public class AgentComparator implements Comparator<AgentDto> {
                 return INSTANCE_ARRAY[DEPOSITABLE];
             case COMPREHENSIVE:
                 return INSTANCE_ARRAY[COMPREHENSIVE];
+            default:return null;
         }
-        return null;
     }
 
     private AgentComparator(int sortType) {
@@ -125,7 +125,7 @@ public class AgentComparator implements Comparator<AgentDto> {
                 }
                 return 1;
             }
+            default: return 0;
         }
-        return 0;
     }
 }

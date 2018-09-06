@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * Description: 奖励
- * Author: zsj
+ * Author: moon
  * Date:  2018/5/29 0029
  */
 @Path("reward")

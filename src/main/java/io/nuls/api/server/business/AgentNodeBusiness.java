@@ -24,7 +24,7 @@ import java.util.*;
 
 /**
  * Description: 节点
- * Author: zsj
+ * Author: moon
  * Date:  2018/5/29 0029
  */
 @Service
@@ -45,7 +45,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @return
      */
     public RpcClientResult getList(String agentName, int pageNumber, int pageSize) {
-        Map<String, String> param = new HashMap<>();
+        Map<String, String> param = new HashMap<>(3);
         if (StringUtils.isNotBlank(agentName)) {
             param.put("keyword", agentName);
         }
@@ -186,6 +186,7 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
      * @param id 主键 txhash
      * @return
      */
+    @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByKey(String id) {
         return agentNodeMapper.deleteByPrimaryKey(id);
@@ -265,7 +266,6 @@ public class AgentNodeBusiness implements BaseService<AgentNode, String> {
                 agentNodeDto = new AgentNodeDto(agentNode,0,"");
                 agentNodeDtoMap.put(agentNode.getAgentAddress(),agentNodeDto);
             }
-
         }
         agentNodeDtoList =new ArrayList<>(agentNodeDtoMap.values());
         /*根据出块数量从高到底排序*/

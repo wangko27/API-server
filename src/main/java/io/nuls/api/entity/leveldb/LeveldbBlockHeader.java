@@ -2,7 +2,7 @@ package io.nuls.api.entity.leveldb;
 
 /**
  * Description:
- * Author: zsj
+ * Author: moon
  * Date:  2018/7/7 0007
  */
 public class LeveldbBlockHeader {

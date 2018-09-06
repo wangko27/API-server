@@ -23,6 +23,23 @@ import java.util.List;
 public class TransactionTool {
 
     /**
+     * 根据备注获取size
+     * @param remark  备注
+     * @return
+     */
+    public static int getRemarkSize(String remark){
+        if (StringUtils.isNotBlank(remark)) {
+            try {
+                return remark.getBytes(SDKConstant.DEFAULT_ENCODING).length;
+            } catch (UnsupportedEncodingException e) {
+                return 1;
+            }
+        } else {
+            return 1;
+        }
+    }
+
+    /**
      * 获取转账交易手续费
      * 交易手续费的计算：手续费单价 * 交易大小
      * 手续费单价(min)：100000 NA/1KB
@@ -35,16 +52,8 @@ public class TransactionTool {
      * @return
      */
     public static TransFeeDto getTransferTxFee(List<Utxo> utxoList, long amount, String remark, long unitPrice) {
-        int size = 162;                  // 124 + 38;
-        if (StringUtils.isNotBlank(remark)) {
-            try {
-                size += remark.getBytes(SDKConstant.DEFAULT_ENCODING).length;
-            } catch (UnsupportedEncodingException e) {
-                throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
-            }
-        } else {
-            size += 1;
-        }
+        // 124 + 38;
+        int size = 162+getRemarkSize(remark);
         return calcFee(utxoList, size, amount, Na.valueOf(unitPrice));
     }
 
@@ -98,8 +107,8 @@ public class TransactionTool {
         } catch (UnsupportedEncodingException e) {
             throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
         }
-
-        size += 162;                  // 124 + 38;
+        // 124 + 38;
+        size += 162;
         return calcFee(utxoList, size, NulsConstant.ALIAS_NA.getValue(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
     }
 
@@ -224,14 +233,20 @@ public class TransactionTool {
         return tx;
     }
 
-    public static Na calcMaxFee(List<Utxo> utxoList,int initSize, long unitPrice) {
+    /**
+     * 计算最大的可用金额
+     * @param utxoList 可用utxo列表
+     * @param initSize 交易初始大小
+     * @param unitPrice 交易手续费单价
+     * @return 最大的可用金额
+     */
+    public static TransFeeDto calcMaxFee(List<Utxo> utxoList,int initSize, long unitPrice) {
+        TransFeeDto transFeeDto = new TransFeeDto();
         Na max = Na.ZERO;
-        int maxSize = TransactionFeeCalculator.MAX_TX_SIZE - initSize;
-        //将所有余额从小到大排序后，累计未花费的余额
+        int maxSize = TransactionFeeCalculator.MAX_TX_SIZE-initSize;
         int size = 0;
         for (int i = 0; i < utxoList.size(); i++) {
             Utxo coin = utxoList.get(i);
-
             if (coin.getAmount().equals(Na.ZERO)) {
                 continue;
             }
@@ -242,8 +257,12 @@ public class TransactionTool {
             max = max.add(Na.valueOf(coin.getAmount()));
         }
         Na fee = TransactionFeeCalculator.getFee(size, Na.valueOf(unitPrice));
+        //最多可转金额等于最大金额减去手续费
         max = max.subtract(fee);
-        return max;
+        transFeeDto.setMoney(max);
+        transFeeDto.setNa(fee);
+        transFeeDto.setSize(size);
+        return transFeeDto;
     }
 
     private static TransFeeDto calcFee(List<Utxo> utxoList, int size, long amount, Na unitPrice) {

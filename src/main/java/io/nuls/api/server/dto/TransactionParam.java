@@ -2,7 +2,7 @@ package io.nuls.api.server.dto;
 
 /**
  * Description:
- * Author: zsj
+ * Author: moon
  * Date:  2018/7/24 0024
  */
 public class TransactionParam {

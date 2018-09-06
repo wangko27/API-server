@@ -58,7 +58,6 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
 
     /**
      * 根据地址，分页查询hash
-     *
      * @param address
      * @param pageNumber
      * @param pageSize
@@ -72,17 +71,19 @@ public class TransactionRelationBusiness implements BaseService<TransactionRelat
         if(type > 0){
             searchable.addCondition("type", SearchOperator.eq, type);
         }
-        if(startTime==endTime && startTime > 0){
+        //前端已改
+        /*if(startTime==endTime && startTime > 0){
             //特殊情况，前段传过来的两个一样的日期，都是当天的00:00:00，就查询这一天的交易即可
             searchable.addCondition("create_time", SearchOperator.gte, startTime);
             searchable.addCondition("create_time", SearchOperator.lte, startTime+ Constant.MILLISECONDS_TIME_DAY);
         }else{
-            if(startTime > 0){
-                searchable.addCondition("create_time", SearchOperator.gte, startTime);
-            }
-            if(endTime > 0){
-                searchable.addCondition("create_time", SearchOperator.lte, endTime);
-            }
+
+        }*/
+        if(startTime > 0){
+            searchable.addCondition("create_time", SearchOperator.gte, startTime);
+        }
+        if(endTime > 0){
+            searchable.addCondition("create_time", SearchOperator.lte, endTime);
         }
         PageHelper.orderBy("id desc");
         PageInfo<TransactionRelation> page = new PageInfo<>(relationMapper.selectList(searchable));

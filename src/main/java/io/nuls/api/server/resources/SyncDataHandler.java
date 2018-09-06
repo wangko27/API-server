@@ -84,22 +84,6 @@ public class SyncDataHandler {
     }
 
 
-    public RpcClientResult<Transaction> getTransaction(String hash) {
-        RpcClientResult result = restFulUtils.get("/tx/hash/" + hash, null);
-        if (result.isFailed()) {
-            return result;
-        }
-        try {
-            Transaction tx = RpcTransferUtil.toTransaction((Map<String, Object>) result.getData());
-            result.setData(tx);
-        } catch (Exception e) {
-            Log.error(e);
-            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
-        }
-        return result;
-    }
-
-
     public RpcClientResult<Utxo> getUtxo(String address, int limit) {
         RpcClientResult result = restFulUtils.get("/utxo/limit/" + address + "/" + limit, null);
         return result;

@@ -1,12 +1,11 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.EntityConstant;
-import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.server.business.AliasBusiness;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.server.business.TransactionRelationBusiness;
-import io.nuls.api.server.business.UtxoBusiness;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,8 @@ public class SearchResource {
 
     @Autowired
     private BlockBusiness blockBusiness;
+    @Autowired
+    private AliasBusiness aliasBusiness;
     @Autowired
     private TransactionBusiness transactionBusiness;
     @Autowired
@@ -61,9 +62,14 @@ public class SearchResource {
                 } else if (null != transactionBusiness.getByHash(keyword)) {
                     result.setData(EntityConstant.SEARCH_TX_HASH);
                 }
-            }
+            }/*else{
+                //不是高度，不是地址，不是hash，根据别名搜索    根据别名获取地址
+                Alias alias = aliasBusiness.getAliasByAlias(keyword);
+                if(null != alias && StringUtils.isNotBlank(alias.getAddress())){
+
+                }
+            }*/
         } catch (Exception e) {
-            e.printStackTrace();
             Log.error(e);
         }
         return result;

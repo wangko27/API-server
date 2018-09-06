@@ -113,7 +113,7 @@ public interface NulsConstant {
      * 小于该值表示按照高度锁定
      * 大于该值表示按照时间锁定
      */
-    long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
+    long BLOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
 
 
 

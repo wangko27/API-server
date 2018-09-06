@@ -281,9 +281,10 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 统计出块历史
+     * @param type 1非必须统计统计，2必须统计
      */
-    public void initHistory() {
-        if(null == HistoryContext.getAll()){
+    public void initHistory(int type) {
+        if(null == HistoryContext.getAll() || type == 2){
             String[] historyList = new String[14];
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.DATE, cal.get(Calendar.DATE));
