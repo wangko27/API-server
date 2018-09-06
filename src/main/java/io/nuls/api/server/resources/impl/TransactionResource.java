@@ -385,7 +385,7 @@ public class TransactionResource {
             if(null != transaction){
                 attr.put("hash",transaction.getHash().getDigestHex());
                 attr.put("tx",transaction);
-                /*Transaction tx = RpcTransferUtil.toTransaction(transaction);
+                Transaction tx = RpcTransferUtil.toTransaction(transaction);
                 Utxo utxoKey = null;
                 for(Input input:tx.getInputs()){
                     utxoKey = utxoBusiness.getByKey(input.getKey());
@@ -398,8 +398,7 @@ public class TransactionResource {
                 WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx,Base64.getEncoder().encodeToString(transaction.serialize()),transactionParam.getAddress(),temp);
                 if(webwalletTransactionBusiness.save(webwalletTransaction) != 1){
                     return RpcClientResult.getFailed(ErrorCode.TX_SAVETEMPUTXO_ERROR);
-                }*/
-                //暂时注释，测试
+                }
             }else{
                 //为空，说明有系统异常
                 return RpcClientResult.getFailed(ErrorCode.FAILED);
