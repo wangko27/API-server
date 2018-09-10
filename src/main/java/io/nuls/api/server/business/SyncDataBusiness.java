@@ -10,6 +10,7 @@ import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
+import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ public class SyncDataBusiness {
     private AgentNodeBusiness agentNodeBusiness;
     @Autowired
     private WebwalletTransactionBusiness webwalletTransactionBusiness;
+    @Autowired
+    private SyncDataHandler syncDataHandler;
 
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
@@ -111,6 +114,22 @@ public class SyncDataBusiness {
                         TransactionRelation key = new TransactionRelation(log.getAddress(), tx.getHash(),tx.getType(),tx.getCreateTime());
                         txRelationList.add(key);
                     }
+                }else if(tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT){
+                    //创建合约
+                    System.out.println("创建合约");
+                    System.out.println("tx.getData:"+tx.getTxData());
+                }else if(tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT){
+                    //调用合约
+                    System.out.println("调用合约");
+                    System.out.println("tx.getData:"+tx.getTxData());
+                }else if(tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT){
+                    //删除合约
+                    System.out.println("删除合约");
+                    System.out.println("tx.getData:"+tx.getTxData());
+                }else if(tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER){
+                    //合约转账
+                    System.out.println("合约转账");
+                    System.out.println("tx.getData:"+tx.getTxData());
                 }
             }
 

@@ -24,6 +24,7 @@
 package io.nuls.api.entity;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -86,7 +87,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static Na valueOf(final long na) {
         if (MAX_NA_VALUE < na) {
-            throw new RuntimeException(ErrorCode.DATA_ERROR.getMsg());
+            throw new RuntimeException(KernelErrorCode.DATA_ERROR.getMsg());
         }
         return new Na(na);
     }

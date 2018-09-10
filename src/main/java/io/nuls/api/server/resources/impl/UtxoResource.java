@@ -1,6 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.business.BlockBusiness;
@@ -35,7 +36,7 @@ public class UtxoResource {
     public RpcClientResult listWithAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;
         }
         if (pageNumber == 0) {

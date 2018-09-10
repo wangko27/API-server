@@ -1,6 +1,7 @@
 package io.nuls.api.server.task;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
@@ -48,7 +49,7 @@ public class BlockSyncTask {
             }
             //失败处理
             if (result.isFailed()) {
-                if (!result.getCode().equals(ErrorCode.DATA_NOT_FOUND.getCode())) {
+                if (!result.getCode().equals(KernelErrorCode.BLOCK_IS_NULL.getCode())) {
                     //如果错误信息不是未找到最新块的话 就说明查询区块报错
                     Log.error("-------获取下一区块头信息失败:" + result.getCode() + "-" + result.getMsg());
                 } else {

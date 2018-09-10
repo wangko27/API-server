@@ -62,6 +62,26 @@ public class EntityConstant {
      */
     public static final int PUTLISH_RED = 2;
 
+
+    /**
+     * CONTRACT 创建合约
+     */
+    public static int TX_TYPE_CREATE_CONTRACT = 100;
+    /**
+     * 调用合约
+     */
+    public static int TX_TYPE_CALL_CONTRACT = 101;
+    /**
+     * 删除合约
+     */
+    public static int TX_TYPE_DELETE_CONTRACT = 102;
+
+    /**
+     * contract transfer 合约转账
+     */
+    public static int TX_TYPE_CONTRACT_TRANSFER = 103;
+
+
     /**
      * 设置别名费用
      */

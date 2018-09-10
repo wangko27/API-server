@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 
 import java.util.Map;
 
@@ -97,15 +98,15 @@ public class RpcClientResult<T> {
     }
 
     public static RpcClientResult getSuccess() {
-        return new RpcClientResult(true, ErrorCode.SUCCESS);
+        return new RpcClientResult(true, KernelErrorCode.SUCCESS);
     }
 
     public static RpcClientResult getFailed() {
-        return new RpcClientResult(false, ErrorCode.FAILED);
+        return new RpcClientResult(false, KernelErrorCode.FAILED);
     }
 
     public static RpcClientResult getFailed(String msg) {
-        return new RpcClientResult(false, ErrorCode.FAILED.getCode(), msg);
+        return new RpcClientResult(false, KernelErrorCode.FAILED.getCode(), msg);
     }
 
     public static RpcClientResult getFailed(ErrorCode errorCode) {

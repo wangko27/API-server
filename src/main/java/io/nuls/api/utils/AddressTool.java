@@ -27,6 +27,7 @@ package io.nuls.api.utils;
 
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.NulsContext;
 import io.nuls.api.crypto.ECKey;
 import io.nuls.api.crypto.Hex;
@@ -141,7 +142,7 @@ public class AddressTool {
         System.arraycopy(hashs, Address.ADDRESS_LENGTH, sign, 0, 1);
 
         if (xor != hashs[Address.ADDRESS_LENGTH]) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
     }
 

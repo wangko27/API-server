@@ -1,6 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.AliasBusiness;
@@ -31,7 +32,7 @@ public class AliasResource {
     public RpcClientResult getAlias(@PathParam("address") String address){
         RpcClientResult result = null;
         if (!StringUtils.validAddress(address)) {
-            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
             return result;
         }
         try {

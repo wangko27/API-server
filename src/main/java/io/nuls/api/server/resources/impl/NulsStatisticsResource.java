@@ -1,6 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.BalanceListContext;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.PackingAddressContext;
@@ -71,7 +72,7 @@ public class NulsStatisticsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult balancelist(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         if (pageNumber < 0 || pageSize < 0) {
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;
@@ -103,7 +104,7 @@ public class NulsStatisticsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult minedlist(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         if (pageNumber < 0 || pageSize < 0) {
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;

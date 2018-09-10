@@ -25,7 +25,7 @@
 package io.nuls.api.utils;
 
 import io.nuls.api.constant.Constant;
-import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.BaseNulsData;
@@ -34,7 +34,6 @@ import io.nuls.api.model.NulsSignData;
 import io.nuls.api.model.Transaction;
 import io.nuls.api.utils.log.Log;
 
-import java.awt.*;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
@@ -54,7 +53,7 @@ public class NulsByteBuffer {
 
     public NulsByteBuffer(byte[] bytes, int cursor) {
         if (null == bytes || bytes.length == 0 || cursor < 0) {
-            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
         this.payload = bytes;
         this.cursor = cursor;
@@ -66,7 +65,7 @@ public class NulsByteBuffer {
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -76,7 +75,7 @@ public class NulsByteBuffer {
             cursor += 2;
             return val;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -86,7 +85,7 @@ public class NulsByteBuffer {
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -96,7 +95,7 @@ public class NulsByteBuffer {
             cursor += 4;
             return val;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -106,7 +105,7 @@ public class NulsByteBuffer {
             cursor += 8;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -121,7 +120,7 @@ public class NulsByteBuffer {
             cursor += offset + varint.getOriginalSizeInBytes();
             return varint.value;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -131,7 +130,7 @@ public class NulsByteBuffer {
             cursor += 1;
             return b;
         } catch (IndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -142,7 +141,7 @@ public class NulsByteBuffer {
             cursor += length;
             return b;
         } catch (IndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 

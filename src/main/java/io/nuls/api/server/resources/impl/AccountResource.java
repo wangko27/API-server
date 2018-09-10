@@ -1,6 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.AddressTool;
@@ -31,7 +32,7 @@ public class AccountResource {
         RpcClientResult result = null;
         try {
             if(StringUtils.isBlank(publicKey)){
-                result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+                result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
                 return result;
             }
             result = RpcClientResult.getSuccess();

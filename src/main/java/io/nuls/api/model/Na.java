@@ -27,6 +27,7 @@ package io.nuls.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.utils.LongUtils;
 
@@ -91,14 +92,14 @@ public final class Na implements Comparable<Na>, Serializable {
 
     private Na(final long na) {
         if (MAX_NA_VALUE < na) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         this.value = na;
     }
 
     public static Na valueOf(final long na) {
         if (MAX_NA_VALUE < na) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         return new Na(na);
     }
