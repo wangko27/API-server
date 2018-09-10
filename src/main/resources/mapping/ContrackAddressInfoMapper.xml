@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.ContrackAddressInfoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.ContrackAddressInfo" >
+    <id column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
+    <result column="creater" property="creater" jdbcType="VARCHAR" />
+    <result column="create_tx_hash" property="createTxHash" jdbcType="VARCHAR" />
+    <result column="block_height" property="blockHeight" jdbcType="BIGINT" />
+    <result column="is_nrc20" property="isNrc20" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <result column="delete_hash" property="deleteHash" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    contract_address, creater, create_tx_hash, block_height, is_nrc20, status, create_time, 
+    delete_hash
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from contrack_address_info
+    where contract_address = #{contractAddress,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from contrack_address_info
+    where contract_address = #{contractAddress,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.ContrackAddressInfo" >
+    insert into contrack_address_info (contract_address, creater, create_tx_hash, 
+      block_height, is_nrc20, status, 
+      create_time, delete_hash)
+    values (#{contractAddress,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, #{createTxHash,jdbcType=VARCHAR}, 
+      #{blockHeight,jdbcType=BIGINT}, #{isNrc20,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=BIGINT}, #{deleteHash,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.ContrackAddressInfo" >
+    insert into contrack_address_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="contractAddress != null" >
+        contract_address,
+      </if>
+      <if test="creater != null" >
+        creater,
+      </if>
+      <if test="createTxHash != null" >
+        create_tx_hash,
+      </if>
+      <if test="blockHeight != null" >
+        block_height,
+      </if>
+      <if test="isNrc20 != null" >
+        is_nrc20,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="deleteHash != null" >
+        delete_hash,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="contractAddress != null" >
+        #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createTxHash != null" >
+        #{createTxHash,jdbcType=VARCHAR},
+      </if>
+      <if test="blockHeight != null" >
+        #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="isNrc20 != null" >
+        #{isNrc20,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHash != null" >
+        #{deleteHash,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.ContrackAddressInfo" >
+    update contrack_address_info
+    <set >
+      <if test="creater != null" >
+        creater = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createTxHash != null" >
+        create_tx_hash = #{createTxHash,jdbcType=VARCHAR},
+      </if>
+      <if test="blockHeight != null" >
+        block_height = #{blockHeight,jdbcType=BIGINT},
+      </if>
+      <if test="isNrc20 != null" >
+        is_nrc20 = #{isNrc20,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="deleteHash != null" >
+        delete_hash = #{deleteHash,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where contract_address = #{contractAddress,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.ContrackAddressInfo" >
+    update contrack_address_info
+    set creater = #{creater,jdbcType=VARCHAR},
+      create_tx_hash = #{createTxHash,jdbcType=VARCHAR},
+      block_height = #{blockHeight,jdbcType=BIGINT},
+      is_nrc20 = #{isNrc20,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=BIGINT},
+      delete_hash = #{deleteHash,jdbcType=VARCHAR}
+    where contract_address = #{contractAddress,jdbcType=VARCHAR}
+  </update>
+</mapper>
