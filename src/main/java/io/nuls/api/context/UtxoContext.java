@@ -59,11 +59,4 @@ public class UtxoContext {
         return setList;
     }
 
-    //启动的时候，初始化缓存
-    public static void initCache(List<AddressHashIndex> list){
-        for(AddressHashIndex hashIndex: list){
-            EhcacheUtil.getInstance().put(Constant.UTXO_CACHE_NAME, hashIndex.getAddress(), hashIndex.getHashIndexSet());
-        }
-    }
-
 }

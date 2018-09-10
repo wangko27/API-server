@@ -53,7 +53,6 @@ public class EntityConstant {
      * 红牌交易
      */
     public static final int TX_TYPE_RED_PUNISH = 8;
-
     /**
      * 黄牌惩罚
      */
