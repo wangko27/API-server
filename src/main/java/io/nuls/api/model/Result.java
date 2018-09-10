@@ -26,6 +26,7 @@ package io.nuls.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.StringUtils;
@@ -47,12 +48,12 @@ public class Result<T> implements Serializable {
 
 
     public Result() {
-        this(true, ErrorCode.SUCCESS, null);
+        this(true, KernelErrorCode.SUCCESS, null);
     }
 
     public Result(boolean success) {
         this.success = success;
-        this.errorCode = ErrorCode.SUCCESS;
+        this.errorCode = KernelErrorCode.SUCCESS;
     }
     public Result(boolean success, ErrorCode errorCode, T data) {
         this.success = success;
@@ -122,7 +123,7 @@ public class Result<T> implements Serializable {
     }
 
     public static Result getFailed() {
-        return getFailed(ErrorCode.FAILED);
+        return getFailed(KernelErrorCode.FAILED);
     }
 
  /*   public static Result getFailed(String msg) {

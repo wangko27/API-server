@@ -26,6 +26,7 @@
 package io.nuls.api.model;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.NulsContext;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.utils.AddressTool;
@@ -106,7 +107,7 @@ public class Address {
 
     public static Address fromHashs(byte[] hashs) {
         if (hashs == null || hashs.length != ADDRESS_LENGTH) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
 
         short chainId = SerializeUtils.bytes2Short(hashs);

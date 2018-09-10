@@ -1,7 +1,11 @@
 package io.nuls.api.server.resources;
 
 import io.nuls.api.constant.ErrorCode;
-import io.nuls.api.entity.*;
+import io.nuls.api.constant.KernelErrorCode;
+import io.nuls.api.entity.Block;
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.entity.Utxo;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.RpcTransferUtil;
@@ -35,7 +39,7 @@ public class SyncDataHandler {
             result.setData(blockHeader);
         } catch (Exception e) {
             Log.error(e);
-            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.DATA_PARSE_ERROR);
         }
         return result;
     }
@@ -53,7 +57,7 @@ public class SyncDataHandler {
             Block block = RpcTransferUtil.toBlock(txHex, header);
             result.setData(block);
         } catch (Exception e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
         return result;
     }
@@ -68,9 +72,17 @@ public class SyncDataHandler {
             result.setData(blockHeader);
         } catch (Exception e) {
             Log.error(e);
-            result = RpcClientResult.getFailed(ErrorCode.DATA_PARSE_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.DATA_PARSE_ERROR);
         }
         return result;
+    }
+
+    public RpcClientResult getTx(String hash) throws NulsException {
+        RpcClientResult result = restFulUtils.get("/api/accountledger/tx/"+hash, null);
+        if (result.isFailed()) {
+            return result;
+        }
+        return null;
     }
 
     public RpcClientResult broadcast(Map<String, String> params){

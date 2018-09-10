@@ -20,6 +20,7 @@
 package io.nuls.api.server.leveldb.service.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.server.leveldb.manager.LevelDBManager;
 import io.nuls.api.server.leveldb.service.BatchOperation;
 import io.nuls.api.model.Result;
@@ -31,9 +32,9 @@ import java.io.IOException;
 
 public class BatchOperationImpl implements BatchOperation {
 
-    private static final Result FAILED_NULL = Result.getFailed(ErrorCode.NULL_PARAMETER);
+    private static final Result FAILED_NULL = Result.getFailed(KernelErrorCode.NULL_PARAMETER);
     private static final Result SUCCESS = Result.getSuccess();
-    private static final Result FAILED_BATCH_CLOSE = Result.getFailed(ErrorCode.DB_BATCH_CLOSE);
+    private static final Result FAILED_BATCH_CLOSE = Result.getFailed(KernelErrorCode.DB_BATCH_CLOSE);
     private String area;
     private DB db;
     private WriteBatch batch;
@@ -49,10 +50,10 @@ public class BatchOperationImpl implements BatchOperation {
 
     public Result checkBatch() {
         if(db == null) {
-            return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+            return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
         }
         if(batch == null) {
-            return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
+            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION);
         }
         return SUCCESS;
     }
@@ -102,7 +103,7 @@ public class BatchOperationImpl implements BatchOperation {
             db.write(batch);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
+            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION);
         } finally {
             // Make sure you close the batch to avoid resource leaks.
             // 貌似LevelDB未实现此close方法, 所以加入一个逻辑关闭

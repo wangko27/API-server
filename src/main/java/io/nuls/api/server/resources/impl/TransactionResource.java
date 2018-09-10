@@ -3,6 +3,7 @@ package io.nuls.api.server.resources.impl;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
@@ -65,7 +66,7 @@ public class TransactionResource {
     public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("height")Long height,@QueryParam("type")int type){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;
         }
         if (pageNumber == 0) {
@@ -88,7 +89,7 @@ public class TransactionResource {
     public RpcClientResult list(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address")String address,@QueryParam("type")int type,@QueryParam("startTime")long startTime,@QueryParam("endTime")long endTime){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;
         }
         if (pageNumber == 0) {
@@ -100,7 +101,7 @@ public class TransactionResource {
             pageSize = 100;
         }
         if(!StringUtils.validAddress(address)){
-            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
             return result;
         }
         result = RpcClientResult.getSuccess();
@@ -114,7 +115,7 @@ public class TransactionResource {
     public RpcClientResult listWebWallet(@QueryParam("address")String address,@QueryParam("status") int status,@QueryParam("type") int type,@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;
         }
         if (pageNumber == 0) {
@@ -126,7 +127,7 @@ public class TransactionResource {
             pageSize = 100;
         }
         if(!StringUtils.validAddress(address)){
-            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
             return result;
         }
         result = RpcClientResult.getSuccess();
@@ -140,13 +141,13 @@ public class TransactionResource {
     public RpcClientResult getDetailByHash(@PathParam("hash") String hash){
         RpcClientResult result;
         if (!StringUtils.validHash(hash)) {
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         try {
             result = RpcClientResult.getSuccess();
             Transaction transaction = transactionBusiness.getByHash(hash);
             if(null == transaction){
-                return RpcClientResult.getFailed(ErrorCode.DATA_NOT_FOUND);
+                return RpcClientResult.getFailed(KernelErrorCode.DATA_NOT_FOUND);
             }
             List<Utxo> outputs = new ArrayList<>();
             if(null != transaction.getOutputList()){
@@ -179,7 +180,7 @@ public class TransactionResource {
     public RpcClientResult getTransFee(@QueryParam("address")String address,@QueryParam("money")long money,@QueryParam("remark")String remark,@QueryParam("price")long price,@QueryParam("types")int types,@QueryParam("alias")String alias){
         RpcClientResult result;
         if(!StringUtils.validAddress(address)){
-            return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
         }
         result = valiHeight();
         if(result.isSuccess()){
@@ -190,10 +191,10 @@ public class TransactionResource {
             TransFeeDto transFeeDto = null;
             if(types == EntityConstant.TX_TYPE_TRANSFER){
                 if(money <= 0){
-                    return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
                 }
                 if (!StringUtils.validTxRemark(remark)) {
-                    return RpcClientResult.getFailed(ErrorCode.TX_REMARK_LENTH_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
                 }
                 //size: 备注长度+162
                 transFeeDto = TransactionTool.getTransferTxFee(list,money,remark,price);
@@ -210,7 +211,7 @@ public class TransactionResource {
                 //加入共识
                 //size: 288
                 if(money < Constant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue()){
-                    return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
                 }
                 transFeeDto = TransactionTool.getJoinAgentTxFee(list,money);
                 if(null == transFeeDto){
@@ -226,13 +227,13 @@ public class TransactionResource {
                 transFeeDto.setNa(io.nuls.api.model.Na.CENT);
             }else{
                 //其他，暂时不处理
-                return RpcClientResult.getFailed(ErrorCode.TX_TYPE_NULL);
+                return RpcClientResult.getFailed(KernelErrorCode.TX_TYPE_NULL);
             }
             if(null == transFeeDto){
-                return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
             }
             if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
-                return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_TOO_MUCH);
             }
             attr.put("fee",transFeeDto.getNa().getValue()+"");
             attr.put("feeType",feeType+"");
@@ -250,13 +251,13 @@ public class TransactionResource {
         Map<String,Object> attr = new HashMap<>(1);
         attr.put("hash","");
         if(null == transactionParam){
-            return RpcClientResult.getFailed(ErrorCode.NULL_PARAMETER);
+            return RpcClientResult.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         if(StringUtils.isBlank(transactionParam.getAddress())){
-            return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
         }
         if(transactionParam.getTypes() <= 0){
-            return RpcClientResult.getFailed(ErrorCode.TX_TYPE_NULL);
+            return RpcClientResult.getFailed(KernelErrorCode.TX_TYPE_NULL);
         }
         result = valiHeight();
         if(result.isSuccess()){
@@ -268,36 +269,36 @@ public class TransactionResource {
             if(transactionParam.getTypes() == EntityConstant.TX_TYPE_TRANSFER){
                 //金额不正确
                 if(transactionParam.getMoney()<=0){
-                    return RpcClientResult.getFailed(ErrorCode.TX_MONEY_NULL);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_MONEY_NULL);
                 }
                 //手续费不正确
                 if(transactionParam.getPrice()<TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.getValue() || transactionParam.getPrice() > TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES.getValue()){
-                    return RpcClientResult.getFailed(ErrorCode.TX_PRICE_NULL);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_PRICE_NULL);
                 }
                 //转入地址不正确
                 if(!StringUtils.validAddress(transactionParam.getToAddress())){
-                    return RpcClientResult.getFailed(ErrorCode.TX_TOADDRESS_NULL);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_TOADDRESS_NULL);
                 }
                 if(StringUtils.isNotBlank(transactionParam.getRemark()) && StringUtils.isSpecialChar(transactionParam.getRemark())){
-                    return RpcClientResult.getFailed(ErrorCode.TX_REMARK_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_ERROR);
                 }
                 if (!StringUtils.validTxRemark(transactionParam.getRemark())) {
-                    return RpcClientResult.getFailed(ErrorCode.TX_REMARK_LENTH_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
                 }
                 //转账
                 transFeeDto =TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice());
                 if(null == transFeeDto){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
                 }
                 na = transFeeDto.getNa();
                 if(null == na){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
                 }
                 if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_TOO_MUCH);
                 }
                 if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_TOO_MUCH);
                 }
                 //组装交易
                 transaction = TransactionTool.createTransferTx(list,transactionParam.getToAddress(),transactionParam.getMoney(),transactionParam.getRemark(),na.getValue());
@@ -305,32 +306,32 @@ public class TransactionResource {
                 //设置别名
                 //别名格式不正确
                 if(StringUtils.isBlank(transactionParam.getAlias()) || !StringUtils.valiAlias(transactionParam.getAlias())){
-                    return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_ALIAS_ERROR);
                 }
                 //别名长度不正确
                 if(transactionParam.getAlias().length() > 20){
-                    return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_ALIAS_ERROR);
                 }
                 //别名已存在
                 if(webwalletTransactionBusiness.getAliasByAlias(transactionParam.getAlias()) > 0
                         || null!=aliasBusiness.getAliasByAlias(transactionParam.getAlias())){
-                    return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_USED_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_ALIAS_USED_ERROR);
                 }
                 //该用户已经设置过别名了
                 if(null!=aliasBusiness.getAliasByAddress(transactionParam.getAddress())
                         || webwalletTransactionBusiness.getAliasByAddress(transactionParam.getAddress()) > 0){
-                    return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_USED_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_ALIAS_USED_ERROR);
                 }
                 transFeeDto = TransactionTool.getAliasTxFee(list,transactionParam.getAddress(),transactionParam.getAlias());
                 if(null == transFeeDto){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
                 }
                 na = transFeeDto.getNa();
                 if(null == na){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
                 }
                 if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_TOO_MUCH);
                 }
                 temp = transactionParam.getAlias();
                 //组装交易
@@ -338,33 +339,33 @@ public class TransactionResource {
             }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
                 //金额不正确
                 if(transactionParam.getMoney()<=0){
-                    return RpcClientResult.getFailed(ErrorCode.TX_MONEY_NULL);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_MONEY_NULL);
                 }
                 //委托的节点hash不正确
                 if(!StringUtils.validHash(transactionParam.getAgentHash())){
-                    return RpcClientResult.getFailed(ErrorCode.HASH_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.HASH_ERROR);
                 }
                 //加入共识
                 transFeeDto = TransactionTool.getJoinAgentTxFee(list,transactionParam.getMoney());
                 if(null == transFeeDto){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
                 }
                 na = transFeeDto.getNa();
                 if(null == na){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_NOT_ENOUGH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
                 }
                 if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
-                    return RpcClientResult.getFailed(ErrorCode.BALANCE_TOO_MUCH);
+                    return RpcClientResult.getFailed(KernelErrorCode.BALANCE_TOO_MUCH);
                 }
                 //组装交易
                 transaction = TransactionTool.createDepositTx(list,transactionParam.getAddress(),transactionParam.getAgentHash(),transactionParam.getMoney(),na.getValue());
             }else if(transactionParam.getTypes() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
                 //退出委托的hash不正确
                 if(!StringUtils.validHash(transactionParam.getAgentHash())){
-                    return RpcClientResult.getFailed(ErrorCode.HASH_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.HASH_ERROR);
                 }
                 if(webwalletTransactionBusiness.getDepositCoutByAddressAgentHash(transactionParam.getAgentHash()) > 0){
-                    return RpcClientResult.getFailed(ErrorCode.TX_ALIAS_CANCEL_DEPOSIT_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_ALIAS_CANCEL_DEPOSIT_ERROR);
                 }
                 temp = transactionParam.getAgentHash();
                 //组装交易
@@ -380,7 +381,7 @@ public class TransactionResource {
                 }
             }else{
                 //其他，暂时不处理
-                return RpcClientResult.getFailed(ErrorCode.TX_TYPE_NULL);
+                return RpcClientResult.getFailed(KernelErrorCode.TX_TYPE_NULL);
             }
             if(null != transaction){
                 attr.put("hash",transaction.getHash().getDigestHex());
@@ -397,11 +398,11 @@ public class TransactionResource {
                 }
                 WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx,Base64.getEncoder().encodeToString(transaction.serialize()),transactionParam.getAddress(),temp);
                 if(webwalletTransactionBusiness.save(webwalletTransaction) != 1){
-                    return RpcClientResult.getFailed(ErrorCode.TX_SAVETEMPUTXO_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
                 }
             }else{
                 //为空，说明有系统异常
-                return RpcClientResult.getFailed(ErrorCode.FAILED);
+                return RpcClientResult.getFailed(KernelErrorCode.FAILED);
             }
             result.setData(attr);
         }
@@ -414,18 +415,18 @@ public class TransactionResource {
     public RpcClientResult broadcast(TransactionParam transactionParam) throws Exception {
         RpcClientResult result;
         if(null == transactionParam){
-            return RpcClientResult.getFailed(ErrorCode.NULL_PARAMETER);
+            return RpcClientResult.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         if(StringUtils.isBlank(transactionParam.getAgentHash())){
-            return RpcClientResult.getFailed(ErrorCode.NULL_PARAMETER);
+            return RpcClientResult.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         if(StringUtils.isBlank(transactionParam.getSign())){
-            return RpcClientResult.getFailed(ErrorCode.NULL_PARAMETER);
+            return RpcClientResult.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         WebwalletTransaction transaction = webwalletTransactionBusiness.getByKey(transactionParam.getAgentHash());
         if(null != transaction){
             if(null != transactionBusiness.getByHash(transaction.getHash())){
-                return RpcClientResult.getFailed(ErrorCode.TX_HASH_CONFIRMED_ERROR);
+                return RpcClientResult.getFailed(KernelErrorCode.TX_HASH_CONFIRMED_ERROR);
             }
             byte[] data = Base64.getDecoder().decode(transaction.getSignData());
             io.nuls.api.model.Transaction boradTx = null;
@@ -443,7 +444,7 @@ public class TransactionResource {
                 boradTx = new CancelDepositTransaction();
             }else{
                 //其他，暂时不处理
-                return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+                return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             }
             //94015
 
@@ -459,7 +460,7 @@ public class TransactionResource {
                 if(webwalletTransactionBusiness.update(transaction) > 0){
                     return result;
                 }else{
-                    return RpcClientResult.getFailed(ErrorCode.TX_SAVETEMPUTXO_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
                 }
             }else{
                 Log.error("交易"+transaction.getHash()+"验证失败，原因："+result.getData()+"，code:"+result.getCode());
@@ -470,7 +471,7 @@ public class TransactionResource {
                     Map resultAttr = (Map)result.getData();
                     return new RpcClientResult(false, resultAttr.get("code")+"", result.getMsg());
                 }catch (Exception e){
-                    return RpcClientResult.getFailed(ErrorCode.TX_BROADCAST_ERROR);
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_BROADCAST_ERROR);
                 }
             }
         }else{
@@ -487,10 +488,10 @@ public class TransactionResource {
         try {
             RpcClientResult<BlockHeader> newestBlock = syncDataHandler.getNewest();
             if(!newestBlock.isSuccess() || (newestBlock.getData().getHeight()-blockHeader.getHeight())>1){
-                return RpcClientResult.getFailed(ErrorCode.BLOCK_NOT_SYNC);
+                return RpcClientResult.getFailed(KernelErrorCode.BLOCK_NOT_SYNC);
             }
         } catch (NulsException e) {
-            return RpcClientResult.getFailed(ErrorCode.BLOCK_NOT_SYNC);
+            return RpcClientResult.getFailed(KernelErrorCode.BLOCK_NOT_SYNC);
         }
         return RpcClientResult.getSuccess();
     }

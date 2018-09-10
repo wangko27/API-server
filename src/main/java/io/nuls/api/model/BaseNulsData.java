@@ -26,6 +26,7 @@ package io.nuls.api.model;
 
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
@@ -60,7 +61,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
             }
             byte[] bytes = bos.toByteArray();
             if (bytes.length != this.size()) {
-                throw new NulsRuntimeException(ErrorCode.SERIALIZE_ERROR);
+                throw new NulsRuntimeException(KernelErrorCode.SERIALIZE_ERROR);
             }
             return bytes;
         } finally {

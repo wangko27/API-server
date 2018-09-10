@@ -2,6 +2,7 @@ package io.nuls.api.utils;
 
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.Transaction;
 import io.nuls.api.model.tx.*;
@@ -26,6 +27,10 @@ public class TransactionManager {
         TYPE_TX_MAP.put(EntityConstant.TX_TYPE_STOP_AGENT, StopAgentTransaction.class);
         TYPE_TX_MAP.put(EntityConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class);
         TYPE_TX_MAP.put(EntityConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_CREATE_CONTRACT, CreateContractTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_CALL_CONTRACT, CallContractTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_DELETE_CONTRACT, DeleteContractTransaction.class);
+        TYPE_TX_MAP.put(EntityConstant.TX_TYPE_CONTRACT_TRANSFER, ContractTransferTransaction.class);
     }
 
 
@@ -34,7 +39,7 @@ public class TransactionManager {
         byteBuffer.setCursor(byteBuffer.getCursor() - SerializeUtils.sizeOfUint16());
         Class<? extends Transaction> txClass = TYPE_TX_MAP.get(txType);
         if (null == txClass) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "transaction type not exist!");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "transaction type not exist!");
         }
         Transaction tx = byteBuffer.readNulsData(txClass.newInstance());
         return tx;

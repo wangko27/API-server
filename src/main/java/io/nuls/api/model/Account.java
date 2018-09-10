@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 package io.nuls.api.model;
-import io.nuls.api.constant.ErrorCode;
+
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.crypto.AESEncrypt;
 import io.nuls.api.crypto.ECKey;
 import io.nuls.api.crypto.EncryptedData;
@@ -176,7 +177,7 @@ public class Account extends BaseNulsData {
     public void encrypt(String password, boolean isForce) throws NulsException {
         if (this.isEncrypted() && !isForce) {
             if (!unlock(password)) {
-                throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
+                throw new NulsException(KernelErrorCode.PASSWORD_IS_WRONG);
             }
         }
         ECKey eckey = this.getEcKey();
@@ -210,7 +211,7 @@ public class Account extends BaseNulsData {
             this.setPriKey(key.getPrivKeyBytes());
             this.setEcKey(key);
         } catch (Exception e) {
-            throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
+            throw new NulsException(KernelErrorCode.PASSWORD_IS_WRONG);
         }
         return true;
     }

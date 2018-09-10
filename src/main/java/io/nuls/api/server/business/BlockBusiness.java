@@ -47,7 +47,6 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         }
         return null;
     }
-
     /**
      * 查询某时间段内的交易笔数
      *

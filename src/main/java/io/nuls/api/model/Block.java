@@ -25,6 +25,7 @@
 package io.nuls.api.model;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.utils.NulsByteBuffer;
@@ -68,7 +69,7 @@ public class Block extends BaseNulsData implements Cloneable {
         try {
             txs = TransactionManager.getInstances(byteBuffer, header.getTxCount());
         } catch (Exception e) {
-            throw new NulsRuntimeException(ErrorCode.PARSE_OBJECT_ERROR, e.getMessage());
+            throw new NulsRuntimeException(KernelErrorCode.DESERIALIZE_ERROR, e.getMessage());
         }
         for (Transaction tx : txs) {
             tx.setBlockHeight(header.getHeight());

@@ -1,7 +1,7 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.EntityConstant;
-import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.AgentNode;
@@ -84,7 +84,7 @@ public class AgentNodeResource {
     public RpcClientResult getConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("agentName") String agentName,@QueryParam("status") Integer status,@QueryParam("sort") int sort){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;
@@ -112,7 +112,7 @@ public class AgentNodeResource {
     public RpcClientResult getMyConsensusList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize,@QueryParam("address") String address,@QueryParam("agentName")String agentName){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;
@@ -140,11 +140,11 @@ public class AgentNodeResource {
         RpcClientResult result = null;
 
         if(!StringUtils.validAddress(address)){
-            return RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
         }
         AgentNode agentNode = agentNodeBusiness.getAgentByAddress(address);
         if(null == agentNode){
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         result = RpcClientResult.getSuccess();
         //链上加载共识状态
@@ -184,7 +184,7 @@ public class AgentNodeResource {
     public RpcClientResult getAddressConsensus(@PathParam("address") String address){
         RpcClientResult result = null;
         if(!StringUtils.validAddress(address)){
-            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
             return result;
         }
         result = RpcClientResult.getSuccess();

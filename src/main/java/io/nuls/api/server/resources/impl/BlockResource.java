@@ -1,8 +1,8 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.IndexContext;
-import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.BlockBusiness;
@@ -42,7 +42,7 @@ public class BlockResource {
     public RpcClientResult listByAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("address") String address){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;
         }
         if (pageNumber == 0) {
@@ -64,18 +64,18 @@ public class BlockResource {
     public RpcClientResult getBlockByHeight(@PathParam("height") Long height){
         RpcClientResult result;
         if (height < 0) {
-            return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         try {
             result = RpcClientResult.getSuccess();
             //加载最新块，计算确认次数
             BlockHeader localBest = blockBusiness.getNewest();
             if(null == localBest){
-                return RpcClientResult.getFailed(ErrorCode.FAILED);
+                return RpcClientResult.getFailed(KernelErrorCode.FAILED);
             }
             BlockHeader requestBlock = blockBusiness.getBlockByHeight(height);
             if(null == requestBlock){
-                return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+                return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             }
             BlockHeaderDto blockHeaderDto = new BlockHeaderDto(requestBlock);
             blockHeaderDto.setConfirmCount(localBest.getHeight()-requestBlock.getHeight());
@@ -93,7 +93,7 @@ public class BlockResource {
     public RpcClientResult getBlockByHash(@PathParam("hash") String hash){
         RpcClientResult result = null;
         if (!StringUtils.validHash(hash)) {
-            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;
         }
         try {
@@ -104,10 +104,10 @@ public class BlockResource {
             BlockHeader requestBlock = blockBusiness.getBlockByHash(hash);
 
             if(null == localBest){
-                return RpcClientResult.getFailed(ErrorCode.FAILED);
+                return RpcClientResult.getFailed(KernelErrorCode.FAILED);
             }
             if(null == requestBlock){
-                return RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+                return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             }
             BlockHeaderDto blockHeaderDto = new BlockHeaderDto(requestBlock);
             blockHeaderDto.setConfirmCount(localBest.getHeight()-requestBlock.getHeight());

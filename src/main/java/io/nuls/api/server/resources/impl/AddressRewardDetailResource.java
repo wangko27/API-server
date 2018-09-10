@@ -1,6 +1,6 @@
 package io.nuls.api.server.resources.impl;
 
-import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.AddressRewardDetailBusiness;
 import io.nuls.api.utils.StringUtils;
@@ -31,7 +31,7 @@ public class AddressRewardDetailResource {
     public RpcClientResult getDepositList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("address") String address){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed(ErrorCode.PARAMETER_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;
         }
         if (pageNumber == 0) {
@@ -43,7 +43,7 @@ public class AddressRewardDetailResource {
             pageSize = 100;
         }
         if(!StringUtils.validAddress(address)){
-            result = RpcClientResult.getFailed(ErrorCode.ADDRESS_ERROR);
+            result = RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
             return result;
         }
         result = RpcClientResult.getSuccess();

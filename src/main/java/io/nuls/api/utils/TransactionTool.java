@@ -1,6 +1,7 @@
 package io.nuls.api.utils;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.constant.NulsConstant;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.Utxo;
@@ -83,14 +84,14 @@ public class TransactionTool {
                 try {
                     tx.setRemark(remark.getBytes(SDKConstant.DEFAULT_ENCODING));
                 } catch (UnsupportedEncodingException e) {
-                    throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
+                    throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
                 }
             }
             tx.setCoinData(coinData);
             try {
                 tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             } catch (IOException e) {
-                throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR);
+                throw new NulsRuntimeException(KernelErrorCode.DATA_PARSE_ERROR);
             }
             return tx;
         }
@@ -105,7 +106,7 @@ public class TransactionTool {
         try {
             size += alias.getBytes(SDKConstant.DEFAULT_ENCODING).length;
         } catch (UnsupportedEncodingException e) {
-            throw new NulsRuntimeException(ErrorCode.PARAMETER_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
         // 124 + 38;
         size += 162;
@@ -129,7 +130,7 @@ public class TransactionTool {
             try {
                 aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serializeForHash()));
             } catch (IOException e) {
-                throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR);
+                throw new NulsRuntimeException(KernelErrorCode.DATA_PARSE_ERROR);
             }
             return aliasTx;
         }
@@ -166,7 +167,7 @@ public class TransactionTool {
         try {
             hash = NulsDigestData.fromDigestHex(agentHash);
         } catch (NulsException e) {
-            throw new NulsRuntimeException(ErrorCode.HASH_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.HASH_ERROR);
         }
 
         List<Coin> outputs = new ArrayList<>();
@@ -189,7 +190,7 @@ public class TransactionTool {
             try {
                 depositTx.setHash(NulsDigestData.calcDigestData(depositTx.serializeForHash()));
             } catch (IOException e) {
-                throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR);
+                throw new NulsRuntimeException(KernelErrorCode.DATA_PARSE_ERROR);
             }
             return depositTx;
         }
@@ -202,7 +203,7 @@ public class TransactionTool {
         try {
             cancelDeposit.setJoinTxHash(NulsDigestData.fromDigestHex(utxo.getTxHash()));
         } catch (NulsException e) {
-            throw new NulsRuntimeException(ErrorCode.HASH_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.HASH_ERROR);
         }
         //组装input
         Coin from = new Coin();
@@ -228,7 +229,7 @@ public class TransactionTool {
         try {
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         } catch (IOException e) {
-            throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.DATA_PARSE_ERROR);
         }
         return tx;
     }

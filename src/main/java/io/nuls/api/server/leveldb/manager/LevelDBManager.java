@@ -20,6 +20,7 @@
 package io.nuls.api.server.leveldb.manager;
 
 import io.nuls.api.constant.ErrorCode;
+import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.server.leveldb.model.Entry;
 import io.nuls.api.server.leveldb.model.ModelWrapper;
 import io.nuls.api.model.Result;
@@ -219,16 +220,16 @@ public class LevelDBManager {
         try {
             // prevent too many areas
             if (AREAS.size() > (max - 1)) {
-                return Result.getFailed(ErrorCode.DB_AREA_CREATE_EXCEED_LIMIT);
+                return Result.getFailed(KernelErrorCode.DB_AREA_CREATE_EXCEED_LIMIT);
             }
             if (StringUtils.isBlank(areaName)) {
-                return Result.getFailed(ErrorCode.NULL_PARAMETER);
+                return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
             }
             if (AREAS.containsKey(areaName)) {
-                return Result.getFailed(ErrorCode.DB_AREA_EXIST);
+                return Result.getFailed(KernelErrorCode.DB_AREA_EXIST);
             }
             if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
-                return Result.getFailed(ErrorCode.DB_AREA_CREATE_PATH_ERROR);
+                return Result.getFailed(KernelErrorCode.DB_AREA_CREATE_PATH_ERROR);
             }
             Result result;
             try {
@@ -242,7 +243,7 @@ public class LevelDBManager {
                 result = Result.getSuccess();
             } catch (Exception e) {
                 Log.error("error create area: " + areaName, e);
-                result = Result.getFailed(ErrorCode.DB_AREA_CREATE_ERROR);
+                result = Result.getFailed(KernelErrorCode.DB_AREA_CREATE_ERROR);
             }
             return result;
         } finally {
@@ -256,10 +257,10 @@ public class LevelDBManager {
 
     public static Result destroyArea(String areaName) {
         if (!baseCheckArea(areaName)) {
-            return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+            return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
         }
         if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
-            return Result.getFailed(ErrorCode.DB_AREA_CREATE_PATH_ERROR);
+            return Result.getFailed(KernelErrorCode.DB_AREA_CREATE_PATH_ERROR);
         }
         Result result;
         try {
@@ -267,7 +268,7 @@ public class LevelDBManager {
             db.close();
             File dir = new File(dataPath + File.separator + areaName);
             if (!dir.exists()) {
-                return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+                return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
             }
             String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
             destroyDB(filePath);
@@ -277,7 +278,7 @@ public class LevelDBManager {
             result = Result.getSuccess();
         } catch (Exception e) {
             Log.error("error destroy area: " + areaName, e);
-            result = Result.getFailed(ErrorCode.DB_AREA_DESTROY_ERROR);
+            result = Result.getFailed(KernelErrorCode.DB_AREA_DESTROY_ERROR);
         }
         return result;
     }
@@ -422,10 +423,10 @@ public class LevelDBManager {
 
     public static Result put(String area, byte[] key, byte[] value) {
         if (!baseCheckArea(area)) {
-            return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+            return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null || value == null) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
@@ -433,7 +434,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
+            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -448,10 +449,10 @@ public class LevelDBManager {
     @Deprecated
     public static Result put(String area, String key, String value) {
         if (!baseCheckArea(area)) {
-            return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+            return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
         }
         if (StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
@@ -459,7 +460,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
+            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -474,10 +475,10 @@ public class LevelDBManager {
     @Deprecated
     public static Result put(String area, byte[] key, String value) {
         if (!baseCheckArea(area)) {
-            return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+            return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null || StringUtils.isBlank(value)) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
@@ -485,7 +486,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
+            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -505,10 +506,10 @@ public class LevelDBManager {
 
     public static <T> Result putModel(String area, byte[] key, T value) {
         if (!baseCheckArea(area)) {
-            return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+            return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null || value == null) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             byte[] bytes = getModelSerialize(value);
@@ -517,7 +518,7 @@ public class LevelDBManager {
             //抛出异常，让系统回滚
             e.printStackTrace();
             //Log.error(e);
-            return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
+            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -542,10 +543,10 @@ public class LevelDBManager {
     @Deprecated
     public static Result delete(String area, String key) {
         if (!baseCheckArea(area)) {
-            return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+            return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
         }
         if (StringUtils.isBlank(key)) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
@@ -553,16 +554,16 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
+            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
     public static Result delete(String area, byte[] key) {
         if (!baseCheckArea(area)) {
-            return Result.getFailed(ErrorCode.DB_AREA_NOT_EXIST);
+            return Result.getFailed(KernelErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
@@ -570,7 +571,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(ErrorCode.DB_UNKOWN_EXCEPTION);
+            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
