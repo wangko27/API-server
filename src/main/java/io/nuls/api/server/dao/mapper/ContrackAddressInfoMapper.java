@@ -1,6 +1,9 @@
 package io.nuls.api.server.dao.mapper;
 
 import io.nuls.api.entity.ContrackAddressInfo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 @MyBatisMapper
 public interface ContrackAddressInfoMapper extends BaseMapper<ContrackAddressInfo, String>{
@@ -15,4 +18,7 @@ public interface ContrackAddressInfoMapper extends BaseMapper<ContrackAddressInf
     int updateByPrimaryKeySelective(ContrackAddressInfo record);
 
     int updateByPrimaryKey(ContrackAddressInfo record);
+
+    int insertByBatch(@Param("list") List<ContrackAddressInfo> list);
+
 }

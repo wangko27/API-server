@@ -17,6 +17,8 @@ public class ContrackAddressInfo {
 
     private String deleteHash;
 
+    private String methods;
+
     public String getContractAddress() {
         return contractAddress;
     }
@@ -79,5 +81,13 @@ public class ContrackAddressInfo {
 
     public void setDeleteHash(String deleteHash) {
         this.deleteHash = deleteHash == null ? null : deleteHash.trim();
+    }
+
+    public String getMethods() {
+        return methods;
+    }
+
+    public void setMethods(String methods) {
+        this.methods = methods;
     }
 }

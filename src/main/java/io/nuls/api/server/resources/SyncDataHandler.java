@@ -1,9 +1,9 @@
 package io.nuls.api.server.resources;
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.ContrackAddressInfo;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.exception.NulsException;
@@ -78,19 +78,19 @@ public class SyncDataHandler {
     }
 
     public RpcClientResult getTx(String hash) throws NulsException {
-        RpcClientResult result = restFulUtils.get("/api/accountledger/tx/"+hash, null);
+        RpcClientResult result = restFulUtils.get("/api/accountledger/tx/" + hash, null);
         if (result.isFailed()) {
             return result;
         }
         return null;
     }
 
-    public RpcClientResult broadcast(Map<String, String> params){
+    public RpcClientResult broadcast(Map<String, String> params) {
         RpcClientResult result = restFulUtils.post("/accountledger/transaction/broadcast", params);
         return result;
     }
 
-    public RpcClientResult valiTransaction(Map<String, String> params){
+    public RpcClientResult valiTransaction(Map<String, String> params) {
         RpcClientResult result = restFulUtils.post("/accountledger/transaction/valiTransaction", params);
         return result;
     }
@@ -98,6 +98,20 @@ public class SyncDataHandler {
 
     public RpcClientResult<Utxo> getUtxo(String address, int limit) {
         RpcClientResult result = restFulUtils.get("/utxo/limit/" + address + "/" + limit, null);
+        return result;
+    }
+
+    public RpcClientResult<ContrackAddressInfo> getContractInfo(String contractAddress) throws NulsException {
+        RpcClientResult result = restFulUtils.get("/contract/info/" + contractAddress, null);
+        if (result.isFailed()) {
+            return result;
+        }
+        try {
+            ContrackAddressInfo contrackAddressInfo = RpcTransferUtil.toContract((Map<String, Object>) result.getData());
+            result.setData(contrackAddressInfo);
+        } catch (Exception e) {
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
+        }
         return result;
     }
 }

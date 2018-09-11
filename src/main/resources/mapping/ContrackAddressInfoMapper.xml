@@ -33,6 +33,18 @@
       #{blockHeight,jdbcType=BIGINT}, #{isNrc20,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
       #{createTime,jdbcType=BIGINT}, #{deleteHash,jdbcType=VARCHAR})
   </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contrack_address_info (contract_address, creater, create_tx_hash,
+    block_height, is_nrc20, status,
+    create_time, delete_hash)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.contractAddress,jdbcType=VARCHAR}, #{item.creater,jdbcType=VARCHAR}, #{item.createTxHash,jdbcType=VARCHAR},
+      #{item.blockHeight,jdbcType=BIGINT}, #{item.isNrc20,jdbcType=INTEGER}, #{item.status,jdbcType=INTEGER},
+      #{item.createTime,jdbcType=BIGINT}, #{item.deleteHash,jdbcType=VARCHAR})
+    </foreach>
+    on duplicate key update create_time = values(create_time)
+  </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.ContrackAddressInfo" >
     insert into contrack_address_info
     <trim prefix="(" suffix=")" suffixOverrides="," >
@@ -126,4 +138,27 @@
       delete_hash = #{deleteHash,jdbcType=VARCHAR}
     where contract_address = #{contractAddress,jdbcType=VARCHAR}
   </update>
+
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contrack_address_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectCountSearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM contrack_address_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contrack_address_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <delete id="deleteBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable">
+    DELETE from contrack_address_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </delete>
 </mapper>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.ContrackCreateInfoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.ContrackCreateInfo" >
+    <id column="create_tx_hash" property="createTxHash" jdbcType="VARCHAR" />
+    <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
+    <result column="creater" property="creater" jdbcType="VARCHAR" />
+    <result column="contract_code" property="contractCode" jdbcType="VARCHAR" />
+    <result column="gasLimit" property="gaslimit" jdbcType="INTEGER" />
+    <result column="price" property="price" jdbcType="INTEGER" />
+    <result column="args" property="args" jdbcType="VARCHAR" />
+    <result column="methods" property="methods" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    create_tx_hash, contract_address, creater, contract_code, gasLimit, price, args,
+    methods, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from contrack_create_info
+    where create_tx_hash = #{createTxHash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from contrack_create_info
+    where create_tx_hash = #{createTxHash,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.ContrackCreateInfo" >
+    insert into contrack_create_info (create_tx_hash, contract_address, creater,
+      contract_code, gasLimit, price,
+      args, methods, create_time
+      )
+    values (#{createTxHash,jdbcType=VARCHAR}, #{contractAddress,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR},
+      #{contractCode,jdbcType=VARCHAR}, #{gaslimit,jdbcType=INTEGER}, #{price,jdbcType=INTEGER},
+      #{args,jdbcType=VARCHAR}, #{methods,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contrack_create_info (create_tx_hash, contract_address, creater,
+    contract_code, gasLimit, price,
+    args, methods, create_time)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.createTxHash,jdbcType=VARCHAR}, #{item.contractAddress,jdbcType=VARCHAR}, #{item.creater,jdbcType=VARCHAR},
+      #{item.contractCode,jdbcType=VARCHAR}, #{item.gaslimit,jdbcType=VARCHAR}, #{item.price,jdbcType=BIGINT},
+      #{item.args,jdbcType=VARCHAR}, #{item.methods,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT})
+    </foreach>
+    on duplicate key update create_time = values(create_time)
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.ContrackCreateInfo" >
+    insert into contrack_create_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="createTxHash != null" >
+        create_tx_hash,
+      </if>
+      <if test="contractAddress != null" >
+        contract_address,
+      </if>
+      <if test="creater != null" >
+        creater,
+      </if>
+      <if test="contractCode != null" >
+        contract_code,
+      </if>
+      <if test="gaslimit != null" >
+        gasLimit,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="args != null" >
+        args,
+      </if>
+      <if test="methods != null" >
+        methods,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="createTxHash != null" >
+        #{createTxHash,jdbcType=VARCHAR},
+      </if>
+      <if test="contractAddress != null" >
+        #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="contractCode != null" >
+        #{contractCode,jdbcType=VARCHAR},
+      </if>
+      <if test="gaslimit != null" >
+        #{gaslimit,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=INTEGER},
+      </if>
+      <if test="args != null" >
+        #{args,jdbcType=VARCHAR},
+      </if>
+      <if test="methods != null" >
+        #{methods,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.ContrackCreateInfo" >
+    update contrack_create_info
+    <set >
+      <if test="contractAddress != null" >
+        contract_address = #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        creater = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="contractCode != null" >
+        contract_code = #{contractCode,jdbcType=VARCHAR},
+      </if>
+      <if test="gaslimit != null" >
+        gasLimit = #{gaslimit,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=INTEGER},
+      </if>
+      <if test="args != null" >
+        args = #{args,jdbcType=VARCHAR},
+      </if>
+      <if test="methods != null" >
+        methods = #{methods,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where create_tx_hash = #{createTxHash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.ContrackCreateInfo" >
+    update contrack_create_info
+    set contract_address = #{contractAddress,jdbcType=VARCHAR},
+      creater = #{creater,jdbcType=VARCHAR},
+      contract_code = #{contractCode,jdbcType=VARCHAR},
+      gasLimit = #{gaslimit,jdbcType=INTEGER},
+      price = #{price,jdbcType=INTEGER},
+      args = #{args,jdbcType=VARCHAR},
+      methods = #{methods,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=BIGINT}
+    where create_tx_hash = #{createTxHash,jdbcType=VARCHAR}
+  </update>
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contrack_create_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectCountSearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM contrack_create_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contrack_create_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from contrack_create_info where create_tx_hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
+  <delete id="deleteBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable">
+    DELETE from contrack_create_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </delete>
+</mapper>
