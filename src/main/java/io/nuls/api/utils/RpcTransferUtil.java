@@ -3,18 +3,44 @@ package io.nuls.api.utils;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.crypto.Hex;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.ContrackAddressInfo;
+import io.nuls.api.entity.ContrackCreateInfo;
 import io.nuls.api.entity.Deposit;
+import io.nuls.api.entity.Input;
+import io.nuls.api.entity.Output;
+import io.nuls.api.entity.PunishLog;
 import io.nuls.api.entity.Transaction;
-import io.nuls.api.model.*;
-import io.nuls.api.model.tx.*;
+import io.nuls.api.entity.TxData;
+import io.nuls.api.entity.Utxo;
+import io.nuls.api.model.Agent;
+import io.nuls.api.model.CancelDeposit;
+import io.nuls.api.model.Coin;
+import io.nuls.api.model.CreateContractData;
+import io.nuls.api.model.NulsDigestData;
+import io.nuls.api.model.RedPunishData;
+import io.nuls.api.model.StopAgent;
+import io.nuls.api.model.YellowPunishData;
+import io.nuls.api.model.tx.AliasTransaction;
+import io.nuls.api.model.tx.CancelDepositTransaction;
+import io.nuls.api.model.tx.CreateAgentTransaction;
+import io.nuls.api.model.tx.CreateContractTransaction;
+import io.nuls.api.model.tx.DepositTransaction;
+import io.nuls.api.model.tx.RedPunishTransaction;
+import io.nuls.api.model.tx.StopAgentTransaction;
+import io.nuls.api.model.tx.YellowPunishTransaction;
+import io.nuls.api.server.dto.contract.ProgramStatus;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class RpcTransferUtil {
 
@@ -97,12 +123,14 @@ public class RpcTransferUtil {
             tx.setTxData(log);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
             CreateContractTransaction createContractTx = (CreateContractTransaction) txModel;
-            ContractCreateInfo  createData= toContractCreateInfo(createContractTx);
+            ContrackCreateInfo createData= toContrackCreateData(createContractTx);
             tx.setTxData(createData);
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT) {
+
         } else if (txModel.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
-            DeleteContractTransaction deleteContractTx = (DeleteContractTransaction) txModel;
-            ContractDeleteInfo data = toContractDeleteInfo(deleteContractTx);
-            tx.setTxData(data);
+
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
+
         }
         return tx;
     }
@@ -284,18 +312,15 @@ public class RpcTransferUtil {
 
     }
 
-    private static ContractCreateInfo toContractCreateInfo(CreateContractTransaction tx) {
+    private static ContrackCreateInfo toContrackCreateData(CreateContractTransaction tx) {
         CreateContractData model = tx.getTxData();
-        ContractCreateInfo data = new ContractCreateInfo(model);
-        return data;
+        if (model != null) {
+            ContrackCreateInfo contractAddress = new ContrackCreateInfo(model);
+            return contractAddress;
+        }
+        return new ContrackCreateInfo();
     }
 
-    private static ContractDeleteInfo toContractDeleteInfo(DeleteContractTransaction tx) {
-        DeleteContractData model = tx.getTxData();
-        ContractDeleteInfo data = new ContractDeleteInfo(model);
-        return data;
-
-    }
 
     @Deprecated
     public static Transaction toTransaction(Map<String, Object> map) throws Exception {
@@ -338,5 +363,18 @@ public class RpcTransferUtil {
             outputs.add(output);
         }
         return tx;
+    }
+
+    public static ContrackAddressInfo toContract(Map<String, Object> map) throws Exception {
+        ContrackAddressInfo contrackAddressInfo = new ContrackAddressInfo();
+        contrackAddressInfo.setCreateTxHash((String) map.get("createTxHash"));
+        contrackAddressInfo.setContractAddress((String) map.get("address"));
+        contrackAddressInfo.setCreater((String) map.get("creater"));
+        contrackAddressInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
+        contrackAddressInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
+        contrackAddressInfo.setIsNrc20(Boolean.parseBoolean(map.get("isNrc20").toString())?1:0);
+        contrackAddressInfo.setStatus(ProgramStatus.codeOf((String) map.get("status")).getCode());
+        contrackAddressInfo.setMethods(JSONUtils.obj2json(map.get("method")));
+        return contrackAddressInfo;
     }
 }
