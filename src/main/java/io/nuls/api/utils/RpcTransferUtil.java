@@ -12,7 +12,6 @@ import io.nuls.api.entity.Transaction;
 import io.nuls.api.model.*;
 import io.nuls.api.model.tx.*;
 
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.*;
@@ -96,6 +95,14 @@ public class RpcTransferUtil {
             RedPunishTransaction redPunishTx = (RedPunishTransaction) txModel;
             PunishLog log = toRedPublishLog(redPunishTx, header);
             tx.setTxData(log);
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
+            CreateContractTransaction createContractTx = (CreateContractTransaction) txModel;
+            ContractCreateInfo  createData= toContractCreateInfo(createContractTx);
+            tx.setTxData(createData);
+        } else if (txModel.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
+            DeleteContractTransaction deleteContractTx = (DeleteContractTransaction) txModel;
+            ContractDeleteInfo data = toContractDeleteInfo(deleteContractTx);
+            tx.setTxData(data);
         }
         return tx;
     }
@@ -274,6 +281,19 @@ public class RpcTransferUtil {
         punishLog.setRoundIndex(header.getRoundIndex());
         //        punishLog.setReason(new String (model.get);
         return punishLog;
+
+    }
+
+    private static ContractCreateInfo toContractCreateInfo(CreateContractTransaction tx) {
+        CreateContractData model = tx.getTxData();
+        ContractCreateInfo data = new ContractCreateInfo(model);
+        return data;
+    }
+
+    private static ContractDeleteInfo toContractDeleteInfo(DeleteContractTransaction tx) {
+        DeleteContractData model = tx.getTxData();
+        ContractDeleteInfo data = new ContractDeleteInfo(model);
+        return data;
 
     }
 

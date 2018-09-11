@@ -6,12 +6,11 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
-import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
-import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
+import io.nuls.api.model.ContractResultDto;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
-import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,10 +43,14 @@ public class SyncDataBusiness {
     @Autowired
     private WebwalletTransactionBusiness webwalletTransactionBusiness;
     @Autowired
+    private ContractBusiness contractBusiness;
+    @Autowired
     private SyncDataHandler syncDataHandler;
 
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+    private RestFulUtils restFulUtils = RestFulUtils.getInstance();
+
 
     /**
      * 同步最新块数据
@@ -68,6 +71,8 @@ public class SyncDataBusiness {
         List<Alias> aliasList = new ArrayList<>();
         List<Deposit> depositList = new ArrayList<>();
         List<PunishLog> punishLogList = new ArrayList<>();
+        List<ContractDeleteInfo> deleteContractDataList = new ArrayList<>();
+        List<ContractCallInfo> callContractDataList = new ArrayList<>();
 
         try {
             for (int i = 0; i < block.getTxList().size(); i++) {
@@ -116,16 +121,32 @@ public class SyncDataBusiness {
                     }
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT){
                     //创建合约
-                    System.out.println("创建合约");
-                    System.out.println("tx.getData:"+tx.getTxData());
+                    ContractCreateInfo data = (ContractCreateInfo)tx.getTxData();
+                    RpcClientResult result = restFulUtils.get("/contract/result/" + tx.getHash(), null);
+//                    ContractResultDto aaa = restFulUtils.get("/contract/result/" + tx.getHash(), null, ContractResultDto.class);
+                    if (result.isSuccess()) {
+                        Object data1 = result.getData();
+                        System.out.println(data1);
+//                        System.out.println(aaa);
+                    }
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT){
                     //调用合约
-                    System.out.println("调用合约");
-                    System.out.println("tx.getData:"+tx.getTxData());
+                    ContractCallInfo data = (ContractCallInfo)tx.getTxData();
+                    RpcClientResult result = restFulUtils.get("/contract/result/" + tx.getHash(), null);
+                    if (result.isSuccess()) {
+                        Object data1 = result.getData();
+//                        contractBusiness.deleteContract(data.getContractAddress());
+                    }
+                    callContractDataList.add(data);
                 }else if(tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT){
                     //删除合约
-                    System.out.println("删除合约");
-                    System.out.println("tx.getData:"+tx.getTxData());
+                    ContractDeleteInfo data = (ContractDeleteInfo)tx.getTxData();
+                    RpcClientResult result = restFulUtils.get("/contract/result/" + tx.getHash(), null);
+                    if (result.isSuccess()) {
+                        Object data1 = result.getData();
+                        contractBusiness.deleteContract(data.getContractAddress());
+                    }
+                    deleteContractDataList.add(data);
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER){
                     //合约转账
                     System.out.println("合约转账");
@@ -144,6 +165,8 @@ public class SyncDataBusiness {
             aliasBusiness.saveAll(aliasList);
             punishLogBusiness.saveAll(punishLogList);
             depositBusiness.saveAll(depositList);
+            contractBusiness.saveAllDelInfo(deleteContractDataList);
+            contractBusiness.saveAllCallInfo(callContractDataList);
 
             //为了让存入leveldb更快，这里直接做map，全部处理完成之后，再存入leveldb
             Map<String,AddressHashIndex> attrMapList = new HashMap<>();
@@ -273,6 +296,9 @@ public class SyncDataBusiness {
             }
             //回滚块时，删除所有临时utxo
             webwalletUtxoLevelDbService.deleteAll();
+
+            //回滚删除合约交易
+            contractBusiness.rollbackContractDeleteInfo(header.getHash());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

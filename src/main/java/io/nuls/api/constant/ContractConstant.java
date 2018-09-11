@@ -62,4 +62,8 @@ public interface ContractConstant extends NulsConstant {
     String NRC20_EVENT_TRANSFER = "TransferEvent";
     String NRC20_EVENT_APPROVAL = "ApprovalEvent";
 
+    int CONTRACT_STATUS_FAILED = 0;
+    int CONTRACT_STATUS_NORMAL = 1;
+    int CONTRACT_STATUS_DELETED = 2;
+
 }

@@ -37,6 +37,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class StringUtils {
 
+    private static Pattern pattern = Pattern.compile("[0-9]{1,}");
+
     public static boolean isBlank(String str) {
         return null == str || str.trim().length() == 0;
     }
@@ -195,7 +197,6 @@ public class StringUtils {
      * @return
      */
     public static boolean valiNumber(String str){
-        Pattern pattern = Pattern.compile("[0-9]{1,}");
         Matcher matcher = pattern.matcher((CharSequence)str);
         return matcher.matches();
     }
