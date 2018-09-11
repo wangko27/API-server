@@ -1,27 +1,22 @@
 package io.nuls.api.server.business;
 
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.ContrackAddressInfo;
+import io.nuls.api.entity.ContractAddressInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.Scanner;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:ApplicationContext.xml")
 public class ContractAddressBizTest {
 
     @Autowired
-    private ContrackAddressBusiness contrackAddressBusiness;
+    private ContractAddressBusiness contractAddressBusiness;
 
     @Test
     public void insertContractAddress() {
-        ContrackAddressInfo address = new ContrackAddressInfo();
+        ContractAddressInfo address = new ContractAddressInfo();
 
         address.setContractAddress("NseDNHmwumcbCxMiLF5QXZz6paJjG2Rz");
         address.setCreater("NsdvCLtZZBX4QHkZcvkyrRfoeJjRorRW");
@@ -30,7 +25,7 @@ public class ContractAddressBizTest {
         address.setIsNrc20(1);
         address.setStatus(1);
         address.setCreateTime(System.currentTimeMillis());
-        contrackAddressBusiness.save(address);
+        contractAddressBusiness.save(address);
 
     }
 

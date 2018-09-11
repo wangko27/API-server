@@ -4,22 +4,13 @@ import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.*;
-import io.nuls.api.model.Agent;
-import io.nuls.api.model.CancelDeposit;
-import io.nuls.api.model.Coin;
-import io.nuls.api.model.CreateContractData;
-import io.nuls.api.model.NulsDigestData;
-import io.nuls.api.model.RedPunishData;
-import io.nuls.api.model.StopAgent;
-import io.nuls.api.model.YellowPunishData;
-import io.nuls.api.model.tx.AliasTransaction;
-import io.nuls.api.model.tx.CancelDepositTransaction;
-import io.nuls.api.model.tx.CreateAgentTransaction;
-import io.nuls.api.model.tx.CreateContractTransaction;
-import io.nuls.api.model.tx.DepositTransaction;
-import io.nuls.api.model.tx.RedPunishTransaction;
-import io.nuls.api.model.tx.StopAgentTransaction;
-import io.nuls.api.model.tx.YellowPunishTransaction;
+import io.nuls.api.entity.Alias;
+import io.nuls.api.entity.Block;
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.Deposit;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.model.*;
+import io.nuls.api.model.tx.*;
 import io.nuls.api.server.dto.contract.ProgramStatus;
 
 import java.io.UnsupportedEncodingException;
@@ -116,7 +107,9 @@ public class RpcTransferUtil {
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT) {
 
         } else if (txModel.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
-
+            DeleteContractTransaction deleteContractTx = (DeleteContractTransaction) txModel;
+            ContractDeleteInfo data = toContractDeleteInfo(deleteContractTx);
+            tx.setTxData(data);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
 
         }
@@ -351,6 +344,13 @@ public class RpcTransferUtil {
             outputs.add(output);
         }
         return tx;
+    }
+
+    private static ContractDeleteInfo toContractDeleteInfo(DeleteContractTransaction tx) {
+        DeleteContractData model = tx.getTxData();
+        ContractDeleteInfo data = new ContractDeleteInfo(model);
+        return data;
+
     }
 
     public static ContractAddressInfo toContract(Map<String, Object> map) throws Exception {

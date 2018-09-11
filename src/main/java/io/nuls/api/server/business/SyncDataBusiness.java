@@ -151,13 +151,14 @@ public class SyncDataBusiness {
                     System.out.println("tx.getData:"+tx.getTxData());
                 }else if(tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT){
                     //删除合约
-                    ContractCallInfo data = (ContractCallInfo)tx.getTxData();
+                    ContractDeleteInfo data = (ContractDeleteInfo)tx.getTxData();
+                    data.setTxHash(tx.getHash());
                     RpcClientResult result = restFulUtils.get("/contract/result/" + tx.getHash(), null);
                     if (result.isSuccess()) {
                         Object data1 = result.getData();
-//                        contractBusiness.deleteContract(data.getContractAddress());
+                        contractBusiness.deleteContract(data.getContractAddress());
                     }
-                    callContractDataList.add(data);
+                    deleteContractDataList.add(data);
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER){
                     //合约转账
                     System.out.println("合约转账");

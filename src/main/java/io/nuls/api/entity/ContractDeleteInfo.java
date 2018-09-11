@@ -4,20 +4,29 @@ import io.nuls.api.model.DeleteContractData;
 import io.nuls.sdk.core.utils.AddressTool;
 
 public class ContractDeleteInfo extends TxData {
-    private String sender;
+    private String creater;
     private String contractAddress;
+    private String txHash;
 
     public ContractDeleteInfo(DeleteContractData delete) {
-        this.sender = AddressTool.getStringAddressByBytes(delete.getSender());
+        this.creater = AddressTool.getStringAddressByBytes(delete.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(delete.getContractAddress());
     }
 
-    public String getSender() {
-        return sender;
+    public String getTxHash() {
+        return txHash;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public String getCreater() {
+        return creater;
+    }
+
+    public void setCreater(String creater) {
+        this.creater = creater;
     }
 
     public String getContractAddress() {
