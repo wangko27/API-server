@@ -1,6 +1,6 @@
 package io.nuls.api.entity;
 
-public class ContractAddressInfo extends TxData {
+public class ContractAddressInfo {
     private String contractAddress;
 
     private String creater;
@@ -16,6 +16,8 @@ public class ContractAddressInfo extends TxData {
     private Long createTime;
 
     private String deleteHash;
+
+    private String methods;
 
     public String getContractAddress() {
         return contractAddress;
@@ -79,5 +81,13 @@ public class ContractAddressInfo extends TxData {
 
     public void setDeleteHash(String deleteHash) {
         this.deleteHash = deleteHash == null ? null : deleteHash.trim();
+    }
+
+    public String getMethods() {
+        return methods;
+    }
+
+    public void setMethods(String methods) {
+        this.methods = methods;
     }
 }

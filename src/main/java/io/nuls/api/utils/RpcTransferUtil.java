@@ -3,19 +3,7 @@ package io.nuls.api.utils;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.crypto.Hex;
-import io.nuls.api.entity.AgentNode;
-import io.nuls.api.entity.Alias;
-import io.nuls.api.entity.Block;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.ContrackAddressInfo;
-import io.nuls.api.entity.ContrackCreateInfo;
-import io.nuls.api.entity.Deposit;
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Output;
-import io.nuls.api.entity.PunishLog;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.TxData;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 import io.nuls.api.model.Agent;
 import io.nuls.api.model.CancelDeposit;
 import io.nuls.api.model.Coin;
@@ -123,7 +111,7 @@ public class RpcTransferUtil {
             tx.setTxData(log);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
             CreateContractTransaction createContractTx = (CreateContractTransaction) txModel;
-            ContrackCreateInfo createData= toContrackCreateData(createContractTx);
+            ContractCreateInfo createData= toContractCreateData(createContractTx);
             tx.setTxData(createData);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT) {
 
@@ -312,13 +300,13 @@ public class RpcTransferUtil {
 
     }
 
-    private static ContrackCreateInfo toContrackCreateData(CreateContractTransaction tx) {
+    private static ContractCreateInfo toContractCreateData(CreateContractTransaction tx) {
         CreateContractData model = tx.getTxData();
         if (model != null) {
-            ContrackCreateInfo contractAddress = new ContrackCreateInfo(model);
+            ContractCreateInfo contractAddress = new ContractCreateInfo(model);
             return contractAddress;
         }
-        return new ContrackCreateInfo();
+        return new ContractCreateInfo();
     }
 
 
@@ -365,16 +353,16 @@ public class RpcTransferUtil {
         return tx;
     }
 
-    public static ContrackAddressInfo toContract(Map<String, Object> map) throws Exception {
-        ContrackAddressInfo contrackAddressInfo = new ContrackAddressInfo();
-        contrackAddressInfo.setCreateTxHash((String) map.get("createTxHash"));
-        contrackAddressInfo.setContractAddress((String) map.get("address"));
-        contrackAddressInfo.setCreater((String) map.get("creater"));
-        contrackAddressInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
-        contrackAddressInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
-        contrackAddressInfo.setIsNrc20(Boolean.parseBoolean(map.get("isNrc20").toString())?1:0);
-        contrackAddressInfo.setStatus(ProgramStatus.codeOf((String) map.get("status")).getCode());
-        contrackAddressInfo.setMethods(JSONUtils.obj2json(map.get("method")));
-        return contrackAddressInfo;
+    public static ContractAddressInfo toContract(Map<String, Object> map) throws Exception {
+        ContractAddressInfo ContractAddressInfo = new ContractAddressInfo();
+        ContractAddressInfo.setCreateTxHash((String) map.get("createTxHash"));
+        ContractAddressInfo.setContractAddress((String) map.get("address"));
+        ContractAddressInfo.setCreater((String) map.get("creater"));
+        ContractAddressInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
+        ContractAddressInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
+        ContractAddressInfo.setIsNrc20(Boolean.parseBoolean(map.get("isNrc20").toString())?1:0);
+        ContractAddressInfo.setStatus(ProgramStatus.codeOf((String) map.get("status")).getCode());
+        ContractAddressInfo.setMethods(JSONUtils.obj2json(map.get("method")));
+        return ContractAddressInfo;
     }
 }

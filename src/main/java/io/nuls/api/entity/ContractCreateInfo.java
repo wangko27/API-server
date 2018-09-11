@@ -24,15 +24,12 @@
 package io.nuls.api.entity;
 
 
+import io.nuls.api.crypto.Hex;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.ContractData;
 import io.nuls.api.model.CreateContractData;
 import io.nuls.api.model.TransactionLogicData;
-import io.nuls.api.utils.NulsByteBuffer;
-import io.nuls.api.utils.NulsOutputStreamBuffer;
-import io.nuls.api.utils.SerializeUtils;
-import io.nuls.sdk.core.crypto.Hex;
-import io.nuls.sdk.core.utils.AddressTool;
+import io.nuls.api.utils.*;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -43,32 +40,46 @@ import java.util.Set;
  */
 public class ContractCreateInfo extends TxData{
 
-    private String sender;
+    private String createTxHash;
+
     private String contractAddress;
-    private long value;
-    private String hexCode;
-    private long gasLimit;
-    private long price;
-    private byte argsCount;
-    private String[][] args;
+
+    private String creater;
+
+    private String contractCode;
+
+    private Long gaslimit;
+
+    private Long price;
+
+    private String args;
+
+    private String methods;
+
+    private Long createTime;
+
+    public ContractCreateInfo() {
+    }
 
     public ContractCreateInfo(CreateContractData create) {
-        this.sender = AddressTool.getStringAddressByBytes(create.getSender());
+        this.creater = io.nuls.api.utils.AddressTool.getStringAddressByBytes(create.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(create.getContractAddress());
-        this.value = create.getValue();
-        this.hexCode = Hex.encode(create.getCode());
-        this.gasLimit = create.getGasLimit();
+        this.contractCode = Hex.encode(create.getCode());
+        this.gaslimit = create.getGasLimit();
         this.price = create.getPrice();
-        this.argsCount = create.getArgsCount();
-        this.args = create.getArgs();
+        try {
+            this.args = JSONUtils.obj2json(create.getArgs());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public String getSender() {
-        return sender;
+    public String getCreateTxHash() {
+        return createTxHash;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setCreateTxHash(String createTxHash) {
+        this.createTxHash = createTxHash == null ? null : createTxHash.trim();
     }
 
     public String getContractAddress() {
@@ -76,56 +87,63 @@ public class ContractCreateInfo extends TxData{
     }
 
     public void setContractAddress(String contractAddress) {
-        this.contractAddress = contractAddress;
+        this.contractAddress = contractAddress == null ? null : contractAddress.trim();
     }
 
-    public long getValue() {
-        return value;
+    public String getCreater() {
+        return creater;
     }
 
-    public void setValue(long value) {
-        this.value = value;
+    public void setCreater(String creater) {
+        this.creater = creater == null ? null : creater.trim();
     }
 
-    public String getHexCode() {
-        return hexCode;
+    public String getContractCode() {
+        return contractCode;
     }
 
-    public void setHexCode(String hexCode) {
-        this.hexCode = hexCode;
+    public void setContractCode(String contractCode) {
+        this.contractCode = contractCode == null ? null : contractCode.trim();
     }
 
-    public long getGasLimit() {
-        return gasLimit;
+    public Long getGaslimit() {
+        return gaslimit;
     }
 
-    public void setGasLimit(long gasLimit) {
-        this.gasLimit = gasLimit;
+    public void setGaslimit(Long gaslimit) {
+        this.gaslimit = gaslimit;
     }
 
-    public long getPrice() {
+    public Long getPrice() {
         return price;
     }
 
-    public void setPrice(long price) {
+    public void setPrice(Long price) {
         this.price = price;
     }
 
-    public byte getArgsCount() {
-        return argsCount;
-    }
-
-    public void setArgsCount(byte argsCount) {
-        this.argsCount = argsCount;
-    }
-
-    public String[][] getArgs() {
+    public String getArgs() {
         return args;
     }
 
-    public void setArgs(String[][] args) {
-        this.args = args;
+    public void setArgs(String args) {
+        this.args = args == null ? null : args.trim();
     }
 
+    public String getMethods() {
+        return methods;
+    }
+
+    public void setMethods(String methods) {
+        this.methods = methods == null ? null : methods.trim();
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
 
 }

@@ -1,7 +1,7 @@
 package io.nuls.api.server.business;
 
-import io.nuls.api.entity.ContrackAddressInfo;
-import io.nuls.api.server.dao.mapper.ContrackAddressInfoMapper;
+import io.nuls.api.entity.ContractAddressInfo;
+import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,21 +17,21 @@ import java.util.List;
  * @date: 2018/9/10
  */
 @Service
-public class ContrackAddressBusiness implements BaseService<ContrackAddressInfo, String> {
+public class ContractAddressBusiness implements BaseService<ContractAddressInfo, String> {
 
     @Autowired
-    private ContrackAddressInfoMapper contrackAddressInfoMapper;
+    private ContractAddressInfoMapper ContractAddressInfoMapper;
 
     /**
      * 保存智能合约地址
      *
-     * @param contrackAddressInfo 实体
+     * @param ContractAddressInfo 实体
      * @return 1成功，其他失败
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int save(ContrackAddressInfo contrackAddressInfo) {
-        return contrackAddressInfoMapper.insert(contrackAddressInfo);
+    public int save(ContractAddressInfo ContractAddressInfo) {
+        return ContractAddressInfoMapper.insert(ContractAddressInfo);
         
     }
 
@@ -41,9 +41,9 @@ public class ContrackAddressBusiness implements BaseService<ContrackAddressInfo,
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int saveAll(List<ContrackAddressInfo> list) {
+    public int saveAll(List<ContractAddressInfo> list) {
         if (list.size() > 0) {
-            return contrackAddressInfoMapper.insertByBatch(list);
+            return ContractAddressInfoMapper.insertByBatch(list);
         }
         return 0;
     }
@@ -51,13 +51,13 @@ public class ContrackAddressBusiness implements BaseService<ContrackAddressInfo,
     /**
      * 更新智能合约地址
      *
-     * @param contrackAddressInfo 实体
+     * @param ContractAddressInfo 实体
      * @return 1成功，其他失败
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int update(ContrackAddressInfo contrackAddressInfo) {
-        return contrackAddressInfoMapper.updateByPrimaryKey(contrackAddressInfo);
+    public int update(ContractAddressInfo ContractAddressInfo) {
+        return ContractAddressInfoMapper.updateByPrimaryKey(ContractAddressInfo);
     }
 
     /**
@@ -69,7 +69,7 @@ public class ContrackAddressBusiness implements BaseService<ContrackAddressInfo,
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String contractAddress) {
-        return contrackAddressInfoMapper.deleteByPrimaryKey(contractAddress);
+        return ContractAddressInfoMapper.deleteByPrimaryKey(contractAddress);
     }
 
     /**
@@ -79,8 +79,8 @@ public class ContrackAddressBusiness implements BaseService<ContrackAddressInfo,
      * @return
      */
     @Override
-    public ContrackAddressInfo getByKey(String contractAddress) {
-        return contrackAddressInfoMapper.selectByPrimaryKey(contractAddress);
+    public ContractAddressInfo getByKey(String contractAddress) {
+        return ContractAddressInfoMapper.selectByPrimaryKey(contractAddress);
     }
 
     /**
@@ -94,6 +94,6 @@ public class ContrackAddressBusiness implements BaseService<ContrackAddressInfo,
         System.out.println("deleteByHeight====="+height);
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
-        return contrackAddressInfoMapper.deleteBySearchable(searchable);
+        return ContractAddressInfoMapper.deleteBySearchable(searchable);
     }
 }

@@ -6,12 +6,10 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
-import io.nuls.api.server.dao.mapper.leveldb.BlockHeaderLevelDbService;
-import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
-import io.nuls.api.utils.StringUtils;
+import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,9 +48,9 @@ public class SyncDataBusiness {
     @Autowired
     private ContractBusiness contractBusiness;
     @Autowired
-    private ContrackAddressBusiness contrackAddressBusiness;
+    private ContractAddressBusiness ContractAddressBusiness;
     @Autowired
-    private ContrackCreateBusiness contrackCreateBusiness;
+    private ContractCreateBusiness ContractCreateBusiness;
     @Autowired
     private SyncDataHandler syncDataHandler;
 
@@ -80,6 +78,10 @@ public class SyncDataBusiness {
         List<Alias> aliasList = new ArrayList<>();
         List<Deposit> depositList = new ArrayList<>();
         List<PunishLog> punishLogList = new ArrayList<>();
+        List<ContractCreateInfo> contractCreateDataList = new ArrayList<>();
+        List<ContractAddressInfo> contractAddressList = new ArrayList<>();
+        List<ContractDeleteInfo> deleteContractDataList = new ArrayList<>();
+        List<ContractCallInfo> callContractDataList = new ArrayList<>();
 
         try {
             for (int i = 0; i < block.getTxList().size(); i++) {
@@ -129,15 +131,33 @@ public class SyncDataBusiness {
                 } else if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                     //创建合约
                     System.out.println("创建合约");
-                    System.out.println("tx.getData:"+tx.getTxData());
+                    System.out.println("tx.getData:" + tx.getTxData());
+                    if (tx.getTxData() != null) {
+                        ContractCreateInfo ContractCreateData = (ContractCreateInfo) tx.getTxData();
+                        ContractCreateData.setCreateTxHash(tx.getHash());
+                        //查询合约地址信息
+                        RpcClientResult<ContractAddressInfo> contractResult = syncDataHandler.getContractInfo(ContractCreateData.getContractAddress());
+                        if (contractResult != null && contractResult.getData() != null) {
+                            //设置合约包含方法
+                            ContractCreateData.setMethods(contractResult.getData().getMethods());
+                            ContractCreateData.setCreateTime(contractResult.getData().getCreateTime());
+                            contractAddressList.add(contractResult.getData());
+                        }
+                        contractCreateDataList.add(ContractCreateData);
+                    }
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT){
                     //调用合约
                     System.out.println("调用合约");
                     System.out.println("tx.getData:"+tx.getTxData());
                 }else if(tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT){
                     //删除合约
-                    System.out.println("删除合约");
-                    System.out.println("tx.getData:"+tx.getTxData());
+                    ContractCallInfo data = (ContractCallInfo)tx.getTxData();
+                    RpcClientResult result = restFulUtils.get("/contract/result/" + tx.getHash(), null);
+                    if (result.isSuccess()) {
+                        Object data1 = result.getData();
+//                        contractBusiness.deleteContract(data.getContractAddress());
+                    }
+                    callContractDataList.add(data);
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER){
                     //合约转账
                     System.out.println("合约转账");
@@ -160,9 +180,9 @@ public class SyncDataBusiness {
             contractBusiness.saveAllCallInfo(callContractDataList);
 
             //智能合约地址批量保存
-            contrackAddressBusiness.saveAll(contrackAddressList);
+            ContractAddressBusiness.saveAll(contractAddressList);
             //智能合约创建交易数据批量保存
-            contrackCreateBusiness.saveAll(contrackCreateDataList);
+            ContractCreateBusiness.saveAll(contractCreateDataList);
 
             //为了让存入leveldb更快，这里直接做map，全部处理完成之后，再存入leveldb
             Map<String, AddressHashIndex> attrMapList = new HashMap<>();
@@ -230,8 +250,8 @@ public class SyncDataBusiness {
         aliasList = null;
         depositList = null;
         punishLogList = null;
-        contrackAddressList=null;
-        contrackCreateDataList=null;
+        contractAddressList=null;
+        contractCreateDataList=null;
     }
 
     /**
@@ -280,9 +300,9 @@ public class SyncDataBusiness {
             //回滚块
             blockBusiness.deleteByKey(header.getHeight());
             //回滚智能合约地址
-            contrackAddressBusiness.deleteByHeight(header.getHeight());
+            ContractAddressBusiness.deleteByHeight(header.getHeight());
             //回滚智能合约创建交易数据
-            contrackCreateBusiness.deleteList(header.getTxHashList());
+            ContractCreateBusiness.deleteList(header.getTxHashList());
 
             //回滚levelDB与缓存
             //回滚交易

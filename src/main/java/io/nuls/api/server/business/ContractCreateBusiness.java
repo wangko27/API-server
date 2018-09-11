@@ -1,7 +1,7 @@
 package io.nuls.api.server.business;
 
-import io.nuls.api.entity.ContrackCreateInfo;
-import io.nuls.api.server.dao.mapper.ContrackCreateInfoMapper;
+import io.nuls.api.entity.ContractCreateInfo;
+import io.nuls.api.server.dao.mapper.ContractCreateInfoMapper;
 import io.nuls.api.utils.JSONUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,21 +16,21 @@ import java.util.List;
  * @date: 2018/9/11
  */
 @Service
-public class ContrackCreateBusiness implements BaseService<ContrackCreateInfo, String> {
+public class ContractCreateBusiness implements BaseService<ContractCreateInfo, String> {
 
     @Autowired
-    private ContrackCreateInfoMapper contrackCreateInfoMapper;
+    private ContractCreateInfoMapper ContractCreateInfoMapper;
 
     /**
      * 保存智能合约地址
      *
-     * @param contrackCreateInfo 实体
+     * @param ContractCreateInfo 实体
      * @return 1成功，其他失败
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int save(ContrackCreateInfo contrackCreateInfo) {
-        return contrackCreateInfoMapper.insert(contrackCreateInfo);
+    public int save(ContractCreateInfo ContractCreateInfo) {
+        return ContractCreateInfoMapper.insert(ContractCreateInfo);
         
     }
 
@@ -40,9 +40,9 @@ public class ContrackCreateBusiness implements BaseService<ContrackCreateInfo, S
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int saveAll(List<ContrackCreateInfo> list) {
+    public int saveAll(List<ContractCreateInfo> list) {
         if (list.size() > 0) {
-            return contrackCreateInfoMapper.insertByBatch(list);
+            return ContractCreateInfoMapper.insertByBatch(list);
         }
         return 0;
     }
@@ -50,13 +50,13 @@ public class ContrackCreateBusiness implements BaseService<ContrackCreateInfo, S
     /**
      * 更新智能合约创建过程数据
      *
-     * @param contrackCreateInfo 实体
+     * @param ContractCreateInfo 实体
      * @return 1成功，其他失败
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int update(ContrackCreateInfo contrackCreateInfo) {
-        return contrackCreateInfoMapper.updateByPrimaryKey(contrackCreateInfo);
+    public int update(ContractCreateInfo ContractCreateInfo) {
+        return ContractCreateInfoMapper.updateByPrimaryKey(ContractCreateInfo);
     }
 
     /**
@@ -68,7 +68,7 @@ public class ContrackCreateBusiness implements BaseService<ContrackCreateInfo, S
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String createTxHash) {
-        return contrackCreateInfoMapper.deleteByPrimaryKey(createTxHash);
+        return ContractCreateInfoMapper.deleteByPrimaryKey(createTxHash);
     }
 
     /**
@@ -78,8 +78,8 @@ public class ContrackCreateBusiness implements BaseService<ContrackCreateInfo, S
      * @return
      */
     @Override
-    public ContrackCreateInfo getByKey(String createTxHash) {
-        return contrackCreateInfoMapper.selectByPrimaryKey(createTxHash);
+    public ContractCreateInfo getByKey(String createTxHash) {
+        return ContractCreateInfoMapper.selectByPrimaryKey(createTxHash);
     }
 
     /**
@@ -96,7 +96,7 @@ public class ContrackCreateBusiness implements BaseService<ContrackCreateInfo, S
             e.printStackTrace();
         }
         if(null != txHashList){
-            contrackCreateInfoMapper.deleteList(txHashList);
+            ContractCreateInfoMapper.deleteList(txHashList);
         }
     }
 }

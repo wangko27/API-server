@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.nuls.api.server.dao.mapper.ContrackCreateInfoMapper" >
-  <resultMap id="BaseResultMap" type="io.nuls.api.entity.ContrackCreateInfo" >
+<mapper namespace="io.nuls.api.server.dao.mapper.ContractCreateInfoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.ContractCreateInfo" >
     <id column="create_tx_hash" property="createTxHash" jdbcType="VARCHAR" />
     <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
     <result column="creater" property="creater" jdbcType="VARCHAR" />
@@ -19,15 +19,15 @@
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
     <include refid="Base_Column_List" />
-    from contrack_create_info
+    from contract_create_info
     where create_tx_hash = #{createTxHash,jdbcType=VARCHAR}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
-    delete from contrack_create_info
+    delete from contract_create_info
     where create_tx_hash = #{createTxHash,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="io.nuls.api.entity.ContrackCreateInfo" >
-    insert into contrack_create_info (create_tx_hash, contract_address, creater,
+  <insert id="insert" parameterType="io.nuls.api.entity.ContractCreateInfo" >
+    insert into contract_create_info (create_tx_hash, contract_address, creater,
       contract_code, gasLimit, price,
       args, methods, create_time
       )
@@ -37,7 +37,7 @@
       )
   </insert>
   <insert id="insertByBatch" parameterType="java.util.List">
-    insert into contrack_create_info (create_tx_hash, contract_address, creater,
+    insert into contract_create_info (create_tx_hash, contract_address, creater,
     contract_code, gasLimit, price,
     args, methods, create_time)
     values
@@ -48,8 +48,8 @@
     </foreach>
     on duplicate key update create_time = values(create_time)
   </insert>
-  <insert id="insertSelective" parameterType="io.nuls.api.entity.ContrackCreateInfo" >
-    insert into contrack_create_info
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractCreateInfo" >
+    insert into contract_create_info
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="createTxHash != null" >
         create_tx_hash,
@@ -109,8 +109,8 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.ContrackCreateInfo" >
-    update contrack_create_info
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.ContractCreateInfo" >
+    update contract_create_info
     <set >
       <if test="contractAddress != null" >
         contract_address = #{contractAddress,jdbcType=VARCHAR},
@@ -139,8 +139,8 @@
     </set>
     where create_tx_hash = #{createTxHash,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.ContrackCreateInfo" >
-    update contrack_create_info
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.ContractCreateInfo" >
+    update contract_create_info
     set contract_address = #{contractAddress,jdbcType=VARCHAR},
       creater = #{creater,jdbcType=VARCHAR},
       contract_code = #{contractCode,jdbcType=VARCHAR},
@@ -154,28 +154,28 @@
   <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from contrack_create_info
+    from contract_create_info
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
   <select id="selectCountSearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
-    SELECT COUNT(1) FROM contrack_create_info
+    SELECT COUNT(1) FROM contract_create_info
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
 
   <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from contrack_create_info
+    from contract_create_info
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
   <delete id="deleteList" parameterType="java.util.List">
-    delete from contrack_create_info where create_tx_hash in
+    delete from contract_create_info where create_tx_hash in
     <foreach collection="list" item="item" open="(" separator="," close=")">
       #{item,jdbcType=VARCHAR}
     </foreach>
   </delete>
   <delete id="deleteBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable">
-    DELETE from contrack_create_info
+    DELETE from contract_create_info
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </delete>
 </mapper>

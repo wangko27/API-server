@@ -11,64 +11,6 @@
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
     <result column="delete_hash" property="deleteHash" jdbcType="VARCHAR" />
   </resultMap>
-  <sql id="Example_Where_Clause" >
-    <where >
-      <foreach collection="oredCriteria" item="criteria" separator="or" >
-        <if test="criteria.valid" >
-          <trim prefix="(" suffix=")" prefixOverrides="and" >
-            <foreach collection="criteria.criteria" item="criterion" >
-              <choose >
-                <when test="criterion.noValue" >
-                  and ${criterion.condition}
-                </when>
-                <when test="criterion.singleValue" >
-                  and ${criterion.condition} #{criterion.value}
-                </when>
-                <when test="criterion.betweenValue" >
-                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
-                </when>
-                <when test="criterion.listValue" >
-                  and ${criterion.condition}
-                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
-                    #{listItem}
-                  </foreach>
-                </when>
-              </choose>
-            </foreach>
-          </trim>
-        </if>
-      </foreach>
-    </where>
-  </sql>
-  <sql id="Update_By_Example_Where_Clause" >
-    <where >
-      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
-        <if test="criteria.valid" >
-          <trim prefix="(" suffix=")" prefixOverrides="and" >
-            <foreach collection="criteria.criteria" item="criterion" >
-              <choose >
-                <when test="criterion.noValue" >
-                  and ${criterion.condition}
-                </when>
-                <when test="criterion.singleValue" >
-                  and ${criterion.condition} #{criterion.value}
-                </when>
-                <when test="criterion.betweenValue" >
-                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
-                </when>
-                <when test="criterion.listValue" >
-                  and ${criterion.condition}
-                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
-                    #{listItem}
-                  </foreach>
-                </when>
-              </choose>
-            </foreach>
-          </trim>
-        </if>
-      </foreach>
-    </where>
-  </sql>
   <sql id="Base_Column_List" >
     contract_address, creater, create_tx_hash, block_height, is_nrc20, status, create_time, 
     delete_hash
@@ -84,12 +26,24 @@
     where contract_address = #{contractAddress,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.ContractAddressInfo" >
-    insert into contract_address_info (contract_address, creater, create_tx_hash, 
-      block_height, is_nrc20, status, 
+    insert into contract_address_info (contract_address, creater, create_tx_hash,
+      block_height, is_nrc20, status,
       create_time, delete_hash)
-    values (#{contractAddress,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, #{createTxHash,jdbcType=VARCHAR}, 
-      #{blockHeight,jdbcType=BIGINT}, #{isNrc20,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+    values (#{contractAddress,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, #{createTxHash,jdbcType=VARCHAR},
+      #{blockHeight,jdbcType=BIGINT}, #{isNrc20,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
       #{createTime,jdbcType=BIGINT}, #{deleteHash,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contract_address_info (contract_address, creater, create_tx_hash,
+    block_height, is_nrc20, status,
+    create_time, delete_hash)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.contractAddress,jdbcType=VARCHAR}, #{item.creater,jdbcType=VARCHAR}, #{item.createTxHash,jdbcType=VARCHAR},
+      #{item.blockHeight,jdbcType=BIGINT}, #{item.isNrc20,jdbcType=INTEGER}, #{item.status,jdbcType=INTEGER},
+      #{item.createTime,jdbcType=BIGINT}, #{item.deleteHash,jdbcType=VARCHAR})
+    </foreach>
+    on duplicate key update create_time = values(create_time)
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractAddressInfo" >
     insert into contract_address_info
@@ -146,52 +100,6 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByExampleSelective" parameterType="map" >
-    update contract_address_info
-    <set >
-      <if test="record.contractAddress != null" >
-        contract_address = #{record.contractAddress,jdbcType=VARCHAR},
-      </if>
-      <if test="record.creater != null" >
-        creater = #{record.creater,jdbcType=VARCHAR},
-      </if>
-      <if test="record.createTxHash != null" >
-        create_tx_hash = #{record.createTxHash,jdbcType=VARCHAR},
-      </if>
-      <if test="record.blockHeight != null" >
-        block_height = #{record.blockHeight,jdbcType=BIGINT},
-      </if>
-      <if test="record.isNrc20 != null" >
-        is_nrc20 = #{record.isNrc20,jdbcType=INTEGER},
-      </if>
-      <if test="record.status != null" >
-        status = #{record.status,jdbcType=INTEGER},
-      </if>
-      <if test="record.createTime != null" >
-        create_time = #{record.createTime,jdbcType=BIGINT},
-      </if>
-      <if test="record.deleteHash != null" >
-        delete_hash = #{record.deleteHash,jdbcType=VARCHAR},
-      </if>
-    </set>
-    <if test="_parameter != null" >
-      <include refid="Update_By_Example_Where_Clause" />
-    </if>
-  </update>
-  <update id="updateByExample" parameterType="map" >
-    update contract_address_info
-    set contract_address = #{record.contractAddress,jdbcType=VARCHAR},
-      creater = #{record.creater,jdbcType=VARCHAR},
-      create_tx_hash = #{record.createTxHash,jdbcType=VARCHAR},
-      block_height = #{record.blockHeight,jdbcType=BIGINT},
-      is_nrc20 = #{record.isNrc20,jdbcType=INTEGER},
-      status = #{record.status,jdbcType=INTEGER},
-      create_time = #{record.createTime,jdbcType=BIGINT},
-      delete_hash = #{record.deleteHash,jdbcType=VARCHAR}
-    <if test="_parameter != null" >
-      <include refid="Update_By_Example_Where_Clause" />
-    </if>
-  </update>
   <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.ContractAddressInfo" >
     update contract_address_info
     <set >
@@ -230,4 +138,27 @@
       delete_hash = #{deleteHash,jdbcType=VARCHAR}
     where contract_address = #{contractAddress,jdbcType=VARCHAR}
   </update>
+
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contract_address_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectCountSearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM contract_address_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contract_address_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <delete id="deleteBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable">
+    DELETE from contract_address_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </delete>
 </mapper>

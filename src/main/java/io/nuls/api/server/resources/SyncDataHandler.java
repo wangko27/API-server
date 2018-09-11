@@ -1,11 +1,7 @@
 package io.nuls.api.server.resources;
 
 import io.nuls.api.constant.KernelErrorCode;
-import io.nuls.api.entity.Block;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.ContrackAddressInfo;
-import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.RpcTransferUtil;
@@ -101,14 +97,14 @@ public class SyncDataHandler {
         return result;
     }
 
-    public RpcClientResult<ContrackAddressInfo> getContractInfo(String contractAddress) throws NulsException {
+    public RpcClientResult<ContractAddressInfo> getContractInfo(String contractAddress) throws NulsException {
         RpcClientResult result = restFulUtils.get("/contract/info/" + contractAddress, null);
         if (result.isFailed()) {
             return result;
         }
         try {
-            ContrackAddressInfo contrackAddressInfo = RpcTransferUtil.toContract((Map<String, Object>) result.getData());
-            result.setData(contrackAddressInfo);
+            ContractAddressInfo ContractAddressInfo = RpcTransferUtil.toContract((Map<String, Object>) result.getData());
+            result.setData(ContractAddressInfo);
         } catch (Exception e) {
             throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
