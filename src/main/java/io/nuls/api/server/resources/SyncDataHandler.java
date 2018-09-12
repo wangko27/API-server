@@ -110,4 +110,18 @@ public class SyncDataHandler {
         }
         return result;
     }
+
+    public RpcClientResult<ContractResultInfo> getContractResult(String hash) throws NulsException {
+        RpcClientResult result = restFulUtils.get("/contract/result/" + hash, null);
+        if (result.isFailed()) {
+            return result;
+        }
+        try {
+            ContractResultInfo resultDto = RpcTransferUtil.toContractResult((Map<String, Object>) result.getData());
+            result.setData(resultDto);
+        } catch (Exception e) {
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
+        }
+        return result;
+    }
 }

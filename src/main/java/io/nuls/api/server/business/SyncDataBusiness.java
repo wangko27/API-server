@@ -82,6 +82,7 @@ public class SyncDataBusiness {
         List<ContractAddressInfo> contractAddressList = new ArrayList<>();
         List<ContractDeleteInfo> deleteContractDataList = new ArrayList<>();
         List<ContractCallInfo> callContractDataList = new ArrayList<>();
+        List<ContractResultInfo> contractResultInfoList = new ArrayList<>();
 
         try {
             for (int i = 0; i < block.getTxList().size(); i++) {
@@ -130,8 +131,6 @@ public class SyncDataBusiness {
                     }
                 } else if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                     //创建合约
-                    System.out.println("创建合约");
-                    System.out.println("tx.getData:" + tx.getTxData());
                     if (tx.getTxData() != null) {
                         ContractCreateInfo ContractCreateData = (ContractCreateInfo) tx.getTxData();
                         ContractCreateData.setCreateTxHash(tx.getHash());
@@ -147,23 +146,26 @@ public class SyncDataBusiness {
                     }
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT){
                     //调用合约
-                    System.out.println("调用合约");
-                    System.out.println("tx.getData:"+tx.getTxData());
+//                    System.out.println("调用合约");
+//                    System.out.println("tx.getData:"+tx.getTxData());
                 }else if(tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT){
                     //删除合约
                     ContractDeleteInfo data = (ContractDeleteInfo)tx.getTxData();
                     data.setTxHash(tx.getHash());
-                    RpcClientResult result = restFulUtils.get("/contract/result/" + tx.getHash(), null);
+                    //保存调用结果
+                    RpcClientResult<ContractResultInfo> result = syncDataHandler.getContractResult(tx.getHash());
+                    contractResultInfoList.add(result.getData());
                     if (result.isSuccess()) {
-                        Object data1 = result.getData();
                         contractBusiness.deleteContract(data.getContractAddress());
                     }
                     deleteContractDataList.add(data);
+                    System.out.println("##############" + data);
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER){
                     //合约转账
-                    System.out.println("合约转账");
-                    System.out.println("tx.getData:" + tx.getTxData());
+//                    System.out.println("合约转账");
+//                    System.out.println("tx.getData:" + tx.getTxData());
                 }
+                
             }
 
             blockBusiness.save(block.getHeader());
@@ -179,6 +181,7 @@ public class SyncDataBusiness {
             depositBusiness.saveAll(depositList);
             contractBusiness.saveAllDelInfo(deleteContractDataList);
             contractBusiness.saveAllCallInfo(callContractDataList);
+            contractBusiness.saveAllContractResult(contractResultInfoList);
 
             //智能合约地址批量保存
             ContractAddressBusiness.saveAll(contractAddressList);

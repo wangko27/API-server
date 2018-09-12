@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.ContractResultInfoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.ContractResultInfo" >
+    <result column="success" property="success" jdbcType="VARCHAR" />
+    <result column="error_message" property="errorMessage" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
+    <result column="result" property="result" jdbcType="VARCHAR" />
+    <result column="gas_limit" property="gasLimit" jdbcType="BIGINT" />
+    <result column="gas_used" property="gasUsed" jdbcType="BIGINT" />
+    <result column="price" property="price" jdbcType="BIGINT" />
+    <result column="total_fee" property="totalFee" jdbcType="BIGINT" />
+    <result column="tx_size_fee" property="txSizeFee" jdbcType="BIGINT" />
+    <result column="actual_contract_fee" property="actualContractFee" jdbcType="BIGINT" />
+    <result column="refund_fee" property="refundFee" jdbcType="BIGINT" />
+    <result column="stateroot" property="stateroot" jdbcType="VARCHAR" />
+    <result column="value" property="value" jdbcType="BIGINT" />
+    <result column="stacktrace" property="stacktrace" jdbcType="VARCHAR" />
+    <result column="balance" property="balance" jdbcType="BIGINT" />
+    <result column="nonce" property="nonce" jdbcType="BIGINT" />
+    <result column="transfers" property="transfers" jdbcType="VARCHAR" />
+    <result column="events" property="events" jdbcType="VARCHAR" />
+    <result column="token_transfers" property="tokenTransfers" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="symbol" property="symbol" jdbcType="VARCHAR" />
+    <result column="decimals" property="decimals" jdbcType="BIGINT" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+  </resultMap>
+  <insert id="insert" parameterType="io.nuls.api.entity.ContractResultInfo" >
+    insert into contract_result_info (success, error_message, code, 
+      contract_address, result, gas_limit, 
+      gas_used, price, total_fee, 
+      tx_size_fee, actual_contract_fee, refund_fee, 
+      stateroot, value, stacktrace, 
+      balance, nonce, transfers, 
+      events, token_transfers, name, 
+      symbol, decimals, remark, 
+      tx_hash)
+    values (#{success,jdbcType=VARCHAR}, #{errorMessage,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, 
+      #{contractAddress,jdbcType=VARCHAR}, #{result,jdbcType=VARCHAR}, #{gasLimit,jdbcType=BIGINT}, 
+      #{gasUsed,jdbcType=BIGINT}, #{price,jdbcType=BIGINT}, #{totalFee,jdbcType=BIGINT}, 
+      #{txSizeFee,jdbcType=BIGINT}, #{actualContractFee,jdbcType=BIGINT}, #{refundFee,jdbcType=BIGINT}, 
+      #{stateroot,jdbcType=VARCHAR}, #{value,jdbcType=BIGINT}, #{stacktrace,jdbcType=VARCHAR}, 
+      #{balance,jdbcType=BIGINT}, #{nonce,jdbcType=BIGINT}, #{transfers,jdbcType=VARCHAR}, 
+      #{events,jdbcType=VARCHAR}, #{tokenTransfers,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{symbol,jdbcType=VARCHAR}, #{decimals,jdbcType=BIGINT}, #{remark,jdbcType=VARCHAR}, 
+      #{txHash,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractResultInfo" >
+    insert into contract_result_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="success != null" >
+        success,
+      </if>
+      <if test="errorMessage != null" >
+        error_message,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="contractAddress != null" >
+        contract_address,
+      </if>
+      <if test="result != null" >
+        result,
+      </if>
+      <if test="gasLimit != null" >
+        gas_limit,
+      </if>
+      <if test="gasUsed != null" >
+        gas_used,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="totalFee != null" >
+        total_fee,
+      </if>
+      <if test="txSizeFee != null" >
+        tx_size_fee,
+      </if>
+      <if test="actualContractFee != null" >
+        actual_contract_fee,
+      </if>
+      <if test="refundFee != null" >
+        refund_fee,
+      </if>
+      <if test="stateroot != null" >
+        stateroot,
+      </if>
+      <if test="value != null" >
+        value,
+      </if>
+      <if test="stacktrace != null" >
+        stacktrace,
+      </if>
+      <if test="balance != null" >
+        balance,
+      </if>
+      <if test="nonce != null" >
+        nonce,
+      </if>
+      <if test="transfers != null" >
+        transfers,
+      </if>
+      <if test="events != null" >
+        events,
+      </if>
+      <if test="tokenTransfers != null" >
+        token_transfers,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="symbol != null" >
+        symbol,
+      </if>
+      <if test="decimals != null" >
+        decimals,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="txHash != null" >
+        tx_hash,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="success != null" >
+        #{success,jdbcType=VARCHAR},
+      </if>
+      <if test="errorMessage != null" >
+        #{errorMessage,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="contractAddress != null" >
+        #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="result != null" >
+        #{result,jdbcType=VARCHAR},
+      </if>
+      <if test="gasLimit != null" >
+        #{gasLimit,jdbcType=BIGINT},
+      </if>
+      <if test="gasUsed != null" >
+        #{gasUsed,jdbcType=BIGINT},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=BIGINT},
+      </if>
+      <if test="totalFee != null" >
+        #{totalFee,jdbcType=BIGINT},
+      </if>
+      <if test="txSizeFee != null" >
+        #{txSizeFee,jdbcType=BIGINT},
+      </if>
+      <if test="actualContractFee != null" >
+        #{actualContractFee,jdbcType=BIGINT},
+      </if>
+      <if test="refundFee != null" >
+        #{refundFee,jdbcType=BIGINT},
+      </if>
+      <if test="stateroot != null" >
+        #{stateroot,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null" >
+        #{value,jdbcType=BIGINT},
+      </if>
+      <if test="stacktrace != null" >
+        #{stacktrace,jdbcType=VARCHAR},
+      </if>
+      <if test="balance != null" >
+        #{balance,jdbcType=BIGINT},
+      </if>
+      <if test="nonce != null" >
+        #{nonce,jdbcType=BIGINT},
+      </if>
+      <if test="transfers != null" >
+        #{transfers,jdbcType=VARCHAR},
+      </if>
+      <if test="events != null" >
+        #{events,jdbcType=VARCHAR},
+      </if>
+      <if test="tokenTransfers != null" >
+        #{tokenTransfers,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="symbol != null" >
+        #{symbol,jdbcType=VARCHAR},
+      </if>
+      <if test="decimals != null" >
+        #{decimals,jdbcType=BIGINT},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="txHash != null" >
+        #{txHash,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

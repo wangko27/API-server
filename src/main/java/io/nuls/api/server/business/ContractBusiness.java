@@ -4,16 +4,15 @@ import io.nuls.api.constant.ContractConstant;
 import io.nuls.api.entity.ContractAddressInfo;
 import io.nuls.api.entity.ContractCallInfo;
 import io.nuls.api.entity.ContractDeleteInfo;
-import io.nuls.api.entity.ContractDeleteInfo;
+import io.nuls.api.entity.ContractResultInfo;
 import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractResultInfoMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +32,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractAddressInfoMapper contractAddressInfoMapper;
     @Autowired
     private ContractCallInfoMapper contractCallInfoMapper;
+    @Autowired
+    private ContractResultInfoMapper contractResultInfoMapper;
 
     /**
      * 根据地址获取别名
@@ -61,7 +62,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     public int saveAllCallInfo(List<ContractCallInfo> list) {
         int i = 0;
         if (list.size() > 0) {
-//            i = contractCallInfoMapper.insertByBatch(list);
+            i = contractCallInfoMapper.insertByBatch(list);
         }
         return i;
     }
@@ -105,5 +106,14 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     public void rollbackContractDeleteInfo(String hash) {
         //根据hash查出删除交易，获取到合约地址，变更合约状态为正常，最后删除该交易
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAllContractResult(List<ContractResultInfo> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            i = contractResultInfoMapper.insertByBatch(list);
+        }
+        return i;
     }
 }

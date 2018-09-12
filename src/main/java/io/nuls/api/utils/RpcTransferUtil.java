@@ -10,11 +10,14 @@ import io.nuls.api.entity.BlockHeader;
 import io.nuls.api.entity.Deposit;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.model.*;
+import io.nuls.api.entity.ContractResultInfo;
 import io.nuls.api.model.tx.*;
+import io.nuls.api.server.dto.contract.ContractTransfer;
 import io.nuls.api.server.dto.contract.ProgramStatus;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -364,5 +367,33 @@ public class RpcTransferUtil {
         ContractAddressInfo.setStatus(ProgramStatus.codeOf((String) map.get("status")).getCode());
         ContractAddressInfo.setMethods(JSONUtils.obj2json(map.get("method")));
         return ContractAddressInfo;
+    }
+
+    public static ContractResultInfo toContractResult(Map<String, Object> map) {
+        ContractResultInfo result = new ContractResultInfo();
+        result.setErrorMessage((String)map.get("errorMessage"));
+        result.setSuccess((String) map.get("success"));
+        result.setActualContractFee((Long) map.get("actualContractFee"));
+        result.setBalance((Long) map.get("balance"));
+        result.setContractAddress((String) map.get("contractAddress"));
+        result.setDecimals((Long) map.get("decimals"));
+        result.setGasLimit((Long) map.get("gasLimit"));
+        result.setGasUsed((Long) map.get("gasUsed"));
+        result.setName((String) map.get("name"));
+        result.setNonce((Long) map.get("nonce"));
+        result.setPrice((Long) map.get("price"));
+        result.setRefundFee((Long) map.get("refundFee"));
+        result.setRemark((String) map.get("remark"));
+        result.setResult((String) map.get("result"));
+        result.setStacktrace((String) map.get("stackTrace"));
+        result.setStateroot((String) map.get("stateRoot"));
+        result.setSymbol((String) map.get("symbol"));
+        result.setTotalFee((Long) map.get("totalFee"));
+        result.setTxSizeFee((Long) map.get("txSizeFee"));
+        result.setValue((Long) map.get("value"));
+        result.setEvents((String) map.get("events"));
+        result.setTransfers((String) map.get("transfers"));
+        result.setTokenTransfers((String) map.get("tokenTransfers"));
+        return result;
     }
 }
