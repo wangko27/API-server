@@ -16,6 +16,7 @@ import io.nuls.api.entity.ContractCallInfo;
 import io.nuls.api.entity.ContractCreateInfo;
 import io.nuls.api.entity.ContractDeleteInfo;
 import io.nuls.api.entity.ContractResultInfo;
+import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.entity.Deposit;
 import io.nuls.api.entity.Input;
 import io.nuls.api.entity.Output;
@@ -28,7 +29,9 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
+import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.RestFulUtils;
+import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,9 +70,9 @@ public class SyncDataBusiness {
     @Autowired
     private ContractBusiness contractBusiness;
     @Autowired
-    private ContractAddressBusiness ContractAddressBusiness;
+    private ContractAddressBusiness contractAddressBusiness;
     @Autowired
-    private ContractCreateBusiness ContractCreateBusiness;
+    private ContractCreateBusiness contractCreateBusiness;
     @Autowired
     private SyncDataHandler syncDataHandler;
 
@@ -102,6 +105,7 @@ public class SyncDataBusiness {
         List<ContractDeleteInfo> deleteContractDataList = new ArrayList<>();
         List<ContractCallInfo> callContractDataList = new ArrayList<>();
         List<ContractResultInfo> contractResultInfoList = new ArrayList<>();
+        List<ContractTokenInfo> contractTokenInfoList = new ArrayList<>();
 
         try {
             for (int i = 0; i < block.getTxList().size(); i++) {
@@ -153,8 +157,10 @@ public class SyncDataBusiness {
                     //保存调用结果
                     RpcClientResult<ContractResultInfo> result = syncDataHandler.getContractResult(tx.getHash());
                     result.getData().setTxHash(tx.getHash());
-                    contractResultInfoList.add(result.getData());
-                    System.out.println("RESULT======="+JSONUtils.obj2json(result.getData()));
+                    if (result.isSuccess() && result.getData() != null) {
+                        contractResultInfoList.add(result.getData());
+                    }
+                    System.out.println("RESULT=======" + JSONUtils.obj2json(result.getData()));
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
                         if (tx.getTxData() != null && "true".equals(result.getData().getSuccess())) {
@@ -287,8 +293,8 @@ public class SyncDataBusiness {
         aliasList = null;
         depositList = null;
         punishLogList = null;
-        contractAddressList=null;
-        contractCreateDataList=null;
+        contractAddressList = null;
+        contractCreateDataList = null;
     }
 
     /**

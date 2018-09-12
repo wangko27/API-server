@@ -11,7 +11,7 @@ public class ContractTokenInfo {
 
     private Long decimals;
 
-    private Long totalsupply;
+    private String totalsupply;
 
     private Long createTime;
 
@@ -68,11 +68,11 @@ public class ContractTokenInfo {
         this.decimals = decimals;
     }
 
-    public Long getTotalsupply() {
+    public String getTotalsupply() {
         return totalsupply;
     }
 
-    public void setTotalsupply(Long totalsupply) {
+    public void setTotalsupply(String totalsupply) {
         this.totalsupply = totalsupply;
     }
 

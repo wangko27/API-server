@@ -49,7 +49,7 @@ public class ContractAddressInfo {
 
     private Long decimals;
 
-    private Long totalsupply;
+    private String totalsupply;
 
     public String getContractAddress() {
         return contractAddress;
@@ -147,11 +147,11 @@ public class ContractAddressInfo {
         this.decimals = decimals;
     }
 
-    public Long getTotalsupply() {
+    public String getTotalsupply() {
         return totalsupply;
     }
 
-    public void setTotalsupply(Long totalsupply) {
+    public void setTotalsupply(String totalsupply) {
         this.totalsupply = totalsupply;
     }
 }

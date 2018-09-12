@@ -7,7 +7,7 @@
     <result column="token_name" property="tokenName" jdbcType="VARCHAR" />
     <result column="symbol" property="symbol" jdbcType="VARCHAR" />
     <result column="decimals" property="decimals" jdbcType="BIGINT" />
-    <result column="totalsupply" property="totalsupply" jdbcType="BIGINT" />
+    <result column="totalsupply" property="totalsupply" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >

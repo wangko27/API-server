@@ -3,21 +3,43 @@ package io.nuls.api.utils;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.crypto.Hex;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.Deposit;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.model.*;
+import io.nuls.api.entity.ContractAddressInfo;
+import io.nuls.api.entity.ContractCreateInfo;
+import io.nuls.api.entity.ContractDeleteInfo;
 import io.nuls.api.entity.ContractResultInfo;
-import io.nuls.api.model.tx.*;
-import io.nuls.api.server.dto.contract.ContractTransfer;
+import io.nuls.api.entity.Deposit;
+import io.nuls.api.entity.Input;
+import io.nuls.api.entity.Output;
+import io.nuls.api.entity.PunishLog;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.TxData;
+import io.nuls.api.entity.Utxo;
+import io.nuls.api.model.Agent;
+import io.nuls.api.model.CancelDeposit;
+import io.nuls.api.model.Coin;
+import io.nuls.api.model.CreateContractData;
+import io.nuls.api.model.DeleteContractData;
+import io.nuls.api.model.NulsDigestData;
+import io.nuls.api.model.RedPunishData;
+import io.nuls.api.model.StopAgent;
+import io.nuls.api.model.YellowPunishData;
+import io.nuls.api.model.tx.AliasTransaction;
+import io.nuls.api.model.tx.CancelDepositTransaction;
+import io.nuls.api.model.tx.CreateAgentTransaction;
+import io.nuls.api.model.tx.CreateContractTransaction;
+import io.nuls.api.model.tx.DeleteContractTransaction;
+import io.nuls.api.model.tx.DepositTransaction;
+import io.nuls.api.model.tx.RedPunishTransaction;
+import io.nuls.api.model.tx.StopAgentTransaction;
+import io.nuls.api.model.tx.YellowPunishTransaction;
 import io.nuls.api.server.dto.contract.ProgramStatus;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -105,7 +127,7 @@ public class RpcTransferUtil {
             tx.setTxData(log);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
             CreateContractTransaction createContractTx = (CreateContractTransaction) txModel;
-            ContractCreateInfo createData= toContractCreateData(createContractTx);
+            ContractCreateInfo createData = toContractCreateData(createContractTx);
             tx.setTxData(createData);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT) {
 
@@ -358,65 +380,75 @@ public class RpcTransferUtil {
 
     public static ContractAddressInfo toContract(Map<String, Object> map) throws Exception {
         ContractAddressInfo contractAddressInfo = new ContractAddressInfo();
-        contractAddressInfo.setCreateTxHash((String) map.get("createTxHash"));
-        contractAddressInfo.setContractAddress((String) map.get("address"));
-        contractAddressInfo.setCreater((String) map.get("creater"));
-        contractAddressInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
-        contractAddressInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
-        contractAddressInfo.setIsNrc20(Boolean.parseBoolean(map.get("isNrc20").toString())?1:0);
-        //如果是NRC20需要解析代币信息
-        if(Boolean.parseBoolean(map.get("isNrc20").toString())) {
-            contractAddressInfo.setTokenName((String) map.get("nrc20TokenName"));
-            contractAddressInfo.setSymbol((String) map.get("nrc20TokenSymbol"));
-            contractAddressInfo.setDecimals(Long.parseLong(map.get("decimals").toString()));
-            contractAddressInfo.setTotalsupply(Long.parseLong(map.get("totalSupply").toString()));
+        try {
+            contractAddressInfo.setCreateTxHash((String) map.get("createTxHash"));
+            contractAddressInfo.setContractAddress((String) map.get("address"));
+            contractAddressInfo.setCreater((String) map.get("creater"));
+            contractAddressInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
+            contractAddressInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
+            contractAddressInfo.setIsNrc20(Boolean.parseBoolean(map.get("isNrc20").toString()) ? 1 : 0);
+            //如果是NRC20需要解析代币信息
+            if (Boolean.parseBoolean(map.get("isNrc20").toString())) {
+                contractAddressInfo.setTokenName((String) map.get("nrc20TokenName"));
+                contractAddressInfo.setSymbol((String) map.get("nrc20TokenSymbol"));
+                contractAddressInfo.setDecimals(Long.parseLong(map.get("decimals").toString()));
+                contractAddressInfo.setTotalsupply(map.get("totalSupply").toString());
+            }
+            contractAddressInfo.setStatus(ProgramStatus.codeOf((String) map.get("status")).getCode());
+            contractAddressInfo.setMethods(JSONUtils.obj2json(map.get("method")));
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-        contractAddressInfo.setStatus(ProgramStatus.codeOf((String) map.get("status")).getCode());
-        contractAddressInfo.setMethods(JSONUtils.obj2json(map.get("method")));
         return contractAddressInfo;
     }
 
     public static ContractResultInfo toContractResult(Map<String, Object> map) throws Exception {
-        map = (Map<String, Object>)map.get("data");
-        ContractResultInfo result = new ContractResultInfo();
-        result.setErrorMessage((String)map.get("errorMessage"));
-        result.setSuccess(map.get("success").toString());
-        result.setActualContractFee((Integer) map.get("actualContractFee"));
-        result.setBalance((Long) map.get("balance"));
-        result.setContractAddress((String) map.get("contractAddress"));
-        result.setDecimals((Integer) map.get("decimals"));
-        result.setGasLimit((Integer) map.get("gasLimit"));
-        result.setGasUsed((Integer) map.get("gasUsed"));
-        result.setName((String) map.get("name"));
-        result.setNonce((Long) map.get("nonce"));
-        result.setPrice((Integer) map.get("price"));
-        result.setRefundFee((Integer) map.get("refundFee"));
-        result.setRemark((String) map.get("remark"));
-        result.setResult((String) map.get("result"));
-        result.setStacktrace((String) map.get("stackTrace"));
-        result.setStateroot((String) map.get("stateRoot"));
-        result.setSymbol((String) map.get("symbol"));
-        result.setTotalFee((Integer) map.get("totalFee"));
-        result.setTxSizeFee((Integer) map.get("txSizeFee"));
-        result.setValue((Integer) map.get("value"));
-        String events = "";
-        String transfers = "";
-        String tokenTransfers = "";
-        ArrayList list_events = (ArrayList) map.get("events");
-        if (list_events.size() > 0) {
-            events = JSONUtils.obj2json(list_events);
+
+        ContractResultInfo result = null;
+        try {
+            result = new ContractResultInfo();
+            map = (Map<String, Object>) map.get("data");
+            result.setErrorMessage((String) map.get("errorMessage"));
+            result.setSuccess(map.get("success").toString());
+            result.setActualContractFee(Long.parseLong(map.get("actualContractFee").toString()));
+            result.setBalance(map.get("balance") != null ? Long.parseLong(map.get("balance").toString()) : 0);
+            result.setContractAddress((String) map.get("contractAddress"));
+            result.setDecimals(map.get("decimals") != null ? Long.parseLong(map.get("decimals").toString()) : 0);
+            result.setGasLimit(map.get("gasLimit") != null ? Long.parseLong(map.get("gasLimit").toString()) : 0);
+            result.setGasUsed(map.get("gasUsed") != null ? Long.parseLong(map.get("gasUsed").toString()) : 0);
+            result.setTokenName((String) map.get("name"));
+            result.setNonce(Long.parseLong(map.get("nonce").toString()));
+            result.setPrice(Long.parseLong(map.get("price").toString()));
+            result.setRefundFee(map.get("refundFee") != null ? Long.parseLong(map.get("refundFee").toString()) : 0);
+            result.setRemark((String) map.get("remark"));
+            result.setResult((String) map.get("result"));
+            result.setStacktrace((String) map.get("stackTrace"));
+            result.setStateroot((String) map.get("stateRoot"));
+            result.setSymbol((String) map.get("symbol"));
+            result.setTotalFee(map.get("totalFee") != null ? Long.parseLong(map.get("totalFee").toString()) : 0);
+            result.setTxSizeFee(map.get("txSizeFee") != null ? Long.parseLong(map.get("txSizeFee").toString()) : 0);
+            result.setTxValue(map.get("value") != null ? Long.parseLong(map.get("value").toString()) : 0);
+            String events = "";
+            String transfers = "";
+            String tokenTransfers = "";
+            ArrayList list_events = (ArrayList) map.get("events");
+            if (list_events.size() > 0) {
+                events = JSONUtils.obj2json(list_events);
+            }
+            ArrayList list_transfers = (ArrayList) map.get("transfers");
+            if (list_transfers.size() > 0) {
+                transfers = JSONUtils.obj2json(list_transfers);
+            }
+            ArrayList list_tokenTransfers = (ArrayList) map.get("tokenTransfers");
+            if (list_tokenTransfers.size() > 0) {
+                tokenTransfers = JSONUtils.obj2json(list_tokenTransfers);
+            }
+            result.setEvents(events);
+            result.setTransfers(transfers);
+            result.setTokenTransfers(tokenTransfers);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-        ArrayList list_transfers = (ArrayList) map.get("transfers");
-        if (list_transfers.size() > 0) {
-            transfers = JSONUtils.obj2json(list_transfers);
-        }
-        ArrayList list_tokenTransfers = (ArrayList) map.get("tokenTransfers");
-        if (list_tokenTransfers.size() > 0) {
-            tokenTransfers = JSONUtils.obj2json(list_tokenTransfers);
-        }
-        result.setEvents(events);
-        result.setTransfers(transfers);
-        result.setTokenTransfers(tokenTransfers);
         return result;
     }
 }
