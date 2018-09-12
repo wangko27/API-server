@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.ContractTokenInfoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.ContractTokenInfo" >
+    <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+    <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
+    <result column="token_name" property="tokenName" jdbcType="VARCHAR" />
+    <result column="symbol" property="symbol" jdbcType="VARCHAR" />
+    <result column="decimals" property="decimals" jdbcType="BIGINT" />
+    <result column="totalsupply" property="totalsupply" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    tx_hash, contract_address, token_name, symbol, decimals, totalsupply, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from contract_token_info
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from contract_token_info
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.ContractTokenInfo" >
+    insert into contract_token_info (tx_hash, contract_address, token_name, 
+      symbol, decimals, totalsupply, 
+      create_time)
+    values (#{txHash,jdbcType=VARCHAR}, #{contractAddress,jdbcType=VARCHAR}, #{tokenName,jdbcType=VARCHAR}, 
+      #{symbol,jdbcType=VARCHAR}, #{decimals,jdbcType=BIGINT}, #{totalsupply,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contract_token_info (tx_hash, contract_address, token_name,
+    symbol, decimals, totalsupply,
+    create_time)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.contractAddress,jdbcType=VARCHAR}, #{item.tokenName,jdbcType=VARCHAR},
+      #{item.symbol,jdbcType=VARCHAR}, #{item.decimals,jdbcType=BIGINT}, #{item.totalsupply,jdbcType=BIGINT},
+      #{item.createTime,jdbcType=BIGINT})
+    </foreach>
+    on duplicate key update create_time = values(create_time)
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractTokenInfo" >
+    insert into contract_token_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        tx_hash,
+      </if>
+      <if test="contractAddress != null" >
+        contract_address,
+      </if>
+      <if test="tokenName != null" >
+        token_name,
+      </if>
+      <if test="symbol != null" >
+        symbol,
+      </if>
+      <if test="decimals != null" >
+        decimals,
+      </if>
+      <if test="totalsupply != null" >
+        totalsupply,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        #{txHash,jdbcType=VARCHAR},
+      </if>
+      <if test="contractAddress != null" >
+        #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="tokenName != null" >
+        #{tokenName,jdbcType=VARCHAR},
+      </if>
+      <if test="symbol != null" >
+        #{symbol,jdbcType=VARCHAR},
+      </if>
+      <if test="decimals != null" >
+        #{decimals,jdbcType=BIGINT},
+      </if>
+      <if test="totalsupply != null" >
+        #{totalsupply,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.ContractTokenInfo" >
+    update contract_token_info
+    <set >
+      <if test="contractAddress != null" >
+        contract_address = #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="tokenName != null" >
+        token_name = #{tokenName,jdbcType=VARCHAR},
+      </if>
+      <if test="symbol != null" >
+        symbol = #{symbol,jdbcType=VARCHAR},
+      </if>
+      <if test="decimals != null" >
+        decimals = #{decimals,jdbcType=BIGINT},
+      </if>
+      <if test="totalsupply != null" >
+        totalsupply = #{totalsupply,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.ContractTokenInfo" >
+    update contract_token_info
+    set contract_address = #{contractAddress,jdbcType=VARCHAR},
+      token_name = #{tokenName,jdbcType=VARCHAR},
+      symbol = #{symbol,jdbcType=VARCHAR},
+      decimals = #{decimals,jdbcType=BIGINT},
+      totalsupply = #{totalsupply,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=BIGINT}
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+</mapper>

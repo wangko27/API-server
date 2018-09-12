@@ -9,7 +9,9 @@ import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
+import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.RestFulUtils;
+import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,9 +50,9 @@ public class SyncDataBusiness {
     @Autowired
     private ContractBusiness contractBusiness;
     @Autowired
-    private ContractAddressBusiness ContractAddressBusiness;
+    private ContractAddressBusiness contractAddressBusiness;
     @Autowired
-    private ContractCreateBusiness ContractCreateBusiness;
+    private ContractCreateBusiness contractCreateBusiness;
     @Autowired
     private SyncDataHandler syncDataHandler;
 
@@ -83,6 +85,8 @@ public class SyncDataBusiness {
         List<ContractDeleteInfo> deleteContractDataList = new ArrayList<>();
         List<ContractCallInfo> callContractDataList = new ArrayList<>();
         List<ContractResultInfo> contractResultInfoList = new ArrayList<>();
+        List<ContractTokenInfo> contractTokenInfoList = new ArrayList<>();
+
 
         try {
             for (int i = 0; i < block.getTxList().size(); i++) {
@@ -129,43 +133,55 @@ public class SyncDataBusiness {
                         TransactionRelation key = new TransactionRelation(log.getAddress(), tx.getHash(), tx.getType(), tx.getCreateTime());
                         txRelationList.add(key);
                     }
-                } else if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
-                    //创建合约
-                    if (tx.getTxData() != null) {
-                        ContractCreateInfo ContractCreateData = (ContractCreateInfo) tx.getTxData();
-                        ContractCreateData.setCreateTxHash(tx.getHash());
-                        //查询合约地址信息
-                        RpcClientResult<ContractAddressInfo> contractResult = syncDataHandler.getContractInfo(ContractCreateData.getContractAddress());
-                        if (contractResult != null && contractResult.getData() != null) {
-                            //设置合约包含方法
-                            ContractCreateData.setMethods(contractResult.getData().getMethods());
-                            ContractCreateData.setCreateTime(contractResult.getData().getCreateTime());
-                            contractAddressList.add(contractResult.getData());
-                        }
-                        contractCreateDataList.add(ContractCreateData);
-                    }
-                }else if(tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT){
-                    //调用合约
-//                    System.out.println("调用合约");
-//                    System.out.println("tx.getData:"+tx.getTxData());
-                }else if(tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT){
-                    //删除合约
-                    ContractDeleteInfo data = (ContractDeleteInfo)tx.getTxData();
-                    data.setTxHash(tx.getHash());
+                }
+                if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
                     //保存调用结果
                     RpcClientResult<ContractResultInfo> result = syncDataHandler.getContractResult(tx.getHash());
+                    result.getData().setTxHash(tx.getHash());
                     contractResultInfoList.add(result.getData());
-                    if (result.isSuccess()) {
-                        contractBusiness.deleteContract(data.getContractAddress());
-                    }
-                    deleteContractDataList.add(data);
-                    System.out.println("##############" + data);
-                }else if(tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER){
-                    //合约转账
+                    System.out.println("RESULT======="+JSONUtils.obj2json(result.getData()));
+                    if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
+                        //创建合约
+                        if (tx.getTxData() != null && "true".equals(result.getData().getSuccess())) {
+                            ContractCreateInfo contractCreateData = (ContractCreateInfo) tx.getTxData();
+                            contractCreateData.setCreateTxHash(tx.getHash());
+                            //查询合约地址信息
+                            RpcClientResult<ContractAddressInfo> contractResult = syncDataHandler.getContractInfo(contractCreateData.getContractAddress());
+                            ContractAddressInfo contractAddressInfo = contractResult.getData();
+                            if (contractAddressInfo != null) {
+                                //设置合约包含方法
+                                contractCreateData.setMethods(contractAddressInfo.getMethods());
+                                contractCreateData.setCreateTime(contractAddressInfo.getCreateTime());
+                                contractAddressList.add(contractAddressInfo);
+
+                                //NRC20代币信息
+                                if (StringUtils.isNotBlank(contractAddressInfo.getTokenName())) {
+                                    ContractTokenInfo contractTokenInfo = new ContractTokenInfo(contractAddressInfo);
+                                    contractTokenInfoList.add(contractTokenInfo);
+                                }
+                            }
+                            contractCreateDataList.add(contractCreateData);
+                        }
+                    } else if (tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT) {
+                        //调用合约
+//                    System.out.println("调用合约");
+//                    System.out.println("tx.getData:"+tx.getTxData());
+                    } else if (tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
+                        //删除合约
+                        ContractDeleteInfo data = (ContractDeleteInfo) tx.getTxData();
+                        data.setTxHash(tx.getHash());
+                        if (result.isSuccess()) {
+                            contractBusiness.deleteContract(data.getContractAddress());
+                        }
+                        deleteContractDataList.add(data);
+                        System.out.println("##############" + data);
+                    } else if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
+                        //合约转账
 //                    System.out.println("合约转账");
 //                    System.out.println("tx.getData:" + tx.getTxData());
+                    }
                 }
-                
+
             }
 
             blockBusiness.save(block.getHeader());
@@ -179,14 +195,16 @@ public class SyncDataBusiness {
             aliasBusiness.saveAll(aliasList);
             punishLogBusiness.saveAll(punishLogList);
             depositBusiness.saveAll(depositList);
+
+            //智能合约相关数据保存
             contractBusiness.saveAllDelInfo(deleteContractDataList);
             contractBusiness.saveAllCallInfo(callContractDataList);
             contractBusiness.saveAllContractResult(contractResultInfoList);
-
+            contractBusiness.saveAllToken(contractTokenInfoList);
             //智能合约地址批量保存
-            ContractAddressBusiness.saveAll(contractAddressList);
+            contractAddressBusiness.saveAll(contractAddressList);
             //智能合约创建交易数据批量保存
-            ContractCreateBusiness.saveAll(contractCreateDataList);
+            contractCreateBusiness.saveAll(contractCreateDataList);
 
             //为了让存入leveldb更快，这里直接做map，全部处理完成之后，再存入leveldb
             Map<String, AddressHashIndex> attrMapList = new HashMap<>();
@@ -254,8 +272,9 @@ public class SyncDataBusiness {
         aliasList = null;
         depositList = null;
         punishLogList = null;
-        contractAddressList=null;
-        contractCreateDataList=null;
+        contractAddressList = null;
+        contractCreateDataList = null;
+        contractTokenInfoList = null;
     }
 
     /**
@@ -304,9 +323,11 @@ public class SyncDataBusiness {
             //回滚块
             blockBusiness.deleteByKey(header.getHeight());
             //回滚智能合约地址
-            ContractAddressBusiness.deleteByHeight(header.getHeight());
+            contractAddressBusiness.deleteByHeight(header.getHeight());
             //回滚智能合约创建交易数据
-            ContractCreateBusiness.deleteList(header.getTxHashList());
+            contractCreateBusiness.deleteList(header.getTxHashList());
+            //回滚智能合约token代币信息
+            contractBusiness.deleteTokenList(header.getTxHashList());
 
             //回滚levelDB与缓存
             //回滚交易

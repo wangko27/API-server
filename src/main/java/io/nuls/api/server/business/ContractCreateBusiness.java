@@ -19,18 +19,18 @@ import java.util.List;
 public class ContractCreateBusiness implements BaseService<ContractCreateInfo, String> {
 
     @Autowired
-    private ContractCreateInfoMapper ContractCreateInfoMapper;
+    private ContractCreateInfoMapper contractCreateInfoMapper;
 
     /**
      * 保存智能合约地址
      *
-     * @param ContractCreateInfo 实体
+     * @param contractCreateInfo 实体
      * @return 1成功，其他失败
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int save(ContractCreateInfo ContractCreateInfo) {
-        return ContractCreateInfoMapper.insert(ContractCreateInfo);
+    public int save(ContractCreateInfo contractCreateInfo) {
+        return contractCreateInfoMapper.insert(contractCreateInfo);
         
     }
 
@@ -42,7 +42,7 @@ public class ContractCreateBusiness implements BaseService<ContractCreateInfo, S
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int saveAll(List<ContractCreateInfo> list) {
         if (list.size() > 0) {
-            return ContractCreateInfoMapper.insertByBatch(list);
+            return contractCreateInfoMapper.insertByBatch(list);
         }
         return 0;
     }
@@ -50,13 +50,13 @@ public class ContractCreateBusiness implements BaseService<ContractCreateInfo, S
     /**
      * 更新智能合约创建过程数据
      *
-     * @param ContractCreateInfo 实体
+     * @param contractCreateInfo 实体
      * @return 1成功，其他失败
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int update(ContractCreateInfo ContractCreateInfo) {
-        return ContractCreateInfoMapper.updateByPrimaryKey(ContractCreateInfo);
+    public int update(ContractCreateInfo contractCreateInfo) {
+        return contractCreateInfoMapper.updateByPrimaryKey(contractCreateInfo);
     }
 
     /**
@@ -68,7 +68,7 @@ public class ContractCreateBusiness implements BaseService<ContractCreateInfo, S
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String createTxHash) {
-        return ContractCreateInfoMapper.deleteByPrimaryKey(createTxHash);
+        return contractCreateInfoMapper.deleteByPrimaryKey(createTxHash);
     }
 
     /**
@@ -79,7 +79,7 @@ public class ContractCreateBusiness implements BaseService<ContractCreateInfo, S
      */
     @Override
     public ContractCreateInfo getByKey(String createTxHash) {
-        return ContractCreateInfoMapper.selectByPrimaryKey(createTxHash);
+        return contractCreateInfoMapper.selectByPrimaryKey(createTxHash);
     }
 
     /**
@@ -96,7 +96,7 @@ public class ContractCreateBusiness implements BaseService<ContractCreateInfo, S
             e.printStackTrace();
         }
         if(null != txHashList){
-            ContractCreateInfoMapper.deleteList(txHashList);
+            contractCreateInfoMapper.deleteList(txHashList);
         }
     }
 }

@@ -20,19 +20,19 @@ import java.util.List;
 public class ContractAddressBusiness implements BaseService<ContractAddressInfo, String> {
 
     @Autowired
-    private ContractAddressInfoMapper ContractAddressInfoMapper;
+    private ContractAddressInfoMapper contractAddressInfoMapper;
 
     /**
      * 保存智能合约地址
      *
-     * @param ContractAddressInfo 实体
+     * @param contractAddressInfo 实体
      * @return 1成功，其他失败
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int save(ContractAddressInfo ContractAddressInfo) {
-        return ContractAddressInfoMapper.insert(ContractAddressInfo);
-        
+    public int save(ContractAddressInfo contractAddressInfo) {
+        return contractAddressInfoMapper.insert(contractAddressInfo);
+
     }
 
     /**
@@ -43,7 +43,7 @@ public class ContractAddressBusiness implements BaseService<ContractAddressInfo,
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int saveAll(List<ContractAddressInfo> list) {
         if (list.size() > 0) {
-            return ContractAddressInfoMapper.insertByBatch(list);
+            return contractAddressInfoMapper.insertByBatch(list);
         }
         return 0;
     }
@@ -51,13 +51,13 @@ public class ContractAddressBusiness implements BaseService<ContractAddressInfo,
     /**
      * 更新智能合约地址
      *
-     * @param ContractAddressInfo 实体
+     * @param contractAddressInfo 实体
      * @return 1成功，其他失败
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public int update(ContractAddressInfo ContractAddressInfo) {
-        return ContractAddressInfoMapper.updateByPrimaryKey(ContractAddressInfo);
+    public int update(ContractAddressInfo contractAddressInfo) {
+        return contractAddressInfoMapper.updateByPrimaryKey(contractAddressInfo);
     }
 
     /**
@@ -69,7 +69,7 @@ public class ContractAddressBusiness implements BaseService<ContractAddressInfo,
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public int deleteByKey(String contractAddress) {
-        return ContractAddressInfoMapper.deleteByPrimaryKey(contractAddress);
+        return contractAddressInfoMapper.deleteByPrimaryKey(contractAddress);
     }
 
     /**
@@ -80,7 +80,7 @@ public class ContractAddressBusiness implements BaseService<ContractAddressInfo,
      */
     @Override
     public ContractAddressInfo getByKey(String contractAddress) {
-        return ContractAddressInfoMapper.selectByPrimaryKey(contractAddress);
+        return contractAddressInfoMapper.selectByPrimaryKey(contractAddress);
     }
 
     /**
@@ -91,9 +91,8 @@ public class ContractAddressBusiness implements BaseService<ContractAddressInfo,
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteByHeight(long height) {
-        System.out.println("deleteByHeight====="+height);
         Searchable searchable = new Searchable();
         searchable.addCondition("block_height", SearchOperator.eq, height);
-        return ContractAddressInfoMapper.deleteBySearchable(searchable);
+        return contractAddressInfoMapper.deleteBySearchable(searchable);
     }
 }

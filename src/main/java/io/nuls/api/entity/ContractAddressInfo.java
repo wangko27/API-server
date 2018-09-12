@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.api.entity;
 
 public class ContractAddressInfo {
@@ -18,6 +42,14 @@ public class ContractAddressInfo {
     private String deleteHash;
 
     private String methods;
+
+    private String tokenName;
+
+    private String symbol;
+
+    private Long decimals;
+
+    private Long totalsupply;
 
     public String getContractAddress() {
         return contractAddress;
@@ -89,5 +121,37 @@ public class ContractAddressInfo {
 
     public void setMethods(String methods) {
         this.methods = methods;
+    }
+
+    public String getTokenName() {
+        return tokenName;
+    }
+
+    public void setTokenName(String tokenName) {
+        this.tokenName = tokenName;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public Long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(Long decimals) {
+        this.decimals = decimals;
+    }
+
+    public Long getTotalsupply() {
+        return totalsupply;
+    }
+
+    public void setTotalsupply(Long totalsupply) {
+        this.totalsupply = totalsupply;
     }
 }

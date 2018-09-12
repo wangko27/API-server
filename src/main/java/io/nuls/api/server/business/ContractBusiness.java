@@ -5,10 +5,12 @@ import io.nuls.api.entity.ContractAddressInfo;
 import io.nuls.api.entity.ContractCallInfo;
 import io.nuls.api.entity.ContractDeleteInfo;
 import io.nuls.api.entity.ContractResultInfo;
+import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractResultInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractCallInfoMapper contractCallInfoMapper;
     @Autowired
     private ContractResultInfoMapper contractResultInfoMapper;
+    @Autowired
+    private ContractTokenInfoMapper contractTokenInfoMapper;
 
     /**
      * 根据地址获取别名
@@ -115,5 +119,36 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             i = contractResultInfoMapper.insertByBatch(list);
         }
         return i;
+    }
+
+    /**
+     * 批量保存token代币信息
+     * @param list
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAllToken(List<ContractTokenInfo> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            i = contractTokenInfoMapper.insertByBatch(list);
+        }
+        return i;
+    }
+
+    /**
+     * 删除智能合约token代币信息，根据交易哈希批量删除，只有回滚的时候才会调用
+     *
+     * @param txHashList
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void deleteTokenList(List<String> txHashList) {
+        try {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(null != txHashList){
+            contractTokenInfoMapper.deleteList(txHashList);
+        }
     }
 }

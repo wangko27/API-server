@@ -3,21 +3,43 @@ package io.nuls.api.utils;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.crypto.Hex;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.AgentNode;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.Deposit;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.model.*;
+import io.nuls.api.entity.ContractAddressInfo;
+import io.nuls.api.entity.ContractCreateInfo;
+import io.nuls.api.entity.ContractDeleteInfo;
 import io.nuls.api.entity.ContractResultInfo;
-import io.nuls.api.model.tx.*;
-import io.nuls.api.server.dto.contract.ContractTransfer;
+import io.nuls.api.entity.Deposit;
+import io.nuls.api.entity.Input;
+import io.nuls.api.entity.Output;
+import io.nuls.api.entity.PunishLog;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.TxData;
+import io.nuls.api.entity.Utxo;
+import io.nuls.api.model.Agent;
+import io.nuls.api.model.CancelDeposit;
+import io.nuls.api.model.Coin;
+import io.nuls.api.model.CreateContractData;
+import io.nuls.api.model.DeleteContractData;
+import io.nuls.api.model.NulsDigestData;
+import io.nuls.api.model.RedPunishData;
+import io.nuls.api.model.StopAgent;
+import io.nuls.api.model.YellowPunishData;
+import io.nuls.api.model.tx.AliasTransaction;
+import io.nuls.api.model.tx.CancelDepositTransaction;
+import io.nuls.api.model.tx.CreateAgentTransaction;
+import io.nuls.api.model.tx.CreateContractTransaction;
+import io.nuls.api.model.tx.DeleteContractTransaction;
+import io.nuls.api.model.tx.DepositTransaction;
+import io.nuls.api.model.tx.RedPunishTransaction;
+import io.nuls.api.model.tx.StopAgentTransaction;
+import io.nuls.api.model.tx.YellowPunishTransaction;
 import io.nuls.api.server.dto.contract.ProgramStatus;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -357,16 +379,23 @@ public class RpcTransferUtil {
     }
 
     public static ContractAddressInfo toContract(Map<String, Object> map) throws Exception {
-        ContractAddressInfo ContractAddressInfo = new ContractAddressInfo();
-        ContractAddressInfo.setCreateTxHash((String) map.get("createTxHash"));
-        ContractAddressInfo.setContractAddress((String) map.get("address"));
-        ContractAddressInfo.setCreater((String) map.get("creater"));
-        ContractAddressInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
-        ContractAddressInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
-        ContractAddressInfo.setIsNrc20(Boolean.parseBoolean(map.get("isNrc20").toString())?1:0);
-        ContractAddressInfo.setStatus(ProgramStatus.codeOf((String) map.get("status")).getCode());
-        ContractAddressInfo.setMethods(JSONUtils.obj2json(map.get("method")));
-        return ContractAddressInfo;
+        ContractAddressInfo contractAddressInfo = new ContractAddressInfo();
+        contractAddressInfo.setCreateTxHash((String) map.get("createTxHash"));
+        contractAddressInfo.setContractAddress((String) map.get("address"));
+        contractAddressInfo.setCreater((String) map.get("creater"));
+        contractAddressInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
+        contractAddressInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
+        contractAddressInfo.setIsNrc20(Boolean.parseBoolean(map.get("isNrc20").toString())?1:0);
+        //如果是NRC20需要解析代币信息
+        if(Boolean.parseBoolean(map.get("isNrc20").toString())) {
+            contractAddressInfo.setTokenName((String) map.get("nrc20TokenName"));
+            contractAddressInfo.setSymbol((String) map.get("nrc20TokenSymbol"));
+            contractAddressInfo.setDecimals(Long.parseLong(map.get("decimals").toString()));
+            contractAddressInfo.setTotalsupply(Long.parseLong(map.get("totalSupply").toString()));
+        }
+        contractAddressInfo.setStatus(ProgramStatus.codeOf((String) map.get("status")).getCode());
+        contractAddressInfo.setMethods(JSONUtils.obj2json(map.get("method")));
+        return contractAddressInfo;
     }
 
     public static ContractResultInfo toContractResult(Map<String, Object> map) {
@@ -379,7 +408,7 @@ public class RpcTransferUtil {
         result.setDecimals((Long) map.get("decimals"));
         result.setGasLimit((Long) map.get("gasLimit"));
         result.setGasUsed((Long) map.get("gasUsed"));
-        result.setName((String) map.get("name"));
+        result.setTokenName((String) map.get("name"));
         result.setNonce((Long) map.get("nonce"));
         result.setPrice((Long) map.get("price"));
         result.setRefundFee((Long) map.get("refundFee"));
@@ -390,7 +419,7 @@ public class RpcTransferUtil {
         result.setSymbol((String) map.get("symbol"));
         result.setTotalFee((Long) map.get("totalFee"));
         result.setTxSizeFee((Long) map.get("txSizeFee"));
-        result.setValue((Long) map.get("value"));
+        result.setTxValue((Long) map.get("value"));
         result.setEvents((String) map.get("events"));
         result.setTransfers((String) map.get("transfers"));
         result.setTokenTransfers((String) map.get("tokenTransfers"));

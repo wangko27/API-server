@@ -103,8 +103,8 @@ public class SyncDataHandler {
             return result;
         }
         try {
-            ContractAddressInfo ContractAddressInfo = RpcTransferUtil.toContract((Map<String, Object>) result.getData());
-            result.setData(ContractAddressInfo);
+            ContractAddressInfo contractAddressInfo = RpcTransferUtil.toContract((Map<String, Object>) result.getData());
+            result.setData(contractAddressInfo);
         } catch (Exception e) {
             throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }

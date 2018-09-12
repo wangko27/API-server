@@ -7,17 +7,6 @@ import java.util.List;
 
 @MyBatisMapper
 public interface ContractCreateInfoMapper extends BaseMapper<ContractCreateInfo, String>{
-    int deleteByPrimaryKey(String createTxHash);
-
-    int insert(ContractCreateInfo record);
-
-    int insertSelective(ContractCreateInfo record);
-
-    ContractCreateInfo selectByPrimaryKey(String createTxHash);
-
-    int updateByPrimaryKeySelective(ContractCreateInfo record);
-
-    int updateByPrimaryKey(ContractCreateInfo record);
 
     int insertByBatch(@Param("list") List<ContractCreateInfo> list);
 
