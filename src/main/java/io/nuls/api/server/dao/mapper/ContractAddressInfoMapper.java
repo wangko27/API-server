@@ -7,9 +7,6 @@ import java.util.List;
 
 @MyBatisMapper
 public interface ContractAddressInfoMapper extends BaseMapper<ContractAddressInfo, String> {
-    int deleteByPrimaryKey(String contractAddress);
-
-    ContractAddressInfo selectByPrimaryKey(String contractAddress);
 
     int insertByBatch(@Param("list") List<ContractAddressInfo> list);
 }
