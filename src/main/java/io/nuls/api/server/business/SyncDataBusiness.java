@@ -159,7 +159,6 @@ public class SyncDataBusiness {
                         contractBusiness.deleteContract(data.getContractAddress());
                     }
                     deleteContractDataList.add(data);
-                    System.out.println("##############" + data);
                 }else if(tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER){
                     //合约转账
 //                    System.out.println("合约转账");

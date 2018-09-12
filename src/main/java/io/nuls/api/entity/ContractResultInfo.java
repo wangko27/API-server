@@ -24,19 +24,6 @@
 package io.nuls.api.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.nuls.api.model.po.ContractAddressInfoPo;
-import io.nuls.api.server.dto.contract.ContractResult;
-import io.nuls.api.server.dto.contract.ContractTokenTransferInfoPo;
-import io.nuls.api.server.dto.contract.ContractTransfer;
-import io.nuls.api.utils.ContractUtil;
-import io.nuls.sdk.core.crypto.Hex;
-import io.nuls.sdk.core.utils.AddressTool;
-import io.nuls.sdk.core.utils.LongUtils;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author: PierreLuo
@@ -54,23 +41,23 @@ public class ContractResultInfo {
 
     private String result;
 
-    private Long gasLimit;
+    private int gasLimit;
 
-    private Long gasUsed;
+    private int gasUsed;
 
-    private Long price;
+    private int price;
 
-    private Long totalFee;
+    private int totalFee;
 
-    private Long txSizeFee;
+    private int txSizeFee;
 
-    private Long actualContractFee;
+    private int actualContractFee;
 
-    private Long refundFee;
+    private int refundFee;
 
     private String stateroot;
 
-    private Long value;
+    private int value;
 
     private String stacktrace;
 
@@ -88,7 +75,7 @@ public class ContractResultInfo {
 
     private String symbol;
 
-    private Long decimals;
+    private int decimals;
 
     private String remark;
 
@@ -134,59 +121,59 @@ public class ContractResultInfo {
         this.result = result == null ? null : result.trim();
     }
 
-    public Long getGasLimit() {
+    public int getGasLimit() {
         return gasLimit;
     }
 
-    public void setGasLimit(Long gasLimit) {
+    public void setGasLimit(int gasLimit) {
         this.gasLimit = gasLimit;
     }
 
-    public Long getGasUsed() {
+    public int getGasUsed() {
         return gasUsed;
     }
 
-    public void setGasUsed(Long gasUsed) {
+    public void setGasUsed(int gasUsed) {
         this.gasUsed = gasUsed;
     }
 
-    public Long getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public void setPrice(Long price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 
-    public Long getTotalFee() {
+    public int getTotalFee() {
         return totalFee;
     }
 
-    public void setTotalFee(Long totalFee) {
+    public void setTotalFee(int totalFee) {
         this.totalFee = totalFee;
     }
 
-    public Long getTxSizeFee() {
+    public int getTxSizeFee() {
         return txSizeFee;
     }
 
-    public void setTxSizeFee(Long txSizeFee) {
+    public void setTxSizeFee(int txSizeFee) {
         this.txSizeFee = txSizeFee;
     }
 
-    public Long getActualContractFee() {
+    public int getActualContractFee() {
         return actualContractFee;
     }
 
-    public void setActualContractFee(Long actualContractFee) {
+    public void setActualContractFee(int actualContractFee) {
         this.actualContractFee = actualContractFee;
     }
 
-    public Long getRefundFee() {
+    public int getRefundFee() {
         return refundFee;
     }
 
-    public void setRefundFee(Long refundFee) {
+    public void setRefundFee(int refundFee) {
         this.refundFee = refundFee;
     }
 
@@ -198,11 +185,11 @@ public class ContractResultInfo {
         this.stateroot = stateroot == null ? null : stateroot.trim();
     }
 
-    public Long getValue() {
+    public int getValue() {
         return value;
     }
 
-    public void setValue(Long value) {
+    public void setValue(int value) {
         this.value = value;
     }
 
@@ -270,11 +257,11 @@ public class ContractResultInfo {
         this.symbol = symbol == null ? null : symbol.trim();
     }
 
-    public Long getDecimals() {
+    public int getDecimals() {
         return decimals;
     }
 
-    public void setDecimals(Long decimals) {
+    public void setDecimals(int decimals) {
         this.decimals = decimals;
     }
 

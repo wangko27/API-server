@@ -1,5 +1,7 @@
 package io.nuls.api.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.crypto.Hex;
@@ -369,31 +371,47 @@ public class RpcTransferUtil {
         return ContractAddressInfo;
     }
 
-    public static ContractResultInfo toContractResult(Map<String, Object> map) {
+    public static ContractResultInfo toContractResult(Map<String, Object> map) throws Exception {
+        map = (Map<String, Object>)map.get("data");
         ContractResultInfo result = new ContractResultInfo();
         result.setErrorMessage((String)map.get("errorMessage"));
-        result.setSuccess((String) map.get("success"));
-        result.setActualContractFee((Long) map.get("actualContractFee"));
+        result.setSuccess(map.get("success").toString());
+        result.setActualContractFee((Integer) map.get("actualContractFee"));
         result.setBalance((Long) map.get("balance"));
         result.setContractAddress((String) map.get("contractAddress"));
-        result.setDecimals((Long) map.get("decimals"));
-        result.setGasLimit((Long) map.get("gasLimit"));
-        result.setGasUsed((Long) map.get("gasUsed"));
+        result.setDecimals((Integer) map.get("decimals"));
+        result.setGasLimit((Integer) map.get("gasLimit"));
+        result.setGasUsed((Integer) map.get("gasUsed"));
         result.setName((String) map.get("name"));
         result.setNonce((Long) map.get("nonce"));
-        result.setPrice((Long) map.get("price"));
-        result.setRefundFee((Long) map.get("refundFee"));
+        result.setPrice((Integer) map.get("price"));
+        result.setRefundFee((Integer) map.get("refundFee"));
         result.setRemark((String) map.get("remark"));
         result.setResult((String) map.get("result"));
         result.setStacktrace((String) map.get("stackTrace"));
         result.setStateroot((String) map.get("stateRoot"));
         result.setSymbol((String) map.get("symbol"));
-        result.setTotalFee((Long) map.get("totalFee"));
-        result.setTxSizeFee((Long) map.get("txSizeFee"));
-        result.setValue((Long) map.get("value"));
-        result.setEvents((String) map.get("events"));
-        result.setTransfers((String) map.get("transfers"));
-        result.setTokenTransfers((String) map.get("tokenTransfers"));
+        result.setTotalFee((Integer) map.get("totalFee"));
+        result.setTxSizeFee((Integer) map.get("txSizeFee"));
+        result.setValue((Integer) map.get("value"));
+        String events = "";
+        String transfers = "";
+        String tokenTransfers = "";
+        ArrayList list_events = (ArrayList) map.get("events");
+        if (list_events.size() > 0) {
+            events = JSONUtils.obj2json(list_events);
+        }
+        ArrayList list_transfers = (ArrayList) map.get("transfers");
+        if (list_transfers.size() > 0) {
+            transfers = JSONUtils.obj2json(list_transfers);
+        }
+        ArrayList list_tokenTransfers = (ArrayList) map.get("tokenTransfers");
+        if (list_tokenTransfers.size() > 0) {
+            tokenTransfers = JSONUtils.obj2json(list_tokenTransfers);
+        }
+        result.setEvents(events);
+        result.setTransfers(transfers);
+        result.setTokenTransfers(tokenTransfers);
         return result;
     }
 }

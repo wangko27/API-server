@@ -205,4 +205,27 @@
       </if>
     </trim>
   </insert>
+
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contract_result_info (success, error_message, code,
+    contract_address, result, gas_limit,
+    gas_used, price, total_fee,
+    tx_size_fee, actual_contract_fee, refund_fee,
+    stateroot, value, stacktrace,
+    balance, nonce, transfers,
+    events, token_transfers, name,
+    symbol, decimals, remark,
+    tx_hash) values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.success,jdbcType=VARCHAR}, #{item.errorMessage,jdbcType=VARCHAR}, #{item.code,jdbcType=VARCHAR},
+      #{item.contractAddress,jdbcType=VARCHAR}, #{item.result,jdbcType=VARCHAR}, #{item.gasLimit,jdbcType=BIGINT},
+      #{item.gasUsed,jdbcType=BIGINT}, #{item.price,jdbcType=BIGINT}, #{item.totalFee,jdbcType=BIGINT},
+      #{item.txSizeFee,jdbcType=BIGINT}, #{item.actualContractFee,jdbcType=BIGINT}, #{item.refundFee,jdbcType=BIGINT},
+      #{item.stateroot,jdbcType=VARCHAR}, #{item.value,jdbcType=BIGINT}, #{item.stacktrace,jdbcType=VARCHAR},
+      #{item.balance,jdbcType=BIGINT}, #{item.nonce,jdbcType=BIGINT}, #{item.transfers,jdbcType=VARCHAR},
+      #{item.events,jdbcType=VARCHAR}, #{item.tokenTransfers,jdbcType=VARCHAR}, #{item.name,jdbcType=VARCHAR},
+      #{item.symbol,jdbcType=VARCHAR}, #{item.decimals,jdbcType=BIGINT}, #{item.remark,jdbcType=VARCHAR},
+      #{item.txHash,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
 </mapper>
