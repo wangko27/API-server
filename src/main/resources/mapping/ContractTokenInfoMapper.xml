@@ -127,7 +127,7 @@
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
   <delete id="deleteList" parameterType="java.util.List">
-    delete from contract_transaction where tx_hash in
+    delete from contract_token_info where tx_hash in
     <foreach collection="list" item="item" open="(" separator="," close=")">
       #{item,jdbcType=VARCHAR}
     </foreach>

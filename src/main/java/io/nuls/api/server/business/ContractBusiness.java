@@ -33,11 +33,13 @@ import java.util.List;
 public class ContractBusiness implements BaseService<ContractDeleteInfo, String> {
 
     @Autowired
-    private ContractDeleteInfoMapper contractDeleteInfoMapper;
-    @Autowired
     private ContractAddressInfoMapper contractAddressInfoMapper;
     @Autowired
+    private ContractCreateInfoMapper contractCreateInfoMapper;
+    @Autowired
     private ContractCallInfoMapper contractCallInfoMapper;
+    @Autowired
+    private ContractDeleteInfoMapper contractDeleteInfoMapper;
     @Autowired
     private ContractResultInfoMapper contractResultInfoMapper;
     @Autowired
@@ -46,6 +48,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractTransactionMapper contractTransactionMapper;
     @Autowired
     private ContractTokenTransferInfoMapper contractTokenTransferInfoMapper;
+
 
     /**
      * 根据地址获取别名
@@ -122,6 +125,63 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         contractDeleteInfoMapper.selectList(searchable);
     }
 
+    /**
+     * 批量保存智能合约地址
+     * @param list
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAllContractAddress(List<ContractAddressInfo> list) {
+        if (list.size() > 0) {
+            return contractAddressInfoMapper.insertByBatch(list);
+        }
+        return 0;
+    }
+
+    /**
+     * 删除智能合约地址，根据高度删除，只有回滚的时候才会调用
+     *
+     * @param height
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int deleteContractByHeight(long height) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("block_height", SearchOperator.eq, height);
+        return contractAddressInfoMapper.deleteBySearchable(searchable);
+    }
+
+    /**
+     * 批量保存智能合约创建交易过程数据
+     * @param list
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAllCreateData(List<ContractCreateInfo> list) {
+        if (list.size() > 0) {
+            return contractCreateInfoMapper.insertByBatch(list);
+        }
+        return 0;
+    }
+
+    /**
+     * 删除智能合约创建过程数据，根据交易哈希批量删除，只有回滚的时候才会调用
+     *
+     * @param txHashList
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void deleteCreateDataList(List<String> txHashList) {
+        if(null != txHashList && txHashList.size() > 0){
+            contractCreateInfoMapper.deleteList(txHashList);
+        }
+    }
+
+    /**
+     * 智能合约交易执行结果
+     * @param list
+     * @return
+     */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int saveAllContractResult(List<ContractResultInfo> list) {
         int i = 0;
@@ -129,6 +189,19 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             i = contractResultInfoMapper.insertByBatch(list);
         }
         return i;
+    }
+
+    /**
+     * 删除智能合约交易执行结果，根据交易哈希批量删除，只有回滚的时候才会调用
+     *
+     * @param txHashList
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void deleteContractResultList(List<String> txHashList) {
+        if(null != txHashList && txHashList.size() > 0){
+            contractResultInfoMapper.deleteList(txHashList);
+        }
     }
 
     /**
@@ -167,11 +240,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteTokenList(List<String> txHashList) {
-        try {
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if(null != txHashList){
+        if(null != txHashList && txHashList.size() > 0){
             contractTokenInfoMapper.deleteList(txHashList);
         }
     }
@@ -198,11 +267,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteTransactionList(List<String> txHashList) {
-        try {
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if(null != txHashList){
+        if(null != txHashList && txHashList.size() > 0){
             contractTransactionMapper.deleteList(txHashList);
         }
     }

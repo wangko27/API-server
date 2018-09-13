@@ -2,7 +2,6 @@ package io.nuls.api.server.business;
 
 import io.nuls.api.entity.ContractCreateInfo;
 import io.nuls.api.server.dao.mapper.ContractCreateInfoMapper;
-import io.nuls.api.utils.JSONUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -90,11 +89,6 @@ public class ContractCreateBusiness implements BaseService<ContractCreateInfo, S
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteList(List<String> txHashList) {
-        try {
-            System.out.println("createdata deleteList====="+ JSONUtils.obj2json(txHashList));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         if(null != txHashList){
             contractCreateInfoMapper.deleteList(txHashList);
         }
