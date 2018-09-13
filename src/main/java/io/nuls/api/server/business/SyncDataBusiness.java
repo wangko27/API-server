@@ -6,6 +6,7 @@ import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
+import io.nuls.api.model.ContractTokenTransferDto;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -142,6 +143,20 @@ public class SyncDataBusiness {
                         contractResultInfoList.add(result.getData());
                     }
                     //ContractResultInfo中有合约内部转账、代币转账，需要分别进行处理
+                    ContractResultInfo resultData = result.getData();
+                    //代币转账
+                    String tokenTransfersString = resultData.getTokenTransfers();
+                    if (StringUtils.isNotBlank(tokenTransfersString)) {
+                        System.out.println(tokenTransfersString);
+                        List<ContractTokenTransferDto> contractTokenTransferDtos = JSONUtils.json2list(tokenTransfersString, ContractTokenTransferDto.class);
+                        for (ContractTokenTransferDto contractTokenTransferDto : contractTokenTransferDtos) {
+                            ContractTokenTransferInfo contractTokenTransferInfo = new ContractTokenTransferInfo(contractTokenTransferDto);
+                            contractTokenTransferInfo.setTxHash(tx.getHash());
+                            contractTokenTransferInfo.setContractAddress(resultData.getContractAddress());
+                            contractTokenTransferInfoList.add(contractTokenTransferInfo);
+                        }
+                    }
+
                     System.out.println("RESULT=======" + JSONUtils.obj2json(result.getData()));
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
@@ -208,6 +223,7 @@ public class SyncDataBusiness {
             contractBusiness.saveAllCallInfo(callContractDataList);
             contractBusiness.saveAllContractResult(contractResultInfoList);
             contractBusiness.saveAllToken(contractTokenInfoList);
+            contractBusiness.saveAllTokenTransferInfo(contractTokenTransferInfoList);
             //智能合约地址批量保存
             contractAddressBusiness.saveAll(contractAddressList);
             //智能合约创建交易数据批量保存

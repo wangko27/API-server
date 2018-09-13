@@ -7,9 +7,10 @@
     <result column="to_address" property="toAddress" jdbcType="VARCHAR" />
     <result column="tx_value" property="txValue" jdbcType="BIGINT" />
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    tx_hash, from_address, to_address, tx_value, create_time
+    tx_hash, from_address, to_address, tx_value, create_time, from_address
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -23,9 +24,9 @@
   </delete>
   <insert id="insert" parameterType="io.nuls.api.entity.ContractTokenTransferInfo" >
     insert into contract_token_transfer_info (tx_hash, from_address, to_address, 
-      tx_value, create_time)
+      tx_value, create_time, from_address)
     values (#{txHash,jdbcType=VARCHAR}, #{fromAddress,jdbcType=VARCHAR}, #{toAddress,jdbcType=VARCHAR}, 
-      #{txValue,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT})
+      #{txValue,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{contractAddress,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractTokenTransferInfo" >
     insert into contract_token_transfer_info
@@ -45,6 +46,9 @@
       <if test="createTime != null" >
         create_time,
       </if>
+      <if test="contractAddress != null" >
+        contract_address,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -61,6 +65,9 @@
       </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="contractAddress != null" >
+        #{contractAddress,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -79,6 +86,9 @@
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=BIGINT},
       </if>
+      <if test="contractAddress != null" >
+        contract_address = #{contractAddress,jdbcType=VARCHAR},
+      </if>
     </set>
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
@@ -88,6 +98,17 @@
       to_address = #{toAddress,jdbcType=VARCHAR},
       tx_value = #{txValue,jdbcType=BIGINT},
       create_time = #{createTime,jdbcType=BIGINT}
+      contract_address = #{contractAddress,jdbcType=VARCHAR}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
+
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contract_token_transfer_info (tx_hash, from_address, to_address, tx_value, create_time, contract_address)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.fromAddress,jdbcType=VARCHAR}, #{item.toAddress,jdbcType=VARCHAR},
+      #{item.txValue,jdbcType=BIGINT}, #{item.createTime,jdbcType=BIGINT}, #{item.contractAddress,jdbcType=VARCHAR})
+    </foreach>
+    on duplicate key update create_time = values(create_time)
+  </insert>
 </mapper>
