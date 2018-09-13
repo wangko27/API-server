@@ -24,18 +24,8 @@
 package io.nuls.api.entity;
 
 
-import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.CallContractData;
-import io.nuls.api.model.ContractData;
-import io.nuls.api.model.TransactionLogicData;
 import io.nuls.api.utils.AddressTool;
-import io.nuls.api.utils.NulsByteBuffer;
-import io.nuls.api.utils.NulsOutputStreamBuffer;
-import io.nuls.api.utils.SerializeUtils;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @Author: PierreLuo
@@ -59,6 +49,7 @@ public class ContractCallInfo extends TxData{
     private String args;
 
     public ContractCallInfo(CallContractData call) {
+        this.creater = io.nuls.api.utils.AddressTool.getStringAddressByBytes(call.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(call.getContractAddress());
         this.gasLimit = call.getGasLimit();
         this.price = call.getPrice();

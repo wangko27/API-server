@@ -71,4 +71,10 @@ public interface ContractConstant extends NulsConstant {
      */
     int CONTRACT_STATUS_UNCONFIRMED = 0;
     int CONTRACT_STATUS_CONFIRMED = 1;
+
+    /**
+     * 合约交易状态：true-成功、false-失败
+     */
+    String CONTRACT_STATUS_SUCCESS = "true";
+    String CONTRACT_STATUS_FAIL = "false";
 }
