@@ -86,4 +86,11 @@
       #{item.methodDesc,jdbcType=VARCHAR}, #{item.args,jdbcType=VARCHAR})
     </foreach>
   </insert>
+
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from contract_call_info where create_tx_hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
 </mapper>

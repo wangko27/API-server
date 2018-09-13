@@ -134,6 +134,27 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
+     * 回滚调用合约交易
+     * @param txHashList
+     */
+    public void rollbackContractCallInfo(List<String> txHashList) {
+        if(null != txHashList && txHashList.size() > 0){
+            contractResultInfoMapper.deleteList(txHashList);
+            contractCallInfoMapper.deleteList(txHashList);
+        }
+    }
+
+    /**
+     * 回滚代币转账交易记录
+     * @param txHashList
+     */
+    public void rollbackContractTokenTransferInfo(List<String> txHashList) {
+        if(null != txHashList && txHashList.size() > 0){
+            contractTokenTransferInfoMapper.deleteList(txHashList);
+        }
+    }
+
+    /**
      * 批量保存智能合约地址
      * @param list
      * @return

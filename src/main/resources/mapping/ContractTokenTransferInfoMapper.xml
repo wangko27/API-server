@@ -111,4 +111,11 @@
     </foreach>
     on duplicate key update create_time = values(create_time)
   </insert>
+
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from contract_token_transfer_info where create_tx_hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
 </mapper>

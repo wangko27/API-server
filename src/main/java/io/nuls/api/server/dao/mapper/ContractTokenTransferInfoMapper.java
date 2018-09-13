@@ -16,4 +16,9 @@ public interface ContractTokenTransferInfoMapper extends BaseMapper<ContractToke
      */
     int insertByBatch(@Param("list") List<ContractTokenTransferInfo> list);
 
+    /**
+     * 批量删除
+     * @param txHashList
+     */
+    void deleteList(@Param("list") List<String> txHashList);
 }
