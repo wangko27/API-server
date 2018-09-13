@@ -75,7 +75,7 @@ public class SyncDataHandler {
 
     public RpcClientResult getTx(String hash) throws NulsException {
         RpcClientResult result = restFulUtils.get("/api/accountledger/tx/" + hash, null);
-        if (result.isFailed()) {
+        if (result.isSuccess()) {
             return result;
         }
         return null;

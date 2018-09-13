@@ -305,13 +305,12 @@ public class RpcTransferUtil {
     }
 
 
-    @Deprecated
     public static Transaction toTransaction(Map<String, Object> map) throws Exception {
         Transaction tx = new Transaction();
         tx.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
         tx.setHash((String) map.get("hash"));
         tx.setFee(Long.parseLong(map.get("fee").toString()));
-        tx.setRemark(map.get("remark").toString());
+        tx.setRemark((String) map.get("remark"));
         tx.setSize((Integer) map.get("size"));
         tx.setType((Integer) map.get("type"));
         tx.setCreateTime(Long.parseLong(map.get("time").toString()));

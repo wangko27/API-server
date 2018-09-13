@@ -6,35 +6,15 @@ import io.nuls.api.constant.ContractConstant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
-import io.nuls.api.entity.AddressHashIndex;
-import io.nuls.api.entity.AddressRewardDetail;
-import io.nuls.api.entity.AgentNode;
-import io.nuls.api.entity.Alias;
-import io.nuls.api.entity.Block;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.ContractAddressInfo;
-import io.nuls.api.entity.ContractCallInfo;
-import io.nuls.api.entity.ContractCreateInfo;
-import io.nuls.api.entity.ContractDeleteInfo;
-import io.nuls.api.entity.ContractResultInfo;
-import io.nuls.api.entity.ContractTokenInfo;
-import io.nuls.api.entity.ContractTokenTransferInfo;
-import io.nuls.api.entity.ContractTransaction;
-import io.nuls.api.entity.Deposit;
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Output;
-import io.nuls.api.entity.PunishLog;
-import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.TransactionRelation;
-import io.nuls.api.entity.TxData;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 import io.nuls.api.model.ContractTokenTransferDto;
+import io.nuls.api.model.ContractTransferDto;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.RestFulUtils;
+import io.nuls.api.utils.RpcTransferUtil;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,6 +170,19 @@ public class SyncDataBusiness {
                             contractTokenTransferInfoList.add(contractTokenTransferInfo);
                         }
                     }
+                    //合约内部转账
+                    String transfersString = resultData.getTransfers();
+                    if (StringUtils.isNotBlank(transfersString)) {
+                        System.out.println(transfersString);
+                        List<ContractTransferDto> contractTransferDtos = JSONUtils.json2list(transfersString, ContractTransferDto.class);
+                        for (ContractTransferDto contractTransferDto : contractTransferDtos) {
+                            RpcClientResult contractTransferTxResult = syncDataHandler.getTx(contractTransferDto.getTxHash());
+                            Transaction contractTransferTx = RpcTransferUtil.toTransaction((Map) contractTransferTxResult.getData());
+                            System.out.println(contractTransferTx.getType());
+                        }
+                    }
+
+                    System.out.println("RESULT=======" + JSONUtils.obj2json(result.getData()));
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
                         if (tx.getTxData() != null && ContractConstant.CONTRACT_STATUS_SUCCESS.equals(contractResult.getSuccess())) {
@@ -413,7 +406,7 @@ public class SyncDataBusiness {
             webwalletUtxoLevelDbService.deleteAll();
 
             //回滚删除合约交易
-            contractBusiness.rollbackContractDeleteInfo(header.getHash());
+            contractBusiness.rollbackContractDeleteInfo(header.getTxHashList());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
