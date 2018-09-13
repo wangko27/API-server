@@ -30,6 +30,18 @@
       #{creater,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=BIGINT}
       )
   </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contract_transaction (tx_hash, contract_address, tx_type,
+    creater, status, create_time
+    )
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.contractAddress,jdbcType=VARCHAR}, #{item.txType,jdbcType=INTEGER},
+      #{item.creater,jdbcType=VARCHAR}, #{item.status,jdbcType=INTEGER}, #{item.createTime,jdbcType=BIGINT}
+      )
+    </foreach>
+    on duplicate key update create_time = values(create_time)
+  </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractTransaction" >
     insert into contract_transaction
     <trim prefix="(" suffix=")" suffixOverrides="," >
@@ -103,4 +115,10 @@
       create_time = #{createTime,jdbcType=BIGINT}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from contract_transaction where tx_hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
 </mapper>
