@@ -28,6 +28,8 @@ import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.TransactionRelation;
 import io.nuls.api.entity.TxData;
 import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
+import io.nuls.api.model.ContractTokenTransferDto;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -109,6 +111,7 @@ public class SyncDataBusiness {
         List<ContractResultInfo> contractResultInfoList = new ArrayList<>();
         List<ContractTokenInfo> contractTokenInfoList = new ArrayList<>();
         List<ContractTransaction> contractTransactionList = new ArrayList<>();
+        List<ContractTokenTransferInfo> contractTokenTransferInfoList = new ArrayList<>();
 
         try {
             for (int i = 0; i < block.getTxList().size(); i++) {
@@ -174,6 +177,22 @@ public class SyncDataBusiness {
                     contractTransaction.setCreateTime(tx.getCreateTime());
                     contractTransaction.setContractAddress(contractResult.getContractAddress());
                     System.out.println("RESULT=======" + JSONUtils.obj2json(contractResult));
+                    //ContractResultInfo中有合约内部转账、代币转账，需要分别进行处理
+                    ContractResultInfo resultData = result.getData();
+                    //代币转账
+                    String tokenTransfersString = resultData.getTokenTransfers();
+                    if (StringUtils.isNotBlank(tokenTransfersString)) {
+                        System.out.println(tokenTransfersString);
+                        List<ContractTokenTransferDto> contractTokenTransferDtos = JSONUtils.json2list(tokenTransfersString, ContractTokenTransferDto.class);
+                        for (ContractTokenTransferDto contractTokenTransferDto : contractTokenTransferDtos) {
+                            ContractTokenTransferInfo contractTokenTransferInfo = new ContractTokenTransferInfo(contractTokenTransferDto);
+                            contractTokenTransferInfo.setTxHash(tx.getHash());
+                            contractTokenTransferInfo.setContractAddress(resultData.getContractAddress());
+                            contractTokenTransferInfoList.add(contractTokenTransferInfo);
+                        }
+                    }
+
+                    System.out.println("RESULT=======" + JSONUtils.obj2json(result.getData()));
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
                         if (tx.getTxData() != null && "true".equals(contractResult.getSuccess())) {
@@ -200,19 +219,23 @@ public class SyncDataBusiness {
                         }
                     } else if (tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT) {
                         //调用合约
-//                    System.out.println("调用合约");
-//                    System.out.println("tx.getData:"+tx.getTxData());
+                        ContractCallInfo data = (ContractCallInfo) tx.getTxData();
+                        data.setCreateTxHash(tx.getHash());
+                        if (result.isSuccess()) {
+                            ContractResultInfo data1 = result.getData();
+                            System.out.println(data1);
+                        }
+                        callContractDataList.add(data);
                     } else if (tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
                         //删除合约
                         ContractDeleteInfo data = (ContractDeleteInfo) tx.getTxData();
-                        data.setTxHash(tx.getHash());
+                        data.setCreateTxHash(tx.getHash());
                         if (result.isSuccess()) {
                             contractBusiness.deleteContract(data.getContractAddress());
                         }
                         //设置合约交易记录
                         contractTransaction.setCreater(data.getCreater());
                         deleteContractDataList.add(data);
-                        System.out.println("##############" + data);
                     } else if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
                         //合约转账
                     System.out.println("合约转账");
@@ -242,6 +265,7 @@ public class SyncDataBusiness {
             contractBusiness.saveAllContractResult(contractResultInfoList);
             contractBusiness.saveAllToken(contractTokenInfoList);
             contractBusiness.saveAllTransaction(contractTransactionList);
+            contractBusiness.saveAllTokenTransferInfo(contractTokenTransferInfoList);
             //智能合约地址批量保存
             contractAddressBusiness.saveAll(contractAddressList);
             //智能合约创建交易数据批量保存

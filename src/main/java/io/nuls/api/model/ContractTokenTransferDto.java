@@ -37,6 +37,9 @@ public class ContractTokenTransferDto {
     private String to;
     private BigInteger value;
 
+    public ContractTokenTransferDto() {
+    }
+
     public ContractTokenTransferDto(ContractTokenTransferInfoPo po) {
         if(po.getFrom() != null) {
             this.from = AddressTool.getStringAddressByBytes(po.getFrom());

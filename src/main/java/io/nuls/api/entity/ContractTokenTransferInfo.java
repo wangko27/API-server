@@ -1,5 +1,7 @@
 package io.nuls.api.entity;
 
+import io.nuls.api.model.ContractTokenTransferDto;
+
 public class ContractTokenTransferInfo {
     private String txHash;
 
@@ -10,6 +12,24 @@ public class ContractTokenTransferInfo {
     private Long txValue;
 
     private Long createTime;
+
+    private String contractAddress;
+
+    public ContractTokenTransferInfo() {
+    }
+    public ContractTokenTransferInfo(ContractTokenTransferDto dto) {
+        this.fromAddress = dto.getFrom();
+        this.toAddress = dto.getTo();
+        this.txValue = dto.getValue().longValue();
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 
     public String getTxHash() {
         return txHash;

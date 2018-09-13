@@ -18,13 +18,13 @@ public interface ContractCallInfoMapper extends BaseMapper<ContractCallInfo, Lon
 
     int deleteByPrimaryKey(String contractAddress);
 
-    int insert(ContractAddressInfo record);
+    int insert(ContractCallInfo record);
 
-    int insertSelective(ContractAddressInfo record);
+    int insertSelective(ContractCallInfo record);
 
-    ContractAddressInfo selectByPrimaryKey(String contractAddress);
+    ContractCallInfo selectByPrimaryKey(String contractAddress);
 
-    int updateByPrimaryKeySelective(ContractAddressInfo record);
+    int updateByPrimaryKeySelective(ContractCallInfo record);
 
-    int updateByPrimaryKey(ContractAddressInfo record);
+    int updateByPrimaryKey(ContractCallInfo record);
 }

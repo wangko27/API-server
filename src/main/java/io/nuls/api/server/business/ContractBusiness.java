@@ -13,6 +13,8 @@ import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractResultInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
+import io.nuls.api.entity.*;
+import io.nuls.api.server.dao.mapper.*;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractTokenInfoMapper contractTokenInfoMapper;
     @Autowired
     private ContractTransactionMapper contractTransactionMapper;
+    @Autowired
+    private ContractTokenTransferInfoMapper contractTokenTransferInfoMapper;
 
     /**
      * 根据地址获取别名
@@ -135,6 +139,20 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         int i = 0;
         if (list.size() > 0) {
             i = contractTokenInfoMapper.insertByBatch(list);
+        }
+        return i;
+    }
+
+    /**
+     * 批量保存token代币转账信息
+     * @param list
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAllTokenTransferInfo(List<ContractTokenTransferInfo> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            i = contractTokenTransferInfoMapper.insertByBatch(list);
         }
         return i;
     }
