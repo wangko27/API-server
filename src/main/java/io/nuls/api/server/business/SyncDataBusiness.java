@@ -163,7 +163,7 @@ public class SyncDataBusiness {
                             ContractTokenTransferInfo contractTokenTransferInfo = new ContractTokenTransferInfo(contractTokenTransferDto);
                             contractTokenTransferInfo.setTxHash(tx.getHash());
                             contractTokenTransferInfo.setContractAddress(resultData.getContractAddress());
-                            contractTokenTransferInfo.setCreateTime(resultData.getCreateTime());
+                            contractTokenTransferInfo.setCreateTime(tx.getCreateTime());
                             contractTokenTransferInfoList.add(contractTokenTransferInfo);
                         }
                     }
@@ -172,19 +172,19 @@ public class SyncDataBusiness {
                     if (StringUtils.isNotBlank(transfersString)) {
                         System.out.println(transfersString);
                         List<ContractTransferDto> contractTransferDtos = JSONUtils.json2list(transfersString, ContractTransferDto.class);
-                        for (ContractTransferDto contractTransferDto : contractTransferDtos) {
-                            Transaction contractTransferTx = syncDataHandler.getTx(contractTransferDto.getTxHash());
-                            //存放新的utxo到utxoMap
-                            if (contractTransferTx.getOutputs() != null && !contractTransferTx.getOutputs().isEmpty()) {
-                                for (Utxo utxo : contractTransferTx.getOutputs()) {
-                                    utxoMap.put(utxo.getKey(), utxo);
-                                }
-                            }
-                            //存放被花费的utxo
-                            fromList.addAll(utxoBusiness.getListByFrom(contractTransferTx, utxoMap));
-
-                            txList.add(contractTransferTx);
-                        }
+//                        for (ContractTransferDto contractTransferDto : contractTransferDtos) {
+//                            Transaction contractTransferTx = syncDataHandler.getTx(contractTransferDto.getTxHash());
+//                            //存放新的utxo到utxoMap
+//                            if (contractTransferTx.getOutputs() != null && !contractTransferTx.getOutputs().isEmpty()) {
+//                                for (Utxo utxo : contractTransferTx.getOutputs()) {
+//                                    utxoMap.put(utxo.getKey(), utxo);
+//                                }
+//                            }
+//                            //存放被花费的utxo
+//                            fromList.addAll(utxoBusiness.getListByFrom(contractTransferTx, utxoMap));
+//
+//                            txList.add(contractTransferTx);
+//                        }
                     }
 
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {

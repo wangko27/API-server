@@ -1,5 +1,7 @@
 package io.nuls.api.server.business;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.ContractConstant;
 import io.nuls.api.entity.ContractAddressInfo;
 import io.nuls.api.entity.ContractCallInfo;
@@ -17,6 +19,7 @@ import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.*;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -299,6 +302,29 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         if(null != txHashList && txHashList.size() > 0){
             contractTransactionMapper.deleteList(txHashList);
         }
+    }
+
+    /**
+     * 获取块列表
+     *
+     * @param address    合约地址
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<ContractTokenTransferInfo> getContractTokenTransfers(String address, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        if (StringUtils.isNotBlank(address)) {
+            if (StringUtils.validAddress(address)) {
+                searchable.addCondition("contract_address", SearchOperator.eq, address);
+            } else {
+                return null;
+            }
+        }
+        PageHelper.orderBy("create_time desc");
+        PageInfo<ContractTokenTransferInfo> page = new PageInfo<ContractTokenTransferInfo>(contractTokenTransferInfoMapper.selectList(searchable));
+        return page;
     }
 
 }

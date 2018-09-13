@@ -1,6 +1,5 @@
 package io.nuls.api.server.dao.mapper;
 
-import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.entity.ContractTokenTransferInfo;
 import org.apache.ibatis.annotations.Param;
 
