@@ -25,8 +25,10 @@ package io.nuls.api.entity;
 
 
 import io.nuls.api.exception.NulsException;
+import io.nuls.api.model.CallContractData;
 import io.nuls.api.model.ContractData;
 import io.nuls.api.model.TransactionLogicData;
+import io.nuls.api.utils.AddressTool;
 import io.nuls.api.utils.NulsByteBuffer;
 import io.nuls.api.utils.NulsOutputStreamBuffer;
 import io.nuls.api.utils.SerializeUtils;
@@ -40,114 +42,75 @@ import java.util.Set;
  */
 public class ContractCallInfo extends TxData{
 
-    private byte[] sender;
-    private byte[] contractAddress;
-    private long value;
-    private long gasLimit;
-    private long price;
+    private String contractAddress;
+
+    private String createTxHash;
+
+    private String creater;
+
+    private Long gasLimit;
+
+    private Long price;
+
     private String methodName;
+
     private String methodDesc;
-    private byte argsCount;
-    private String[][] args;
 
-    public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfBytes(sender);
-        size += SerializeUtils.sizeOfBytes(contractAddress);
-        size += SerializeUtils.sizeOfVarInt(value);
-        size += SerializeUtils.sizeOfVarInt(gasLimit);
-        size += SerializeUtils.sizeOfVarInt(price);
-        size += SerializeUtils.sizeOfString(methodName);
-        size += SerializeUtils.sizeOfString(methodDesc);
-        size += 1;
-        if(args != null) {
-            for(String[] arg : args) {
-                size += 1;
-                for(String str : arg) {
-                    size += SerializeUtils.sizeOfString(str);
-                }
-            }
-        }
-        return size;
-    }
+    private String args;
 
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(sender);
-        stream.writeBytesWithLength(contractAddress);
-        stream.writeVarInt(value);
-        stream.writeVarInt(gasLimit);
-        stream.writeVarInt(price);
-        stream.writeString(methodName);
-        stream.writeString(methodDesc);
-        stream.write(argsCount);
-        if(args != null) {
-            for(String[] arg : args) {
-                stream.write((byte) arg.length);
-                for(String str : arg){
-                    stream.writeString(str);
-                }
+    public ContractCallInfo(CallContractData call) {
+        this.contractAddress = AddressTool.getStringAddressByBytes(call.getContractAddress());
+        this.gasLimit = call.getGasLimit();
+        this.price = call.getPrice();
+        this.methodName = call.getMethodName();
+        this.methodDesc = call.getMethodDesc();
+        this.args = "";
+        String[][] arrays = call.getArgs();
+        for (String[] arg : arrays) {
+            for (String s : arg) {
+                args = args + s + ",";
             }
+
         }
     }
 
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.sender = byteBuffer.readByLengthByte();
-        this.contractAddress = byteBuffer.readByLengthByte();
-        this.value = byteBuffer.readVarInt();
-        this.gasLimit = byteBuffer.readVarInt();
-        this.price = byteBuffer.readVarInt();
-        this.methodName = byteBuffer.readString();
-        this.methodDesc = byteBuffer.readString();
-        this.argsCount = byteBuffer.readByte();
-        byte length = this.argsCount;
-        this.args = new String[length][];
-        for(byte i = 0; i < length; i++) {
-            byte argCount = byteBuffer.readByte();
-            String[] arg = new String[argCount];
-            for(byte k = 0; k < argCount; k++) {
-                arg[k] = byteBuffer.readString();
-            }
-            args[i] = arg;
-        }
-    }
-
-    public byte[] getSender() {
-        return sender;
-    }
-
-    public void setSender(byte[] sender) {
-        this.sender = sender;
-    }
-
-    public byte[] getContractAddress() {
+    public String getContractAddress() {
         return contractAddress;
     }
 
-    public void setContractAddress(byte[] contractAddress) {
+    public void setContractAddress(String contractAddress) {
         this.contractAddress = contractAddress;
     }
 
-    public long getValue() {
-        return value;
+    public String getCreateTxHash() {
+        return createTxHash;
     }
 
-    public void setValue(long value) {
-        this.value = value;
+    public void setCreateTxHash(String createTxHash) {
+        this.createTxHash = createTxHash;
     }
 
-    public long getGasLimit() {
+    public String getCreater() {
+        return creater;
+    }
+
+    public void setCreater(String creater) {
+        this.creater = creater;
+    }
+
+    public Long getGasLimit() {
         return gasLimit;
     }
 
-    public void setGasLimit(long gasLimit) {
+    public void setGasLimit(Long gasLimit) {
         this.gasLimit = gasLimit;
     }
 
-    public long getPrice() {
+    public Long getPrice() {
         return price;
     }
 
-    public void setPrice(long price) {
+    public void setPrice(Long price) {
         this.price = price;
     }
 
@@ -167,25 +130,11 @@ public class ContractCallInfo extends TxData{
         this.methodDesc = methodDesc;
     }
 
-    public byte getArgsCount() {
-        return argsCount;
-    }
-
-    public void setArgsCount(byte argsCount) {
-        this.argsCount = argsCount;
-    }
-
-    public String[][] getArgs() {
+    public String getArgs() {
         return args;
     }
 
-    public void setArgs(String[][] args) {
+    public void setArgs(String args) {
         this.args = args;
-    }
-
-    public Set<byte[]> getAddresses() {
-        Set<byte[]> addressSet = new HashSet<>();
-        addressSet.add(contractAddress);
-        return addressSet;
     }
 }

@@ -3,39 +3,14 @@ package io.nuls.api.utils;
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.crypto.Hex;
-import io.nuls.api.entity.AgentNode;
+import io.nuls.api.entity.*;
 import io.nuls.api.entity.Alias;
 import io.nuls.api.entity.Block;
 import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.ContractAddressInfo;
-import io.nuls.api.entity.ContractCreateInfo;
-import io.nuls.api.entity.ContractDeleteInfo;
-import io.nuls.api.entity.ContractResultInfo;
 import io.nuls.api.entity.Deposit;
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Output;
-import io.nuls.api.entity.PunishLog;
 import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.TxData;
-import io.nuls.api.entity.Utxo;
-import io.nuls.api.model.Agent;
-import io.nuls.api.model.CancelDeposit;
-import io.nuls.api.model.Coin;
-import io.nuls.api.model.CreateContractData;
-import io.nuls.api.model.DeleteContractData;
-import io.nuls.api.model.NulsDigestData;
-import io.nuls.api.model.RedPunishData;
-import io.nuls.api.model.StopAgent;
-import io.nuls.api.model.YellowPunishData;
-import io.nuls.api.model.tx.AliasTransaction;
-import io.nuls.api.model.tx.CancelDepositTransaction;
-import io.nuls.api.model.tx.CreateAgentTransaction;
-import io.nuls.api.model.tx.CreateContractTransaction;
-import io.nuls.api.model.tx.DeleteContractTransaction;
-import io.nuls.api.model.tx.DepositTransaction;
-import io.nuls.api.model.tx.RedPunishTransaction;
-import io.nuls.api.model.tx.StopAgentTransaction;
-import io.nuls.api.model.tx.YellowPunishTransaction;
+import io.nuls.api.model.*;
+import io.nuls.api.model.tx.*;
 import io.nuls.api.server.dto.contract.ProgramStatus;
 
 import java.io.UnsupportedEncodingException;
@@ -130,7 +105,9 @@ public class RpcTransferUtil {
             ContractCreateInfo createData = toContractCreateData(createContractTx);
             tx.setTxData(createData);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT) {
-
+            CallContractTransaction callContractTx = (CallContractTransaction) txModel;
+            ContractCallInfo data = toContractCallInfo(callContractTx);
+            tx.setTxData(data);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
             DeleteContractTransaction deleteContractTx = (DeleteContractTransaction) txModel;
             ContractDeleteInfo data = toContractDeleteInfo(deleteContractTx);
@@ -378,6 +355,13 @@ public class RpcTransferUtil {
 
     }
 
+    private static ContractCallInfo toContractCallInfo(CallContractTransaction tx) {
+        CallContractData model = tx.getTxData();
+        ContractCallInfo data = new ContractCallInfo(model);
+        return data;
+
+    }
+
     public static ContractAddressInfo toContract(Map<String, Object> map) throws Exception {
         ContractAddressInfo contractAddressInfo = new ContractAddressInfo();
         try {
@@ -417,7 +401,7 @@ public class RpcTransferUtil {
             result.setGasLimit(map.get("gasLimit") != null ? Long.parseLong(map.get("gasLimit").toString()) : 0);
             result.setGasUsed(map.get("gasUsed") != null ? Long.parseLong(map.get("gasUsed").toString()) : 0);
             result.setTokenName((String) map.get("name"));
-            result.setNonce(Long.parseLong(map.get("nonce").toString()));
+            result.setNonce(map.get("gasLimit") != null ? Long.parseLong(map.get("nonce").toString()) : 0);
             result.setPrice(Long.parseLong(map.get("price").toString()));
             result.setRefundFee(map.get("refundFee") != null ? Long.parseLong(map.get("refundFee").toString()) : 0);
             result.setRemark((String) map.get("remark"));

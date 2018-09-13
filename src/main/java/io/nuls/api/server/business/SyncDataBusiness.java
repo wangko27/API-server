@@ -5,27 +5,7 @@ import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
-import io.nuls.api.entity.AddressHashIndex;
-import io.nuls.api.entity.AddressRewardDetail;
-import io.nuls.api.entity.AgentNode;
-import io.nuls.api.entity.Alias;
-import io.nuls.api.entity.Block;
-import io.nuls.api.entity.BlockHeader;
-import io.nuls.api.entity.ContractAddressInfo;
-import io.nuls.api.entity.ContractCallInfo;
-import io.nuls.api.entity.ContractCreateInfo;
-import io.nuls.api.entity.ContractDeleteInfo;
-import io.nuls.api.entity.ContractResultInfo;
-import io.nuls.api.entity.ContractTokenInfo;
-import io.nuls.api.entity.Deposit;
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Output;
-import io.nuls.api.entity.PunishLog;
-import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.TransactionRelation;
-import io.nuls.api.entity.TxData;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -106,6 +86,7 @@ public class SyncDataBusiness {
         List<ContractCallInfo> callContractDataList = new ArrayList<>();
         List<ContractResultInfo> contractResultInfoList = new ArrayList<>();
         List<ContractTokenInfo> contractTokenInfoList = new ArrayList<>();
+        List<ContractTokenTransferInfo> contractTokenTransferInfoList = new ArrayList<>();
 
         try {
             for (int i = 0; i < block.getTxList().size(); i++) {
@@ -160,6 +141,7 @@ public class SyncDataBusiness {
                     if (result.isSuccess() && result.getData() != null) {
                         contractResultInfoList.add(result.getData());
                     }
+                    //ContractResultInfo中有合约内部转账、代币转账，需要分别进行处理
                     System.out.println("RESULT=======" + JSONUtils.obj2json(result.getData()));
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
@@ -185,17 +167,21 @@ public class SyncDataBusiness {
                         }
                     } else if (tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT) {
                         //调用合约
-//                    System.out.println("调用合约");
-//                    System.out.println("tx.getData:"+tx.getTxData());
+                        ContractCallInfo data = (ContractCallInfo) tx.getTxData();
+                        data.setCreateTxHash(tx.getHash());
+                        if (result.isSuccess()) {
+                            ContractResultInfo data1 = result.getData();
+                            System.out.println(data1);
+                        }
+                        callContractDataList.add(data);
                     } else if (tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
                         //删除合约
                         ContractDeleteInfo data = (ContractDeleteInfo) tx.getTxData();
-                        data.setTxHash(tx.getHash());
+                        data.setCreateTxHash(tx.getHash());
                         if (result.isSuccess()) {
                             contractBusiness.deleteContract(data.getContractAddress());
                         }
                         deleteContractDataList.add(data);
-                        System.out.println("##############" + data);
                     } else if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
                         //合约转账
 //                    System.out.println("合约转账");
