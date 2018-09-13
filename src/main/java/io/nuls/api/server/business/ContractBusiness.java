@@ -100,10 +100,12 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 回滚删除合约交易
-     * @param hash
+     * @param txHashList
      */
-    public void rollbackContractDeleteInfo(String hash) {
+    public void rollbackContractDeleteInfo(List<String> txHashList) {
         //根据hash查出删除交易，获取到合约地址，变更合约状态为正常，最后删除该交易
+        Searchable searchable = new Searchable();
+        contractDeleteInfoMapper.selectList(searchable);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)

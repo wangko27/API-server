@@ -7,11 +7,13 @@ import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.*;
 import io.nuls.api.model.ContractTokenTransferDto;
+import io.nuls.api.model.ContractTransferDto;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.RestFulUtils;
+import io.nuls.api.utils.RpcTransferUtil;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,6 +158,17 @@ public class SyncDataBusiness {
                             contractTokenTransferInfoList.add(contractTokenTransferInfo);
                         }
                     }
+                    //合约内部转账
+                    String transfersString = resultData.getTransfers();
+                    if (StringUtils.isNotBlank(transfersString)) {
+                        System.out.println(transfersString);
+                        List<ContractTransferDto> contractTransferDtos = JSONUtils.json2list(transfersString, ContractTransferDto.class);
+                        for (ContractTransferDto contractTransferDto : contractTransferDtos) {
+                            RpcClientResult contractTransferTxResult = syncDataHandler.getTx(contractTransferDto.getTxHash());
+                            Transaction contractTransferTx = RpcTransferUtil.toTransaction((Map) contractTransferTxResult.getData());
+                            System.out.println(contractTransferTx.getType());
+                        }
+                    }
 
                     System.out.println("RESULT=======" + JSONUtils.obj2json(result.getData()));
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
@@ -199,7 +212,7 @@ public class SyncDataBusiness {
                         deleteContractDataList.add(data);
                     } else if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
                         //合约转账
-//                    System.out.println("合约转账");
+                        System.out.println("合约转账");
 //                    System.out.println("tx.getData:" + tx.getTxData());
                     }
                 }
@@ -368,7 +381,7 @@ public class SyncDataBusiness {
             webwalletUtxoLevelDbService.deleteAll();
 
             //回滚删除合约交易
-            contractBusiness.rollbackContractDeleteInfo(header.getHash());
+            contractBusiness.rollbackContractDeleteInfo(header.getTxHashList());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
