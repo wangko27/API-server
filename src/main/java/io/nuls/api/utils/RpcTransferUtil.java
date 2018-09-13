@@ -314,13 +314,11 @@ public class RpcTransferUtil {
         tx.setSize((Integer) map.get("size"));
         tx.setType((Integer) map.get("type"));
         tx.setCreateTime(Long.parseLong(map.get("time").toString()));
+        tx.setScriptSign((String) map.get("scriptSig"));
 
         Map<String, Object> dataMap = new HashMap<>();
         List<Map<String, Object>> inputMaps = (List<Map<String, Object>>) map.get("inputs");
 
-        dataMap.put("inputs", inputMaps);
-        dataMap.put("scriptSign", map.get("scriptSig").toString());
-        //   tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
 
         List<Input> inputs = new ArrayList<>();
         for (int i = 0; i < inputMaps.size(); i++) {
@@ -342,8 +340,12 @@ public class RpcTransferUtil {
             output.setAddress((String) dataMap.get("address"));
             output.setLockTime(Long.parseLong(dataMap.get("lockTime").toString()));
             output.setAmount(Long.parseLong(dataMap.get("value").toString()));
+            output.setTxIndex(Integer.parseInt(dataMap.get("index").toString()));
+            output.setTxHash((String) dataMap.get("txHash"));
             outputs.add(output);
         }
+        tx.setOutputs(outputs);
+
         return tx;
     }
 
@@ -400,7 +402,7 @@ public class RpcTransferUtil {
             result.setGasLimit(map.get("gasLimit") != null ? Long.parseLong(map.get("gasLimit").toString()) : 0);
             result.setGasUsed(map.get("gasUsed") != null ? Long.parseLong(map.get("gasUsed").toString()) : 0);
             result.setTokenName((String) map.get("name"));
-            result.setNonce(map.get("gasLimit") != null ? Long.parseLong(map.get("nonce").toString()) : 0);
+            result.setNonce(map.get("nonce") != null ? Long.parseLong(map.get("nonce").toString()) : 0);
             result.setPrice(Long.parseLong(map.get("price").toString()));
             result.setRefundFee(map.get("refundFee") != null ? Long.parseLong(map.get("refundFee").toString()) : 0);
             result.setRemark((String) map.get("remark"));

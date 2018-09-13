@@ -155,6 +155,7 @@ public class SyncDataBusiness {
                             ContractTokenTransferInfo contractTokenTransferInfo = new ContractTokenTransferInfo(contractTokenTransferDto);
                             contractTokenTransferInfo.setTxHash(tx.getHash());
                             contractTokenTransferInfo.setContractAddress(resultData.getContractAddress());
+                            contractTokenTransferInfo.setCreateTime(resultData.getCreateTime());
                             contractTokenTransferInfoList.add(contractTokenTransferInfo);
                         }
                     }
@@ -166,7 +167,16 @@ public class SyncDataBusiness {
                         for (ContractTransferDto contractTransferDto : contractTransferDtos) {
                             RpcClientResult contractTransferTxResult = syncDataHandler.getTx(contractTransferDto.getTxHash());
                             Transaction contractTransferTx = RpcTransferUtil.toTransaction((Map) contractTransferTxResult.getData());
-                            System.out.println(contractTransferTx.getType());
+                            //存放新的utxo到utxoMap
+                            if (contractTransferTx.getOutputs() != null && !contractTransferTx.getOutputs().isEmpty()) {
+                                for (Utxo utxo : contractTransferTx.getOutputs()) {
+                                    utxoMap.put(utxo.getKey(), utxo);
+                                }
+                            }
+                            //存放被花费的utxo
+                            fromList.addAll(utxoBusiness.getListByFrom(contractTransferTx, utxoMap));
+
+                            txList.add(contractTransferTx);
                         }
                     }
 
