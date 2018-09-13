@@ -351,4 +351,10 @@
       create_time = #{createTime,jdbcType=BIGINT}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from contract_result_info where tx_hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
 </mapper>
