@@ -117,9 +117,17 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param txHashList
      */
     public void rollbackContractDeleteInfo(List<String> txHashList) {
-        //根据hash查出删除交易，获取到合约地址，变更合约状态为正常，最后删除该交易
-        Searchable searchable = new Searchable();
-        contractDeleteInfoMapper.selectList(searchable);
+        for (String hash : txHashList) {
+            //变更合约状态为正常，最后删除该交易
+            ContractAddressInfo contractAddressInfo = new ContractAddressInfo();
+            contractAddressInfo.setCreateTxHash(hash);
+            contractAddressInfo.setStatus(ContractConstant.CONTRACT_STATUS_CONFIRMED);
+            contractAddressInfoMapper.updateByPrimaryKey(contractAddressInfo);
+            Searchable searchable = new Searchable();
+            searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
+            contractDeleteInfoMapper.deleteBySearchable(searchable);
+        }
+
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)

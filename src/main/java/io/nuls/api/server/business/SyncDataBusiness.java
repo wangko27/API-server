@@ -145,9 +145,9 @@ public class SyncDataBusiness {
                     if (result.isFailed() || result.getData() == null) {
                         return;
                     }
-                    ContractResultInfo contractResult = result.getData();
-                    contractResult.setTxHash(tx.getHash());
-                    contractResultInfoList.add(contractResult);
+                    ContractResultInfo resultData = result.getData();
+                    resultData.setTxHash(tx.getHash());
+                    contractResultInfoList.add(resultData);
 
                     //保存合约交易记录
                     ContractTransaction contractTransaction = new ContractTransaction();
@@ -155,18 +155,17 @@ public class SyncDataBusiness {
                     contractTransaction.setTxType(tx.getType());
                     contractTransaction.setStatus(ContractConstant.CONTRACT_STATUS_CONFIRMED);
                     contractTransaction.setCreateTime(tx.getCreateTime());
-                    contractTransaction.setContractAddress(contractResult.getContractAddress());
-                    System.out.println("RESULT=======" + JSONUtils.obj2json(contractResult));
+                    contractTransaction.setContractAddress(resultData.getContractAddress());
+                    System.out.println("RESULT=======" + JSONUtils.obj2json(resultData));
                     //ContractResultInfo中有合约内部转账、代币转账，需要分别进行处理
                     //代币转账
-                    String tokenTransfersString = contractResult.getTokenTransfers();
+                    String tokenTransfersString = resultData.getTokenTransfers();
                     if (StringUtils.isNotBlank(tokenTransfersString)) {
                         System.out.println(tokenTransfersString);
                         List<ContractTokenTransferDto> contractTokenTransferDtos = JSONUtils.json2list(tokenTransfersString, ContractTokenTransferDto.class);
                         for (ContractTokenTransferDto contractTokenTransferDto : contractTokenTransferDtos) {
                             ContractTokenTransferInfo contractTokenTransferInfo = new ContractTokenTransferInfo(contractTokenTransferDto);
                             contractTokenTransferInfo.setTxHash(tx.getHash());
-                            contractTokenTransferInfo.setContractAddress(contractResult.getContractAddress());
                             contractTokenTransferInfo.setContractAddress(resultData.getContractAddress());
                             contractTokenTransferInfo.setCreateTime(resultData.getCreateTime());
                             contractTokenTransferInfoList.add(contractTokenTransferInfo);
@@ -178,8 +177,7 @@ public class SyncDataBusiness {
                         System.out.println(transfersString);
                         List<ContractTransferDto> contractTransferDtos = JSONUtils.json2list(transfersString, ContractTransferDto.class);
                         for (ContractTransferDto contractTransferDto : contractTransferDtos) {
-                            RpcClientResult contractTransferTxResult = syncDataHandler.getTx(contractTransferDto.getTxHash());
-                            Transaction contractTransferTx = RpcTransferUtil.toTransaction((Map) contractTransferTxResult.getData());
+                            Transaction contractTransferTx = syncDataHandler.getTx(contractTransferDto.getTxHash());
                             //存放新的utxo到utxoMap
                             if (contractTransferTx.getOutputs() != null && !contractTransferTx.getOutputs().isEmpty()) {
                                 for (Utxo utxo : contractTransferTx.getOutputs()) {
@@ -196,7 +194,7 @@ public class SyncDataBusiness {
                     System.out.println("RESULT=======" + JSONUtils.obj2json(result.getData()));
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
-                        if (tx.getTxData() != null && ContractConstant.CONTRACT_STATUS_SUCCESS.equals(contractResult.getSuccess())) {
+                        if (tx.getTxData() != null && ContractConstant.CONTRACT_STATUS_SUCCESS.equals(resultData.getSuccess())) {
                             ContractCreateInfo contractCreateData = (ContractCreateInfo) tx.getTxData();
                             contractCreateData.setCreateTxHash(tx.getHash());
                             //查询合约地址信息
@@ -222,11 +220,7 @@ public class SyncDataBusiness {
                         //调用合约
                         ContractCallInfo data = (ContractCallInfo) tx.getTxData();
                         data.setCreateTxHash(tx.getHash());
-                        if (result.isSuccess()) {
-                            ContractResultInfo data1 = result.getData();
-                            System.out.println(data1);
-                        }
-                        if (StringUtils.isNotBlank(contractResult.getTransfers())) {
+                        if (StringUtils.isNotBlank(resultData.getTransfers())) {
                             //合约转账
                             contractTransaction.setTxType(EntityConstant.TX_TYPE_CONTRACT_TRANSFER);
                         }
@@ -244,7 +238,7 @@ public class SyncDataBusiness {
                         contractTransaction.setCreater(data.getCreater());
                         deleteContractDataList.add(data);
                     }
-                    if (ContractConstant.CONTRACT_STATUS_SUCCESS.equals(contractResult.getSuccess())) {
+                    if (ContractConstant.CONTRACT_STATUS_SUCCESS.equals(resultData.getSuccess())) {
                         //合约交易记录
                         contractTransactionList.add(contractTransaction);
                     }
@@ -399,6 +393,8 @@ public class SyncDataBusiness {
             contractBusiness.deleteTokenList(header.getTxHashList());
             //回滚智能合约交易记录
             contractBusiness.deleteTransactionList(header.getTxHashList());
+            //回滚删除合约交易记录
+            contractBusiness.rollbackContractDeleteInfo(header.getTxHashList());
 
             //回滚levelDB与缓存
             //回滚交易
@@ -416,8 +412,6 @@ public class SyncDataBusiness {
             //回滚块时，删除所有临时utxo
             webwalletUtxoLevelDbService.deleteAll();
 
-            //回滚删除合约交易
-            contractBusiness.rollbackContractDeleteInfo(header.getTxHashList());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
