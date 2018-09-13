@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.Constant;
+import io.nuls.api.constant.ContractConstant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
@@ -89,6 +90,7 @@ public class SyncDataBusiness {
         List<ContractCallInfo> callContractDataList = new ArrayList<>();
         List<ContractResultInfo> contractResultInfoList = new ArrayList<>();
         List<ContractTokenInfo> contractTokenInfoList = new ArrayList<>();
+        List<ContractTransaction> contractTransactionList = new ArrayList<>();
         List<ContractTokenTransferInfo> contractTokenTransferInfoList = new ArrayList<>();
 
         try {
@@ -140,20 +142,31 @@ public class SyncDataBusiness {
                 if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
                     //保存调用结果
                     RpcClientResult<ContractResultInfo> result = syncDataHandler.getContractResult(tx.getHash());
-                    result.getData().setTxHash(tx.getHash());
-                    if (result.isSuccess() && result.getData() != null) {
-                        contractResultInfoList.add(result.getData());
+                    if (result.isFailed() || result.getData() == null) {
+                        return;
                     }
+                    ContractResultInfo contractResult = result.getData();
+                    contractResult.setTxHash(tx.getHash());
+                    contractResultInfoList.add(contractResult);
+
+                    //保存合约交易记录
+                    ContractTransaction contractTransaction = new ContractTransaction();
+                    contractTransaction.setTxHash(tx.getHash());
+                    contractTransaction.setTxType(tx.getType());
+                    contractTransaction.setStatus(ContractConstant.CONTRACT_STATUS_CONFIRMED);
+                    contractTransaction.setCreateTime(tx.getCreateTime());
+                    contractTransaction.setContractAddress(contractResult.getContractAddress());
+                    System.out.println("RESULT=======" + JSONUtils.obj2json(contractResult));
                     //ContractResultInfo中有合约内部转账、代币转账，需要分别进行处理
-                    ContractResultInfo resultData = result.getData();
                     //代币转账
-                    String tokenTransfersString = resultData.getTokenTransfers();
+                    String tokenTransfersString = contractResult.getTokenTransfers();
                     if (StringUtils.isNotBlank(tokenTransfersString)) {
                         System.out.println(tokenTransfersString);
                         List<ContractTokenTransferDto> contractTokenTransferDtos = JSONUtils.json2list(tokenTransfersString, ContractTokenTransferDto.class);
                         for (ContractTokenTransferDto contractTokenTransferDto : contractTokenTransferDtos) {
                             ContractTokenTransferInfo contractTokenTransferInfo = new ContractTokenTransferInfo(contractTokenTransferDto);
                             contractTokenTransferInfo.setTxHash(tx.getHash());
+                            contractTokenTransferInfo.setContractAddress(contractResult.getContractAddress());
                             contractTokenTransferInfo.setContractAddress(resultData.getContractAddress());
                             contractTokenTransferInfo.setCreateTime(resultData.getCreateTime());
                             contractTokenTransferInfoList.add(contractTokenTransferInfo);
@@ -183,12 +196,12 @@ public class SyncDataBusiness {
                     System.out.println("RESULT=======" + JSONUtils.obj2json(result.getData()));
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
-                        if (tx.getTxData() != null && "true".equals(result.getData().getSuccess())) {
+                        if (tx.getTxData() != null && ContractConstant.CONTRACT_STATUS_SUCCESS.equals(contractResult.getSuccess())) {
                             ContractCreateInfo contractCreateData = (ContractCreateInfo) tx.getTxData();
                             contractCreateData.setCreateTxHash(tx.getHash());
                             //查询合约地址信息
-                            RpcClientResult<ContractAddressInfo> contractResult = syncDataHandler.getContractInfo(contractCreateData.getContractAddress());
-                            ContractAddressInfo contractAddressInfo = contractResult.getData();
+                            RpcClientResult<ContractAddressInfo> contractInfoResult = syncDataHandler.getContractInfo(contractCreateData.getContractAddress());
+                            ContractAddressInfo contractAddressInfo = contractInfoResult.getData();
                             if (contractAddressInfo != null) {
                                 //设置合约包含方法
                                 contractCreateData.setMethods(contractAddressInfo.getMethods());
@@ -200,6 +213,8 @@ public class SyncDataBusiness {
                                     ContractTokenInfo contractTokenInfo = new ContractTokenInfo(contractAddressInfo);
                                     contractTokenInfoList.add(contractTokenInfo);
                                 }
+                                //设置合约交易记录创建者
+                                contractTransaction.setCreater(contractAddressInfo.getCreater());
                             }
                             contractCreateDataList.add(contractCreateData);
                         }
@@ -211,6 +226,12 @@ public class SyncDataBusiness {
                             ContractResultInfo data1 = result.getData();
                             System.out.println(data1);
                         }
+                        if (StringUtils.isNotBlank(contractResult.getTransfers())) {
+                            //合约转账
+                            contractTransaction.setTxType(EntityConstant.TX_TYPE_CONTRACT_TRANSFER);
+                        }
+                        //设置合约交易记录创建者
+                        contractTransaction.setCreater(data.getCreater());
                         callContractDataList.add(data);
                     } else if (tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
                         //删除合约
@@ -219,11 +240,13 @@ public class SyncDataBusiness {
                         if (result.isSuccess()) {
                             contractBusiness.deleteContract(data.getContractAddress());
                         }
+                        //设置合约交易记录创建者
+                        contractTransaction.setCreater(data.getCreater());
                         deleteContractDataList.add(data);
-                    } else if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
-                        //合约转账
-                        System.out.println("合约转账");
-//                    System.out.println("tx.getData:" + tx.getTxData());
+                    }
+                    if (ContractConstant.CONTRACT_STATUS_SUCCESS.equals(contractResult.getSuccess())) {
+                        //合约交易记录
+                        contractTransactionList.add(contractTransaction);
                     }
                 }
 
@@ -246,6 +269,7 @@ public class SyncDataBusiness {
             contractBusiness.saveAllCallInfo(callContractDataList);
             contractBusiness.saveAllContractResult(contractResultInfoList);
             contractBusiness.saveAllToken(contractTokenInfoList);
+            contractBusiness.saveAllTransaction(contractTransactionList);
             contractBusiness.saveAllTokenTransferInfo(contractTokenTransferInfoList);
             //智能合约地址批量保存
             contractAddressBusiness.saveAll(contractAddressList);
@@ -373,6 +397,8 @@ public class SyncDataBusiness {
             contractCreateBusiness.deleteList(header.getTxHashList());
             //回滚智能合约token代币信息
             contractBusiness.deleteTokenList(header.getTxHashList());
+            //回滚智能合约交易记录
+            contractBusiness.deleteTransactionList(header.getTxHashList());
 
             //回滚levelDB与缓存
             //回滚交易
