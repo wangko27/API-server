@@ -49,4 +49,26 @@ public class TokenResource {
         return result;
     }
 
+    @GET
+    @Path("/{contractAddress}/holders")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTokenAssets(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("contractAddress") String contractAddress){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokenAssets(contractAddress,pageNumber,pageSize));
+        return result;
+    }
+
 }

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.ContractTokenAssetsMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.ContractTokenAssets" >
+    <id column="hash" property="hash" jdbcType="VARCHAR" />
+    <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
+    <result column="account_address" property="accountAddress" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    hash, contract_address, account_address, amount
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from contract_token_assets
+    where hash = #{hash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from contract_token_assets
+    where hash = #{hash,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.ContractTokenAssets" >
+    insert into contract_token_assets (hash, contract_address, account_address,
+      amount)
+    values (#{hash,jdbcType=VARCHAR}, #{contractAddress,jdbcType=VARCHAR}, #{accountAddress,jdbcType=VARCHAR},
+      #{amount,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractTokenAssets" >
+    insert into contract_token_assets
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="hash != null" >
+        hash,
+      </if>
+      <if test="contractAddress != null" >
+        contract_address,
+      </if>
+      <if test="accountAddress != null" >
+        account_address,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="hash != null" >
+        #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="contractAddress != null" >
+        #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="accountAddress != null" >
+        #{accountAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.ContractTokenAssets" >
+    update contract_token_assets
+    <set >
+      <if test="contractAddress != null" >
+        contract_address = #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="accountAddress != null" >
+        account_address = #{accountAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where hash = #{hash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.ContractTokenAssets" >
+    update contract_token_assets
+    set contract_address = #{contractAddress,jdbcType=VARCHAR},
+      account_address = #{accountAddress,jdbcType=VARCHAR},
+      amount = #{amount,jdbcType=VARCHAR}
+    where hash = #{hash,jdbcType=VARCHAR}
+  </update>
+
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contract_token_assets (contract_address, account_address, amount, hash)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.contractAddress,jdbcType=VARCHAR}, #{item.accountAddress,jdbcType=VARCHAR}, #{item.amount,jdbcType=VARCHAR}, #{item.hash,jdbcType=VARCHAR})
+    </foreach>
+    on duplicate key update hash = values(hash)
+  </insert>
+
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from contract_token_assets where hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
+
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from contract_token_assets
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+</mapper>

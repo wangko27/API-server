@@ -2,6 +2,7 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mchange.v1.util.ListUtils;
 import io.nuls.api.constant.ContractConstant;
 import io.nuls.api.entity.ContractAddressInfo;
 import io.nuls.api.entity.ContractCallInfo;
@@ -9,6 +10,7 @@ import io.nuls.api.entity.ContractDeleteInfo;
 import io.nuls.api.entity.ContractResultInfo;
 import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.entity.ContractTransaction;
+import io.nuls.api.model.ContractTokenTransferDto;
 import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
@@ -25,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Description: 别名
@@ -51,6 +53,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractTransactionMapper contractTransactionMapper;
     @Autowired
     private ContractTokenTransferInfoMapper contractTokenTransferInfoMapper;
+    @Autowired
+    private ContractTokenAssetsMapper contractTokenAssetsMapper;
 
 
     /**
@@ -305,7 +309,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
-     * 获取块列表
+     * 获取代币转账信息
      *
      * @param address    合约地址
      * @param pageNumber
@@ -327,4 +331,55 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         return page;
     }
 
+    /**
+     * 获取代币转账信息
+     *
+     * @param address    合约地址
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<ContractTokenAssets> getContractTokenAssets(String address, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        if (StringUtils.isNotBlank(address)) {
+            if (StringUtils.validAddress(address)) {
+                searchable.addCondition("contract_address", SearchOperator.eq, address);
+            } else {
+                return null;
+            }
+        }
+        PageHelper.orderBy("amount asc");
+        PageInfo<ContractTokenAssets> page = new PageInfo<ContractTokenAssets>(contractTokenAssetsMapper.selectList(searchable));
+        return page;
+    }
+
+    public void calContractTokenAssets(List<ContractTokenTransferInfo> contractTokenTransferDtos, String contractAddress) {
+        Searchable searchable = new Searchable();
+        if (StringUtils.isNotBlank(contractAddress)) {
+            if (StringUtils.validAddress(contractAddress)) {
+                searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+            } else {
+                return;
+            }
+        }
+
+        List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
+        HashMap<String, Long> tempMap = new HashMap<>();
+        for (ContractTokenTransferInfo contractTokenTransferInfo : contractTokenTransferDtos) {
+            String fromAddress = contractTokenTransferInfo.getFromAddress();
+            String toAddress = contractTokenTransferInfo.getToAddress();
+            Long txValue = contractTokenTransferInfo.getTxValue();
+            Long fromAmount = tempMap.get("fromAddress") != null ? tempMap.get("fromAddress") : 0L;
+            Long toAmount = tempMap.get("toAddress") != null ? tempMap.get("toAddress") : 0L;
+            fromAmount -= txValue;
+            toAmount += txValue;
+            tempMap.put(fromAddress, fromAmount);
+            tempMap.put(toAddress, toAmount);
+        }
+        for (Map.Entry<String, Long> stringLongEntry : tempMap.entrySet()) {
+
+        }
+
+    }
 }
