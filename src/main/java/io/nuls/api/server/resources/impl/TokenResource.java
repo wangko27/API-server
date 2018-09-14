@@ -20,7 +20,7 @@ import javax.ws.rs.core.MediaType;
  * Author: moon
  * Date:  2018/5/29 0029
  */
-@Path("token")
+@Path("tokens")
 @Component
 public class TokenResource {
 
@@ -46,6 +46,50 @@ public class TokenResource {
         }
         result = RpcClientResult.getSuccess();
         result.setData(contractBusiness.getContractTokenTransfers(contractAddress,pageNumber,pageSize));
+        return result;
+    }
+
+    @GET
+    @Path("/{contractAddress}/holders")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTokenAssets(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("contractAddress") String contractAddress){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokenAssets(contractAddress,pageNumber,pageSize));
+        return result;
+    }
+
+    @GET
+    @Path("/{contractAddress}/holder/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTokenAssetsDetails(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("contractAddress") String contractAddress, @PathParam("address") String address){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokenAssetsDetails(address,contractAddress,pageNumber,pageSize));
         return result;
     }
 
