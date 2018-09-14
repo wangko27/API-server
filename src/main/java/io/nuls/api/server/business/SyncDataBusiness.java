@@ -217,7 +217,6 @@ public class SyncDataBusiness {
 
                         //合约转账
                         if (StringUtils.isNotBlank(resultData.getTransfers())) {
-                            //合约转账
                             contractTransaction.setTxType(EntityConstant.TX_TYPE_CONTRACT_TRANSFER);
                         }
                         //设置合约交易记录创建者

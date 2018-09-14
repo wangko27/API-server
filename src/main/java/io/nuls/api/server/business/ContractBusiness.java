@@ -8,6 +8,7 @@ import io.nuls.api.entity.ContractCallInfo;
 import io.nuls.api.entity.ContractCreateInfo;
 import io.nuls.api.entity.ContractDeleteInfo;
 import io.nuls.api.entity.ContractResultInfo;
+import io.nuls.api.entity.ContractTokenAssets;
 import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.entity.ContractTokenTransferInfo;
 import io.nuls.api.entity.ContractTransaction;
@@ -16,18 +17,23 @@ import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCreateInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractResultInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractTokenAssetsMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenTransferInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Description: 别名
