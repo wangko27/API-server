@@ -50,6 +50,11 @@ public class NulsContext {
      * The default address type, a chain can contain several address types, and the address type is contained in the address.
      */
     public static byte DEFAULT_ADDRESS_TYPE = 1;
+    /**
+     * 智能合约地址类型
+     * contract address type
+     */
+    public static byte CONTRACT_ADDRESS_TYPE = 2;
 
     /*
      *  chain name

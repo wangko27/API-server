@@ -1,5 +1,6 @@
 package io.nuls.api.utils;
 
+import io.nuls.api.cfg.NulsConfig;
 import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.constant.NulsConstant;
@@ -8,18 +9,16 @@ import io.nuls.api.entity.Utxo;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.*;
-import io.nuls.api.model.tx.AliasTransaction;
-import io.nuls.api.model.tx.CancelDepositTransaction;
-import io.nuls.api.model.tx.DepositTransaction;
-import io.nuls.api.model.tx.TransferTransaction;
+import io.nuls.api.model.tx.*;
 import io.nuls.api.server.dto.TransFeeDto;
-import io.nuls.sdk.core.contast.SDKConstant;
+import io.nuls.api.utils.log.Log;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TransactionTool {
 
@@ -31,7 +30,7 @@ public class TransactionTool {
     public static int getRemarkSize(String remark){
         if (StringUtils.isNotBlank(remark)) {
             try {
-                return remark.getBytes(SDKConstant.DEFAULT_ENCODING).length;
+                return remark.getBytes(NulsConfig.DEFAULT_ENCODING).length;
             } catch (UnsupportedEncodingException e) {
                 return 1;
             }
@@ -82,7 +81,7 @@ public class TransactionTool {
             tx.setTime(TimeService.currentTimeMillis());
             if (StringUtils.isNotBlank(remark)) {
                 try {
-                    tx.setRemark(remark.getBytes(SDKConstant.DEFAULT_ENCODING));
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
                 } catch (UnsupportedEncodingException e) {
                     throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
                 }
@@ -104,7 +103,7 @@ public class TransactionTool {
         byte[] addressBytes = AddressTool.getAddress(address);
         size += VarInt.sizeOf((addressBytes).length) + (addressBytes).length;
         try {
-            size += alias.getBytes(SDKConstant.DEFAULT_ENCODING).length;
+            size += alias.getBytes(NulsConfig.DEFAULT_ENCODING).length;
         } catch (UnsupportedEncodingException e) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -233,6 +232,189 @@ public class TransactionTool {
         }
         return tx;
     }
+
+    public static CreateContractTransaction contractCreateTxForApi(String sender, Long gasLimit, Long price,
+                                         byte[] contractCode, Object[] args, String remark,List<Utxo> utxoList,long fee) {
+        try {
+            AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
+            AssertUtil.canNotEmpty(contractCode, "the contractCode can not be empty");
+            Na value = Na.ZERO;
+
+            // 生成一个地址作为智能合约地址
+            Address contractAddress = AccountTool.createContractAddress();
+
+            byte[] contractAddressBytes = contractAddress.getAddressBytes();
+            byte[] senderBytes = AddressTool.getAddress(sender);
+
+            CreateContractTransaction tx = new CreateContractTransaction();
+            if (StringUtils.isNotBlank(remark)) {
+                try {
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    Log.error(e);
+                    throw new RuntimeException(e);
+                }
+            }
+            tx.setTime(TimeService.currentTimeMillis());
+
+            long gasUsed = gasLimit.longValue();
+            Na imputedNa = Na.valueOf(LongUtils.mul(gasUsed, price));
+            // 总花费
+            Na totalNa = imputedNa.add(value);
+
+            // 组装txData
+            CreateContractData createContractData = new CreateContractData();
+            createContractData.setSender(senderBytes);
+            createContractData.setContractAddress(contractAddressBytes);
+            createContractData.setValue(value.getValue());
+            createContractData.setGasLimit(gasLimit);
+            createContractData.setPrice(price);
+            createContractData.setCodeLen(contractCode.length);
+            createContractData.setCode(contractCode);
+            if (args != null) {
+                createContractData.setArgsCount((byte) args.length);
+                if (args.length > 0) {
+                    createContractData.setArgs(ContractUtil.twoDimensionalArray(args));
+                }
+            }
+            tx.setTxData(createContractData);
+
+
+            List<Coin> outputs = new ArrayList<>();
+            Coin to = new Coin();
+            to.setLockTime(0);
+            to.setNa(totalNa);
+            to.setOwner(AddressTool.getAddress(contractAddressBytes));
+            outputs.add(to);
+
+            CoinData coinData = createCoinData(utxoList, outputs, totalNa.getValue()+fee);
+
+            tx.setCoinData(coinData);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            return tx;
+        } catch (Exception e) {
+            Log.error(e);
+            Result result = Result.getFailed(KernelErrorCode.CONTRACT_TX_CREATE_ERROR);
+            result.setMsg(e.getMessage());
+            return null;
+        }
+    }
+
+
+
+    public Result contractCallTxForApi(String sender, Na value, Long gasLimit, Long price, String contractAddress,
+                                       String methodName, String methodDesc, Object[] args, String remark,List<Utxo> utxoList,long fee) {
+        try {
+            AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
+            AssertUtil.canNotEmpty(methodName, "the methodName can not be empty");
+            if (value == null) {
+                value = Na.ZERO;
+            }
+            byte[] senderBytes = AddressTool.getAddress(sender);
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+
+            CallContractTransaction tx = new CallContractTransaction();
+            if (StringUtils.isNotBlank(remark)) {
+                try {
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    Log.error(e);
+                    throw new RuntimeException(e);
+                }
+            }
+            tx.setTime(TimeService.currentTimeMillis());
+
+
+
+            long gasUsed = gasLimit.longValue();
+            Na imputedNa = Na.valueOf(LongUtils.mul(gasUsed, price));
+            // 总花费
+            Na totalNa = imputedNa.add(value);
+
+            // 组装txData
+            CallContractData callContractData = new CallContractData();
+            callContractData.setContractAddress(contractAddressBytes);
+            callContractData.setSender(senderBytes);
+            callContractData.setValue(value.getValue());
+            callContractData.setPrice(price.longValue());
+            callContractData.setGasLimit(gasLimit.longValue());
+            callContractData.setMethodName(methodName);
+            callContractData.setMethodDesc(methodDesc);
+            if (args != null) {
+                callContractData.setArgsCount((byte) args.length);
+                callContractData.setArgs(ContractUtil.twoDimensionalArray(args));
+            }
+            tx.setTxData(callContractData);
+
+            List<Coin> outputs = new ArrayList<>();
+            Coin to = new Coin();
+            to.setLockTime(0);
+            to.setNa(totalNa);
+            to.setOwner(AddressTool.getAddress(contractAddressBytes));
+            outputs.add(to);
+
+            CoinData coinData = createCoinData(utxoList, outputs, totalNa.getValue()+fee);
+            tx.setCoinData(coinData);
+
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+
+            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+        } catch (Exception e) {
+            Log.error(e);
+            Result result = Result.getFailed(KernelErrorCode.CONTRACT_TX_CREATE_ERROR);
+            result.setMsg(e.getMessage());
+            return result;
+        }
+    }
+
+
+
+    public Result contractDeleteTxForApi(String sender, String contractAddress, String remark,List<Utxo> utxoList,long fee) {
+        try {
+            AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
+            AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
+
+            DeleteContractTransaction tx = new DeleteContractTransaction();
+            if (StringUtils.isNotBlank(remark)) {
+                try {
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    Log.error(e);
+                    throw new RuntimeException(e);
+                }
+            }
+            tx.setTime(TimeService.currentTimeMillis());
+
+            byte[] senderBytes = AddressTool.getAddress(sender);
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+
+            // 组装txData
+            DeleteContractData deleteContractData = new DeleteContractData();
+            deleteContractData.setContractAddress(contractAddressBytes);
+            deleteContractData.setSender(senderBytes);
+
+            tx.setTxData(deleteContractData);
+
+            List<Coin> outputs = new ArrayList<>();
+            Coin to = new Coin();
+            to.setLockTime(0);
+            to.setNa(Na.ZERO);
+            to.setOwner(AddressTool.getAddress(contractAddressBytes));
+            outputs.add(to);
+            CoinData coinData = createCoinData(utxoList, outputs,fee);
+
+            tx.setCoinData(coinData);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+
+            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+        } catch (Exception e) {
+            Log.error(e);
+            Result result = Result.getFailed(KernelErrorCode.CONTRACT_TX_CREATE_ERROR);
+            result.setMsg(e.getMessage());
+            return result;
+        }
+    }
+
 
     /**
      * 计算最大的可用金额

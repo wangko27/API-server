@@ -13,6 +13,7 @@ import io.nuls.api.model.tx.DepositTransaction;
 import io.nuls.api.model.tx.TransferTransaction;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
+import io.nuls.api.server.dto.ContractTransParam;
 import io.nuls.api.server.dto.TransFeeDto;
 import io.nuls.api.server.dto.TransactionDto;
 import io.nuls.api.server.dto.TransactionParam;
@@ -406,6 +407,30 @@ public class TransactionResource {
             }
             result.setData(attr);
         }
+        return result;
+    }
+
+    @POST
+    @Path("/contractTrans")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult contractTrans(ContractTransParam contractTransParam) throws Exception {
+        io.nuls.api.model.Transaction transaction = null;
+        List<Utxo> list = utxoBusiness.getUsableUtxo(contractTransParam.getSender());
+        //转账
+        TransFeeDto transFeeDto =TransactionTool.getTransferTxFee(list,0,contractTransParam.getRemark(),TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.getValue());
+
+        transaction = TransactionTool.contractCreateTxForApi(
+                contractTransParam.getSender(),
+                contractTransParam.getGasLimit(),
+                contractTransParam.getPrice(),
+                Hex.decode(contractTransParam.getContractCode()),
+                null,
+                contractTransParam.getRemark(),
+                list,
+                transFeeDto.getNa().getValue()
+                );
+        RpcClientResult result = RpcClientResult.getSuccess();
+        result.setData(transaction.getHash());
         return result;
     }
 
