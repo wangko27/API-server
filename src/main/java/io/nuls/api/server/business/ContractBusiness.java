@@ -3,8 +3,24 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.ContractConstant;
-import io.nuls.api.entity.*;
-import io.nuls.api.server.dao.mapper.*;
+import io.nuls.api.entity.ContractAddressInfo;
+import io.nuls.api.entity.ContractCallInfo;
+import io.nuls.api.entity.ContractCreateInfo;
+import io.nuls.api.entity.ContractDeleteInfo;
+import io.nuls.api.entity.ContractResultInfo;
+import io.nuls.api.entity.ContractTokenAssets;
+import io.nuls.api.entity.ContractTokenInfo;
+import io.nuls.api.entity.ContractTokenTransferInfo;
+import io.nuls.api.entity.ContractTransaction;
+import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractCreateInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractResultInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractTokenAssetsMapper;
+import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractTokenTransferInfoMapper;
+import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
@@ -449,4 +465,18 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         }
         return i;
     }
+    /**
+     *
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<ContractAddressInfo> getContractInfoList(int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        PageHelper.orderBy("create_time desc");
+        PageInfo<ContractAddressInfo> page = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
+        return page;
+    }
+
 }

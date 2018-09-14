@@ -247,25 +247,27 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         for (Transaction trans : transactionList) {
             //去leveldb中重新加载trans
             trans = transactionLevelDbService.select(trans.getHash());
-            //trans.setExtend(null);
-            trans.setOutputs(null);
-            trans.setTxData(null);
+            if(trans!=null) {
+                //trans.setExtend(null);
+                trans.setOutputs(null);
+                trans.setTxData(null);
             /*trans.setScriptSign(null);*/
-            //去掉TxDataList
-            if (null == trans.getOutputList()) {
-                trans.setOutputList(new ArrayList<>());
-            }
-            if (null == trans.getInputs()) {
-                trans.setInputs(new ArrayList<>());
-            } else {
-                for (Input input : trans.getInputs()) {
-                    Utxo utxo = utxoBusiness.getByKey(input.getFromHash(), input.getFromIndex());
-                    input.setAddress(utxo.getAddress());
-                    input.setValue(utxo.getAmount());
+                //去掉TxDataList
+                if (null == trans.getOutputList()) {
+                    trans.setOutputList(new ArrayList<>());
                 }
+                if (null == trans.getInputs()) {
+                    trans.setInputs(new ArrayList<>());
+                } else {
+                    for (Input input : trans.getInputs()) {
+                        Utxo utxo = utxoBusiness.getByKey(input.getFromHash(), input.getFromIndex());
+                        input.setAddress(utxo.getAddress());
+                        input.setValue(utxo.getAmount());
+                    }
+                }
+                trans.setTxDataList(null);
+                txList.add(trans);
             }
-            trans.setTxDataList(null);
-            txList.add(trans);
         }
         return txList;
     }
