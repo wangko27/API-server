@@ -5,7 +5,7 @@
     <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
     <result column="from_address" property="fromAddress" jdbcType="VARCHAR" />
     <result column="to_address" property="toAddress" jdbcType="VARCHAR" />
-    <result column="tx_value" property="txValue" jdbcType="BIGINT" />
+    <result column="tx_value" property="txValue" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
     <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
   </resultMap>
@@ -26,7 +26,7 @@
     insert into contract_token_transfer_info (tx_hash, from_address, to_address, 
       tx_value, create_time, from_address)
     values (#{txHash,jdbcType=VARCHAR}, #{fromAddress,jdbcType=VARCHAR}, #{toAddress,jdbcType=VARCHAR}, 
-      #{txValue,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{contractAddress,jdbcType=VARCHAR})
+      #{txValue,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT}, #{contractAddress,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractTokenTransferInfo" >
     insert into contract_token_transfer_info
@@ -61,7 +61,7 @@
         #{toAddress,jdbcType=VARCHAR},
       </if>
       <if test="txValue != null" >
-        #{txValue,jdbcType=BIGINT},
+        #{txValue,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=BIGINT},
@@ -81,7 +81,7 @@
         to_address = #{toAddress,jdbcType=VARCHAR},
       </if>
       <if test="txValue != null" >
-        tx_value = #{txValue,jdbcType=BIGINT},
+        tx_value = #{txValue,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=BIGINT},
@@ -96,7 +96,7 @@
     update contract_token_transfer_info
     set from_address = #{fromAddress,jdbcType=VARCHAR},
       to_address = #{toAddress,jdbcType=VARCHAR},
-      tx_value = #{txValue,jdbcType=BIGINT},
+      tx_value = #{txValue,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=BIGINT}
       contract_address = #{contractAddress,jdbcType=VARCHAR}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
@@ -107,7 +107,7 @@
     values
     <foreach collection="list" item="item" index="index" separator=",">
       (#{item.txHash,jdbcType=VARCHAR}, #{item.fromAddress,jdbcType=VARCHAR}, #{item.toAddress,jdbcType=VARCHAR},
-      #{item.txValue,jdbcType=BIGINT}, #{item.createTime,jdbcType=BIGINT}, #{item.contractAddress,jdbcType=VARCHAR})
+      #{item.txValue,jdbcType=VARCHAR}, #{item.createTime,jdbcType=BIGINT}, #{item.contractAddress,jdbcType=VARCHAR})
     </foreach>
     on duplicate key update create_time = values(create_time)
   </insert>

@@ -86,7 +86,7 @@
     <foreach collection="list" item="item" index="index" separator=",">
       (#{item.contractAddress,jdbcType=VARCHAR}, #{item.accountAddress,jdbcType=VARCHAR}, #{item.amount,jdbcType=VARCHAR}, #{item.hash,jdbcType=VARCHAR})
     </foreach>
-    on duplicate key update hash = values(hash)
+    on duplicate key update amount = values(amount)
   </insert>
 
   <delete id="deleteList" parameterType="java.util.List">
