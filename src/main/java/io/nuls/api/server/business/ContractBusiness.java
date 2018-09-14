@@ -465,6 +465,19 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         PageInfo<ContractAddressInfo> page = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
         return page;
     }
+    /**
+     * Get all tokens list
+     *
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public  PageInfo<ContractTokenInfo> getContractTokeninfoList(int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber,pageSize);
+        Searchable searchable = new Searchable();
+        PageInfo<ContractTokenInfo> page = new PageInfo<>(contractTokenInfoMapper.selectList(searchable));
+        return page;
+    }
 
     public ContractTransactionDetail getContractTransactionDetail(String hash, String contractAddress) {
         Transaction transaction = transactionBusiness.getByHash(hash);

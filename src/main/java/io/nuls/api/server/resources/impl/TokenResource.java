@@ -117,4 +117,44 @@ public class TokenResource {
         return result;
     }
 
+    /**
+     * Description:get all tokens list
+     * Author: Flyglded
+     * Date:  2018/9/14 0029
+     */
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public  RpcClientResult getTokens(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        RpcClientResult result = null;
+        if(pageNumber <0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if(pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if(pageSize == 0) {
+            pageSize = 20;
+        }
+        if(pageSize > 100) {
+            pageSize = 100;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokeninfoList(pageNumber,pageSize));
+        return result;
+    }
+
+    @GET
+    @Path("/{contractAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getTokenInfo(@QueryParam("contractAddress") String contractAddress) {
+        RpcClientResult result = null;
+        if(StringUtils.isBlank(contractAddress)) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        result = RpcClientResult.getSuccess();
+        return result;
+    }
 }
