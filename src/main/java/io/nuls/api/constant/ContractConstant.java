@@ -77,4 +77,10 @@ public interface ContractConstant extends NulsConstant {
      */
     String CONTRACT_STATUS_SUCCESS = "true";
     String CONTRACT_STATUS_FAIL = "false";
+
+    /**
+     * 合约是否支持NRC20：0-否、1-是
+     */
+    int CONTRACT_NRC20_STATUS_NO = 0;
+    int CONTRACT_NRC20_STATUS_YES = 1;
 }

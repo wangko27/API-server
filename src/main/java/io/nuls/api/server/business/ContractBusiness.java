@@ -3,6 +3,7 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.ContractConstant;
+import io.nuls.api.entity.Balance;
 import io.nuls.api.entity.ContractAddressInfo;
 import io.nuls.api.entity.ContractCallInfo;
 import io.nuls.api.entity.ContractCreateInfo;
@@ -21,8 +22,10 @@ import io.nuls.api.server.dao.mapper.ContractTokenAssetsMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenTransferInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
+import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.contract.ContractAddressInfoDto;
 import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +64,10 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractTokenTransferInfoMapper contractTokenTransferInfoMapper;
     @Autowired
     private ContractTokenAssetsMapper contractTokenAssetsMapper;
-
+    @Autowired
+    private TransactionRelationMapper transactionRelationMapper;
+    @Autowired
+    private BalanceBusiness balanceBusiness;
 
     /**
      * 根据地址获取别名
@@ -69,7 +75,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param address 账户地址
      * @return
      */
-    public ContractDeleteInfo  getContractDeleteInfoByAddress(String address) {
+    public ContractDeleteInfo getContractDeleteInfoByAddress(String address) {
         ContractDeleteInfo contractDeleteInfo = null;
         Searchable searchable = new Searchable();
         searchable.addCondition("address", SearchOperator.eq, address);
@@ -130,6 +136,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 回滚删除合约交易
+     *
      * @param txHashList
      */
     public void rollbackContractDeleteInfo(List<String> txHashList) {
@@ -148,10 +155,11 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 回滚调用合约交易
+     *
      * @param txHashList
      */
     public void rollbackContractCallInfo(List<String> txHashList) {
-        if(null != txHashList && txHashList.size() > 0){
+        if (null != txHashList && txHashList.size() > 0) {
             contractResultInfoMapper.deleteList(txHashList);
             contractCallInfoMapper.deleteList(txHashList);
         }
@@ -159,16 +167,18 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 回滚代币转账交易记录
+     *
      * @param txHashList
      */
     public void rollbackContractTokenTransferInfo(List<String> txHashList) {
-        if(null != txHashList && txHashList.size() > 0){
+        if (null != txHashList && txHashList.size() > 0) {
             contractTokenTransferInfoMapper.deleteList(txHashList);
         }
     }
 
     /**
      * 批量保存智能合约地址
+     *
      * @param list
      * @return
      */
@@ -195,6 +205,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 批量保存智能合约创建交易过程数据
+     *
      * @param list
      * @return
      */
@@ -214,13 +225,14 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteCreateDataList(List<String> txHashList) {
-        if(null != txHashList && txHashList.size() > 0){
+        if (null != txHashList && txHashList.size() > 0) {
             contractCreateInfoMapper.deleteList(txHashList);
         }
     }
 
     /**
      * 智能合约交易执行结果
+     *
      * @param list
      * @return
      */
@@ -241,13 +253,14 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteContractResultList(List<String> txHashList) {
-        if(null != txHashList && txHashList.size() > 0){
+        if (null != txHashList && txHashList.size() > 0) {
             contractResultInfoMapper.deleteList(txHashList);
         }
     }
 
     /**
      * 批量保存token代币信息
+     *
      * @param list
      * @return
      */
@@ -262,6 +275,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 批量保存token代币转账信息
+     *
      * @param list
      * @return
      */
@@ -282,13 +296,14 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteTokenList(List<String> txHashList) {
-        if(null != txHashList && txHashList.size() > 0){
+        if (null != txHashList && txHashList.size() > 0) {
             contractTokenInfoMapper.deleteList(txHashList);
         }
     }
 
     /**
      * 批量保存智能合约交易记录
+     *
      * @param list
      * @return
      */
@@ -309,7 +324,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteTransactionList(List<String> txHashList) {
-        if(null != txHashList && txHashList.size() > 0){
+        if (null != txHashList && txHashList.size() > 0) {
             contractTransactionMapper.deleteList(txHashList);
         }
     }
@@ -363,8 +378,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     /**
      * 获取某个账户的代币详情信息
      *
-     * @param address    账户地址
-     * @param contractAddress    合约地址
+     * @param address         账户地址
+     * @param contractAddress 合约地址
      * @param pageNumber
      * @param pageSize
      * @return
@@ -462,8 +477,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         }
         return i;
     }
+
     /**
-     *
      * @param pageNumber
      * @param pageSize
      * @return
@@ -473,7 +488,66 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         Searchable searchable = new Searchable();
         PageHelper.orderBy("create_time desc");
         PageInfo<ContractAddressInfo> page = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
+//        List<ContractAddressInfo> list = contractAddressInfoMapper.selectList(searchable);
+//        List<ContractAddressInfoDto> contractList = new ArrayList<>();
+//        if (list != null) {
+//            for (ContractAddressInfo contractInfo : list) {
+//                ContractAddressInfoDto contract = new ContractAddressInfoDto(contractInfo);
+//                contractList.add(contract);
+//            }
+//        }
+//        PageInfo<ContractAddressInfoDto> page = new PageInfo<>(contractList);
         return page;
     }
+
+    /**
+     * @param contractAddress
+     * @return
+     */
+    public ContractAddressInfoDto getContractInfo(String contractAddress) {
+        ContractAddressInfo contractInfo = contractAddressInfoMapper.selectByPrimaryKey(contractAddress);
+        ContractAddressInfoDto contract = null;
+        if (contractInfo != null) {
+            contract = new ContractAddressInfoDto(contractInfo);
+            Balance balance = balanceBusiness.getBalance(contract.getContractAddress());
+            if (balance != null) {
+                //设置余额
+                contract.setBalance(balance.getUsable());
+                //如果是NRC20则查询NRC20信息
+                if (ContractConstant.CONTRACT_NRC20_STATUS_YES == contract.getIsNrc20()) {
+                    ContractTokenInfo tokenInfo = contractTokenInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
+                    if (tokenInfo != null) {
+                        contract.setTokenName(tokenInfo.getTokenName());
+                        contract.setSymbol(tokenInfo.getSymbol());
+                        contract.setDecimals(tokenInfo.getDecimals());
+                        contract.setTotalsupply(tokenInfo.getTotalsupply());
+                    }
+                }
+                //查询交易笔数
+                Searchable searchable = new Searchable();
+                searchable.addCondition("address", SearchOperator.eq, contractAddress);
+                int txCount=transactionRelationMapper.selectTotalCount(searchable);
+                contract.setTxCount(txCount);
+            }
+        }
+        return contract;
+    }
+
+    /**
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<ContractTransaction> getContractTxList(String contractAddress,String accountAddress,int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Map<String,Object> params=new HashMap<>();
+        params.put("contractAddress",contractAddress);
+        params.put("accountAddress",accountAddress);
+        PageInfo<ContractTransaction> page = new PageInfo<>(contractTransactionMapper.selectContractTxList(params));
+//        List<ContractTransaction> list = contractTransactionMapper.selectContractTxList(params);
+//        PageInfo<ContractTransaction> page = new PageInfo<>(list);
+        return page;
+    }
+
 
 }

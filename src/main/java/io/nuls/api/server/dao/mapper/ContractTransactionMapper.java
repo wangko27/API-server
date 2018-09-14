@@ -4,6 +4,7 @@ import io.nuls.api.entity.ContractTransaction;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @MyBatisMapper
 public interface ContractTransactionMapper extends BaseMapper<ContractTransaction, String>{
@@ -19,4 +20,6 @@ public interface ContractTransactionMapper extends BaseMapper<ContractTransactio
      * @param txHashList
      */
     void deleteList(@Param("list") List<String> txHashList);
+
+    List<ContractTransaction> selectContractTxList(Map map);
 }

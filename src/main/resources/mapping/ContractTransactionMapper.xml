@@ -121,4 +121,17 @@
       #{item,jdbcType=VARCHAR}
     </foreach>
   </delete>
+  <select id="selectContractTxList" parameterType="java.util.Map" resultMap="BaseResultMap">
+    SELECT t.* FROM contract_transaction t
+    <if test="accountAddress != null" >
+    INNER JOIN contract_address_info a ON a.contract_address = t.contract_address
+    </if>
+    <where>
+      t.contract_address = #{contractAddress,jdbcType=VARCHAR}
+      <if test="accountAddress != null" >
+        and a.creater = #{accountAddress,jdbcType=VARCHAR}
+      </if>
+    </where>
+    order by t.create_time desc
+  </select>
 </mapper>
