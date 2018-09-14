@@ -30,10 +30,7 @@ import io.nuls.api.server.business.ContractBusiness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -66,6 +63,15 @@ public class ContractResource {
             pageSize = 100;
         }
         result.setData(contractBusiness.getContractInfoList(pageNumber,pageSize));
+        return result;
+    }
+
+    @GET
+    @Path("/{contractAddress}/transaction/{hash}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTransactionDetail(@PathParam("contractAddress") String contractAddress, @PathParam("hash") String hash){
+        RpcClientResult result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTransactionDetail(hash,contractAddress));
         return result;
     }
 

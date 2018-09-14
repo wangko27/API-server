@@ -3,27 +3,12 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.ContractConstant;
-import io.nuls.api.entity.ContractAddressInfo;
-import io.nuls.api.entity.ContractCallInfo;
-import io.nuls.api.entity.ContractCreateInfo;
-import io.nuls.api.entity.ContractDeleteInfo;
-import io.nuls.api.entity.ContractResultInfo;
-import io.nuls.api.entity.ContractTokenAssets;
-import io.nuls.api.entity.ContractTokenInfo;
-import io.nuls.api.entity.ContractTokenTransferInfo;
-import io.nuls.api.entity.ContractTransaction;
-import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractCreateInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractResultInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractTokenAssetsMapper;
-import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractTokenTransferInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
+import io.nuls.api.entity.*;
+import io.nuls.api.server.dao.mapper.*;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
+import io.nuls.api.server.dto.contract.ContractTransactionDetail;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,6 +47,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractTokenTransferInfoMapper contractTokenTransferInfoMapper;
     @Autowired
     private ContractTokenAssetsMapper contractTokenAssetsMapper;
+    @Autowired
+    private TransactionBusiness transactionBusiness;
 
 
     /**
@@ -437,7 +424,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                 if (address.equals(contractTokenAsset.getAccountAddress())) {
                     exist = true;
                     BigInteger amount = new BigInteger(contractTokenAsset.getAmount());
-                    amount.add(value);
+                    amount = amount.add(value);
                     if (amount.compareTo(BigInteger.ZERO) == 1) {
                         contractTokenAsset.setAmount(amount.toString());
                     } else {
@@ -479,4 +466,27 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         return page;
     }
 
+    public ContractTransactionDetail getContractTransactionDetail(String hash, String contractAddress) {
+        Transaction transaction = transactionBusiness.getByHash(hash);
+        Searchable searchable = new Searchable();
+        searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
+        switch (transaction.getType()) {
+            case ContractConstant.TX_TYPE_CREATE_CONTRACT :
+                ContractCreateInfo contractCreateInfo = contractCreateInfoMapper.selectBySearchable(searchable);
+                transaction.setTxData(contractCreateInfo);
+                break;
+            case ContractConstant.TX_TYPE_CALL_CONTRACT :
+                ContractCallInfo contractCallInfo = contractCallInfoMapper.selectBySearchable(searchable);
+                transaction.setTxData(contractCallInfo);
+                break;
+            case ContractConstant.TX_TYPE_DELETE_CONTRACT :
+                ContractDeleteInfo contractDeleteInfo = contractDeleteInfoMapper.selectBySearchable(searchable);
+                transaction.setTxData(contractDeleteInfo);
+                break;
+            default:
+        }
+        ContractTransactionDetail detail = new ContractTransactionDetail(transaction);
+        detail.setContractAddress(contractAddress);
+        return detail;
+    }
 }
