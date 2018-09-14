@@ -111,4 +111,18 @@
     </foreach>
     on duplicate key update create_time = values(create_time)
   </insert>
+
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from contract_token_transfer_info where create_tx_hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
+
+  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from contract_token_transfer_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

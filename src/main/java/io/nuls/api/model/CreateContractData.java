@@ -51,13 +51,13 @@ public class CreateContractData extends TransactionLogicData implements Contract
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfBytes(sender);
-        size += SerializeUtils.sizeOfBytes(contractAddress);
-        size += SerializeUtils.sizeOfVarInt(value);
-        size += SerializeUtils.sizeOfVarInt(codeLen);
+        size += Address.ADDRESS_LENGTH;
+        size += Address.ADDRESS_LENGTH;
+        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfInt32();
         size += SerializeUtils.sizeOfBytes(code);
-        size += SerializeUtils.sizeOfVarInt(gasLimit);
-        size += SerializeUtils.sizeOfVarInt(price);
+        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfInt64();
         size += 1;
         if(args != null) {
             for(String[] arg : args) {
@@ -72,13 +72,13 @@ public class CreateContractData extends TransactionLogicData implements Contract
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(sender);
-        stream.writeBytesWithLength(contractAddress);
-        stream.writeVarInt(value);
-        stream.writeVarInt(codeLen);
+        stream.write(sender);
+        stream.write(contractAddress);
+        stream.writeInt64(value);
+        stream.writeUint32(codeLen);
         stream.writeBytesWithLength(code);
-        stream.writeVarInt(gasLimit);
-        stream.writeVarInt(price);
+        stream.writeInt64(gasLimit);
+        stream.writeInt64(price);
         stream.write(argsCount);
         if(args != null) {
             for(String[] arg : args) {
@@ -92,13 +92,13 @@ public class CreateContractData extends TransactionLogicData implements Contract
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.sender = byteBuffer.readByLengthByte();
-        this.contractAddress = byteBuffer.readByLengthByte();
-        this.value = (long) byteBuffer.readVarInt();
-        this.codeLen = (int) byteBuffer.readVarInt();
+        this.sender = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.value = byteBuffer.readInt64();
+        this.codeLen = byteBuffer.readInt32();
         this.code = byteBuffer.readByLengthByte();
-        this.gasLimit = (long) byteBuffer.readVarInt();
-        this.price = (long) byteBuffer.readVarInt();
+        this.gasLimit = byteBuffer.readInt64();
+        this.price = byteBuffer.readInt64();
         this.argsCount = byteBuffer.readByte();
         byte length = this.argsCount;
         this.args = new String[length][];
@@ -194,4 +194,5 @@ public class CreateContractData extends TransactionLogicData implements Contract
         addressSet.add(contractAddress);
         return addressSet;
     }
+
 }

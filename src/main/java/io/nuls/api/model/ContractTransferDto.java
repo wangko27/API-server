@@ -39,6 +39,9 @@ public class ContractTransferDto {
     private boolean isSendBack;
     private String orginTxHash;
 
+    public ContractTransferDto() {
+    }
+
     public ContractTransferDto(ContractTransfer transfer) {
         this.from = AddressTool.getStringAddressByBytes(transfer.getFrom());
         this.to = AddressTool.getStringAddressByBytes(transfer.getTo());

@@ -16,15 +16,9 @@ public interface ContractCallInfoMapper extends BaseMapper<ContractCallInfo, Lon
      */
     int insertByBatch(@Param("list") List<ContractCallInfo> list);
 
-    int deleteByPrimaryKey(String contractAddress);
-
-    int insert(ContractCallInfo record);
-
-    int insertSelective(ContractCallInfo record);
-
-    ContractCallInfo selectByPrimaryKey(String contractAddress);
-
-    int updateByPrimaryKeySelective(ContractCallInfo record);
-
-    int updateByPrimaryKey(ContractCallInfo record);
+    /**
+     * 批量删除
+     * @param txHashList
+     */
+    void deleteList(@Param("list") List<String> txHashList);
 }

@@ -3,11 +3,13 @@ package io.nuls.api.server.resources;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
+import io.nuls.api.utils.NulsByteBuffer;
 import io.nuls.api.utils.RestFulUtils;
 import io.nuls.api.utils.RpcTransferUtil;
 import io.nuls.api.utils.log.Log;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,12 +75,12 @@ public class SyncDataHandler {
         return result;
     }
 
-    public RpcClientResult getTx(String hash) throws NulsException {
-        RpcClientResult result = restFulUtils.get("/api/accountledger/tx/" + hash, null);
-        if (result.isFailed()) {
-            return result;
-        }
-        return null;
+    public Transaction getTx(String hash) throws Exception {
+        io.nuls.api.model.Transaction boradTx = null;
+        String result = (String) restFulUtils.get("/tx/bytes/" + hash, null).getData();
+        byte[] data = Base64.getDecoder().decode(result);
+        boradTx.parse(new NulsByteBuffer(data));
+        return RpcTransferUtil.toTransaction(boradTx);
     }
 
     public RpcClientResult broadcast(Map<String, String> params) {

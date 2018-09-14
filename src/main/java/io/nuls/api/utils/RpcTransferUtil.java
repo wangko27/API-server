@@ -305,23 +305,20 @@ public class RpcTransferUtil {
     }
 
 
-    @Deprecated
     public static Transaction toTransaction(Map<String, Object> map) throws Exception {
         Transaction tx = new Transaction();
         tx.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
         tx.setHash((String) map.get("hash"));
         tx.setFee(Long.parseLong(map.get("fee").toString()));
-        tx.setRemark(map.get("remark").toString());
+        tx.setRemark((String) map.get("remark"));
         tx.setSize((Integer) map.get("size"));
         tx.setType((Integer) map.get("type"));
         tx.setCreateTime(Long.parseLong(map.get("time").toString()));
+        tx.setScriptSign((String) map.get("scriptSig"));
 
         Map<String, Object> dataMap = new HashMap<>();
         List<Map<String, Object>> inputMaps = (List<Map<String, Object>>) map.get("inputs");
 
-        dataMap.put("inputs", inputMaps);
-        dataMap.put("scriptSign", map.get("scriptSig").toString());
-        //   tx.setExtend(JSONUtils.obj2json(dataMap).getBytes());
 
         List<Input> inputs = new ArrayList<>();
         for (int i = 0; i < inputMaps.size(); i++) {
@@ -343,8 +340,12 @@ public class RpcTransferUtil {
             output.setAddress((String) dataMap.get("address"));
             output.setLockTime(Long.parseLong(dataMap.get("lockTime").toString()));
             output.setAmount(Long.parseLong(dataMap.get("value").toString()));
+            output.setTxIndex(Integer.parseInt(dataMap.get("index").toString()));
+            output.setTxHash((String) dataMap.get("txHash"));
             outputs.add(output);
         }
+        tx.setOutputs(outputs);
+
         return tx;
     }
 
@@ -394,15 +395,15 @@ public class RpcTransferUtil {
             map = (Map<String, Object>) map.get("data");
             result.setErrorMessage((String) map.get("errorMessage"));
             result.setSuccess(map.get("success").toString());
-            result.setActualContractFee(Long.parseLong(map.get("actualContractFee").toString()));
+            result.setActualContractFee(map.get("actualContractFee") != null ? Long.parseLong(map.get("actualContractFee").toString()) : 0);
             result.setBalance(map.get("balance") != null ? Long.parseLong(map.get("balance").toString()) : 0);
             result.setContractAddress((String) map.get("contractAddress"));
             result.setDecimals(map.get("decimals") != null ? Long.parseLong(map.get("decimals").toString()) : 0);
             result.setGasLimit(map.get("gasLimit") != null ? Long.parseLong(map.get("gasLimit").toString()) : 0);
             result.setGasUsed(map.get("gasUsed") != null ? Long.parseLong(map.get("gasUsed").toString()) : 0);
             result.setTokenName((String) map.get("name"));
-            result.setNonce(map.get("gasLimit") != null ? Long.parseLong(map.get("nonce").toString()) : 0);
-            result.setPrice(Long.parseLong(map.get("price").toString()));
+            result.setNonce(map.get("nonce") != null ? Long.parseLong(map.get("nonce").toString()) : 0);
+            result.setPrice(map.get("price") != null ? Long.parseLong(map.get("price").toString()) : 0);
             result.setRefundFee(map.get("refundFee") != null ? Long.parseLong(map.get("refundFee").toString()) : 0);
             result.setRemark((String) map.get("remark"));
             result.setResult((String) map.get("result"));
@@ -412,24 +413,18 @@ public class RpcTransferUtil {
             result.setTotalFee(map.get("totalFee") != null ? Long.parseLong(map.get("totalFee").toString()) : 0);
             result.setTxSizeFee(map.get("txSizeFee") != null ? Long.parseLong(map.get("txSizeFee").toString()) : 0);
             result.setTxValue(map.get("value") != null ? Long.parseLong(map.get("value").toString()) : 0);
-            String events = "";
-            String transfers = "";
-            String tokenTransfers = "";
-            ArrayList list_events = (ArrayList) map.get("events");
-            if (list_events.size() > 0) {
-                events = JSONUtils.obj2json(list_events);
+            ArrayList listEvents = (ArrayList) map.get("events");
+            if (listEvents != null && listEvents.size() > 0) {
+                result.setEvents(JSONUtils.obj2json(listEvents));
             }
-            ArrayList list_transfers = (ArrayList) map.get("transfers");
-            if (list_transfers.size() > 0) {
-                transfers = JSONUtils.obj2json(list_transfers);
+            ArrayList listTransfers = (ArrayList) map.get("transfers");
+            if (listTransfers != null && listTransfers.size() > 0) {
+                result.setTransfers(JSONUtils.obj2json(listTransfers));
             }
-            ArrayList list_tokenTransfers = (ArrayList) map.get("tokenTransfers");
-            if (list_tokenTransfers.size() > 0) {
-                tokenTransfers = JSONUtils.obj2json(list_tokenTransfers);
+            ArrayList listTokenTransfers = (ArrayList) map.get("tokenTransfers");
+            if (listTokenTransfers != null && listTokenTransfers.size() > 0) {
+                result.setTokenTransfers(JSONUtils.obj2json(listTokenTransfers));
             }
-            result.setEvents(events);
-            result.setTransfers(transfers);
-            result.setTokenTransfers(tokenTransfers);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
