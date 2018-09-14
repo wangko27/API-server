@@ -2,32 +2,22 @@ package io.nuls.api.server.business;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mchange.v1.util.ListUtils;
 import io.nuls.api.constant.ContractConstant;
-import io.nuls.api.entity.ContractAddressInfo;
-import io.nuls.api.entity.ContractCallInfo;
-import io.nuls.api.entity.ContractDeleteInfo;
-import io.nuls.api.entity.ContractResultInfo;
-import io.nuls.api.entity.ContractTokenInfo;
-import io.nuls.api.entity.ContractTransaction;
-import io.nuls.api.model.ContractTokenTransferDto;
-import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractDeleteInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractResultInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
-import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
 import io.nuls.api.entity.*;
 import io.nuls.api.server.dao.mapper.*;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Description: 别名
@@ -332,7 +322,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
-     * 获取代币转账信息
+     * 获取某个代币的持有者列表
      *
      * @param address    合约地址
      * @param pageNumber
@@ -352,6 +342,49 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         PageHelper.orderBy("amount asc");
         PageInfo<ContractTokenAssets> page = new PageInfo<ContractTokenAssets>(contractTokenAssetsMapper.selectList(searchable));
         return page;
+    }
+
+    /**
+     * 获取某个账户的代币详情信息
+     *
+     * @param address    账户地址
+     * @param contractAddress    合约地址
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public ContractTokenAssetsDetail getContractTokenAssetsDetails(String address, String contractAddress, int pageNumber, int pageSize) {
+        ContractTokenAssets assets = new ContractTokenAssets();
+        ContractTokenAssetsDetail detail = new ContractTokenAssetsDetail();
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        if (StringUtils.isNotBlank(address)) {
+            if (StringUtils.validAddress(address)) {
+                searchable.addCondition("address", SearchOperator.eq, address);
+                searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+            } else {
+                return null;
+            }
+        }
+        PageHelper.orderBy("amount asc");
+        assets = contractTokenAssetsMapper.selectBySearchable(searchable);
+        detail.setAccountAddress(assets.getAccountAddress());
+        detail.setAmount(assets.getAmount());
+        detail.setContractAddress(assets.getContractAddress());
+        detail.setHash(assets.getHash());
+
+        searchable = new Searchable();
+        searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+        searchable.addCondition("from_address", SearchOperator.eq, contractAddress);
+        List<ContractTokenTransferInfo> temp1 = contractTokenTransferInfoMapper.selectList(searchable);
+        searchable = new Searchable();
+        searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+        searchable.addCondition("to_address", SearchOperator.eq, contractAddress);
+        List<ContractTokenTransferInfo> temp2 = contractTokenTransferInfoMapper.selectList(searchable);
+        temp1.addAll(temp2);
+        PageInfo<ContractTokenTransferInfo> page = new PageInfo<>(temp1);
+        detail.setPage(page);
+        return detail;
     }
 
     public void calContractTokenAssets(List<ContractTokenTransferInfo> contractTokenTransferDtos, String contractAddress) {
@@ -378,8 +411,39 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             tempMap.put(toAddress, toAmount);
         }
         for (Map.Entry<String, Long> stringLongEntry : tempMap.entrySet()) {
-
+            String address = stringLongEntry.getKey();
+            Long value = stringLongEntry.getValue();
+            boolean exist = false;
+            for (ContractTokenAssets contractTokenAsset : contractTokenAssets) {
+                if (address.equals(contractTokenAsset.getAccountAddress())) {
+                    exist = true;
+                    Long amount = Long.parseLong(contractTokenAsset.getAmount());
+                    amount += value;
+                    if (amount > 0L) {
+                        contractTokenAsset.setAmount(amount.toString());
+                    } else {
+                        contractTokenAssets.remove(contractTokenAsset);
+                    }
+                }
+            }
+            if (!exist) {
+                ContractTokenAssets contractTokenAsset = new ContractTokenAssets();
+                contractTokenAsset.setContractAddress(contractAddress);
+                contractTokenAsset.setAccountAddress(address);
+                contractTokenAsset.setAmount(value.toString());
+                contractTokenAsset.setHash(Objects.hash(contractAddress, address) + "");
+                contractTokenAssets.add(contractTokenAsset);
+            }
         }
+        saveAllContractTokenAssets(contractTokenAssets);
+    }
 
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAllContractTokenAssets(List<ContractTokenAssets> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            i = contractTokenAssetsMapper.insertByBatch(list);
+        }
+        return i;
     }
 }
