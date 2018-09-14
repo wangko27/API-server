@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -398,28 +399,30 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         }
 
         List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
-        HashMap<String, Long> tempMap = new HashMap<>();
+        HashMap<String, BigInteger> tempMap = new HashMap<>();
         for (ContractTokenTransferInfo contractTokenTransferInfo : contractTokenTransferDtos) {
             String fromAddress = contractTokenTransferInfo.getFromAddress();
             String toAddress = contractTokenTransferInfo.getToAddress();
-            Long txValue = contractTokenTransferInfo.getTxValue();
-            Long fromAmount = tempMap.get("fromAddress") != null ? tempMap.get("fromAddress") : 0L;
-            Long toAmount = tempMap.get("toAddress") != null ? tempMap.get("toAddress") : 0L;
-            fromAmount -= txValue;
-            toAmount += txValue;
-            tempMap.put(fromAddress, fromAmount);
+            BigInteger txValue = contractTokenTransferInfo.getTxValue();
+            if (StringUtils.isNotBlank(fromAddress)) {
+                BigInteger fromAmount = tempMap.get(fromAddress) != null ? tempMap.get(fromAddress) : new BigInteger("0");
+                fromAmount = fromAmount.subtract(txValue);
+                tempMap.put(fromAddress, fromAmount);
+            }
+            BigInteger toAmount = tempMap.get(toAddress) != null ? tempMap.get(toAddress) : new BigInteger("0");
+            toAmount = toAmount.add(txValue);
             tempMap.put(toAddress, toAmount);
         }
-        for (Map.Entry<String, Long> stringLongEntry : tempMap.entrySet()) {
+        for (Map.Entry<String, BigInteger> stringLongEntry : tempMap.entrySet()) {
             String address = stringLongEntry.getKey();
-            Long value = stringLongEntry.getValue();
+            BigInteger value = stringLongEntry.getValue();
             boolean exist = false;
             for (ContractTokenAssets contractTokenAsset : contractTokenAssets) {
                 if (address.equals(contractTokenAsset.getAccountAddress())) {
                     exist = true;
-                    Long amount = Long.parseLong(contractTokenAsset.getAmount());
-                    amount += value;
-                    if (amount > 0L) {
+                    BigInteger amount = new BigInteger(contractTokenAsset.getAmount());
+                    amount.add(value);
+                    if (amount.compareTo(BigInteger.ZERO) == 1) {
                         contractTokenAsset.setAmount(amount.toString());
                     } else {
                         contractTokenAssets.remove(contractTokenAsset);
