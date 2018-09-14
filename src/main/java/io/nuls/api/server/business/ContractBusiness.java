@@ -327,4 +327,18 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         return page;
     }
 
+    /**
+     *
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<ContractAddressInfo> getContractInfoList(int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Searchable searchable = new Searchable();
+        PageHelper.orderBy("create_time desc");
+        PageInfo<ContractAddressInfo> page = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
+        return page;
+    }
+
 }
