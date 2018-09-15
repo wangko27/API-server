@@ -61,9 +61,13 @@ public class CreateContractData extends TransactionLogicData implements Contract
         size += 1;
         if(args != null) {
             for(String[] arg : args) {
-                size += 1;
-                for(String str : arg) {
-                    size += SerializeUtils.sizeOfString(str);
+                if(arg == null) {
+                    size += 1;
+                } else {
+                    size += 1;
+                    for(String str : arg) {
+                        size += SerializeUtils.sizeOfString(str);
+                    }
                 }
             }
         }
@@ -82,9 +86,13 @@ public class CreateContractData extends TransactionLogicData implements Contract
         stream.write(argsCount);
         if(args != null) {
             for(String[] arg : args) {
-                stream.write((byte) arg.length);
-                for(String str : arg){
-                    stream.writeString(str);
+                if(arg == null) {
+                    stream.write((byte) 0);
+                } else {
+                    stream.write((byte) arg.length);
+                    for(String str : arg){
+                        stream.writeString(str);
+                    }
                 }
             }
         }
@@ -104,14 +112,19 @@ public class CreateContractData extends TransactionLogicData implements Contract
         this.args = new String[length][];
         for(byte i = 0; i < length; i++) {
             byte argCount = byteBuffer.readByte();
-            String[] arg = new String[argCount];
-            for(byte k = 0; k < argCount; k++) {
-                arg[k] = byteBuffer.readString();
+            if(argCount == 0) {
+                args[i] = null;
+            } else {
+                String[] arg = new String[argCount];
+                for(byte k = 0; k < argCount; k++) {
+                    arg[k] = byteBuffer.readString();
+                }
+                args[i] = arg;
             }
-            args[i] = arg;
         }
     }
 
+    @Override
     public long getValue() {
         return value;
     }

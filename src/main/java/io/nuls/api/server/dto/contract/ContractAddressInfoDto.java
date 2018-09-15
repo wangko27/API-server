@@ -26,9 +26,7 @@ package io.nuls.api.server.dto.contract;
 
 import io.nuls.api.entity.ContractAddressInfo;
 import io.nuls.api.server.dto.contract.vm.ProgramMethod;
-import io.nuls.api.utils.DateUtil;
 
-import java.util.Date;
 import java.util.List;
 
 public class ContractAddressInfoDto {
@@ -44,7 +42,7 @@ public class ContractAddressInfoDto {
 
     private Integer status;
 
-    private String createTime;
+    private Long createTime;
 
     private String deleteHash;
 
@@ -69,7 +67,7 @@ public class ContractAddressInfoDto {
         this.contractAddress = contractInfo.getContractAddress();
         this.creater = contractInfo.getCreater();
         this.createTxHash = contractInfo.getCreateTxHash();
-        this.createTime = DateUtil.convertDate(new Date(contractInfo.getCreateTime()));
+        this.createTime = contractInfo.getCreateTime();
         this.blockHeight = contractInfo.getBlockHeight();
         this.isNrc20 = contractInfo.getIsNrc20();
         this.status = contractInfo.getStatus();
@@ -123,11 +121,11 @@ public class ContractAddressInfoDto {
         this.status = status;
     }
 
-    public String getCreateTime() {
+    public Long getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Long createTime) {
         this.createTime = createTime;
     }
 

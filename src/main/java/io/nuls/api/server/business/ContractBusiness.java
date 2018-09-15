@@ -595,6 +595,46 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         return page;
     }
 
+    /**
+     * get contract token info by contract address
+     * @param contractAddress
+     * @return
+     */
+    public ContractTokenInfo getContractTokenInfo(String contractAddress) {
+        return contractTokenInfoMapper.selectTokenByAddress(contractAddress);
+    }
+
+    /**
+     * get contract address info by contract address
+     * @param contractAddress
+     * @return
+     */
+    public ContractAddressInfo getContractAddressInfo(String contractAddress) {
+        return contractAddressInfoMapper.selectByPrimaryKey(contractAddress);
+    }
+
+    /**
+     * get total transfers
+     * @param contractAddress
+     * @return
+     */
+    public long selectTotalTransfer(String contractAddress) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+        long result = contractTokenTransferInfoMapper.selectTotalTransfer(searchable);
+        return result;
+    }
+    /**
+     * get total holders
+     * @param contractAddress
+     * @return
+     */
+    public Long selectTotalHolders(String contractAddress) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+        long result = contractTokenAssetsMapper.selectTotalHolders(searchable);
+        return result;
+    }
 
     public ContractTransactionDetail getContractTransactionDetail(String hash, String contractAddress) {
         Transaction transaction = transactionBusiness.getByHash(hash);
