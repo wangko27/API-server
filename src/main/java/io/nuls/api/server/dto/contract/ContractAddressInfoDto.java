@@ -25,9 +25,11 @@
 package io.nuls.api.server.dto.contract;
 
 import io.nuls.api.entity.ContractAddressInfo;
+import io.nuls.api.server.dto.contract.vm.ProgramMethod;
 import io.nuls.api.utils.DateUtil;
 
 import java.util.Date;
+import java.util.List;
 
 public class ContractAddressInfoDto {
     private String contractAddress;
@@ -58,6 +60,7 @@ public class ContractAddressInfoDto {
 
     private Long balance;
     private int txCount;
+    private List<ProgramMethod> method;
 
     public ContractAddressInfoDto() {
     }
@@ -190,5 +193,13 @@ public class ContractAddressInfoDto {
 
     public void setTxCount(int txCount) {
         this.txCount = txCount;
+    }
+
+    public List<ProgramMethod> getMethod() {
+        return method;
+    }
+
+    public void setMethod(List<ProgramMethod> method) {
+        this.method = method;
     }
 }

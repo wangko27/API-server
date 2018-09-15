@@ -85,7 +85,7 @@ public class ContractResource {
     @GET
     @Path("/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getContractList(@PathParam("contractAddress") String contractAddress) {
+    public RpcClientResult getContracInfo(@PathParam("contractAddress") String contractAddress) {
         RpcClientResult result = RpcClientResult.getSuccess();
         if (contractAddress == null) {
             return RpcClientResult.getFailed(ContractErrorCode.PARAMETER_ERROR);

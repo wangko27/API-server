@@ -29,6 +29,8 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.contract.ContractAddressInfoDto;
 import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
 import io.nuls.api.server.dto.contract.ContractTransactionDetail;
+import io.nuls.api.server.dto.contract.vm.ProgramMethod;
+import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -508,25 +510,38 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         ContractAddressInfoDto contract = null;
         if (contractInfo != null) {
             contract = new ContractAddressInfoDto(contractInfo);
+            //查询合约地址余额
             Balance balance = balanceBusiness.getBalance(contract.getContractAddress());
             if (balance != null) {
                 //设置余额
                 contract.setBalance(balance.getUsable());
-                //如果是NRC20则查询NRC20信息
-                if (ContractConstant.CONTRACT_NRC20_STATUS_YES == contract.getIsNrc20()) {
-                    ContractTokenInfo tokenInfo = contractTokenInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
-                    if (tokenInfo != null) {
-                        contract.setTokenName(tokenInfo.getTokenName());
-                        contract.setSymbol(tokenInfo.getSymbol());
-                        contract.setDecimals(tokenInfo.getDecimals());
-                        contract.setTotalsupply(tokenInfo.getTotalsupply());
-                    }
+            }
+            //如果是NRC20则查询NRC20信息
+            if (ContractConstant.CONTRACT_NRC20_STATUS_YES == contract.getIsNrc20()) {
+                ContractTokenInfo tokenInfo = contractTokenInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
+                if (tokenInfo != null) {
+                    contract.setTokenName(tokenInfo.getTokenName());
+                    contract.setSymbol(tokenInfo.getSymbol());
+                    contract.setDecimals(tokenInfo.getDecimals());
+                    contract.setTotalsupply(tokenInfo.getTotalsupply());
                 }
-                //查询交易笔数
-                Searchable searchable = new Searchable();
-                searchable.addCondition("address", SearchOperator.eq, contractAddress);
-                int txCount=transactionRelationMapper.selectTotalCount(searchable);
-                contract.setTxCount(txCount);
+            }
+            //查询交易笔数
+            Searchable searchable = new Searchable();
+            searchable.addCondition("address", SearchOperator.eq, contractAddress);
+            int txCount=transactionRelationMapper.selectTotalCount(searchable);
+            contract.setTxCount(txCount);
+
+            //查询合约创建详情
+            ContractCreateInfo createInfo=contractCreateInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
+            if(createInfo!=null)
+            {
+                try {
+                    List<ProgramMethod> methodList=JSONUtils.json2list(createInfo.getMethods(),ProgramMethod.class);
+                    contract.setMethod(methodList);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         return contract;
@@ -543,8 +558,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         params.put("contractAddress",contractAddress);
         params.put("accountAddress",accountAddress);
         PageInfo<ContractTransaction> page = new PageInfo<>(contractTransactionMapper.selectContractTxList(params));
-//        List<ContractTransaction> list = contractTransactionMapper.selectContractTxList(params);
-//        PageInfo<ContractTransaction> page = new PageInfo<>(list);
         return page;
     }
     /**
