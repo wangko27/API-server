@@ -48,6 +48,9 @@ public class ContractCallInfo extends TxData{
 
     private String args;
 
+    public ContractCallInfo() {
+    }
+
     public ContractCallInfo(CallContractData call) {
         this.creater = io.nuls.api.utils.AddressTool.getStringAddressByBytes(call.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(call.getContractAddress());

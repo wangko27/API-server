@@ -6,6 +6,9 @@
         <result column="creater" property="creater" jdbcType="VARCHAR"/>
         <result column="create_tx_hash" property="createTxHash" jdbcType="VARCHAR"/>
     </resultMap>
+    <sql id="Base_Column_List" >
+    contract_address, creater, create_tx_hash
+  </sql>
     <insert id="insert" parameterType="io.nuls.api.entity.ContractDeleteInfo">
     insert into contract_delete_info (contract_address, creater, create_tx_hash
       )
@@ -46,5 +49,10 @@
             #{item.createTxHash,jdbcType=VARCHAR})
         </foreach>
     </insert>
-
+    <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from contract_delete_info
+        <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+    </select>
 </mapper>

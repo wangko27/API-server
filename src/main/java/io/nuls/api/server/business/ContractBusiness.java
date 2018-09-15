@@ -36,10 +36,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Description: 别名
@@ -386,15 +383,15 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         ContractTokenAssetsDetail detail = new ContractTokenAssetsDetail();
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        if (StringUtils.isNotBlank(address)) {
-            if (StringUtils.validAddress(address)) {
-                searchable.addCondition("address", SearchOperator.eq, address);
+        if (StringUtils.isNotBlank(address) && StringUtils.isNotBlank(contractAddress)) {
+            if (StringUtils.validAddress(address) && StringUtils.validAddress(contractAddress)) {
+                searchable.addCondition("account_address", SearchOperator.eq, address);
                 searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
             } else {
                 return null;
             }
         }
-        PageHelper.orderBy("amount asc");
+        PageHelper.orderBy("create_time asc");
         assets = contractTokenAssetsMapper.selectBySearchable(searchable);
         detail.setAccountAddress(assets.getAccountAddress());
         detail.setAmount(assets.getAmount());
@@ -403,11 +400,11 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
         searchable = new Searchable();
         searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
-        searchable.addCondition("from_address", SearchOperator.eq, contractAddress);
+        searchable.addCondition("from_address", SearchOperator.eq, address);
         List<ContractTokenTransferInfo> temp1 = contractTokenTransferInfoMapper.selectList(searchable);
         searchable = new Searchable();
         searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
-        searchable.addCondition("to_address", SearchOperator.eq, contractAddress);
+        searchable.addCondition("to_address", SearchOperator.eq, address);
         List<ContractTokenTransferInfo> temp2 = contractTokenTransferInfoMapper.selectList(searchable);
         temp1.addAll(temp2);
         PageInfo<ContractTokenTransferInfo> page = new PageInfo<>(temp1);
@@ -426,6 +423,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         }
 
         List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
+        List<String> deleteContractTokenAssets = new ArrayList<>();
         HashMap<String, BigInteger> tempMap = new HashMap<>();
         for (ContractTokenTransferInfo contractTokenTransferInfo : contractTokenTransferDtos) {
             String fromAddress = contractTokenTransferInfo.getFromAddress();
@@ -453,6 +451,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                         contractTokenAsset.setAmount(amount.toString());
                     } else {
                         contractTokenAssets.remove(contractTokenAsset);
+                        deleteContractTokenAssets.add(contractTokenAsset.getHash());
                     }
                 }
             }
@@ -466,6 +465,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             }
         }
         saveAllContractTokenAssets(contractTokenAssets);
+        deleteAllContractTokenAssets(deleteContractTokenAssets);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -475,6 +475,14 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             i = contractTokenAssetsMapper.insertByBatch(list);
         }
         return i;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void deleteAllContractTokenAssets(List<String> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            contractTokenAssetsMapper.deleteList(list);
+        }
     }
 
     /**

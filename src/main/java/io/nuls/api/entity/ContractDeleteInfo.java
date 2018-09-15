@@ -10,6 +10,9 @@ public class ContractDeleteInfo extends TxData {
 
     private String creater;
 
+    public ContractDeleteInfo() {
+    }
+
     public ContractDeleteInfo(DeleteContractData delete) {
         this.creater = AddressTool.getStringAddressByBytes(delete.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(delete.getContractAddress());

@@ -165,7 +165,7 @@ public class SyncDataBusiness {
                             contractTokenTransferInfo.setCreateTime(tx.getCreateTime());
                             contractTokenTransferInfoList.add(contractTokenTransferInfo);
                         }
-                        //contractBusiness.calContractTokenAssets(contractTokenTransferInfoList, resultData.getContractAddress());
+                        contractBusiness.calContractTokenAssets(contractTokenTransferInfoList, resultData.getContractAddress());
                     }
                     //合约内部转账
                     String transfersString = resultData.getTransfers();
