@@ -47,6 +47,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         }
         return null;
     }
+
     /**
      * 查询某时间段内的交易笔数
      *
@@ -80,8 +81,10 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         }
         Long endTime = startTime - Constant.MILLISECONDS_TIME_DAY;
         List<BlockHeader> blockHeaderList = getBlockByTime(endTime, startTime);
-        for (BlockHeader block : blockHeaderList) {
-            total += block.getReward();
+        if (blockHeaderList != null) {
+            for (BlockHeader block : blockHeaderList) {
+                total += block.getReward();
+            }
         }
         return total;
     }
@@ -212,7 +215,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         BlockHeader header = blockHeaderMapper.selectByPrimaryKey(blockHeight);
         if (null != header) {
             header = blockHeaderLevelDbService.select(header.getHash());
-            if(null != header){
+            if (null != header) {
                 AgentNode agentNode = agentNodeBusiness.getAgentByAddress(header.getConsensusAddress());
                 if (agentNode != null) {
                     Long height = rewardDetailBusiness.getLastRewardHeight(agentNode.getRewardAddress());
@@ -280,10 +283,11 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
 
     /**
      * 统计出块历史
+     *
      * @param type 1非必须统计统计，2必须统计
      */
     public void initHistory(int type) {
-        if(null == HistoryContext.getAll() || type == 2){
+        if (null == HistoryContext.getAll() || type == 2) {
             String[] historyList = new String[14];
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.DATE, cal.get(Calendar.DATE));
