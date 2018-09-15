@@ -125,4 +125,9 @@
     from contract_token_transfer_info
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+  
+  <select id="selectTotalTransfer" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="java.lang.Long">
+    SELECT count(contract_address) total FROM contract_token_transfer_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

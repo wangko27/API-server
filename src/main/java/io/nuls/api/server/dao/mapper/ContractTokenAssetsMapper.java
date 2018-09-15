@@ -28,4 +28,10 @@ public interface ContractTokenAssetsMapper extends BaseMapper<ContractTokenAsset
      * @param searchable
      */
     ContractTokenAssetsDetail getDetail(@Param("list") Searchable searchable);
+    /**
+     * get total holders
+     * @param searchable
+     * @return
+     */
+    long selectTotalHolders(Searchable searchable);
 }

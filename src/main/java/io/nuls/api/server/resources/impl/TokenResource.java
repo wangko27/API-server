@@ -27,6 +27,8 @@ package io.nuls.api.server.resources.impl;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.ContractAddressInfo;
+import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.BlockBusiness;
 import io.nuls.api.server.business.ContractBusiness;
@@ -38,6 +40,8 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Description:
@@ -144,17 +148,46 @@ public class TokenResource {
         result.setData(contractBusiness.getContractTokeninfoList(pageNumber,pageSize));
         return result;
     }
-
+    /**
+     * Description:get all tokens list
+     * Author: Flyglded
+     * Date:  2018/9/14 0029
+     */
     @GET
     @Path("/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getTokenInfo(@QueryParam("contractAddress") String contractAddress) {
         RpcClientResult result = null;
+        ContractTokenInfo contractTokenInfo = null;
+        ContractAddressInfo contractAddressInfo = null;
+        Map<String, Object> mapToken = new HashMap<String, Object>();
         if(StringUtils.isBlank(contractAddress)) {
             result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;
         }
+        contractTokenInfo = contractBusiness.getContractTokenInfo(contractAddress);
+        if(null == contractTokenInfo) {
+            result = RpcClientResult.getFailed(KernelErrorCode.DATA_ERROR);
+            return result;
+        }
+        contractAddressInfo = contractBusiness.getContractAddressInfo(contractAddress);
+        long totalTransfers = contractBusiness.selectTotalTransfer(contractAddress);
+        long totalHolders = contractBusiness.selectTotalHolders(contractAddress);
+        mapToken.put("contractAddress",contractTokenInfo.getContractAddress());
+        mapToken.put("name",contractTokenInfo.getTokenName());
+        mapToken.put("symbol",contractTokenInfo.getSymbol());
+        mapToken.put("decimals",contractTokenInfo.getDecimals());
+        mapToken.put("totalSupply",contractTokenInfo.getTotalsupply());
+        mapToken.put("blockHeight",contractAddressInfo.getBlockHeight());
+        mapToken.put("createrAddress",contractAddressInfo.getCreater());
+        mapToken.put("txHash",contractTokenInfo.getTxHash());
+        mapToken.put("createTime",contractTokenInfo.getCreateTime());
+        mapToken.put("isNrc20",contractAddressInfo.getIsNrc20());
+        mapToken.put("status",contractAddressInfo.getStatus());
+        mapToken.put("transfers",totalTransfers);
+        mapToken.put("holders",totalHolders);
         result = RpcClientResult.getSuccess();
+        result.setData(mapToken);
         return result;
     }
 }
