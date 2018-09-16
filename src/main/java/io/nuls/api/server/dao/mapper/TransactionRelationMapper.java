@@ -15,4 +15,6 @@ public interface TransactionRelationMapper extends BaseMapper<TransactionRelatio
     void deleteList(@Param("list") List<String> txHashList);
 
     long isAddressExist(Searchable searchable);
+
+    int selectTotalCount(Searchable searchable);
 }

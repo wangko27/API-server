@@ -11,6 +11,11 @@
     <result column="method_desc" property="methodDesc" jdbcType="VARCHAR" />
     <result column="args" property="args" jdbcType="VARCHAR" />
   </resultMap>
+  <sql id="Base_Column_List" >
+    contract_address, create_tx_hash, creater,
+      gas_limit, price, method_name,
+      method_desc, args
+  </sql>
   <insert id="insert" parameterType="io.nuls.api.entity.ContractCallInfo" >
     insert into contract_call_info (contract_address, create_tx_hash, creater, 
       gas_limit, price, method_name, 
@@ -93,4 +98,11 @@
       #{item,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contract_call_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

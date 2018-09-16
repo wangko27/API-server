@@ -20,4 +20,11 @@ public interface ContractTokenInfoMapper extends BaseMapper<ContractTokenInfo, S
      * @param txHashList
      */
     void deleteList(@Param("list") List<String> txHashList);
+
+    /**
+     * select token detail accordding contract address
+     * @param contractAddress
+     * @return
+     */
+    ContractTokenInfo selectTokenByAddress(String contractAddress);
 }

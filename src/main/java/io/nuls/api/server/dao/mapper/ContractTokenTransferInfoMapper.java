@@ -1,6 +1,7 @@
 package io.nuls.api.server.dao.mapper;
 
 import io.nuls.api.entity.ContractTokenTransferInfo;
+import io.nuls.api.server.dao.util.Searchable;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -20,4 +21,11 @@ public interface ContractTokenTransferInfoMapper extends BaseMapper<ContractToke
      * @param txHashList
      */
     void deleteList(@Param("list") List<String> txHashList);
+
+    /**
+     * get total transfers
+     * @param searchable
+     * @return
+     */
+    long selectTotalTransfer(Searchable searchable);
 }

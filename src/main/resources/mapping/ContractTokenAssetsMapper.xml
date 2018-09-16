@@ -86,7 +86,7 @@
     <foreach collection="list" item="item" index="index" separator=",">
       (#{item.contractAddress,jdbcType=VARCHAR}, #{item.accountAddress,jdbcType=VARCHAR}, #{item.amount,jdbcType=VARCHAR}, #{item.hash,jdbcType=VARCHAR})
     </foreach>
-    on duplicate key update hash = values(hash)
+    on duplicate key update amount = values(amount)
   </insert>
 
   <delete id="deleteList" parameterType="java.util.List">
@@ -100,6 +100,18 @@
     select
     <include refid="Base_Column_List"/>
     from contract_token_assets
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contract_token_assets
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <select id="selectTotalHolders" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="java.lang.Long">
+    SELECT count(contract_address) total FROM contract_token_assets
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
 </mapper>

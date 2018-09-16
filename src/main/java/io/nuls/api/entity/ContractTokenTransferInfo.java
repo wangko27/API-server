@@ -2,14 +2,18 @@ package io.nuls.api.entity;
 
 import io.nuls.api.model.ContractTokenTransferDto;
 
+import java.math.BigInteger;
+
 public class ContractTokenTransferInfo {
     private String txHash;
+
+    private String createTxHash;
 
     private String fromAddress;
 
     private String toAddress;
 
-    private Long txValue;
+    private BigInteger txValue;
 
     private Long createTime;
 
@@ -20,7 +24,15 @@ public class ContractTokenTransferInfo {
     public ContractTokenTransferInfo(ContractTokenTransferDto dto) {
         this.fromAddress = dto.getFrom();
         this.toAddress = dto.getTo();
-        this.txValue = dto.getValue().longValue();
+        this.txValue = dto.getValue();
+    }
+
+    public String getCreateTxHash() {
+        return createTxHash;
+    }
+
+    public void setCreateTxHash(String createTxHash) {
+        this.createTxHash = createTxHash;
     }
 
     public String getContractAddress() {
@@ -55,11 +67,11 @@ public class ContractTokenTransferInfo {
         this.toAddress = toAddress == null ? null : toAddress.trim();
     }
 
-    public Long getTxValue() {
+    public BigInteger getTxValue() {
         return txValue;
     }
 
-    public void setTxValue(Long txValue) {
+    public void setTxValue(BigInteger txValue) {
         this.txValue = txValue;
     }
 

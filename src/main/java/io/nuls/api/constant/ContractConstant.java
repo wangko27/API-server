@@ -62,9 +62,9 @@ public interface ContractConstant extends NulsConstant {
     String NRC20_EVENT_TRANSFER = "TransferEvent";
     String NRC20_EVENT_APPROVAL = "ApprovalEvent";
 
-    int CONTRACT_STATUS_FAILED = 0;
-    int CONTRACT_STATUS_NORMAL = 1;
-    int CONTRACT_STATUS_DELETED = 2;
+    int CONTRACT_STATUS_FAILED = 1;
+    int CONTRACT_STATUS_NORMAL = 2;
+    int CONTRACT_STATUS_DELETED = 3;
 
     /**
      * 合约确认状态：0-未确认、1-已确认
@@ -77,4 +77,10 @@ public interface ContractConstant extends NulsConstant {
      */
     String CONTRACT_STATUS_SUCCESS = "true";
     String CONTRACT_STATUS_FAIL = "false";
+
+    /**
+     * 合约是否支持NRC20：0-否、1-是
+     */
+    int CONTRACT_NRC20_STATUS_NO = 0;
+    int CONTRACT_NRC20_STATUS_YES = 1;
 }

@@ -24,10 +24,10 @@
 package io.nuls.api.model;
 
 
+
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.utils.NulsByteBuffer;
 import io.nuls.api.utils.NulsOutputStreamBuffer;
-import io.nuls.api.utils.SerializeUtils;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -73,6 +73,11 @@ public class DeleteContractData extends TransactionLogicData implements Contract
 
     @Override
     public long getPrice() {
+        return 0L;
+    }
+
+    @Override
+    public long getValue() {
         return 0L;
     }
 

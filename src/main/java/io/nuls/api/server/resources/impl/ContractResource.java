@@ -24,14 +24,18 @@
  */
 package io.nuls.api.server.resources.impl;
 
+import io.nuls.api.constant.ContractErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.ContractBusiness;
+import io.nuls.api.utils.AddressTool;
+import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -51,7 +55,7 @@ public class ContractResource {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getContractList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize){
+    public RpcClientResult getContractList(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
         RpcClientResult result = RpcClientResult.getSuccess();
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
@@ -65,8 +69,54 @@ public class ContractResource {
         } else if (pageSize > 100) {
             pageSize = 100;
         }
-        result.setData(contractBusiness.getContractInfoList(pageNumber,pageSize));
+        result.setData(contractBusiness.getContractInfoList(pageNumber, pageSize));
         return result;
     }
+
+    @GET
+    @Path("/{contractAddress}/transaction/{hash}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTransactionDetail(@PathParam("contractAddress") String contractAddress, @PathParam("hash") String hash){
+        RpcClientResult result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTransactionDetail(hash,contractAddress));
+        return result;
+    }
+
+    @GET
+    @Path("/{contractAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContracInfo(@PathParam("contractAddress") String contractAddress) {
+        RpcClientResult result = RpcClientResult.getSuccess();
+        if (contractAddress == null) {
+            return RpcClientResult.getFailed(ContractErrorCode.PARAMETER_ERROR);
+        }
+        if (!AddressTool.validAddress(contractAddress)) {
+            return RpcClientResult.getFailed(ContractErrorCode.ILLEGAL_CONTRACT_ADDRESS);
+        }
+        result.setData(contractBusiness.getContractInfo(contractAddress));
+        return result;
+    }
+
+    @GET
+    @Path("/{contractAddress}/transactions")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTxList(@PathParam("contractAddress") String contractAddress, @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @QueryParam("accountAddress") String accountAddress) {
+        RpcClientResult result = RpcClientResult.getSuccess();
+        //参数校验
+        if (contractAddress == null) {
+            return RpcClientResult.getFailed(ContractErrorCode.PARAMETER_ERROR);
+        }
+        if (!AddressTool.validAddress(contractAddress)) {
+            return RpcClientResult.getFailed(ContractErrorCode.ILLEGAL_CONTRACT_ADDRESS);
+        }
+
+        if (!StringUtils.isBlank(accountAddress) && !AddressTool.validAddress(accountAddress)) {
+            return RpcClientResult.getFailed(ContractErrorCode.ADDRESS_ERROR);
+        }
+
+        result.setData(contractBusiness.getContractTxList(contractAddress, accountAddress, pageNumber, pageSize));
+        return result;
+    }
+
 
 }

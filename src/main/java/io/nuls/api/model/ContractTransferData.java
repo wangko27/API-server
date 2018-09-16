@@ -121,4 +121,11 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     public long getPrice() {
         return 0L;
     }
+
+    @Override
+    public long getValue() {
+        return 0L;
+    }
+
+
 }
