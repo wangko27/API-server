@@ -160,12 +160,13 @@ public class SyncDataBusiness {
                         List<ContractTokenTransferDto> contractTokenTransferDtos = JSONUtils.json2list(tokenTransfersString, ContractTokenTransferDto.class);
                         for (ContractTokenTransferDto contractTokenTransferDto : contractTokenTransferDtos) {
                             ContractTokenTransferInfo contractTokenTransferInfo = new ContractTokenTransferInfo(contractTokenTransferDto);
-                            contractTokenTransferInfo.setTxHash(tx.getHash());
+                            contractTokenTransferInfo.setCreateTxHash(tx.getHash());
+                            contractTokenTransferInfo.setTxHash(StringUtils.getNewUUID());
                             contractTokenTransferInfo.setContractAddress(resultData.getContractAddress());
                             contractTokenTransferInfo.setCreateTime(tx.getCreateTime());
                             contractTokenTransferInfoList.add(contractTokenTransferInfo);
                         }
-                        contractBusiness.calContractTokenAssets(contractTokenTransferInfoList, resultData.getContractAddress());
+                        contractBusiness.calContractTokenAssets(contractTokenTransferInfoList, resultData.getContractAddress(), false);
                     }
                     //合约内部转账
                     String transfersString = resultData.getTransfers();
@@ -386,22 +387,22 @@ public class SyncDataBusiness {
             transactionRelationBusiness.deleteList(header.getTxHashList());
             //回滚块
             blockBusiness.deleteByKey(header.getHeight());
-            //回滚智能合约地址
-            contractBusiness.deleteContractByHeight(header.getHeight());
-            //回滚智能合约创建交易数据
-            contractBusiness.deleteCreateDataList(header.getTxHashList());
+            //回滚代币转账交易记录
+            contractBusiness.rollbackContractTokenTransferInfo(header.getTxHashList());
+            //回滚智能合约交易执行结果
+            contractBusiness.deleteContractResultList(header.getTxHashList());
             //回滚智能合约token代币信息
             contractBusiness.deleteTokenList(header.getTxHashList());
             //回滚智能合约交易记录
             contractBusiness.deleteTransactionList(header.getTxHashList());
-            //回滚智能合约交易执行结果
-            contractBusiness.deleteContractResultList(header.getTxHashList());
+            //回滚智能合约创建交易数据
+            contractBusiness.deleteCreateDataList(header.getTxHashList());
             //回滚删除合约交易记录
             contractBusiness.rollbackContractDeleteInfo(header.getTxHashList());
             //回滚调用合约交易记录
             contractBusiness.rollbackContractCallInfo(header.getTxHashList());
-            //回滚代币转账交易记录
-            contractBusiness.rollbackContractTokenTransferInfo(header.getTxHashList());
+            //回滚智能合约地址
+            contractBusiness.deleteContractByHeight(header.getHeight());
 
             //回滚levelDB与缓存
             //回滚交易

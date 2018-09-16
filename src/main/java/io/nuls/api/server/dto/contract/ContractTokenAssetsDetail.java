@@ -14,14 +14,14 @@ public class ContractTokenAssetsDetail {
 
     private String hash;
 
-    private PageInfo<ContractTokenTransferInfo> page;
+    private List<ContractTokenTransferInfo> list;
 
-    public PageInfo<ContractTokenTransferInfo> getPage() {
-        return page;
+    public List<ContractTokenTransferInfo> getList() {
+        return list;
     }
 
-    public void setPage(PageInfo<ContractTokenTransferInfo> page) {
-        this.page = page;
+    public void setList(List<ContractTokenTransferInfo> list) {
+        this.list = list;
     }
 
     public String getHash() {

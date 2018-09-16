@@ -102,22 +102,9 @@ public class TokenResource {
     @GET
     @Path("/{contractAddress}/holder/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getContractTokenAssetsDetails(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("contractAddress") String contractAddress, @PathParam("address") String address){
-        RpcClientResult result = null;
-        if (pageNumber < 0 || pageSize < 0) {
-            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
-            return result;
-        }
-        if (pageNumber == 0) {
-            pageNumber = 1;
-        }
-        if (pageSize == 0) {
-            pageSize = 20;
-        } else if (pageSize > 100) {
-            pageSize = 100;
-        }
-        result = RpcClientResult.getSuccess();
-        result.setData(contractBusiness.getContractTokenAssetsDetails(address,contractAddress,pageNumber,pageSize));
+    public RpcClientResult getContractTokenAssetsDetails(@PathParam("contractAddress") String contractAddress, @PathParam("address") String address){
+        RpcClientResult result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokenAssetsDetails(address,contractAddress));
         return result;
     }
 

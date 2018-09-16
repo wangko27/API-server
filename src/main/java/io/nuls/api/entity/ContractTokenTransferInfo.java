@@ -7,6 +7,8 @@ import java.math.BigInteger;
 public class ContractTokenTransferInfo {
     private String txHash;
 
+    private String createTxHash;
+
     private String fromAddress;
 
     private String toAddress;
@@ -23,6 +25,14 @@ public class ContractTokenTransferInfo {
         this.fromAddress = dto.getFrom();
         this.toAddress = dto.getTo();
         this.txValue = dto.getValue();
+    }
+
+    public String getCreateTxHash() {
+        return createTxHash;
+    }
+
+    public void setCreateTxHash(String createTxHash) {
+        this.createTxHash = createTxHash;
     }
 
     public String getContractAddress() {
