@@ -1,6 +1,7 @@
 package io.nuls.api.server.dao.mapper;
 
 import io.nuls.api.entity.ContractTokenInfo;
+import io.nuls.api.server.dto.ContractTokenDto;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -27,4 +28,9 @@ public interface ContractTokenInfoMapper extends BaseMapper<ContractTokenInfo, S
      * @return
      */
     ContractTokenInfo selectTokenByAddress(String contractAddress);
+    /**
+     * select all token info
+     * @return
+     */
+    List<ContractTokenDto> getAll();
 }

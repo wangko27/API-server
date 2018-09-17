@@ -26,6 +26,7 @@ import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.ContractTokenDto;
 import io.nuls.api.server.dto.contract.ContractAddressInfoDto;
 import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
 import io.nuls.api.server.dto.contract.ContractTransactionDetail;
@@ -588,10 +589,10 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param pageSize
      * @return
      */
-    public  PageInfo<ContractTokenInfo> getContractTokeninfoList(int pageNumber, int pageSize) {
+    public  PageInfo<ContractTokenDto> getContractTokeninfoList(int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber,pageSize);
-        Searchable searchable = new Searchable();
-        PageInfo<ContractTokenInfo> page = new PageInfo<>(contractTokenInfoMapper.selectList(searchable));
+        //Searchable searchable = new Searchable();
+        PageInfo<ContractTokenDto> page = new PageInfo<>(contractTokenInfoMapper.getAll());
         return page;
     }
 
