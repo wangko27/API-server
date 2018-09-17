@@ -81,7 +81,7 @@ public class BlockBusiness implements BaseService<BlockHeader, Long> {
         }
         Long endTime = startTime - Constant.MILLISECONDS_TIME_DAY;
         List<BlockHeader> blockHeaderList = getBlockByTime(endTime, startTime);
-        if (blockHeaderList != null) {
+        if (blockHeaderList != null && blockHeaderList.size() > 0) {
             for (BlockHeader block : blockHeaderList) {
                 total += block.getReward();
             }
