@@ -26,8 +26,10 @@ package io.nuls.api.entity;
 
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.ContractData;
+import io.nuls.api.model.ContractTransferData;
 import io.nuls.api.model.NulsDigestData;
 import io.nuls.api.model.TransactionLogicData;
+import io.nuls.api.utils.AddressTool;
 import io.nuls.api.utils.NulsByteBuffer;
 import io.nuls.api.utils.NulsOutputStreamBuffer;
 import io.nuls.api.utils.SerializeUtils;
@@ -41,18 +43,34 @@ import java.util.Set;
  */
 public class ContractTransferInfo extends TxData{
 
-    private NulsDigestData orginTxHash;
-    private byte[] contractAddress;
+    private String orginTxHash;
+    private String contractAddress;
     private byte success;
 
-    public ContractTransferInfo(){
-
+    public ContractTransferInfo() {
     }
 
-    public ContractTransferInfo(NulsDigestData orginTxHash, byte[] contractAddress, byte success) {
+    public ContractTransferInfo(ContractTransferData transferData) {
+        NulsDigestData thatOrginTxHash = transferData.getOrginTxHash();
+        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.getDigestHex();
+        this.contractAddress = AddressTool.getStringAddressByBytes(transferData.getContractAddress());
+        this.success = transferData.getSuccess();
+    }
+
+    public String getOrginTxHash() {
+        return orginTxHash;
+    }
+
+    public void setOrginTxHash(String orginTxHash) {
         this.orginTxHash = orginTxHash;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
         this.contractAddress = contractAddress;
-        this.success = success;
     }
 
     public byte getSuccess() {
@@ -61,33 +79,5 @@ public class ContractTransferInfo extends TxData{
 
     public void setSuccess(byte success) {
         this.success = success;
-    }
-
-    public byte[] getContractAddress() {
-        return contractAddress;
-    }
-
-    public void setContractAddress(byte[] contractAddress) {
-        this.contractAddress = contractAddress;
-    }
-
-    public NulsDigestData getOrginTxHash() {
-        return orginTxHash;
-    }
-
-    public void setOrginTxHash(NulsDigestData orginTxHash) {
-        this.orginTxHash = orginTxHash;
-    }
-
-    public long getGasLimit() {
-        return 0L;
-    }
-
-    public byte[] getSender() {
-        return null;
-    }
-
-    public long getPrice() {
-        return 0L;
     }
 }
