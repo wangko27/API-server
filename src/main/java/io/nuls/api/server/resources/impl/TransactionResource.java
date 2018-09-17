@@ -2,15 +2,11 @@ package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.EntityConstant;
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.*;
 import io.nuls.api.exception.NulsException;
-import io.nuls.api.model.tx.AliasTransaction;
-import io.nuls.api.model.tx.CancelDepositTransaction;
-import io.nuls.api.model.tx.DepositTransaction;
-import io.nuls.api.model.tx.TransferTransaction;
+import io.nuls.api.model.tx.*;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.dto.ContractTransParam;
@@ -20,7 +16,6 @@ import io.nuls.api.server.dto.TransactionParam;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.*;
 import io.nuls.api.utils.log.Log;
-import io.protostuff.Rpc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -414,24 +409,152 @@ public class TransactionResource {
     @Path("/contractTrans")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult contractTrans(ContractTransParam contractTransParam) throws Exception {
-        io.nuls.api.model.Transaction transaction = null;
-        List<Utxo> list = utxoBusiness.getUsableUtxo(contractTransParam.getSender());
-        //转账
-        TransFeeDto transFeeDto =TransactionTool.getTransferTxFee(list,0,contractTransParam.getRemark(),TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.getValue());
+        if(null == contractTransParam){
+            return RpcClientResult.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+        if(StringUtils.isBlank(contractTransParam.getSender())){
+            return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
+        }
+        if(contractTransParam.getTypes() <= 0){
+            return RpcClientResult.getFailed(KernelErrorCode.TX_TYPE_NULL);
+        }
+        //手续费不正确
+        if(contractTransParam.getPrice()<0){
+            return RpcClientResult.getFailed(KernelErrorCode.TX_PRICE_NULL);
+        }
 
-        transaction = TransactionTool.contractCreateTxForApi(
-                contractTransParam.getSender(),
-                contractTransParam.getGasLimit(),
-                contractTransParam.getPrice(),
-                Hex.decode(contractTransParam.getContractCode()),
-                null,
-                contractTransParam.getRemark(),
-                list,
-                transFeeDto.getNa().getValue()
+        if(StringUtils.isNotBlank(contractTransParam.getRemark()) && StringUtils.isSpecialChar(contractTransParam.getRemark())){
+            return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_ERROR);
+        }
+        if (!StringUtils.validTxRemark(contractTransParam.getRemark())) {
+            return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
+        }
+        RpcClientResult result  = valiHeight();
+        if(result.isSuccess()) {
+            io.nuls.api.model.Transaction transaction = null;
+            List<Utxo> list = utxoBusiness.getUsableUtxo(contractTransParam.getSender());
+            if(contractTransParam.getTypes() == EntityConstant.TX_TYPE_CREATE_CONTRACT){
+                result = TransactionTool.contractCreateTxForApi(
+                    contractTransParam.getSender(),
+                    contractTransParam.getGasLimit(),
+                    contractTransParam.getPrice(),
+                    Hex.decode(contractTransParam.getContractCode()),
+                    null,
+                    contractTransParam.getRemark(),
+                    list
                 );
-        RpcClientResult result = RpcClientResult.getSuccess();
-        result.setData(transaction.getHash());
+                if(result.isSuccess()){
+                    transaction = (CreateContractTransaction)result.getData();
+                }
+            }else if(contractTransParam.getTypes() == EntityConstant.TX_TYPE_CALL_CONTRACT){
+                result = TransactionTool.contractCallTxForApi(
+                        contractTransParam.getSender(),
+                        io.nuls.api.model.Na.valueOf(contractTransParam.getValue()),
+                        contractTransParam.getGasLimit(),
+                        contractTransParam.getPrice(),
+                        contractTransParam.getContractAddress(),
+                        contractTransParam.getMethodName(),
+                        contractTransParam.getMethodDesc(),
+                        null,
+                        contractTransParam.getRemark(),
+                        list
+
+                    );
+                if(result.isSuccess()){
+                    transaction = (CallContractTransaction)result.getData();
+                }
+            }else if(contractTransParam.getTypes() == EntityConstant.TX_TYPE_DELETE_CONTRACT){
+                result = TransactionTool.contractDeleteTxForApi(
+                        contractTransParam.getSender(),
+                        contractTransParam.getContractAddress(),
+                        contractTransParam.getRemark(),
+                        list);
+                if(result.isSuccess()){
+                    transaction = (DeleteContractTransaction)result.getData();
+                }
+            }else{
+                //其他，暂时不处理
+                return RpcClientResult.getFailed(KernelErrorCode.TX_TYPE_NULL);
+            }
+            result.setData(transaction.getHash().getDigestHex());
+            Transaction tx = RpcTransferUtil.toTransaction(transaction);
+            Utxo utxoKey = null;
+            for (Input input : tx.getInputs()) {
+                utxoKey = utxoBusiness.getByKey(input.getKey());
+                if (utxoKey == null) {
+                    utxoKey = webwalletUtxoLevelDbService.select(contractTransParam.getSender());
+                }
+                input.setAddress(utxoKey.getAddress());
+                input.setValue(utxoKey.getAmount());
+            }
+            WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx, Base64.getEncoder().encodeToString(transaction.serialize()), contractTransParam.getSender(), null);
+            if (webwalletTransactionBusiness.save(webwalletTransaction) != 1) {
+                return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
+            }
+        }
         return result;
+    }
+
+    @POST
+    @Path("/contractBroadcast")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult contractBroadcast(ContractTransParam contractTransParam) throws Exception {
+        RpcClientResult result = null;
+        WebwalletTransaction transaction = webwalletTransactionBusiness.getByKey(contractTransParam.getHash());
+        if(null != transaction){
+            if(null != transactionBusiness.getByHash(transaction.getHash())){
+                return RpcClientResult.getFailed(KernelErrorCode.TX_HASH_CONFIRMED_ERROR);
+            }
+            byte[] data = Base64.getDecoder().decode(transaction.getSignData());
+            io.nuls.api.model.Transaction boradTx = null;
+            boradTx = new CreateContractTransaction();
+            /*if(transaction.getType() == EntityConstant.TX_TYPE_TRANSFER){
+                //转账
+                boradTx = new TransferTransaction();
+            }else if(transaction.getType() == EntityConstant.TX_TYPE_ACCOUNT_ALIAS){
+                //设置别名
+                boradTx = new AliasTransaction();
+            }else if(transaction.getType() == EntityConstant.TX_TYPE_JOIN_CONSENSUS){
+                //加入共识
+                boradTx = new DepositTransaction();
+            }else if(transaction.getType() == EntityConstant.TX_TYPE_CANCEL_DEPOSIT){
+                //退出共识
+                boradTx = new CancelDepositTransaction();
+            }else{
+                //其他，暂时不处理
+                return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            }*/
+            //94015
+
+            boradTx.parse(new NulsByteBuffer(data));
+            boradTx.setScriptSig(Hex.decode(contractTransParam.getSign()));
+            Map<String, String> params = new HashMap<>(1);
+            String txHex = Hex.encode(boradTx.serialize());
+            params.put("txHex", txHex);
+            result = syncDataHandler.broadcast(params);
+            if(result.isSuccess()){
+                //广播成功，签名数据update回去，同时保存utxo到leveldb
+                transaction.setSignData(txHex);
+                if(webwalletTransactionBusiness.update(transaction) > 0){
+                    return result;
+                }else{
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
+                }
+            }else{
+                Log.error("交易"+transaction.getHash()+"验证失败，原因："+result.getData()+"，code:"+result.getCode());
+                //删除交易和缓存
+                webwalletTransactionBusiness.deleteByKey(boradTx.getHash().getDigestHex());
+                webwalletUtxoLevelDbService.delete(transaction.getAddress());
+                try{
+                    Map resultAttr = (Map)result.getData();
+                    return new RpcClientResult(false, resultAttr.get("code")+"", result.getMsg());
+                }catch (Exception e){
+                    return RpcClientResult.getFailed(KernelErrorCode.TX_BROADCAST_ERROR);
+                }
+            }
+        }else{
+            return RpcClientResult.getFailed();
+        }
     }
 
     @POST

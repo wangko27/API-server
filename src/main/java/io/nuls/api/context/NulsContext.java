@@ -56,12 +56,6 @@ public class NulsContext {
      */
     public static byte CONTRACT_ADDRESS_TYPE = 2;
 
-    /**
-     * 智能合约地址类型
-     * contract address type
-     */
-    public static byte CONTRACT_ADDRESS_TYPE = 2;
-
     /*
      *  chain name
      */

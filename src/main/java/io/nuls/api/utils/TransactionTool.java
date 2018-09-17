@@ -1,10 +1,10 @@
 package io.nuls.api.utils;
 
 import io.nuls.api.cfg.NulsConfig;
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.constant.NulsConstant;
 import io.nuls.api.crypto.Hex;
+import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class TransactionTool {
 
@@ -54,6 +53,18 @@ public class TransactionTool {
     public static TransFeeDto getTransferTxFee(List<Utxo> utxoList, long amount, String remark, long unitPrice) {
         // 124 + 38;
         int size = 162+getRemarkSize(remark);
+        return calcFee(utxoList, size, amount, Na.valueOf(unitPrice));
+    }
+
+    /**
+     * 计算智能合约交易手续费
+     * @param utxoList utxo list
+     * @param size 大小
+     * @param amount 金额
+     * @param unitPrice 单价
+     * @return
+     */
+    public static TransFeeDto getContractTransferTxFee(List<Utxo> utxoList,int size,long amount,long unitPrice) {
         return calcFee(utxoList, size, amount, Na.valueOf(unitPrice));
     }
 
@@ -233,8 +244,9 @@ public class TransactionTool {
         return tx;
     }
 
-    public static CreateContractTransaction contractCreateTxForApi(String sender, Long gasLimit, Long price,
-                                         byte[] contractCode, Object[] args, String remark,List<Utxo> utxoList,long fee) {
+    //todo
+    public static RpcClientResult contractCreateTxForApi(String sender, long gasLimit, Long price,
+                                         byte[] contractCode, Object[] args, String remark,List<Utxo> utxoList) {
         try {
             AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
             AssertUtil.canNotEmpty(contractCode, "the contractCode can not be empty");
@@ -257,10 +269,8 @@ public class TransactionTool {
             }
             tx.setTime(TimeService.currentTimeMillis());
 
-            long gasUsed = gasLimit.longValue();
-            Na imputedNa = Na.valueOf(LongUtils.mul(gasUsed, price));
-            // 总花费
-            Na totalNa = imputedNa.add(value);
+            long totalNa = LongUtils.mul(gasLimit, price);
+
 
             // 组装txData
             CreateContractData createContractData = new CreateContractData();
@@ -278,20 +288,23 @@ public class TransactionTool {
                 }
             }
             tx.setTxData(createContractData);
-
-
+            TransFeeDto transFeeDto = TransactionTool.getContractTransferTxFee(utxoList,tx.getSize(),totalNa,TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.getValue());
+            if(null == transFeeDto){
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
+            }
+            if(null == transFeeDto.getNa()){
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
+            }
+            if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_TOO_MUCH);
+            }
             List<Coin> outputs = new ArrayList<>();
-            Coin to = new Coin();
-            to.setLockTime(0);
-            to.setNa(totalNa);
-            to.setOwner(AddressTool.getAddress(contractAddressBytes));
-            outputs.add(to);
-
-            CoinData coinData = createCoinData(utxoList, outputs, totalNa.getValue()+fee);
-
+            CoinData coinData = createCoinData(utxoList, outputs, LongUtils.add(totalNa,transFeeDto.getNa().getValue()));
             tx.setCoinData(coinData);
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            return tx;
+            RpcClientResult result = RpcClientResult.getSuccess();
+            result.setData(tx);
+            return result;
         } catch (Exception e) {
             Log.error(e);
             Result result = Result.getFailed(KernelErrorCode.CONTRACT_TX_CREATE_ERROR);
@@ -302,8 +315,8 @@ public class TransactionTool {
 
 
 
-    public Result contractCallTxForApi(String sender, Na value, Long gasLimit, Long price, String contractAddress,
-                                       String methodName, String methodDesc, Object[] args, String remark,List<Utxo> utxoList,long fee) {
+    public static RpcClientResult contractCallTxForApi(String sender, Na value, Long gasLimit, Long price, String contractAddress,
+                                                String methodName, String methodDesc, Object[] args, String remark, List<Utxo> utxoList) {
         try {
             AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
             AssertUtil.canNotEmpty(methodName, "the methodName can not be empty");
@@ -345,31 +358,46 @@ public class TransactionTool {
                 callContractData.setArgs(ContractUtil.twoDimensionalArray(args));
             }
             tx.setTxData(callContractData);
-
             List<Coin> outputs = new ArrayList<>();
-            Coin to = new Coin();
-            to.setLockTime(0);
-            to.setNa(totalNa);
-            to.setOwner(AddressTool.getAddress(contractAddressBytes));
-            outputs.add(to);
+            if(value.isGreaterThan(Na.ZERO)){
+                Coin to = new Coin();
+                to.setLockTime(0);
+                to.setNa(value);
+                to.setOwner(AddressTool.getAddress(contractAddressBytes));
+                outputs.add(to);
+            }
+            TransFeeDto transFeeDto = TransactionTool.getContractTransferTxFee(
+                    utxoList,
+                    tx.getSize(),
+                    totalNa.getValue(),
+                    TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.getValue()
+                    );
+            if(null == transFeeDto){
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
+            }
+            if(null == transFeeDto.getNa()){
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
+            }
+            if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_TOO_MUCH);
+            }
 
-            CoinData coinData = createCoinData(utxoList, outputs, totalNa.getValue()+fee);
+            CoinData coinData = createCoinData(utxoList, outputs, totalNa.getValue());
             tx.setCoinData(coinData);
 
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-
-            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+            RpcClientResult result = RpcClientResult.getSuccess();
+            result.setData(tx);
+            return result;
         } catch (Exception e) {
             Log.error(e);
-            Result result = Result.getFailed(KernelErrorCode.CONTRACT_TX_CREATE_ERROR);
-            result.setMsg(e.getMessage());
-            return result;
+            return RpcClientResult.getFailed(KernelErrorCode.CONTRACT_TX_CREATE_ERROR);
         }
     }
 
 
 
-    public Result contractDeleteTxForApi(String sender, String contractAddress, String remark,List<Utxo> utxoList,long fee) {
+    public static RpcClientResult contractDeleteTxForApi(String sender, String contractAddress, String remark,List<Utxo> utxoList) {
         try {
             AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
             AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
@@ -394,22 +422,18 @@ public class TransactionTool {
             deleteContractData.setSender(senderBytes);
 
             tx.setTxData(deleteContractData);
-
             List<Coin> outputs = new ArrayList<>();
-            Coin to = new Coin();
-            to.setLockTime(0);
-            to.setNa(Na.ZERO);
-            to.setOwner(AddressTool.getAddress(contractAddressBytes));
-            outputs.add(to);
-            CoinData coinData = createCoinData(utxoList, outputs,fee);
-
+            CoinData coinData = createCoinData(utxoList, outputs, Na.ZERO.getValue());
             tx.setCoinData(coinData);
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+            RpcClientResult result = RpcClientResult.getSuccess();
+            result.setData(tx);
+            return result;
+
         } catch (Exception e) {
             Log.error(e);
-            Result result = Result.getFailed(KernelErrorCode.CONTRACT_TX_CREATE_ERROR);
+            RpcClientResult result = RpcClientResult.getFailed(KernelErrorCode.CONTRACT_TX_CREATE_ERROR);
             result.setMsg(e.getMessage());
             return result;
         }

@@ -15,11 +15,7 @@ import io.nuls.api.server.dto.contract.ProgramStatus;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RpcTransferUtil {
 
