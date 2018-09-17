@@ -334,9 +334,6 @@ public class TransactionTool {
                 }
             }
             tx.setTime(TimeService.currentTimeMillis());
-
-
-
             long gasUsed = gasLimit.longValue();
             Na imputedNa = Na.valueOf(LongUtils.mul(gasUsed, price));
             // 总花费
@@ -356,14 +353,7 @@ public class TransactionTool {
                 callContractData.setArgs(ContractUtil.twoDimensionalArray(args));
             }
             tx.setTxData(callContractData);
-            List<Coin> outputs = new ArrayList<>();
-            if(value.isGreaterThan(Na.ZERO)){
-                Coin to = new Coin();
-                to.setLockTime(0);
-                to.setNa(value);
-                to.setOwner(AddressTool.getAddress(contractAddressBytes));
-                outputs.add(to);
-            }
+
             TransFeeDto transFeeDto = TransactionTool.getContractTransferTxFee(
                     utxoList,
                     tx.getSize(),
@@ -379,8 +369,15 @@ public class TransactionTool {
             if(transFeeDto.getSize() > TransactionFeeCalculator.MAX_TX_SIZE){
                 return null;
             }
-
-            CoinData coinData = createCoinData(utxoList, outputs, totalNa.getValue());
+            List<Coin> outputs = new ArrayList<>();
+            if(value.isGreaterThan(Na.ZERO)){
+                Coin to = new Coin();
+                to.setLockTime(0);
+                to.setNa(value);
+                to.setOwner(AddressTool.getAddress(contractAddressBytes));
+                outputs.add(to);
+            }
+            CoinData coinData = createCoinData(utxoList, outputs, totalNa.add(transFeeDto.getNa()).getValue());
             tx.setCoinData(coinData);
 
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
