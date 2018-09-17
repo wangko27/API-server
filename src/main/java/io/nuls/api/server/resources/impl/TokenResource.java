@@ -143,7 +143,7 @@ public class TokenResource {
     @GET
     @Path("/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getTokenInfo(@QueryParam("contractAddress") String contractAddress) {
+    public RpcClientResult getTokenInfo(@PathParam("contractAddress") String contractAddress) {
         RpcClientResult result = null;
         ContractTokenInfo contractTokenInfo = null;
         ContractAddressInfo contractAddressInfo = null;
@@ -161,7 +161,7 @@ public class TokenResource {
         long totalTransfers = contractBusiness.selectTotalTransfer(contractAddress);
         long totalHolders = contractBusiness.selectTotalHolders(contractAddress);
         mapToken.put("contractAddress",contractTokenInfo.getContractAddress());
-        mapToken.put("name",contractTokenInfo.getTokenName());
+        mapToken.put("tokenName",contractTokenInfo.getTokenName());
         mapToken.put("symbol",contractTokenInfo.getSymbol());
         mapToken.put("decimals",contractTokenInfo.getDecimals());
         mapToken.put("totalSupply",contractTokenInfo.getTotalsupply());

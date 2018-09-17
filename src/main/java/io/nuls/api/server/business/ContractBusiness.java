@@ -28,6 +28,7 @@ import io.nuls.api.server.dao.mapper.ContractTransferInfoMapper;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.ContractTokenDto;
 import io.nuls.api.server.dto.contract.ContractAddressInfoDto;
 import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
 import io.nuls.api.server.dto.contract.ContractTransactionDetail;
@@ -40,10 +41,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Description: 别名
@@ -73,8 +71,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractTokenAssetsMapper contractTokenAssetsMapper;
     @Autowired
     private TransactionBusiness transactionBusiness;
-    @Autowired
-    private ContractTransferInfoMapper contractTransferInfoMapper;
+
     @Autowired
     private TransactionRelationMapper transactionRelationMapper;
     @Autowired
@@ -147,7 +144,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 回滚删除合约交易
-     *
      * @param txHashList
      */
     public void rollbackContractDeleteInfo(List<String> txHashList) {
@@ -165,11 +161,10 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 回滚调用合约交易
-     *
      * @param txHashList
      */
     public void rollbackContractCallInfo(List<String> txHashList) {
-        if (null != txHashList && txHashList.size() > 0) {
+        if(null != txHashList && txHashList.size() > 0){
             contractResultInfoMapper.deleteList(txHashList);
             contractCallInfoMapper.deleteList(txHashList);
         }
@@ -177,12 +172,11 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 回滚代币转账交易记录
-     *
      * @param txHashList
      */
     public void rollbackContractTokenTransferInfo(List<String> txHashList) {
         //一个Block包含多笔交易，每一笔交易可能包含多笔代币转账交易
-        if (null != txHashList && txHashList.size() > 0) {
+        if(null != txHashList && txHashList.size() > 0){
             for (String hash : txHashList) {
                 Searchable searchable = new Searchable();
                 searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
@@ -196,7 +190,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 批量保存智能合约地址
-     *
      * @param list
      * @return
      */
@@ -223,7 +216,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 批量保存智能合约创建交易过程数据
-     *
      * @param list
      * @return
      */
@@ -243,14 +235,13 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteCreateDataList(List<String> txHashList) {
-        if (null != txHashList && txHashList.size() > 0) {
+        if(null != txHashList && txHashList.size() > 0){
             contractCreateInfoMapper.deleteList(txHashList);
         }
     }
 
     /**
      * 智能合约交易执行结果
-     *
      * @param list
      * @return
      */
@@ -271,14 +262,13 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteContractResultList(List<String> txHashList) {
-        if (null != txHashList && txHashList.size() > 0) {
+        if(null != txHashList && txHashList.size() > 0){
             contractResultInfoMapper.deleteList(txHashList);
         }
     }
 
     /**
      * 批量保存token代币信息
-     *
      * @param list
      * @return
      */
@@ -293,7 +283,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 批量保存token代币转账信息
-     *
      * @param list
      * @return
      */
@@ -314,14 +303,13 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteTokenList(List<String> txHashList) {
-        if (null != txHashList && txHashList.size() > 0) {
+        if(null != txHashList && txHashList.size() > 0){
             contractTokenInfoMapper.deleteList(txHashList);
         }
     }
 
     /**
      * 批量保存智能合约交易记录
-     *
      * @param list
      * @return
      */
@@ -342,7 +330,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteTransactionList(List<String> txHashList) {
-        if (null != txHashList && txHashList.size() > 0) {
+        if(null != txHashList && txHashList.size() > 0){
             contractTransactionMapper.deleteList(txHashList);
         }
     }
@@ -396,8 +384,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     /**
      * 获取某个账户的代币详情信息
      *
-     * @param address         账户地址
-     * @param contractAddress 合约地址
+     * @param address    账户地址
+     * @param contractAddress    合约地址
      * @return
      */
     public ContractTokenAssetsDetail getContractTokenAssetsDetails(String address, String contractAddress) {
@@ -433,10 +421,9 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * 计算代币资产
-     *
-     * @param contractTokenTransferDtos 代币转账记录
-     * @param contractAddress           代币合约地址
-     * @param rollback                  是否是回滚操作
+     * @param contractTokenTransferDtos     代币转账记录
+     * @param contractAddress       代币合约地址
+     * @param rollback       是否是回滚操作
      */
     public void calContractTokenAssets(List<ContractTokenTransferInfo> contractTokenTransferDtos, String contractAddress, boolean rollback) {
         BigInteger sign = new BigInteger("1");
@@ -517,34 +504,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
-     * 批量保存合约内部转账交易
-     *
-     * @param list
-     * @return
-     */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int saveAllTransferInfo(List<ContractTransferInfo> list) {
-        int i = 0;
-        if (list.size() > 0) {
-            i = contractTransferInfoMapper.insertByBatch(list);
-        }
-        return i;
-    }
-
-    /**
-     * 批量删除合约内部转账交易
-     *
-     * @param list
-     */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public void deleteAllTransferInfo(List<String> list) {
-        int i = 0;
-        if (list.size() > 0) {
-            contractTransferInfoMapper.deleteList(list);
-        }
-    }
-
-    /**
      * @param pageNumber
      * @param pageSize
      * @return
@@ -554,6 +513,15 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         Searchable searchable = new Searchable();
         PageHelper.orderBy("create_time desc");
         PageInfo<ContractAddressInfo> page = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
+//        List<ContractAddressInfo> list = contractAddressInfoMapper.selectList(searchable);
+//        List<ContractAddressInfoDto> contractList = new ArrayList<>();
+//        if (list != null) {
+//            for (ContractAddressInfo contractInfo : list) {
+//                ContractAddressInfoDto contract = new ContractAddressInfoDto(contractInfo);
+//                contractList.add(contract);
+//            }
+//        }
+//        PageInfo<ContractAddressInfoDto> page = new PageInfo<>(contractList);
         return page;
     }
 
@@ -582,22 +550,18 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                     contract.setTotalsupply(tokenInfo.getTotalsupply());
                 }
             }
-            //查询交易笔数（非合约交易）
+            //查询交易笔数
             Searchable searchable = new Searchable();
             searchable.addCondition("address", SearchOperator.eq, contractAddress);
-            searchable.addCondition("type", SearchOperator.notIn, ContractConstant.TX_TYPE_CONTRACT_LIST);
-            int txCount = transactionRelationMapper.selectTotalCount(searchable);
-            //查询交易笔数（合约交易）
-            searchable = new Searchable();
-            searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
-            txCount += contractTransactionMapper.selectTotalCount(searchable);
+            int txCount=transactionRelationMapper.selectTotalCount(searchable);
             contract.setTxCount(txCount);
 
             //查询合约创建详情
-            ContractCreateInfo createInfo = contractCreateInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
-            if (createInfo != null) {
+            ContractCreateInfo createInfo=contractCreateInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
+            if(createInfo!=null)
+            {
                 try {
-                    List<ProgramMethod> methodList = JSONUtils.json2list(createInfo.getMethods(), ProgramMethod.class);
+                    List<ProgramMethod> methodList=JSONUtils.json2list(createInfo.getMethods(),ProgramMethod.class);
                     contract.setMethod(methodList);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -612,15 +576,14 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param pageSize
      * @return
      */
-    public PageInfo<ContractTransaction> getContractTxList(String contractAddress, String accountAddress, int pageNumber, int pageSize) {
+    public PageInfo<ContractTransaction> getContractTxList(String contractAddress,String accountAddress,int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
-        Map<String, Object> params = new HashMap<>();
-        params.put("contractAddress", contractAddress);
-        params.put("accountAddress", accountAddress);
+        Map<String,Object> params=new HashMap<>();
+        params.put("contractAddress",contractAddress);
+        params.put("accountAddress",accountAddress);
         PageInfo<ContractTransaction> page = new PageInfo<>(contractTransactionMapper.selectContractTxList(params));
         return page;
     }
-
     /**
      * Get all tokens list
      *
@@ -628,16 +591,15 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param pageSize
      * @return
      */
-    public PageInfo<ContractTokenInfo> getContractTokeninfoList(int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
-        Searchable searchable = new Searchable();
-        PageInfo<ContractTokenInfo> page = new PageInfo<>(contractTokenInfoMapper.selectList(searchable));
+    public  PageInfo<ContractTokenDto> getContractTokeninfoList(int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber,pageSize);
+        //Searchable searchable = new Searchable();
+        PageInfo<ContractTokenDto> page = new PageInfo<>(contractTokenInfoMapper.getAll());
         return page;
     }
 
     /**
      * get contract token info by contract address
-     *
      * @param contractAddress
      * @return
      */
@@ -647,7 +609,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * get contract address info by contract address
-     *
      * @param contractAddress
      * @return
      */
@@ -657,7 +618,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
 
     /**
      * get total transfers
-     *
      * @param contractAddress
      * @return
      */
@@ -667,10 +627,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         long result = contractTokenTransferInfoMapper.selectTotalTransfer(searchable);
         return result;
     }
-
     /**
      * get total holders
-     *
      * @param contractAddress
      * @return
      */
@@ -686,15 +644,15 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         Searchable searchable = new Searchable();
         searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
         switch (transaction.getType()) {
-            case ContractConstant.TX_TYPE_CREATE_CONTRACT:
+            case ContractConstant.TX_TYPE_CREATE_CONTRACT :
                 ContractCreateInfo contractCreateInfo = contractCreateInfoMapper.selectBySearchable(searchable);
                 transaction.setTxData(contractCreateInfo);
                 break;
-            case ContractConstant.TX_TYPE_CALL_CONTRACT:
+            case ContractConstant.TX_TYPE_CALL_CONTRACT :
                 ContractCallInfo contractCallInfo = contractCallInfoMapper.selectBySearchable(searchable);
                 transaction.setTxData(contractCallInfo);
                 break;
-            case ContractConstant.TX_TYPE_DELETE_CONTRACT:
+            case ContractConstant.TX_TYPE_DELETE_CONTRACT :
                 ContractDeleteInfo contractDeleteInfo = contractDeleteInfoMapper.selectBySearchable(searchable);
                 transaction.setTxData(contractDeleteInfo);
                 break;
