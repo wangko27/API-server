@@ -140,10 +140,9 @@ public class SyncDataBusiness {
                     if (result.isFailed() || result.getData() == null) {
                         return;
                     }
-                    //保存调用结果
+
                     ContractResultInfo resultData = result.getData();
                     resultData.setTxHash(tx.getHash());
-                    contractResultInfoList.add(resultData);
 
                     //保存合约交易记录
                     ContractTransaction contractTransaction = new ContractTransaction();
@@ -169,23 +168,23 @@ public class SyncDataBusiness {
                         contractBusiness.calContractTokenAssets(contractTokenTransferInfoList, resultData.getContractAddress(), false);
                     }
                     //合约内部转账
-                    /*String transfersString = resultData.getTransfers();
+                    String transfersString = resultData.getTransfers();
                     if (StringUtils.isNotBlank(transfersString)) {
                         List<ContractTransferDto> contractTransferDtos = JSONUtils.json2list(transfersString, ContractTransferDto.class);
-                        for (ContractTransferDto contractTransferDto : contractTransferDtos) {
-                            Transaction contractTransferTx = syncDataHandler.getTx(contractTransferDto.getTxHash());
-                            //存放新的utxo到utxoMap
-                            if (contractTransferTx.getOutputs() != null && !contractTransferTx.getOutputs().isEmpty()) {
-                                for (Utxo utxo : contractTransferTx.getOutputs()) {
-                                    utxoMap.put(utxo.getKey(), utxo);
-                                }
-                            }
-                            //存放被花费的utxo
-                            fromList.addAll(utxoBusiness.getListByFrom(contractTransferTx, utxoMap));
-
-                            txList.add(contractTransferTx);
-                        }
-                    }*/
+//                        for (ContractTransferDto contractTransferDto : contractTransferDtos) {
+//                            Transaction contractTransferTx = syncDataHandler.getTx(contractTransferDto.getTxHash());
+//                            //存放新的utxo到utxoMap
+//                            if (contractTransferTx.getOutputs() != null && !contractTransferTx.getOutputs().isEmpty()) {
+//                                for (Utxo utxo : contractTransferTx.getOutputs()) {
+//                                    utxoMap.put(utxo.getKey(), utxo);
+//                                }
+//                            }
+//                            //存放被花费的utxo
+//                            fromList.addAll(utxoBusiness.getListByFrom(contractTransferTx, utxoMap));
+//
+//                            txList.add(contractTransferTx);
+//                        }
+                    }
 
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
@@ -237,6 +236,10 @@ public class SyncDataBusiness {
                     if (ContractConstant.CONTRACT_STATUS_SUCCESS.equals(resultData.getSuccess())) {
                         //合约交易记录
                         contractTransactionList.add(contractTransaction);
+                        //保存调用结果
+                        if (StringUtils.isNotBlank(resultData.getContractAddress())) {
+                            contractResultInfoList.add(resultData);
+                        }
                     }
                 }
 
