@@ -402,37 +402,39 @@ public class RpcTransferUtil {
         try {
             result = new ContractResultInfo();
             map = (Map<String, Object>) map.get("data");
-            result.setErrorMessage((String) map.get("errorMessage"));
-            result.setSuccess(map.get("success").toString());
-            result.setActualContractFee(map.get("actualContractFee") != null ? Long.parseLong(map.get("actualContractFee").toString()) : 0);
-            result.setBalance(map.get("balance") != null ? Long.parseLong(map.get("balance").toString()) : 0);
-            result.setContractAddress((String) map.get("contractAddress"));
-            result.setDecimals(map.get("decimals") != null ? Long.parseLong(map.get("decimals").toString()) : 0);
-            result.setGasLimit(map.get("gasLimit") != null ? Long.parseLong(map.get("gasLimit").toString()) : 0);
-            result.setGasUsed(map.get("gasUsed") != null ? Long.parseLong(map.get("gasUsed").toString()) : 0);
-            result.setTokenName((String) map.get("name"));
-            result.setNonce(map.get("nonce") != null ? Long.parseLong(map.get("nonce").toString()) : 0);
-            result.setPrice(map.get("price") != null ? Long.parseLong(map.get("price").toString()) : 0);
-            result.setRefundFee(map.get("refundFee") != null ? Long.parseLong(map.get("refundFee").toString()) : 0);
-            result.setRemark((String) map.get("remark"));
-            result.setResult((String) map.get("result"));
-            result.setStacktrace((String) map.get("stackTrace"));
-            result.setStateroot((String) map.get("stateRoot"));
-            result.setSymbol((String) map.get("symbol"));
-            result.setTotalFee(map.get("totalFee") != null ? Long.parseLong(map.get("totalFee").toString()) : 0);
-            result.setTxSizeFee(map.get("txSizeFee") != null ? Long.parseLong(map.get("txSizeFee").toString()) : 0);
-            result.setTxValue(map.get("value") != null ? Long.parseLong(map.get("value").toString()) : 0);
-            ArrayList listEvents = (ArrayList) map.get("events");
-            if (listEvents != null && listEvents.size() > 0) {
-                result.setEvents(JSONUtils.obj2json(listEvents));
-            }
-            ArrayList listTransfers = (ArrayList) map.get("transfers");
-            if (listTransfers != null && listTransfers.size() > 0) {
-                result.setTransfers(JSONUtils.obj2json(listTransfers));
-            }
-            ArrayList listTokenTransfers = (ArrayList) map.get("tokenTransfers");
-            if (listTokenTransfers != null && listTokenTransfers.size() > 0) {
-                result.setTokenTransfers(JSONUtils.obj2json(listTokenTransfers));
+            if (map != null) {
+                result.setErrorMessage((String) map.get("errorMessage"));
+                result.setSuccess(map.get("success").toString());
+                result.setActualContractFee(map.get("actualContractFee") != null ? Long.parseLong(map.get("actualContractFee").toString()) : 0);
+                result.setBalance(map.get("balance") != null ? Long.parseLong(map.get("balance").toString()) : 0);
+                result.setContractAddress((String) map.get("contractAddress"));
+                result.setDecimals(map.get("decimals") != null ? Long.parseLong(map.get("decimals").toString()) : 0);
+                result.setGasLimit(map.get("gasLimit") != null ? Long.parseLong(map.get("gasLimit").toString()) : 0);
+                result.setGasUsed(map.get("gasUsed") != null ? Long.parseLong(map.get("gasUsed").toString()) : 0);
+                result.setTokenName((String) map.get("name"));
+                result.setNonce(map.get("nonce") != null ? Long.parseLong(map.get("nonce").toString()) : 0);
+                result.setPrice(map.get("price") != null ? Long.parseLong(map.get("price").toString()) : 0);
+                result.setRefundFee(map.get("refundFee") != null ? Long.parseLong(map.get("refundFee").toString()) : 0);
+                result.setRemark((String) map.get("remark"));
+                result.setResult((String) map.get("result"));
+                result.setStacktrace((String) map.get("stackTrace"));
+                result.setStateroot((String) map.get("stateRoot"));
+                result.setSymbol((String) map.get("symbol"));
+                result.setTotalFee(map.get("totalFee") != null ? Long.parseLong(map.get("totalFee").toString()) : 0);
+                result.setTxSizeFee(map.get("txSizeFee") != null ? Long.parseLong(map.get("txSizeFee").toString()) : 0);
+                result.setTxValue(map.get("value") != null ? Long.parseLong(map.get("value").toString()) : 0);
+                ArrayList listEvents = (ArrayList) map.get("events");
+                if (listEvents != null && listEvents.size() > 0) {
+                    result.setEvents(JSONUtils.obj2json(listEvents));
+                }
+                ArrayList listTransfers = (ArrayList) map.get("transfers");
+                if (listTransfers != null && listTransfers.size() > 0) {
+                    result.setTransfers(JSONUtils.obj2json(listTransfers));
+                }
+                ArrayList listTokenTransfers = (ArrayList) map.get("tokenTransfers");
+                if (listTokenTransfers != null && listTokenTransfers.size() > 0) {
+                    result.setTokenTransfers(JSONUtils.obj2json(listTokenTransfers));
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();

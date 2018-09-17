@@ -83,7 +83,6 @@ public class SyncDataBusiness {
         List<ContractAddressInfo> contractAddressList = new ArrayList<>();
         List<ContractDeleteInfo> deleteContractDataList = new ArrayList<>();
         List<ContractCallInfo> callContractDataList = new ArrayList<>();
-        List<ContractTransferInfo> contractTransferInfoList = new ArrayList<>();
         List<ContractResultInfo> contractResultInfoList = new ArrayList<>();
         List<ContractTokenInfo> contractTokenInfoList = new ArrayList<>();
         List<ContractTransaction> contractTransactionList = new ArrayList<>();
@@ -141,10 +140,9 @@ public class SyncDataBusiness {
                     if (result.isFailed() || result.getData() == null) {
                         return;
                     }
-                    //保存调用结果
+
                     ContractResultInfo resultData = result.getData();
                     resultData.setTxHash(tx.getHash());
-                    contractResultInfoList.add(resultData);
 
                     //保存合约交易记录
                     ContractTransaction contractTransaction = new ContractTransaction();
@@ -216,6 +214,10 @@ public class SyncDataBusiness {
                     if (ContractConstant.CONTRACT_STATUS_SUCCESS.equals(resultData.getSuccess())) {
                         //合约交易记录
                         contractTransactionList.add(contractTransaction);
+                        //保存调用结果
+                        if (StringUtils.isNotBlank(resultData.getContractAddress())) {
+                            contractResultInfoList.add(resultData);
+                        }
                     }
                 }
 
