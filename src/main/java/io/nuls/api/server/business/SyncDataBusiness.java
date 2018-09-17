@@ -169,7 +169,7 @@ public class SyncDataBusiness {
                         contractBusiness.calContractTokenAssets(contractTokenTransferInfoList, resultData.getContractAddress(), false);
                     }
                     //合约内部转账
-                    String transfersString = resultData.getTransfers();
+                    /*String transfersString = resultData.getTransfers();
                     if (StringUtils.isNotBlank(transfersString)) {
                         List<ContractTransferDto> contractTransferDtos = JSONUtils.json2list(transfersString, ContractTransferDto.class);
                         for (ContractTransferDto contractTransferDto : contractTransferDtos) {
@@ -185,7 +185,7 @@ public class SyncDataBusiness {
 
                             txList.add(contractTransferTx);
                         }
-                    }
+                    }*/
 
                     if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT) {
                         //创建合约
