@@ -28,6 +28,7 @@ import io.nuls.api.constant.Constant;
 import io.nuls.api.counter.RequestCounter;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.utils.PropertiesUtils;
+import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,7 +51,8 @@ public class ApiServerFilter implements ContainerRequestFilter, ContainerRespons
     @Override
     public void filter(ContainerRequestContext requestContext) {
         requestContext.setProperty("start", System.currentTimeMillis());
-        String remoteIP = request.getRemoteAddr();
+
+        String remoteIP = getIp(request);
         int count = 0;
         try {
             count = RequestCounter.increment(remoteIP);
@@ -76,6 +78,23 @@ public class ApiServerFilter implements ContainerRequestFilter, ContainerRespons
         //Log.error(e.getMessage());
         RpcClientResult result = RpcClientResult.getFailed(e.getMessage());
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
+    }
+    public static String getIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if(StringUtils.isNotBlank(ip) && !"unKnown".equalsIgnoreCase(ip)){
+                //多次反向代理后会有多个ip值，第一个ip才是真实ip
+                int index = ip.indexOf(",");
+                if(index != -1){
+                        return ip.substring(0,index);
+                    }else{
+                        return ip;
+                    }
+            }
+        ip = request.getHeader("X-Real-IP");
+        if(StringUtils.isNotBlank(ip) && !"unKnown".equalsIgnoreCase(ip)){
+                return ip;
+            }
+        return request.getRemoteAddr();
     }
 
 }
