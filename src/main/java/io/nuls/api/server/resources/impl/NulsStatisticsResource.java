@@ -1,14 +1,10 @@
 package io.nuls.api.server.resources.impl;
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.BalanceListContext;
 import io.nuls.api.context.HistoryContext;
 import io.nuls.api.context.PackingAddressContext;
-import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.entity.Utxo;
-import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dto.AgentNodeDto;
 import io.nuls.api.server.dto.Page;
 import io.nuls.api.server.dto.UtxoDto;
@@ -19,9 +15,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Description: 统计信息 （14天交易历史、持币账户、出块账户）

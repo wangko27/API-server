@@ -1,6 +1,5 @@
 package io.nuls.api.server.resources.impl;
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.BlockHeader;
@@ -16,7 +15,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Description:
+ * Description: 区块相关
  * Author: moon
  * Date:  2018/5/29 0029
  */
@@ -27,6 +26,10 @@ public class BlockResource {
     @Autowired
     private BlockBusiness blockBusiness;
 
+    /**
+     * 获取最新几条区块信息 （区块链浏览器首页显示，因为首页访问频繁，所以这里单独做一个获取首页区块的接口，从缓存获取）
+     * @return
+     */
     @GET
     @Path("/index")
     @Produces(MediaType.APPLICATION_JSON)
@@ -36,6 +39,13 @@ public class BlockResource {
         return result;
     }
 
+    /**
+     * 获取区块列表，可根据地址过滤
+     * @param pageNumber 页数
+     * @param pageSize 每页大小
+     * @param address 地址
+     * @return
+     */
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
@@ -58,6 +68,11 @@ public class BlockResource {
         return result;
     }
 
+    /**
+     * 根据高度获取区块详情
+     * @param height 高度
+     * @return
+     */
     @GET
     @Path("/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -87,6 +102,11 @@ public class BlockResource {
         return result;
     }
 
+    /**
+     * 根据hash获取区块详情
+     * @param hash 区块hash
+     * @return
+     */
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -119,6 +139,10 @@ public class BlockResource {
         return result;
     }
 
+    /**
+     * 获取最新区块
+     * @return
+     */
     @GET
     @Path("/newest")
     @Produces(MediaType.APPLICATION_JSON)

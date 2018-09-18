@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Description:
+ * Description: 共识节点相关
  * Author: moon
  * Date:  2018/5/29 0029
  */

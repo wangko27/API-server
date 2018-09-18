@@ -14,7 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Description: 委托
+ * Description: 惩罚记录相关
  * Author: moon
  * Date:  2018/5/29 0029
  */
@@ -25,6 +25,13 @@ public class PunishLogResource {
     @Autowired
     private PunishLogBusiness punishLogBusiness;
 
+    /**
+     * 获取某地址的惩罚记录
+     * @param pageNumber 页数
+     * @param pageSize 每页大小
+     * @param address 地址
+     * @return
+     */
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)

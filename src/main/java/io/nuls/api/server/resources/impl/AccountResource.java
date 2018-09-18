@@ -1,6 +1,5 @@
 package io.nuls.api.server.resources.impl;
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.RpcClientResult;
@@ -24,6 +23,11 @@ import javax.ws.rs.core.MediaType;
 @Component
 public class AccountResource {
 
+    /**
+     * 根据publickey 获取地址
+     * @param publicKey
+     * @return
+     */
     @GET
     @Path("/getAddress/{publicKey}")
     @Produces(MediaType.APPLICATION_JSON)

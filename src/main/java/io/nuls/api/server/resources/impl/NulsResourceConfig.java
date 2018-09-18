@@ -31,7 +31,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 
 /**
- *
+ * 配置相关
  * @author Niels
  * @date 2017/9/28
  *

@@ -25,6 +25,13 @@ public class AddressRewardDetailResource {
     @Autowired
     private AddressRewardDetailBusiness addressRewardDetailBusiness;
 
+    /**
+     * 获取某地址的奖励
+     * @param pageNumber 页数
+     * @param pageSize 每页大小
+     * @param address 地址
+     * @return
+     */
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)

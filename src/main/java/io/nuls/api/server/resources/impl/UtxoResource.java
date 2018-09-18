@@ -1,25 +1,19 @@
 package io.nuls.api.server.resources.impl;
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
-import io.nuls.api.context.IndexContext;
-import io.nuls.api.entity.*;
-import io.nuls.api.server.business.BlockBusiness;
-import io.nuls.api.server.business.TransactionBusiness;
+import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.UtxoBusiness;
-import io.nuls.api.server.dto.TransactionDto;
-import io.nuls.api.utils.StringUtils;
-import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Description:
+ * Description: utxo相关
  * Author: moon
  * Date:  2018/5/29 0029
  */
@@ -30,6 +24,13 @@ public class UtxoResource {
     @Autowired
     private UtxoBusiness utxoBusiness;
 
+    /**
+     * 获取某地址的冻结列表
+     * @param pageNumber 页数
+     * @param pageSize 每页大小
+     * @param address 地址
+     * @return
+     */
     @GET
     @Path("/list/address")
     @Produces(MediaType.APPLICATION_JSON)

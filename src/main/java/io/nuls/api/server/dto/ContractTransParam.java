@@ -11,7 +11,7 @@ public class ContractTransParam {
     private String remark;
     private String contractCode;
     private long price;
-    private Object args;
+    private Object[] args;
     private int types;
     private String hash;
     private String sign;
@@ -100,11 +100,11 @@ public class ContractTransParam {
         this.contractCode = contractCode;
     }
 
-    public Object getArgs() {
+    public Object[] getArgs() {
         return args;
     }
 
-    public void setArgs(Object args) {
+    public void setArgs(Object[] args) {
         this.args = args;
     }
 

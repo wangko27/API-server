@@ -25,6 +25,11 @@ public class BalanceResource {
     @Autowired
     private BalanceBusiness balanceBusiness;
 
+    /**
+     * 根据地址获取账户资产 nuls
+     * @param address 地址
+     * @return
+     */
     @GET
     @Path("/get/{address}")
     @Produces(MediaType.APPLICATION_JSON)

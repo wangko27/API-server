@@ -9,17 +9,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Description:
+ * Description: 首页
  * Author: moon
  * Date:  2018/8/28 0028
  */
 @Path("/")
 @Component
 public class IndexResource {
-    /**
-     * 14天交易历史
-     * @return
-     */
+
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)

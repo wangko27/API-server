@@ -17,7 +17,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-/**
+/**搜索相关
  * @author: Charlie
  * @date: 2018/4/2
  */
@@ -35,6 +35,11 @@ public class SearchResource {
     private TransactionRelationBusiness transactionRelationBusiness;
 
 
+    /**
+     * 根据关键字搜索，区块链浏览器搜索用
+     * @param keyword
+     * @return
+     */
     @GET
     @Path("/{keyword}")
     @Produces(MediaType.APPLICATION_JSON)

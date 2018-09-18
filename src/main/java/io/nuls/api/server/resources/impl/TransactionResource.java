@@ -24,7 +24,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.*;
 
 /**
- * Description:
+ * Description: 交易记录相关
  * Author: moon
  * Date:  2018/5/29 0029
  */
@@ -47,6 +47,10 @@ public class TransactionResource {
 
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
 
+    /**
+     * 获取最新几条交易信息 （区块链浏览器首页显示，因为首页访问频繁，所以这里单独做一个获取首页交易的接口，从缓存获取）
+     * @return
+     */
     @GET
     @Path("/index")
     @Produces(MediaType.APPLICATION_JSON)
@@ -56,6 +60,14 @@ public class TransactionResource {
         return result;
     }
 
+    /**
+     * 获取所有交易列表
+     * @param pageNumber 页数
+     * @param pageSize 每页大小
+     * @param height 高度
+     * @param type 交易类型
+     * @return
+     */
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
@@ -79,6 +91,16 @@ public class TransactionResource {
         return result;
     }
 
+    /**
+     * 获取某地址的交易记录
+     * @param pageNumber 页数
+     * @param pageSize 每页大小
+     * @param address 地址
+     * @param type 交易类型
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return
+     */
     @GET
     @Path("/list/address")
     @Produces(MediaType.APPLICATION_JSON)
@@ -105,6 +127,15 @@ public class TransactionResource {
         return result;
     }
 
+    /**
+     * 获取未确认交易列表
+     * @param address 地址
+     * @param status 交易状态 1待确认，2已确认
+     * @param type 交易类型
+     * @param pageNumber 页数
+     * @param pageSize 每页大小
+     * @return 未确认交易列表
+     */
     @GET
     @Path("/list/webwallet/address")
     @Produces(MediaType.APPLICATION_JSON)
@@ -131,6 +162,11 @@ public class TransactionResource {
         return result;
     }
 
+    /**
+     * 根据交易hash获取交易详情
+     * @param hash 交易hash
+     * @return 交易详情
+     */
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -170,6 +206,16 @@ public class TransactionResource {
         return result;
     }
 
+    /**
+     * 获取交易手续费
+     * @param address 交易发起地址
+     * @param money 交易金额
+     * @param remark 交易备注
+     * @param price 交易单价
+     * @param types 交易类型
+     * @param alias 别名
+     * @return 交易手续费
+     */
     @GET
     @Path("/transFee")
     @Produces(MediaType.APPLICATION_JSON)
@@ -239,12 +285,18 @@ public class TransactionResource {
         return result;
     }
 
+    /**
+     * 组装转账、设置别名、加入共识、退出共识交易
+     * @param transactionParam 参数对象
+     * @return 交易hash
+     * @throws Exception
+     */
     @POST
     @Path("/trans")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult trans(TransactionParam transactionParam) throws Exception {
         RpcClientResult result;
-        Map<String,Object> attr = new HashMap<>(1);
+        Map<String,Object> attr = new HashMap<>(2);
         attr.put("hash","");
         if(null == transactionParam){
             return RpcClientResult.getFailed(KernelErrorCode.NULL_PARAMETER);
@@ -382,20 +434,8 @@ public class TransactionResource {
             if(null != transaction){
                 attr.put("hash",transaction.getHash().getDigestHex());
                 attr.put("tx",transaction);
-                Transaction tx = RpcTransferUtil.toTransaction(transaction);
-                Utxo utxoKey = null;
-                for(Input input:tx.getInputs()){
-                    utxoKey = utxoBusiness.getByKey(input.getKey());
-                    if(utxoKey == null){
-                        utxoKey = webwalletUtxoLevelDbService.select(transactionParam.getAddress());
-                    }
-                    input.setAddress(utxoKey.getAddress());
-                    input.setValue(utxoKey.getAmount());
-                }
-                WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx,Base64.getEncoder().encodeToString(transaction.serialize()),transactionParam.getAddress(),temp);
-                if(webwalletTransactionBusiness.save(webwalletTransaction) != 1){
-                    return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
-                }
+                result = saveWalletTransaction(transaction,transactionParam.getAddress(),temp);
+                result.setData(attr);
             }else{
                 //为空，说明有系统异常
                 return RpcClientResult.getFailed(KernelErrorCode.FAILED);
@@ -405,6 +445,12 @@ public class TransactionResource {
         return result;
     }
 
+    /**
+     * 根据参数组装只能合约交易
+     * @param contractTransParam 参数对象
+     * @return 交易hash
+     * @throws Exception
+     */
     @POST
     @Path("/contractTrans")
     @Produces(MediaType.APPLICATION_JSON)
@@ -430,6 +476,8 @@ public class TransactionResource {
             return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
         }
         RpcClientResult result  = valiHeight();
+        Map<String,Object> attr = new HashMap<>(1);
+        attr.put("hash","");
         if(result.isSuccess()) {
             io.nuls.api.model.Transaction transaction = null;
             List<Utxo> list = utxoBusiness.getUsableUtxo(contractTransParam.getSender());
@@ -439,7 +487,7 @@ public class TransactionResource {
                     contractTransParam.getGasLimit(),
                     contractTransParam.getPrice(),
                     Hex.decode(contractTransParam.getContractCode()),
-                    null,
+                    contractTransParam.getArgs(),
                     contractTransParam.getRemark(),
                     list
                 );
@@ -452,7 +500,7 @@ public class TransactionResource {
                         contractTransParam.getContractAddress(),
                         contractTransParam.getMethodName(),
                         contractTransParam.getMethodDesc(),
-                        null,
+                        contractTransParam.getArgs(),
                         contractTransParam.getRemark(),
                         list
 
@@ -470,25 +518,19 @@ public class TransactionResource {
             if(null == transaction){
                 return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
             }
-            result.setData(transaction.getHash().getDigestHex());
-            Transaction tx = RpcTransferUtil.toTransaction(transaction);
-            Utxo utxoKey = null;
-            for (Input input : tx.getInputs()) {
-                utxoKey = utxoBusiness.getByKey(input.getKey());
-                if (utxoKey == null) {
-                    utxoKey = webwalletUtxoLevelDbService.select(contractTransParam.getSender());
-                }
-                input.setAddress(utxoKey.getAddress());
-                input.setValue(utxoKey.getAmount());
-            }
-            WebwalletTransaction webwalletTransaction = new WebwalletTransaction(tx, Base64.getEncoder().encodeToString(transaction.serialize()), contractTransParam.getSender(), null);
-            if (webwalletTransactionBusiness.save(webwalletTransaction) != 1) {
-                return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
-            }
+            attr.put("hash",transaction.getHash().getDigestHex());
+            result = saveWalletTransaction(transaction,contractTransParam.getSender(),null);
+            result.setData(attr);
         }
         return result;
     }
 
+    /**
+     * 广播交易 创建合约、调用合约、删除合约
+     * @param contractTransParam 参数对象
+     * @return 调用结果
+     * @throws Exception
+     */
     @POST
     @Path("/contractBroadcast")
     @Produces(MediaType.APPLICATION_JSON)
@@ -518,6 +560,12 @@ public class TransactionResource {
         }
     }
 
+    /**
+     * 广播交易 转账、共识、设置别名、退出共识
+     * @param transactionParam 参数对象
+     * @return 广播结果
+     * @throws Exception
+     */
     @POST
     @Path("/broadcast")
     @Produces(MediaType.APPLICATION_JSON)
@@ -562,6 +610,36 @@ public class TransactionResource {
         }else{
             return RpcClientResult.getFailed();
         }
+    }
+
+    /**
+     * 保存webwallet 临时交易（发送交易先保存到临时交易表）
+     * @param transaction 交易
+     * @param sender 交易发送者
+     * @param temp 任意值，webwallet的任意值，会存入数据库，目前是存了别名交易的别名，防止别名重复设置，还存了退出交易的hash，防止重复退出
+     * @return 保存结果
+     * @throws Exception 转换交易
+     */
+    private RpcClientResult saveWalletTransaction(io.nuls.api.model.Transaction transaction,String sender,String temp) throws Exception {
+        Transaction tx = RpcTransferUtil.toTransaction(transaction);
+        Utxo utxoKey = null;
+        for (Input input : tx.getInputs()) {
+            utxoKey = utxoBusiness.getByKey(input.getKey());
+            if (utxoKey == null) {
+                utxoKey = webwalletUtxoLevelDbService.select(sender);
+            }
+            input.setAddress(utxoKey.getAddress());
+            input.setValue(utxoKey.getAmount());
+        }
+        WebwalletTransaction webwalletTransaction = new WebwalletTransaction(
+                tx,
+                Base64.getEncoder().encodeToString(transaction.serialize()),
+                sender,
+                temp);
+        if (webwalletTransactionBusiness.save(webwalletTransaction) != 1) {
+            return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
+        }
+        return RpcClientResult.getSuccess();
     }
 
     /**

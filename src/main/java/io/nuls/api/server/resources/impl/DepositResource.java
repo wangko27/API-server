@@ -1,16 +1,16 @@
 package io.nuls.api.server.resources.impl;
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.RpcClientResult;
-import io.nuls.api.server.business.AliasBusiness;
 import io.nuls.api.server.business.DepositBusiness;
 import io.nuls.api.utils.StringUtils;
-import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -25,6 +25,14 @@ public class DepositResource {
     @Autowired
     private DepositBusiness depositBusiness;
 
+    /**
+     * 获取某地址委托列表，如果传入了agenthash，则查询该节点下的某地址的委托记录
+     * @param pageNumber 每页大小
+     * @param pageSize 页数
+     * @param address 地址
+     * @param agentHash 节点hash
+     * @return
+     */
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
