@@ -129,14 +129,14 @@ public class ProgramMethod {
             return false;
         }
         if (args != null) {
-            if(that.args == null) {
+            if (that.args == null) {
                 return false;
             }
-            if(!isEqualNrc20Args(args, that.args)) {
+            if (!isEqualNrc20Args(args, that.args)) {
                 return false;
             }
         } else {
-            if(that.args != null) {
+            if (that.args != null) {
                 return false;
             }
         }
@@ -169,10 +169,10 @@ public class ProgramMethod {
             // 参数类型相同
             int size = a.size();
             ProgramMethodArg argA, argB;
-            for(int i = 0; i < size; i++){
+            for (int i = 0; i < size; i++) {
                 argA = a.get(i);
                 argB = b.get(i);
-                if(!argA.equalsNrc20(argB)) {
+                if (!argA.equalsNrc20(argB)) {
                     return false;
                 }
             }

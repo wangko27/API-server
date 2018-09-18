@@ -249,3 +249,172 @@ UNLOCK TABLES;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+/*
+智能合约相关表
+Date: 2018-09-18 09:56:19
+*/
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for contract_address_info
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_address_info`;
+CREATE TABLE `contract_address_info` (
+  `contract_address` varchar(40) NOT NULL COMMENT '智能合约地址',
+  `creater` varchar(40) DEFAULT NULL COMMENT '创建地址',
+  `create_tx_hash` varchar(80) NOT NULL COMMENT '创建合约交易hash',
+  `block_height` bigint(19) DEFAULT NULL COMMENT '创建高度',
+  `is_nrc20` int(1) DEFAULT NULL COMMENT '是否支持NRC20协议(0-否、1-是)',
+  `status` int(1) DEFAULT NULL COMMENT '状态：(0-失败、1-正常、2-停止)',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '创建时间',
+  `delete_hash` varchar(80) DEFAULT NULL COMMENT '删除合约交易hash',
+  PRIMARY KEY (`contract_address`),
+  KEY `contrack_address_txhash_idx` (`create_tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约地址表';
+
+-- ----------------------------
+-- Table structure for contract_call_info
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_call_info`;
+CREATE TABLE `contract_call_info` (
+  `contract_address` varchar(40) DEFAULT NULL COMMENT '合约地址',
+  `create_tx_hash` varchar(80) DEFAULT NULL COMMENT '交易哈希',
+  `creater` varchar(40) DEFAULT NULL COMMENT '创建者地址',
+  `gas_limit` bigint(19) DEFAULT NULL COMMENT '最大gas消耗',
+  `price` bigint(19) DEFAULT NULL COMMENT '执行合约单价',
+  `method_name` varchar(80) DEFAULT NULL COMMENT '方法名称',
+  `method_desc` varchar(200) DEFAULT NULL COMMENT '方法签名',
+  `args` varchar(200) DEFAULT NULL COMMENT '调用合约参数'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约调用交易表';
+
+-- ----------------------------
+-- Table structure for contract_create_info
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_create_info`;
+CREATE TABLE `contract_create_info` (
+  `create_tx_hash` varchar(80) NOT NULL COMMENT '创建合约交易hash',
+  `contract_address` varchar(40) NOT NULL COMMENT '智能合约地址',
+  `creater` varchar(40) DEFAULT NULL COMMENT '创建地址',
+  `contract_code` text COMMENT '智能合约代码（HEX编码）',
+  `gasLimit` bigint(19) DEFAULT NULL COMMENT '最大gas消耗',
+  `price` bigint(19) DEFAULT NULL COMMENT '执行合约单价',
+  `args` text COMMENT '创建合约参数',
+  `methods` text COMMENT '合约包括方法',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`create_tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约新增交易表';
+
+-- ----------------------------
+-- Table structure for contract_delete_info
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_delete_info`;
+CREATE TABLE `contract_delete_info` (
+  `contract_address` varchar(40) NOT NULL COMMENT '智能合约地址',
+  `creater` varchar(40) DEFAULT NULL COMMENT '创建地址',
+  `create_tx_hash` varchar(80) NOT NULL COMMENT '创建合约交易hash',
+  PRIMARY KEY (`create_tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约删除交易表';
+
+-- ----------------------------
+-- Table structure for contract_result_info
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_result_info`;
+CREATE TABLE `contract_result_info` (
+  `tx_hash` varchar(80) NOT NULL COMMENT '合约交易hash',
+  `contract_address` varchar(40) NOT NULL COMMENT '合约地址',
+  `success` varchar(10) DEFAULT NULL COMMENT '交易是否成功',
+  `error_message` varchar(100) DEFAULT NULL COMMENT '执行失败信息',
+  `result` text COMMENT '执行结果',
+  `gas_limit` bigint(19) DEFAULT NULL COMMENT 'gas最大限制',
+  `gas_used` bigint(19) DEFAULT NULL COMMENT '已使用Gas',
+  `price` bigint(19) DEFAULT NULL COMMENT '单价',
+  `total_fee` bigint(19) DEFAULT NULL COMMENT '交易总手续费',
+  `tx_size_fee` bigint(19) DEFAULT NULL COMMENT '交易大小手续费',
+  `actual_contract_fee` bigint(19) DEFAULT NULL COMMENT '实际执行合约手续费',
+  `refund_fee` bigint(19) DEFAULT NULL COMMENT '退还的手续费',
+  `stateroot` varchar(100) DEFAULT NULL COMMENT '状态根',
+  `tx_value` bigint(19) DEFAULT NULL COMMENT '交易附带的货币量',
+  `stacktrace` text DEFAULT NULL COMMENT '堆栈踪迹',
+  `balance` bigint(19) DEFAULT NULL COMMENT '合约余额',
+  `nonce` bigint(19) DEFAULT NULL COMMENT '随机数',
+  `transfers` text COMMENT '合约内部转账过程JSON数据',
+  `events` text COMMENT '合约事件过程JSON数据',
+  `token_transfers` text COMMENT '合约代币转账过程JSON数据',
+  `token_name` varchar(50) DEFAULT NULL COMMENT '代币名称',
+  `symbol` varchar(20) DEFAULT NULL COMMENT '代币符号',
+  `decimals` bigint(19) DEFAULT NULL COMMENT '货币小数位精度',
+  `remark` varchar(100) DEFAULT NULL COMMENT '备注',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '交易时间',
+  PRIMARY KEY (`tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约交易返回结果表';
+
+-- ----------------------------
+-- Table structure for contract_token_assets
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_token_assets`;
+CREATE TABLE `contract_token_assets` (
+  `contract_address` varchar(80) NOT NULL COMMENT '智能合约地址',
+  `account_address` varchar(80) NOT NULL COMMENT '账户地址',
+  `amount` varchar(100) NOT NULL COMMENT '金额',
+  `hash` varchar(80) NOT NULL,
+  PRIMARY KEY (`hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='NRC20代币资产表';
+
+-- ----------------------------
+-- Table structure for contract_token_info
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_token_info`;
+CREATE TABLE `contract_token_info` (
+  `contract_address` varchar(40) NOT NULL COMMENT '智能合约地址',
+  `tx_hash` varchar(80) NOT NULL COMMENT '创建合约交易hash',
+  `token_name` varchar(50) DEFAULT NULL COMMENT '代币名',
+  `symbol` varchar(50) DEFAULT NULL COMMENT '代币符号',
+  `decimals` bigint(19) DEFAULT NULL COMMENT '精度',
+  `totalsupply` varchar(100) DEFAULT NULL COMMENT '总供应量',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='NRC20代币信息表';
+
+-- ----------------------------
+-- Table structure for contract_token_transfer_info
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_token_transfer_info`;
+CREATE TABLE `contract_token_transfer_info` (
+  `tx_hash` varchar(80) NOT NULL COMMENT '创建合约交易hash',
+  `from_address` varchar(40) DEFAULT NULL COMMENT '转出地址',
+  `to_address` varchar(40) DEFAULT NULL COMMENT '转入地址',
+  `tx_value` varchar(200) DEFAULT NULL COMMENT '转账金额',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '交易时间',
+  `contract_address` varchar(40) DEFAULT NULL,
+  `create_tx_hash` varchar(80) DEFAULT NULL,
+  PRIMARY KEY (`tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='NRC20代币转账信息表';
+
+-- ----------------------------
+-- Table structure for contract_transaction
+-- ----------------------------
+DROP TABLE IF EXISTS `contract_transaction`;
+CREATE TABLE `contract_transaction` (
+  `contract_address` varchar(40) NOT NULL COMMENT '智能合约地址',
+  `tx_hash` varchar(80) NOT NULL COMMENT '创建合约交易hash',
+  `tx_type` int(4) DEFAULT NULL COMMENT '交易类型：（100-创建、101-调用合约、102-删除）',
+  `creater` varchar(40) DEFAULT NULL COMMENT '交易创建来源地址',
+  `status` int(1) DEFAULT NULL COMMENT '交易状态（1-已确认、0-未确认）',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约交易记录表';
+
+/*Table structure for table `contract_transfer_info` */
+DROP TABLE IF EXISTS `contract_transfer_info`;
+CREATE TABLE `contract_transfer_info` (
+  `tx_hash` varchar(80) NOT NULL COMMENT '合约内部转账交易hash',
+  `orgin_tx_hash` varchar(80) NOT NULL COMMENT '调用合约交易原hash',
+  `contract_address` varchar(40) NOT NULL COMMENT '智能合约地址',
+  `from_address` varchar(40) DEFAULT NULL COMMENT '来源地址',
+  `to_address` varchar(40) DEFAULT NULL COMMENT '转入地址',
+  `tx_value` bigint(19) DEFAULT NULL COMMENT '转账金额',
+  `create_time` bigint(15) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约内部转账交易表';
