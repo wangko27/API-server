@@ -79,38 +79,64 @@ public class ProgramMethod {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProgramMethod that = (ProgramMethod) o;
 
-        if (view != that.view) return false;
-        if (event != that.event) return false;
-        if (payable != that.payable) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (desc != null ? !desc.equals(that.desc) : that.desc != null) return false;
-        if (args != null ? !args.equals(that.args) : that.args != null) return false;
+        if (view != that.view) {
+            return false;
+        }
+        if (event != that.event) {
+            return false;
+        }
+        if (payable != that.payable) {
+            return false;
+        }
+        if (name != null ? !name.equals(that.name) : that.name != null) {
+            return false;
+        }
+        if (desc != null ? !desc.equals(that.desc) : that.desc != null) {
+            return false;
+        }
+        if (args != null ? !args.equals(that.args) : that.args != null) {
+            return false;
+        }
         return returnArg != null ? returnArg.equals(that.returnArg) : that.returnArg == null;
     }
 
     public boolean equalsNrc20Method(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProgramMethod that = (ProgramMethod) o;
 
-        if (view != that.view) return false;
-        if (event != that.event) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (view != that.view) {
+            return false;
+        }
+        if (event != that.event) {
+            return false;
+        }
+        if (name != null ? !name.equals(that.name) : that.name != null) {
+            return false;
+        }
         if (args != null) {
-            if(that.args == null) {
+            if (that.args == null) {
                 return false;
             }
-            if(!isEqualNrc20Args(args, that.args)) {
+            if (!isEqualNrc20Args(args, that.args)) {
                 return false;
             }
         } else {
-            if(that.args != null) {
+            if (that.args != null) {
                 return false;
             }
         }
@@ -143,10 +169,10 @@ public class ProgramMethod {
             // 参数类型相同
             int size = a.size();
             ProgramMethodArg argA, argB;
-            for(int i = 0; i < size; i++){
+            for (int i = 0; i < size; i++) {
                 argA = a.get(i);
                 argB = b.get(i);
-                if(!argA.equalsNrc20(argB)) {
+                if (!argA.equalsNrc20(argB)) {
                     return false;
                 }
             }

@@ -129,7 +129,7 @@
     <where>
       t.contract_address = #{contractAddress,jdbcType=VARCHAR}
       <if test="accountAddress != null" >
-        and a.creater = #{accountAddress,jdbcType=VARCHAR}
+        and t.creater = #{accountAddress,jdbcType=VARCHAR}
       </if>
     </where>
     order by t.create_time desc
