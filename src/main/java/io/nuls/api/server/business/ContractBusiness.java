@@ -13,6 +13,7 @@ import io.nuls.api.entity.ContractTokenAssets;
 import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.entity.ContractTokenTransferInfo;
 import io.nuls.api.entity.ContractTransaction;
+import io.nuls.api.entity.ContractTransferInfo;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
@@ -23,6 +24,7 @@ import io.nuls.api.server.dao.mapper.ContractTokenAssetsMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenTransferInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
+import io.nuls.api.server.dao.mapper.ContractTransferInfoMapper;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
@@ -73,7 +75,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractTokenAssetsMapper contractTokenAssetsMapper;
     @Autowired
     private TransactionBusiness transactionBusiness;
-
+    @Autowired
+    private ContractTransferInfoMapper contractTransferInfoMapper;
     @Autowired
     private TransactionRelationMapper transactionRelationMapper;
     @Autowired
@@ -311,6 +314,34 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
+     * 批量保存合约内部转账交易
+     *
+     * @param list
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAllTransferInfo(List<ContractTransferInfo> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            i = contractTransferInfoMapper.insertByBatch(list);
+        }
+        return i;
+    }
+
+    /**
+     * 批量删除合约内部转账交易
+     *
+     * @param list
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void deleteAllTransferInfo(List<String> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            contractTransferInfoMapper.deleteList(list);
+        }
+    }
+
+    /**
      * 批量保存智能合约交易记录
      * @param list
      * @return
@@ -540,15 +571,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         Searchable searchable = new Searchable();
         PageHelper.orderBy("create_time desc");
         PageInfo<ContractAddressInfo> page = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
-//        List<ContractAddressInfo> list = contractAddressInfoMapper.selectList(searchable);
-//        List<ContractAddressInfoDto> contractList = new ArrayList<>();
-//        if (list != null) {
-//            for (ContractAddressInfo contractInfo : list) {
-//                ContractAddressInfoDto contract = new ContractAddressInfoDto(contractInfo);
-//                contractList.add(contract);
-//            }
-//        }
-//        PageInfo<ContractAddressInfoDto> page = new PageInfo<>(contractList);
         return page;
     }
 
@@ -577,18 +599,22 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                     contract.setTotalsupply(tokenInfo.getTotalsupply());
                 }
             }
-            //查询交易笔数
+            //查询交易笔数（非合约交易）
             Searchable searchable = new Searchable();
             searchable.addCondition("address", SearchOperator.eq, contractAddress);
-            int txCount=transactionRelationMapper.selectTotalCount(searchable);
+            searchable.addCondition("type", SearchOperator.notIn, ContractConstant.TX_TYPE_CONTRACT_LIST);
+            int txCount = transactionRelationMapper.selectTotalCount(searchable);
+            //查询交易笔数（合约交易）
+            searchable = new Searchable();
+            searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+            txCount += contractTransactionMapper.selectTotalCount(searchable);
             contract.setTxCount(txCount);
 
             //查询合约创建详情
-            ContractCreateInfo createInfo=contractCreateInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
-            if(createInfo!=null)
-            {
+            ContractCreateInfo createInfo = contractCreateInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
+            if (createInfo != null) {
                 try {
-                    List<ProgramMethod> methodList=JSONUtils.json2list(createInfo.getMethods(),ProgramMethod.class);
+                    List<ProgramMethod> methodList = JSONUtils.json2list(createInfo.getMethods(), ProgramMethod.class);
                     contract.setMethod(methodList);
                 } catch (Exception e) {
                     e.printStackTrace();
