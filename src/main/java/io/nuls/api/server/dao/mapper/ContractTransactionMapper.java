@@ -1,6 +1,7 @@
 package io.nuls.api.server.dao.mapper;
 
 import io.nuls.api.entity.ContractTransaction;
+import io.nuls.api.server.dao.util.Searchable;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface ContractTransactionMapper extends BaseMapper<ContractTransactio
     void deleteList(@Param("list") List<String> txHashList);
 
     List<ContractTransaction> selectContractTxList(Map map);
+
+    int selectTotalCount(Searchable searchable);
 }

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.api.server.dao.mapper.ContractTransferInfoMapper" >
+  <resultMap id="BaseResultMap" type="io.nuls.api.entity.ContractTransferInfo" >
+    <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+    <result column="orgin_tx_hash" property="orginTxHash" jdbcType="VARCHAR" />
+    <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
+    <result column="from_address" property="fromAddress" jdbcType="VARCHAR" />
+    <result column="to_address" property="toAddress" jdbcType="VARCHAR" />
+    <result column="tx_value" property="txValue" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    tx_hash, orgin_tx_hash, contract_address, from_address, to_address, tx_value, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from contract_transfer_info
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from contract_transfer_info
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="io.nuls.api.entity.ContractTransferInfo" >
+    insert into contract_transfer_info (tx_hash, orgin_tx_hash, contract_address, 
+      from_address, to_address, tx_value, 
+      create_time)
+    values (#{txHash,jdbcType=VARCHAR}, #{orginTxHash,jdbcType=VARCHAR}, #{contractAddress,jdbcType=VARCHAR}, 
+      #{fromAddress,jdbcType=VARCHAR}, #{toAddress,jdbcType=VARCHAR}, #{txValue,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertByBatch" parameterType="java.util.List">
+    insert into contract_transfer_info (tx_hash, orgin_tx_hash, contract_address,
+    from_address, to_address, tx_value,
+    create_time)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.txHash,jdbcType=VARCHAR}, #{item.orginTxHash,jdbcType=VARCHAR}, #{item.contractAddress,jdbcType=VARCHAR},
+      #{item.fromAddress,jdbcType=VARCHAR}, #{item.toAddress,jdbcType=VARCHAR}, #{item.txValue,jdbcType=BIGINT},
+      #{item.createTime,jdbcType=BIGINT})
+    </foreach>
+    on duplicate key update create_time = values(create_time)
+  </insert>
+  <insert id="insertSelective" parameterType="io.nuls.api.entity.ContractTransferInfo" >
+    insert into contract_transfer_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        tx_hash,
+      </if>
+      <if test="orginTxHash != null" >
+        orgin_tx_hash,
+      </if>
+      <if test="contractAddress != null" >
+        contract_address,
+      </if>
+      <if test="fromAddress != null" >
+        from_address,
+      </if>
+      <if test="toAddress != null" >
+        to_address,
+      </if>
+      <if test="txValue != null" >
+        tx_value,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="txHash != null" >
+        #{txHash,jdbcType=VARCHAR},
+      </if>
+      <if test="orginTxHash != null" >
+        #{orginTxHash,jdbcType=VARCHAR},
+      </if>
+      <if test="contractAddress != null" >
+        #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="fromAddress != null" >
+        #{fromAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="toAddress != null" >
+        #{toAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="txValue != null" >
+        #{txValue,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="io.nuls.api.entity.ContractTransferInfo" >
+    update contract_transfer_info
+    <set >
+      <if test="orginTxHash != null" >
+        orgin_tx_hash = #{orginTxHash,jdbcType=VARCHAR},
+      </if>
+      <if test="contractAddress != null" >
+        contract_address = #{contractAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="fromAddress != null" >
+        from_address = #{fromAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="toAddress != null" >
+        to_address = #{toAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="txValue != null" >
+        tx_value = #{txValue,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="io.nuls.api.entity.ContractTransferInfo" >
+    update contract_transfer_info
+    set orgin_tx_hash = #{orginTxHash,jdbcType=VARCHAR},
+      contract_address = #{contractAddress,jdbcType=VARCHAR},
+      from_address = #{fromAddress,jdbcType=VARCHAR},
+      to_address = #{toAddress,jdbcType=VARCHAR},
+      tx_value = #{txValue,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=BIGINT}
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+  </update>
+  <delete id="deleteList" parameterType="java.util.List">
+    delete from contract_transfer_info where tx_hash in
+    <foreach collection="list" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+  </delete>
+</mapper>

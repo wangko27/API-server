@@ -6,9 +6,31 @@ import io.nuls.api.constant.ContractConstant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.context.UtxoContext;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.AddressHashIndex;
+import io.nuls.api.entity.AddressRewardDetail;
+import io.nuls.api.entity.AgentNode;
+import io.nuls.api.entity.Alias;
+import io.nuls.api.entity.Block;
+import io.nuls.api.entity.BlockHeader;
+import io.nuls.api.entity.ContractAddressInfo;
+import io.nuls.api.entity.ContractCallInfo;
+import io.nuls.api.entity.ContractCreateInfo;
+import io.nuls.api.entity.ContractDeleteInfo;
+import io.nuls.api.entity.ContractResultInfo;
+import io.nuls.api.entity.ContractTokenInfo;
+import io.nuls.api.entity.ContractTokenTransferInfo;
+import io.nuls.api.entity.ContractTransaction;
+import io.nuls.api.entity.ContractTransferInfo;
+import io.nuls.api.entity.Deposit;
+import io.nuls.api.entity.Input;
+import io.nuls.api.entity.Output;
+import io.nuls.api.entity.PunishLog;
+import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.entity.Transaction;
+import io.nuls.api.entity.TransactionRelation;
+import io.nuls.api.entity.TxData;
+import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.ContractTokenTransferDto;
-import io.nuls.api.model.ContractTransferDto;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -21,7 +43,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class SyncDataBusiness {
@@ -87,6 +113,7 @@ public class SyncDataBusiness {
         List<ContractTokenInfo> contractTokenInfoList = new ArrayList<>();
         List<ContractTransaction> contractTransactionList = new ArrayList<>();
         List<ContractTokenTransferInfo> contractTokenTransferInfoList = new ArrayList<>();
+        List<ContractTransferInfo> contractTransferInfoList = new ArrayList<>();
 
         try {
             for (int i = 0; i < block.getTxList().size(); i++) {
@@ -133,8 +160,7 @@ public class SyncDataBusiness {
                         TransactionRelation key = new TransactionRelation(log.getAddress(), tx.getHash(), tx.getType(), tx.getCreateTime());
                         txRelationList.add(key);
                     }
-                }
-                if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
+                } else if (tx.getType() == EntityConstant.TX_TYPE_CREATE_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_CALL_CONTRACT || tx.getType() == EntityConstant.TX_TYPE_DELETE_CONTRACT) {
                     //查询合约交易执行结果
                     RpcClientResult<ContractResultInfo> result = syncDataHandler.getContractResult(tx.getHash());
                     if (result.isFailed() || result.getData() == null) {
@@ -144,7 +170,7 @@ public class SyncDataBusiness {
                     ContractResultInfo resultData = result.getData();
                     resultData.setTxHash(tx.getHash());
 
-                    //保存合约交易记录
+                    //保存合约交易记录（创建、调用、删除合约，不包含内部转账）
                     ContractTransaction contractTransaction = new ContractTransaction();
                     contractTransaction.setTxHash(tx.getHash());
                     contractTransaction.setTxType(tx.getType());
@@ -219,29 +245,20 @@ public class SyncDataBusiness {
                             contractResultInfoList.add(resultData);
                         }
                     }
-                }
-
-                if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
+                } else if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
                     //合约内部转账
-                    ContractTransferInfo data = (ContractTransferInfo) tx.getTxData();
+                    ContractTransferInfo transferInfo = (ContractTransferInfo) tx.getTxData();
+                    transferInfo.setTxHash(tx.getHash());
+                    transferInfo.setCreateTime(tx.getCreateTime());
+                    transferInfo.setFromAddress(transferInfo.getContractAddress());
+                    if (tx.getOutputList() != null && tx.getOutputList().size() > 0) {
+                        transferInfo.setToAddress(tx.getOutputList().get(0).getAddress());
+                        transferInfo.setTxValue(tx.getOutputList().get(0).getValue());
+                    }
+                    //合约内部转账交易记录
+                    contractTransferInfoList.add(transferInfo);
 
-                    //设置合约交易记录创建者
-//                    contractTransferInfoList.add(data);
-
-                    //保存合约交易记录
-                    ContractTransaction contractTransaction = new ContractTransaction();
-                    contractTransaction.setTxHash(tx.getHash());
-                    contractTransaction.setTxType(tx.getType());
-                    contractTransaction.setStatus(ContractConstant.CONTRACT_STATUS_CONFIRMED);
-                    contractTransaction.setCreateTime(tx.getCreateTime());
-                    contractTransaction.setContractAddress(data.getContractAddress());
-                    contractTransaction.setCreater(data.getContractAddress());
-                    //合约交易记录
-                    contractTransactionList.add(contractTransaction);
                 }
-
-
-
             }
 
             blockBusiness.save(block.getHeader());
@@ -263,6 +280,7 @@ public class SyncDataBusiness {
             contractBusiness.saveAllToken(contractTokenInfoList);
             contractBusiness.saveAllTransaction(contractTransactionList);
             contractBusiness.saveAllTokenTransferInfo(contractTokenTransferInfoList);
+            contractBusiness.saveAllTransferInfo(contractTransferInfoList);
             //智能合约地址批量保存
             contractBusiness.saveAllContractAddress(contractAddressList);
             //智能合约创建交易数据批量保存
@@ -405,6 +423,8 @@ public class SyncDataBusiness {
             contractBusiness.rollbackContractCallInfo(header.getTxHashList());
             //回滚智能合约地址
             contractBusiness.deleteContractByHeight(header.getHeight());
+            //回滚合约内部转账交易记录
+            contractBusiness.deleteAllTransferInfo(header.getTxHashList());
 
             //回滚levelDB与缓存
             //回滚交易

@@ -10,6 +10,16 @@
     <result column="totalsupply" property="totalsupply" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
   </resultMap>
+  <resultMap id="DtoResultMap" type="io.nuls.api.server.dto.ContractTokenDto">
+    <id column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+    <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
+    <result column="token_name" property="tokenName" jdbcType="VARCHAR" />
+    <result column="symbol" property="symbol" jdbcType="VARCHAR" />
+    <result column="decimals" property="decimals" jdbcType="BIGINT" />
+    <result column="totalsupply" property="totalsupply" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+  </resultMap>
   <sql id="Base_Column_List" >
     tx_hash, contract_address, token_name, symbol, decimals, totalsupply, create_time
   </sql>
@@ -133,13 +143,13 @@
     </foreach>
   </delete>
 
-  <select id="selectList" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+  <select id="getAll" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="DtoResultMap">
     SELECT
-    <include refid="Base_Column_List" />
-    FROM contract_token_info
-    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where" />
+    a.tx_hash, a.contract_address, a.token_name, a.symbol, a.decimals, a.totalsupply, a.create_time,b.status
+    FROM contract_token_info a,contract_address_info b
+    WHERE a.contract_address = b.contract_address
   </select>
-  <select id="selectTokenByAddress" parameterType="java.lang.String">
+  <select id="selectTokenByAddress" parameterType="java.lang.String" resultMap="BaseResultMap">
     SELECT
     <include refid="Base_Column_List" />
     FROM contract_token_info
