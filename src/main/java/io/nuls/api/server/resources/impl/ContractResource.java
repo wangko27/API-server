@@ -73,12 +73,17 @@ public class ContractResource {
         return result;
     }
 
+    /**
+     * 根据交易hash获取合约交易详情
+     * @param hash
+     * @return
+     */
     @GET
-    @Path("/{contractAddress}/transaction/{hash}")
+    @Path("/transaction/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getContractTransactionDetail(@PathParam("contractAddress") String contractAddress, @PathParam("hash") String hash){
+    public RpcClientResult getContractTransactionDetail(@PathParam("hash") String hash){
         RpcClientResult result = RpcClientResult.getSuccess();
-        result.setData(contractBusiness.getContractTransactionDetail(hash,contractAddress));
+        result.setData(contractBusiness.getContractTransactionDetail(hash));
         return result;
     }
 

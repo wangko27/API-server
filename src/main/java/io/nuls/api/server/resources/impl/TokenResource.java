@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Description:
+ * Description:代币接口
  * Author: moon
  * Date:  2018/5/29 0029
  */
@@ -55,10 +55,17 @@ public class TokenResource {
     @Autowired
     private ContractBusiness contractBusiness;
 
+    /**
+     * 根据合约地址获取代币转账列表
+     * @param pageNumber
+     * @param pageSize
+     * @param contractAddress       合约地址
+     * @return
+     */
     @GET
     @Path("/{contractAddress}/transactions")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getContractTokenTransfers(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("contractAddress") String contractAddress){
+    public RpcClientResult getContractTokenTransferInfosByContractAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("contractAddress") String contractAddress){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
@@ -73,10 +80,46 @@ public class TokenResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(contractBusiness.getContractTokenTransfers(contractAddress,pageNumber,pageSize));
+        result.setData(contractBusiness.getContractTokenTransferInfosByContractAddress(contractAddress,pageNumber,pageSize));
         return result;
     }
 
+    /**
+     * 根据钱包地址获取代币转账列表
+     * @param pageNumber
+     * @param pageSize
+     * @param accountAddress       NULS钱包地址
+     * @return
+     */
+    @GET
+    @Path("/transactions/{accountAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTokenTransferInfosByAccountAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("accountAddress") String accountAddress){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokenTransferInfosByAccountAddress(accountAddress,pageNumber,pageSize));
+        return result;
+    }
+
+    /**
+     * 根据合约地址获取指定代币持有者列表
+     * @param pageNumber
+     * @param pageSize
+     * @param contractAddress       合约地址
+     * @return
+     */
     @GET
     @Path("/{contractAddress}/holders")
     @Produces(MediaType.APPLICATION_JSON)
@@ -135,6 +178,35 @@ public class TokenResource {
         result.setData(contractBusiness.getContractTokeninfoList(pageNumber,pageSize));
         return result;
     }
+
+    /**
+     * Description:get all tokens list
+     * Author: Flyglded
+     * Date:  2018/9/14 0029
+     */
+    @GET
+    @Path("/wallet/{accountAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public  RpcClientResult getTokensByAccountAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("accountAddress") String accountAddress) {
+        RpcClientResult result = null;
+        if(pageNumber <0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if(pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if(pageSize == 0) {
+            pageSize = 20;
+        }
+        if(pageSize > 100) {
+            pageSize = 100;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokeninfoListByAccountAddress(pageNumber,pageSize,accountAddress));
+        return result;
+    }
+
     /**
      * Description:get all tokens list
      * Author: Flyglded
@@ -143,7 +215,7 @@ public class TokenResource {
     @GET
     @Path("/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getTokenInfo(@QueryParam("contractAddress") String contractAddress) {
+    public RpcClientResult getTokenInfo(@PathParam("contractAddress") String contractAddress) {
         RpcClientResult result = null;
         ContractTokenInfo contractTokenInfo = null;
         ContractAddressInfo contractAddressInfo = null;
@@ -161,7 +233,7 @@ public class TokenResource {
         long totalTransfers = contractBusiness.selectTotalTransfer(contractAddress);
         long totalHolders = contractBusiness.selectTotalHolders(contractAddress);
         mapToken.put("contractAddress",contractTokenInfo.getContractAddress());
-        mapToken.put("name",contractTokenInfo.getTokenName());
+        mapToken.put("tokenName",contractTokenInfo.getTokenName());
         mapToken.put("symbol",contractTokenInfo.getSymbol());
         mapToken.put("decimals",contractTokenInfo.getDecimals());
         mapToken.put("totalSupply",contractTokenInfo.getTotalsupply());

@@ -3,6 +3,10 @@
  */
 package io.nuls.api.constant;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public interface ContractConstant extends NulsConstant {
 
     short MODULE_ID_CONTRACT = 10;
@@ -24,8 +28,6 @@ public interface ContractConstant extends NulsConstant {
     String BALANCE_TRIGGER_METHOD_DESC = "() return void";
 
     String CONTRACT_CONSTRUCTOR = "<init>";
-
-
 
 
     String CALL = "call";
@@ -62,9 +64,9 @@ public interface ContractConstant extends NulsConstant {
     String NRC20_EVENT_TRANSFER = "TransferEvent";
     String NRC20_EVENT_APPROVAL = "ApprovalEvent";
 
-    int CONTRACT_STATUS_FAILED = 1;
-    int CONTRACT_STATUS_NORMAL = 2;
-    int CONTRACT_STATUS_DELETED = 3;
+    int CONTRACT_STATUS_FAILED = 0;
+    int CONTRACT_STATUS_NORMAL = 1;
+    int CONTRACT_STATUS_DELETED = 2;
 
     /**
      * 合约确认状态：0-未确认、1-已确认
@@ -83,4 +85,9 @@ public interface ContractConstant extends NulsConstant {
      */
     int CONTRACT_NRC20_STATUS_NO = 0;
     int CONTRACT_NRC20_STATUS_YES = 1;
+
+    /**
+     * 合约交易类型编号
+     */
+    List<Integer> TX_TYPE_CONTRACT_LIST = new ArrayList<>(Arrays.asList(100, 101, 102, 103));
 }

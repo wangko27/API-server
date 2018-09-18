@@ -109,7 +109,9 @@ public class RpcTransferUtil {
             ContractDeleteInfo data = toContractDeleteInfo(deleteContractTx);
             tx.setTxData(data);
         } else if (txModel.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
-
+            ContractTransferTransaction contractTx = (ContractTransferTransaction) txModel;
+            ContractTransferInfo data = toContractTransferInfo(contractTx);
+            tx.setTxData(data);
         }
         return tx;
     }
@@ -352,6 +354,13 @@ public class RpcTransferUtil {
 
     }
 
+    private static ContractTransferInfo toContractTransferInfo(ContractTransferTransaction tx) {
+        ContractTransferData model = tx.getTxData();
+        ContractTransferInfo data = new ContractTransferInfo(model);
+        return data;
+
+    }
+
     private static ContractCallInfo toContractCallInfo(CallContractTransaction tx) {
         CallContractData model = tx.getTxData();
         ContractCallInfo data = new ContractCallInfo(model);
@@ -390,6 +399,7 @@ public class RpcTransferUtil {
             result = new ContractResultInfo();
             map = (Map<String, Object>) map.get("data");
             if (map != null) {
+
                 result.setErrorMessage((String) map.get("errorMessage"));
                 result.setSuccess(map.get("success").toString());
                 result.setActualContractFee(map.get("actualContractFee") != null ? Long.parseLong(map.get("actualContractFee").toString()) : 0);

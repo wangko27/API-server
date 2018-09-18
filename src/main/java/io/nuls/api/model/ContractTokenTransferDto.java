@@ -23,7 +23,7 @@
  */
 package io.nuls.api.model;
 
-import io.nuls.api.server.dto.contract.ContractTokenTransferInfoPo;
+import io.nuls.api.server.po.contract.ContractTokenTransferInfoPo;
 import io.nuls.sdk.core.utils.AddressTool;
 
 import java.math.BigInteger;

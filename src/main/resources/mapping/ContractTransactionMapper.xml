@@ -134,4 +134,8 @@
     </where>
     order by t.create_time desc
   </select>
+  <select id="selectTotalCount" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Integer">
+    SELECT COUNT(1) FROM contract_transaction
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

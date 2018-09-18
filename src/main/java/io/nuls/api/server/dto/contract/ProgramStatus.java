@@ -3,9 +3,9 @@ package io.nuls.api.server.dto.contract;
 public enum ProgramStatus {
 
     /**
-     * 1-未找到、2-正常、3-停止
+     * 0-未找到、1-正常、2-停止
      */
-    NOT_FOUND("not_found", 1), NORMAL("normal", 2), STOP("stop", 3);
+    NOT_FOUND("not_found", 0), NORMAL("normal", 1), STOP("stop", 2);
 
     //状态描述
     private String name;

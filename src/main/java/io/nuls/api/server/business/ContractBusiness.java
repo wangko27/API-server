@@ -13,6 +13,7 @@ import io.nuls.api.entity.ContractTokenAssets;
 import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.entity.ContractTokenTransferInfo;
 import io.nuls.api.entity.ContractTransaction;
+import io.nuls.api.entity.ContractTransferInfo;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
@@ -23,12 +24,15 @@ import io.nuls.api.server.dao.mapper.ContractTokenAssetsMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTokenTransferInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
+import io.nuls.api.server.dao.mapper.ContractTransferInfoMapper;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
+import io.nuls.api.server.dto.ContractTokenDto;
 import io.nuls.api.server.dto.contract.ContractAddressInfoDto;
 import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
-import io.nuls.api.server.dto.contract.ContractTransactionDetail;
+import io.nuls.api.server.dto.contract.ContractTransactionDetailDto;
+import io.nuls.api.server.dto.contract.*;
 import io.nuls.api.server.dto.contract.vm.ProgramMethod;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.StringUtils;
@@ -38,7 +42,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Description: 别名
@@ -68,7 +75,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     private ContractTokenAssetsMapper contractTokenAssetsMapper;
     @Autowired
     private TransactionBusiness transactionBusiness;
-
+    @Autowired
+    private ContractTransferInfoMapper contractTransferInfoMapper;
     @Autowired
     private TransactionRelationMapper transactionRelationMapper;
     @Autowired
@@ -306,6 +314,34 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
+     * 批量保存合约内部转账交易
+     *
+     * @param list
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public int saveAllTransferInfo(List<ContractTransferInfo> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            i = contractTransferInfoMapper.insertByBatch(list);
+        }
+        return i;
+    }
+
+    /**
+     * 批量删除合约内部转账交易
+     *
+     * @param list
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public void deleteAllTransferInfo(List<String> list) {
+        int i = 0;
+        if (list.size() > 0) {
+            contractTransferInfoMapper.deleteList(list);
+        }
+    }
+
+    /**
      * 批量保存智能合约交易记录
      * @param list
      * @return
@@ -333,14 +369,14 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
-     * 获取代币转账信息
+     * 根据合约地址获取代币转账信息
      *
      * @param address    合约地址
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<ContractTokenTransferInfo> getContractTokenTransfers(String address, int pageNumber, int pageSize) {
+    public PageInfo<ContractTokenTransferInfoDto> getContractTokenTransferInfosByContractAddress(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (StringUtils.isNotBlank(address)) {
@@ -351,7 +387,31 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             }
         }
         PageHelper.orderBy("create_time desc");
-        PageInfo<ContractTokenTransferInfo> page = new PageInfo<ContractTokenTransferInfo>(contractTokenTransferInfoMapper.selectList(searchable));
+        List<ContractTokenTransferInfo> contractTokenTransferInfos = contractTokenTransferInfoMapper.selectList(searchable);
+        ContractTokenInfo contractTokenInfo = contractTokenInfoMapper.selectBySearchable(searchable);
+        PageInfo<ContractTokenTransferInfoDto> page = new PageInfo<>(ContractTokenTransferInfoDto.parseList(contractTokenTransferInfos, contractTokenInfo));
+        return page;
+    }
+
+    /**
+     * 根据NULS钱包地址获取代币转账信息
+     *
+     * @param accountAddress    NULS钱包地址
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<ContractTokenTransferInfoDto> getContractTokenTransferInfosByAccountAddress(String accountAddress, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        if (StringUtils.isNotBlank(accountAddress)) {
+            if (StringUtils.validAddress(accountAddress)) {
+
+            } else {
+                return null;
+            }
+        }
+        PageHelper.orderBy("create_time asc");
+        PageInfo<ContractTokenTransferInfoDto> page = new PageInfo<>(contractTokenTransferInfoMapper.selectTransferDtos(accountAddress));
         return page;
     }
 
@@ -363,7 +423,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param pageSize
      * @return
      */
-    public PageInfo<ContractTokenAssets> getContractTokenAssets(String address, int pageNumber, int pageSize) {
+    public PageInfo<ContractTokenAssetsDto> getContractTokenAssets(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (StringUtils.isNotBlank(address)) {
@@ -373,8 +433,9 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                 return null;
             }
         }
-        PageHelper.orderBy("amount asc");
-        PageInfo<ContractTokenAssets> page = new PageInfo<ContractTokenAssets>(contractTokenAssetsMapper.selectList(searchable));
+        PageHelper.orderBy("amount desc");
+        List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
+        PageInfo<ContractTokenAssetsDto> page = new PageInfo<>(ContractTokenAssetsDto.parseList(contractTokenAssets));
         return page;
     }
 
@@ -510,15 +571,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         Searchable searchable = new Searchable();
         PageHelper.orderBy("create_time desc");
         PageInfo<ContractAddressInfo> page = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
-//        List<ContractAddressInfo> list = contractAddressInfoMapper.selectList(searchable);
-//        List<ContractAddressInfoDto> contractList = new ArrayList<>();
-//        if (list != null) {
-//            for (ContractAddressInfo contractInfo : list) {
-//                ContractAddressInfoDto contract = new ContractAddressInfoDto(contractInfo);
-//                contractList.add(contract);
-//            }
-//        }
-//        PageInfo<ContractAddressInfoDto> page = new PageInfo<>(contractList);
         return page;
     }
 
@@ -547,18 +599,22 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                     contract.setTotalsupply(tokenInfo.getTotalsupply());
                 }
             }
-            //查询交易笔数
+            //查询交易笔数（非合约交易）
             Searchable searchable = new Searchable();
             searchable.addCondition("address", SearchOperator.eq, contractAddress);
-            int txCount=transactionRelationMapper.selectTotalCount(searchable);
+            searchable.addCondition("type", SearchOperator.notIn, ContractConstant.TX_TYPE_CONTRACT_LIST);
+            int txCount = transactionRelationMapper.selectTotalCount(searchable);
+            //查询交易笔数（合约交易）
+            searchable = new Searchable();
+            searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+            txCount += contractTransactionMapper.selectTotalCount(searchable);
             contract.setTxCount(txCount);
 
             //查询合约创建详情
-            ContractCreateInfo createInfo=contractCreateInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
-            if(createInfo!=null)
-            {
+            ContractCreateInfo createInfo = contractCreateInfoMapper.selectByPrimaryKey(contract.getCreateTxHash());
+            if (createInfo != null) {
                 try {
-                    List<ProgramMethod> methodList=JSONUtils.json2list(createInfo.getMethods(),ProgramMethod.class);
+                    List<ProgramMethod> methodList = JSONUtils.json2list(createInfo.getMethods(), ProgramMethod.class);
                     contract.setMethod(methodList);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -588,10 +644,30 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param pageSize
      * @return
      */
-    public  PageInfo<ContractTokenInfo> getContractTokeninfoList(int pageNumber, int pageSize) {
+    public  PageInfo<ContractTokenDto> getContractTokeninfoList(int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber,pageSize);
+        //Searchable searchable = new Searchable();
+        PageInfo<ContractTokenDto> page = new PageInfo<>(contractTokenInfoMapper.getAll());
+        return page;
+    }
+
+    /**
+     * Get all tokens list
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public  PageInfo<ContractTokenDto> getContractTokeninfoListByAccountAddress(int pageNumber, int pageSize, String accountAddress) {
+        PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
-        PageInfo<ContractTokenInfo> page = new PageInfo<>(contractTokenInfoMapper.selectList(searchable));
+        if (StringUtils.isNotBlank(accountAddress)) {
+            if (!StringUtils.validAddress(accountAddress)) {
+                return null;
+            }
+        }
+        PageHelper.orderBy("create_time desc");
+        List<ContractTokenDto> contractTokenDtos = contractTokenInfoMapper.getListByAccountAddress(accountAddress);
+        PageInfo<ContractTokenDto> page = new PageInfo<>(contractTokenDtos);
         return page;
     }
 
@@ -636,7 +712,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         return result;
     }
 
-    public ContractTransactionDetail getContractTransactionDetail(String hash, String contractAddress) {
+    public ContractTransactionDetailDto getContractTransactionDetail(String hash) {
         Transaction transaction = transactionBusiness.getByHash(hash);
         Searchable searchable = new Searchable();
         searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
@@ -655,8 +731,12 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                 break;
             default:
         }
-        ContractTransactionDetail detail = new ContractTransactionDetail(transaction);
-        detail.setContractAddress(contractAddress);
+
+        Searchable searchable1 = new Searchable();
+        searchable1.addCondition("tx_hash", SearchOperator.eq, hash);
+        ContractResultInfo contractResultInfo = contractResultInfoMapper.selectBySearchable(searchable1);
+        ContractTransactionDetailDto detail = new ContractTransactionDetailDto(transaction);
+        detail.setResultDto(contractResultInfo);
         return detail;
     }
 }

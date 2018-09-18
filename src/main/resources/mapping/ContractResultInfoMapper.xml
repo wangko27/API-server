@@ -357,4 +357,11 @@
       #{item,jdbcType=VARCHAR}
     </foreach>
   </delete>
+
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contract_result_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>
