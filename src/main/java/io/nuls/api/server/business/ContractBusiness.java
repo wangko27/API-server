@@ -29,7 +29,7 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.ContractTokenDto;
 import io.nuls.api.server.dto.contract.ContractAddressInfoDto;
 import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
-import io.nuls.api.server.dto.contract.ContractTransactionDetail;
+import io.nuls.api.server.dto.contract.ContractTransactionDetailDto;
 import io.nuls.api.server.dto.contract.*;
 import io.nuls.api.server.dto.contract.vm.ProgramMethod;
 import io.nuls.api.utils.JSONUtils;
@@ -666,7 +666,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         return result;
     }
 
-    public ContractTransactionDetail getContractTransactionDetail(String hash, String contractAddress) {
+    public ContractTransactionDetailDto getContractTransactionDetail(String hash) {
         Transaction transaction = transactionBusiness.getByHash(hash);
         Searchable searchable = new Searchable();
         searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
@@ -685,8 +685,12 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                 break;
             default:
         }
-        ContractTransactionDetail detail = new ContractTransactionDetail(transaction);
-        detail.setContractAddress(contractAddress);
+
+        Searchable searchable1 = new Searchable();
+        searchable1.addCondition("tx_hash", SearchOperator.eq, hash);
+        ContractResultInfo contractResultInfo = contractResultInfoMapper.selectBySearchable(searchable1);
+        ContractTransactionDetailDto detail = new ContractTransactionDetailDto(transaction);
+        detail.setResultDto(contractResultInfo);
         return detail;
     }
 }

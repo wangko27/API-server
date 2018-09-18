@@ -59,7 +59,7 @@ public class TokenResource {
      * 根据合约地址获取代币转账列表
      * @param pageNumber
      * @param pageSize
-     * @param contractAddress
+     * @param contractAddress       合约地址
      * @return
      */
     @GET
@@ -113,6 +113,13 @@ public class TokenResource {
         return result;
     }
 
+    /**
+     * 根据合约地址获取指定代币持有者列表
+     * @param pageNumber
+     * @param pageSize
+     * @param contractAddress       合约地址
+     * @return
+     */
     @GET
     @Path("/{contractAddress}/holders")
     @Produces(MediaType.APPLICATION_JSON)

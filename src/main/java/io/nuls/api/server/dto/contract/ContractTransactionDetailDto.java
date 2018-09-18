@@ -27,16 +27,11 @@
 
 package io.nuls.api.server.dto.contract;
 
-import io.nuls.api.entity.Input;
-import io.nuls.api.entity.Transaction;
-import io.nuls.api.entity.TxData;
-import io.nuls.api.entity.Utxo;
+import io.nuls.api.entity.*;
 
 import java.util.List;
 
-public class ContractTransactionDetail {
-
-    private Long id;
+public class ContractTransactionDetailDto {
 
     private String hash;
 
@@ -62,15 +57,20 @@ public class ContractTransactionDetail {
 
     private String scriptSign;
 
+    private String status;
+
+    private String confirmCount;
+
     private TxData txData;
 
-    public ContractTransactionDetail(Transaction transaction) {
+    private ContractResultInfo resultDto;
+
+    public ContractTransactionDetailDto(Transaction transaction) {
         this.amount = transaction.getAmount();
         this.blockHeight = transaction.getBlockHeight();
         this.createTime = transaction.getCreateTime();
         this.fee = transaction.getFee();
         this.hash = transaction.getHash();
-        this.id = transaction.getId();
         this.inputs = transaction.getInputs();
         this.outputs = transaction.getOutputs();
         this.remark = transaction.getRemark();
@@ -78,6 +78,30 @@ public class ContractTransactionDetail {
         this.size = transaction.getSize();
         this.type = transaction.getType();
         this.txData = transaction.getTxData();
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getConfirmCount() {
+        return confirmCount;
+    }
+
+    public void setConfirmCount(String confirmCount) {
+        this.confirmCount = confirmCount;
+    }
+
+    public ContractResultInfo getResultDto() {
+        return resultDto;
+    }
+
+    public void setResultDto(ContractResultInfo resultDto) {
+        this.resultDto = resultDto;
     }
 
     public String getHash() {
@@ -182,14 +206,6 @@ public class ContractTransactionDetail {
 
     public void setTxData(TxData txData) {
         this.txData = txData;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
 }

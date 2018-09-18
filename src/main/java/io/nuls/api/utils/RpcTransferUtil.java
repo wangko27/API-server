@@ -403,6 +403,7 @@ public class RpcTransferUtil {
             result = new ContractResultInfo();
             map = (Map<String, Object>) map.get("data");
             if (map != null) {
+
                 result.setErrorMessage((String) map.get("errorMessage"));
                 result.setSuccess(map.get("success").toString());
                 result.setActualContractFee(map.get("actualContractFee") != null ? Long.parseLong(map.get("actualContractFee").toString()) : 0);
