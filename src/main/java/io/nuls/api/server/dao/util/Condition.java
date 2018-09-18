@@ -23,6 +23,8 @@
  */
 package io.nuls.api.server.dao.util;
 
+import java.util.List;
+
 /**
  * 封装sql查询条件赋值,
  * prefix和endfix主要针对有时候查询条件需要在整条条件语句前后加上括号等情况时赋值调用
@@ -108,8 +110,21 @@ public class Condition {
             return "%" + value;
         }
         if (operator == SearchOperator.in || operator == SearchOperator.notIn) {
-            if (value instanceof String) {
-                return "(" + value + ")";
+            if (value instanceof List) {
+				List list = (List) value;
+				if (list.size() > 0){
+					StringBuilder sb = new StringBuilder("(");
+					for (Object o : list) {
+						if (o instanceof String) {
+							sb.append("'").append(o).append("'").append(",");
+						}
+						if (o instanceof Number) {
+							sb.append(o).append(",");
+						}
+					}
+					return sb.append(")").toString();
+				}
+				return "";
             }
         }
 		return value;

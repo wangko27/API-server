@@ -78,7 +78,17 @@ public class ContractResultInfo {
 
     private String remark;
 
+    private Integer confirmCount;
+
     private Long createTime;
+
+    public Integer getConfirmCount() {
+        return confirmCount;
+    }
+
+    public void setConfirmCount(Integer confirmCount) {
+        this.confirmCount = confirmCount;
+    }
 
     public String getTxHash() {
         return txHash;

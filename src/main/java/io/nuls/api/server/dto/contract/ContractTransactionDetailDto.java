@@ -59,7 +59,7 @@ public class ContractTransactionDetailDto {
 
     private String status;
 
-    private String confirmCount;
+    private Integer confirmCount;
 
     private TxData txData;
 
@@ -88,11 +88,11 @@ public class ContractTransactionDetailDto {
         this.status = status;
     }
 
-    public String getConfirmCount() {
+    public Integer getConfirmCount() {
         return confirmCount;
     }
 
-    public void setConfirmCount(String confirmCount) {
+    public void setConfirmCount(Integer confirmCount) {
         this.confirmCount = confirmCount;
     }
 
