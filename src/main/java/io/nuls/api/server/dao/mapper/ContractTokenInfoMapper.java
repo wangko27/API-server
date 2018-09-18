@@ -33,4 +33,9 @@ public interface ContractTokenInfoMapper extends BaseMapper<ContractTokenInfo, S
      * @return
      */
     List<ContractTokenDto> getAll();
+    /**
+     * select all token info
+     * @return
+     */
+    List<ContractTokenDto> getListByAccountAddress(String accountAddress);
 }

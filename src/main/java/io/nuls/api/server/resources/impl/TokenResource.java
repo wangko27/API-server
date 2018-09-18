@@ -178,6 +178,35 @@ public class TokenResource {
         result.setData(contractBusiness.getContractTokeninfoList(pageNumber,pageSize));
         return result;
     }
+
+    /**
+     * Description:get all tokens list
+     * Author: Flyglded
+     * Date:  2018/9/14 0029
+     */
+    @GET
+    @Path("/wallet/{accountAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public  RpcClientResult getTokensByAccountAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("accountAddress") String accountAddress) {
+        RpcClientResult result = null;
+        if(pageNumber <0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if(pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if(pageSize == 0) {
+            pageSize = 20;
+        }
+        if(pageSize > 100) {
+            pageSize = 100;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokeninfoListByAccountAddress(pageNumber,pageSize,accountAddress));
+        return result;
+    }
+
     /**
      * Description:get all tokens list
      * Author: Flyglded

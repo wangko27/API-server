@@ -149,6 +149,14 @@
     FROM contract_token_info a,contract_address_info b
     WHERE a.contract_address = b.contract_address
   </select>
+
+  <select id="getListByAccountAddress" parameterType="java.lang.String" resultMap="DtoResultMap">
+    SELECT
+      a.tx_hash, a.contract_address, a.token_name, a.symbol, a.decimals, a.totalsupply, a.create_time,c.status
+    from contract_token_info a join contract_token_assets b on a.contract_address = b.contract_address join contract_address_info c on c.contract_address = a.contract_address
+    where b.account_address = #{accountAddress,jdbcType=VARCHAR}
+  </select>
+
   <select id="selectTokenByAddress" parameterType="java.lang.String" resultMap="BaseResultMap">
     SELECT
     <include refid="Base_Column_List" />
