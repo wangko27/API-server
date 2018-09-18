@@ -145,4 +145,11 @@
     FROM contract_token_info
     WHERE contract_address = #{contractAddress,jdbcType=VARCHAR}
   </select>
+
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contract_token_info
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

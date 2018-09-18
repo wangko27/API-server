@@ -26,9 +26,7 @@ import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
 import io.nuls.api.server.dao.mapper.TransactionRelationMapper;
 import io.nuls.api.server.dao.util.SearchOperator;
 import io.nuls.api.server.dao.util.Searchable;
-import io.nuls.api.server.dto.contract.ContractAddressInfoDto;
-import io.nuls.api.server.dto.contract.ContractTokenAssetsDetail;
-import io.nuls.api.server.dto.contract.ContractTransactionDetail;
+import io.nuls.api.server.dto.contract.*;
 import io.nuls.api.server.dto.contract.vm.ProgramMethod;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.StringUtils;
@@ -333,14 +331,14 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
-     * 获取代币转账信息
+     * 根据合约地址获取代币转账信息
      *
      * @param address    合约地址
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<ContractTokenTransferInfo> getContractTokenTransfers(String address, int pageNumber, int pageSize) {
+    public PageInfo<ContractTokenTransferInfoDto> getContractTokenTransferInfosByContractAddress(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (StringUtils.isNotBlank(address)) {
@@ -351,7 +349,31 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             }
         }
         PageHelper.orderBy("create_time desc");
-        PageInfo<ContractTokenTransferInfo> page = new PageInfo<ContractTokenTransferInfo>(contractTokenTransferInfoMapper.selectList(searchable));
+        List<ContractTokenTransferInfo> contractTokenTransferInfos = contractTokenTransferInfoMapper.selectList(searchable);
+        ContractTokenInfo contractTokenInfo = contractTokenInfoMapper.selectBySearchable(searchable);
+        PageInfo<ContractTokenTransferInfoDto> page = new PageInfo<>(ContractTokenTransferInfoDto.parseList(contractTokenTransferInfos, contractTokenInfo));
+        return page;
+    }
+
+    /**
+     * 根据NULS钱包地址获取代币转账信息
+     *
+     * @param accountAddress    NULS钱包地址
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<ContractTokenTransferInfoDto> getContractTokenTransferInfosByAccountAddress(String accountAddress, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        if (StringUtils.isNotBlank(accountAddress)) {
+            if (StringUtils.validAddress(accountAddress)) {
+
+            } else {
+                return null;
+            }
+        }
+        PageHelper.orderBy("create_time asc");
+        PageInfo<ContractTokenTransferInfoDto> page = new PageInfo<>(contractTokenTransferInfoMapper.selectTransferDtos(accountAddress));
         return page;
     }
 
@@ -363,7 +385,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param pageSize
      * @return
      */
-    public PageInfo<ContractTokenAssets> getContractTokenAssets(String address, int pageNumber, int pageSize) {
+    public PageInfo<ContractTokenAssetsDto> getContractTokenAssets(String address, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         if (StringUtils.isNotBlank(address)) {
@@ -373,8 +395,9 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                 return null;
             }
         }
-        PageHelper.orderBy("amount asc");
-        PageInfo<ContractTokenAssets> page = new PageInfo<ContractTokenAssets>(contractTokenAssetsMapper.selectList(searchable));
+        PageHelper.orderBy("amount desc");
+        List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
+        PageInfo<ContractTokenAssetsDto> page = new PageInfo<>(ContractTokenAssetsDto.parseList(contractTokenAssets));
         return page;
     }
 

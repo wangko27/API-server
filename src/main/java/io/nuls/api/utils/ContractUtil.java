@@ -25,7 +25,7 @@ package io.nuls.api.utils;
 
 import io.nuls.api.constant.ContractConstant;
 import io.nuls.api.model.Transaction;
-import io.nuls.api.server.dto.contract.ContractTokenTransferInfoPo;
+import io.nuls.api.server.po.contract.ContractTokenTransferInfoPo;
 import io.nuls.sdk.core.utils.Log;
 
 import java.lang.reflect.Array;

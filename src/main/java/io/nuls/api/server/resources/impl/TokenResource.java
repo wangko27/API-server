@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Description:
+ * Description:代币接口
  * Author: moon
  * Date:  2018/5/29 0029
  */
@@ -55,10 +55,17 @@ public class TokenResource {
     @Autowired
     private ContractBusiness contractBusiness;
 
+    /**
+     * 根据合约地址获取代币转账列表
+     * @param pageNumber
+     * @param pageSize
+     * @param contractAddress
+     * @return
+     */
     @GET
     @Path("/{contractAddress}/transactions")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getContractTokenTransfers(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("contractAddress") String contractAddress){
+    public RpcClientResult getContractTokenTransferInfosByContractAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("contractAddress") String contractAddress){
         RpcClientResult result = null;
         if (pageNumber < 0 || pageSize < 0) {
             result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
@@ -73,7 +80,36 @@ public class TokenResource {
             pageSize = 100;
         }
         result = RpcClientResult.getSuccess();
-        result.setData(contractBusiness.getContractTokenTransfers(contractAddress,pageNumber,pageSize));
+        result.setData(contractBusiness.getContractTokenTransferInfosByContractAddress(contractAddress,pageNumber,pageSize));
+        return result;
+    }
+
+    /**
+     * 根据钱包地址获取代币转账列表
+     * @param pageNumber
+     * @param pageSize
+     * @param accountAddress       NULS钱包地址
+     * @return
+     */
+    @GET
+    @Path("/transactions/{accountAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTokenTransferInfosByAccountAddress(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize, @PathParam("accountAddress") String accountAddress){
+        RpcClientResult result = null;
+        if (pageNumber < 0 || pageSize < 0) {
+            result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return result;
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 20;
+        } else if (pageSize > 100) {
+            pageSize = 100;
+        }
+        result = RpcClientResult.getSuccess();
+        result.setData(contractBusiness.getContractTokenTransferInfosByAccountAddress(accountAddress,pageNumber,pageSize));
         return result;
     }
 

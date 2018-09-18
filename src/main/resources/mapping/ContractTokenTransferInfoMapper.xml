@@ -10,6 +10,18 @@
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
     <result column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
   </resultMap>
+  <resultMap id="DtoResultMap" type="io.nuls.api.server.dto.contract.ContractTokenTransferInfoDto" >
+    <id column="contract_address" property="contractAddress" jdbcType="VARCHAR" />
+    <result column="token_name" property="name" jdbcType="VARCHAR" />
+    <result column="symbol" property="symbol" jdbcType="VARCHAR" />
+    <result column="decimals" property="decimals" jdbcType="BIGINT" />
+    <result column="from_address" property="fromAddress" jdbcType="VARCHAR" />
+    <result column="to_address" property="toAddress" jdbcType="VARCHAR" />
+    <result column="tx_value" property="txValue" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="BIGINT" />
+    <result column="tx_hash" property="txHash" jdbcType="VARCHAR" />
+  </resultMap>
+
   <sql id="Base_Column_List" >
     tx_hash, from_address, to_address, tx_value, create_time, contract_address, create_tx_hash
   </sql>
@@ -142,5 +154,11 @@
   <select id="selectTotalTransfer" parameterType="io.nuls.api.server.dao.util.Searchable" resultType="java.lang.Long">
     SELECT count(contract_address) total FROM contract_token_transfer_info
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
+
+  <select id="selectTransferDtos" parameterType="java.lang.String" resultMap="DtoResultMap">
+    SELECT a.contract_address, b.token_name, b.symbol, b.decimals, a.from_address, a.to_address, a.tx_value, a.create_time, a.tx_hash
+      FROM contract_token_transfer_info a join contract_token_info b on a.contract_address = b.contract_address
+    where a.from_address = #{accountAddress,jdbcType=VARCHAR} or a.to_address = #{accountAddress,jdbcType=VARCHAR}
   </select>
 </mapper>
