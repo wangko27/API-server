@@ -9,6 +9,10 @@ public class UtxoDto {
     public UtxoDto() {
 
     }
+    public UtxoDto(String address,long total) {
+        this.address = address;
+        this.total = total;
+    }
     public UtxoDto(String address) {
         this.address = address;
     }

@@ -14,7 +14,6 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.FreezeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.StringUtils;
-import io.nuls.api.utils.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -362,7 +361,7 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
      *
      * @return
      */
-    public List<UtxoDto> getBlockSumTxamount() {
+    /*public List<UtxoDto> getBlockSumTxamount() {
         Map<String, UtxoDto> mapData = new HashMap<>();
         List<Utxo> utxoList = getList();
         UtxoDto utxoDto;
@@ -380,5 +379,31 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
             }
         }
         return new ArrayList<UtxoDto>(mapData.values());
+    }*/
+
+
+    /**
+     * 统计持币账户 扫描所有utxo   更新于2018-09-19，采用单账户统计余额的方式统计，对于utxo越多，效率相对会更高
+     *
+     * @return
+     */
+    public List<UtxoDto> getBlockSumTxamount(){
+        List<UtxoDto> ulist = new ArrayList<>();
+        List<AddressHashIndex> allList = addressHashIndexLevelDbService.getAll();
+        //统计地址
+        String address;
+        //统计金额
+        long total = 0;
+        Utxo utxo;
+        for(AddressHashIndex addressHashIndex : allList){
+            address = addressHashIndex.getAddress();
+            Set<String> utxoSet = addressHashIndex.getHashIndexSet();
+            for(String hashIndex:utxoSet){
+                utxo = selectUtxoByHashAndIndex(hashIndex);
+                total += utxo.getAmount();
+            }
+            ulist.add(new UtxoDto(address,total));
+        }
+        return ulist;
     }
 }
