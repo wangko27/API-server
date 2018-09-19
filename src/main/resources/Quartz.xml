@@ -56,7 +56,7 @@
 
     <bean id="balanceTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="balanceTaskSync" />
-        <property name="cronExpression" value="0 0 * * * ?" />
+        <property name="cronExpression" value="0 0 0/1 * * ?" />
     </bean>
     <bean id="transactionHistoryTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="transactionHistoryTaskSync" />
@@ -70,18 +70,18 @@
     <bean id="webwalletTransactionTaskTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="webwalletTransactionSync" />
         <property name="startDelay" value="0" />
-        <property name="repeatInterval" value="600000" /><!-- 每10分钟调度一次 -->
+        <property name="repeatInterval" value="6000000" /><!-- 每10分钟调度一次 -->
     </bean>
     <bean id="agentNodeSyncTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="agentNodeSync" />
         <property name="startDelay" value="0" />
-        <property name="repeatInterval" value="20000" />
+        <property name="repeatInterval" value="200000" />
     </bean>
     <bean id="assetsBrowseTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="assetsBrowseSyn" />
         <property name="startDelay" value="10000" />
         <!--<property name="repeatInterval" value="1800000" />-->
-        <property name="repeatInterval" value="1800000" />
+        <property name="repeatInterval" value="3600000" />
     </bean>
 
     <bean id="SpringJobSchedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
