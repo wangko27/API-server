@@ -168,7 +168,7 @@ public class SyncDataBusiness {
                     //查询合约交易执行结果
                     RpcClientResult<ContractResultInfo> result = syncDataHandler.getContractResult(tx.getHash());
                     if (result.isFailed() || result.getData() == null) {
-                        return;
+                        continue;
                     }
 
                     ContractResultInfo resultData = result.getData();
@@ -235,7 +235,7 @@ public class SyncDataBusiness {
                         ContractDeleteInfo data = (ContractDeleteInfo) tx.getTxData();
                         data.setCreateTxHash(tx.getHash());
                         if (result.isSuccess()) {
-                            contractBusiness.deleteContract(data.getContractAddress());
+                            contractBusiness.deleteContract(data);
                         }
                         //设置合约交易记录创建者
                         contractTransaction.setCreater(data.getCreater());

@@ -108,9 +108,9 @@ public class Condition {
             return "%" + value;
         }
         if (operator == SearchOperator.in || operator == SearchOperator.notIn) {
-            if (value instanceof String) {
-                return "(" + value + ")";
-            }
+			if (value instanceof String) {
+				return "(" + value + ")";
+			}
         }
 		return value;
 	}

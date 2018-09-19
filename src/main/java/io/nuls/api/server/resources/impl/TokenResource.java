@@ -219,7 +219,7 @@ public class TokenResource {
         RpcClientResult result = null;
         ContractTokenInfo contractTokenInfo = null;
         ContractAddressInfo contractAddressInfo = null;
-        Map<String, Object> mapToken = new HashMap<String, Object>();
+        Map<String, Object> mapToken = new HashMap<>(13);
         if(StringUtils.isBlank(contractAddress)) {
             result = RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             return result;

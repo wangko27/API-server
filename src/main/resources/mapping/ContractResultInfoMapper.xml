@@ -26,13 +26,14 @@
     <result column="symbol" property="symbol" jdbcType="VARCHAR" />
     <result column="decimals" property="decimals" jdbcType="BIGINT" />
     <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="confirm_count" property="confirmCount" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
     tx_hash, contract_address, success, error_message, result, gas_limit, gas_used, price, 
     total_fee, tx_size_fee, actual_contract_fee, refund_fee, stateroot, tx_value, stacktrace, 
     balance, nonce, transfers, events, token_transfers, token_name, symbol, decimals, 
-    remark, create_time
+    remark, create_time, confirm_count
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -53,7 +54,7 @@
       balance, nonce, transfers, 
       events, token_transfers, token_name, 
       symbol, decimals, remark, 
-      create_time)
+      create_time, confirm_count)
     values (#{txHash,jdbcType=VARCHAR}, #{contractAddress,jdbcType=VARCHAR}, #{success,jdbcType=VARCHAR}, 
       #{errorMessage,jdbcType=VARCHAR}, #{result,jdbcType=VARCHAR}, #{gasLimit,jdbcType=BIGINT}, 
       #{gasUsed,jdbcType=BIGINT}, #{price,jdbcType=BIGINT}, #{totalFee,jdbcType=BIGINT}, 
@@ -62,7 +63,7 @@
       #{balance,jdbcType=BIGINT}, #{nonce,jdbcType=BIGINT}, #{transfers,jdbcType=VARCHAR}, 
       #{events,jdbcType=VARCHAR}, #{tokenTransfers,jdbcType=VARCHAR}, #{tokenName,jdbcType=VARCHAR}, 
       #{symbol,jdbcType=VARCHAR}, #{decimals,jdbcType=BIGINT}, #{remark,jdbcType=VARCHAR}, 
-      #{createTime,jdbcType=BIGINT})
+      #{createTime,jdbcType=BIGINT}, #{confirmCount,jdbcType=VARCHAR})
   </insert>
   <insert id="insertByBatch" parameterType="java.util.List">
     insert into contract_result_info (tx_hash, contract_address, success,
@@ -73,7 +74,7 @@
     balance, nonce, transfers,
     events, token_transfers, token_name,
     symbol, decimals, remark,
-    create_time)
+    create_time, confirm_count)
     values
     <foreach collection="list" item="item" index="index" separator=",">
       (#{item.txHash,jdbcType=VARCHAR}, #{item.contractAddress,jdbcType=VARCHAR}, #{item.success,jdbcType=VARCHAR},
@@ -84,7 +85,7 @@
       #{item.balance,jdbcType=BIGINT}, #{item.nonce,jdbcType=BIGINT}, #{item.transfers,jdbcType=VARCHAR},
       #{item.events,jdbcType=VARCHAR}, #{item.tokenTransfers,jdbcType=VARCHAR}, #{item.tokenName,jdbcType=VARCHAR},
       #{item.symbol,jdbcType=VARCHAR}, #{item.decimals,jdbcType=BIGINT}, #{item.remark,jdbcType=VARCHAR},
-      #{item.createTime,jdbcType=BIGINT})
+      #{item.createTime,jdbcType=BIGINT}, #{item.confirmCount,jdbcType=VARCHAR})
     </foreach>
     on duplicate key update create_time = values(create_time)
   </insert>
@@ -166,6 +167,9 @@
       <if test="createTime != null" >
         create_time,
       </if>
+      <if test="confirmCount != null" >
+        confirm_count,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="txHash != null" >
@@ -242,6 +246,9 @@
       </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="confirmCount != null" >
+        #{confirmCount,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -320,6 +327,9 @@
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=BIGINT},
       </if>
+      <if test="confirmCount != null" >
+        confirm_count = #{confirmCount,jdbcType=VARCHAR},
+      </if>
     </set>
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
@@ -349,6 +359,7 @@
       decimals = #{decimals,jdbcType=BIGINT},
       remark = #{remark,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=BIGINT}
+      confirm_count = #{confirmCount,jdbcType=VARCHAR}
     where tx_hash = #{txHash,jdbcType=VARCHAR}
   </update>
   <delete id="deleteList" parameterType="java.util.List">
