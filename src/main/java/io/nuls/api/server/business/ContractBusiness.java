@@ -499,15 +499,12 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         if (rollback) {
             sign = sign.negate();
         }
-        Searchable searchable = new Searchable();
-        if (StringUtils.isNotBlank(contractAddress) && StringUtils.validAddress(contractAddress)) {
-            searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
-        } else {
+        if (StringUtils.isBlank(contractAddress) || !StringUtils.validAddress(contractAddress)) {
             return;
         }
 
-        List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
         List<ContractTokenAssets> addContractTokenAssets = new ArrayList<>();
+        List<String> lists = new ArrayList<>();
         List<String> deleteContractTokenAssets = new ArrayList<>();
         HashMap<String, BigInteger> tempMap = new HashMap<>(contractTokenTransferDtos.size());
         for (ContractTokenTransferInfo contractTokenTransferInfo : contractTokenTransferDtos) {//for循环统计出各地址代币收支状况
@@ -522,7 +519,17 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             BigInteger toAmount = tempMap.get(toAddress) != null ? tempMap.get(toAddress) : BigInteger.ZERO;
             toAmount = toAmount.add(txValue);
             tempMap.put(toAddress, toAmount);
+            if (StringUtils.isNotBlank(fromAddress) && !lists.contains(fromAddress)) {
+                lists.add(fromAddress);
+            }
+            if (!lists.contains(toAddress)) {
+                lists.add(toAddress);
+            }
         }
+        Searchable searchable = new Searchable();
+        searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
+        searchable.addCondition("account_address", SearchOperator.in, lists);
+        List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
         for (Map.Entry<String, BigInteger> stringLongEntry : tempMap.entrySet()) {
             String address = stringLongEntry.getKey();
             BigInteger value = stringLongEntry.getValue();
