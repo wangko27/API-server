@@ -22,50 +22,59 @@
  * SOFTWARE.
  *
  */
+
 package io.nuls.api.crypto.script;
-import io.nuls.api.crypto.script.Script;
+
+
+import io.nuls.api.crypto.ECKey;
 import io.nuls.api.exception.NulsException;
+import io.nuls.api.model.BaseNulsData;
+import io.nuls.api.model.NulsDigestData;
 import io.nuls.api.model.NulsSignData;
 import io.nuls.api.utils.NulsByteBuffer;
 import io.nuls.api.utils.NulsOutputStreamBuffer;
 import io.nuls.api.utils.SerializeUtils;
-import io.nuls.api.utils.log.Log;
+import io.nuls.sdk.core.contast.KernelErrorCode;
+import io.nuls.sdk.core.validate.ValidateResult;
 
 import java.io.IOException;
 
-/**
- * @author Facjas
- * @date 2018/3/8.
- */
-public class P2PKHScriptSig extends Script {
-
-    //todo 确认该长度是否正确
-    public static final int DEFAULT_SERIALIZE_LENGTH = 110;
-
+public class BlockSignature extends BaseNulsData {
     private NulsSignData signData;
-
     private byte[] publicKey;
 
-    public P2PKHScriptSig() {
-
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(publicKey.length);
+        stream.write(publicKey);
+        stream.writeNulsData(signData);
     }
 
-    public P2PKHScriptSig(byte[] signBytes, byte[] publicKey) {
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        int length = byteBuffer.readByte();
+        this.publicKey = byteBuffer.readBytes(length);
         this.signData = new NulsSignData();
-        try {
-            this.signData.parse(signBytes,0);
-        } catch (NulsException e) {
-            Log.error(e);
+        this.signData.parse(byteBuffer);
+    }
+
+    @Override
+    public int size() {
+        int size = 1 + publicKey.length;
+        size += SerializeUtils.sizeOfNulsData(signData);
+        return size;
+    }
+
+    public ValidateResult verifySignature(NulsDigestData digestData) {
+        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), publicKey);
+        if (b) {
+            return ValidateResult.getSuccessResult();
+        } else {
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
         }
-        this.publicKey = publicKey;
-    }
-
-    public NulsSignData getSignData() {
-        return signData;
-    }
-
-    public void setSignData(NulsSignData signData) {
-        this.signData = signData;
     }
 
     public byte[] getPublicKey() {
@@ -76,52 +85,11 @@ public class P2PKHScriptSig extends Script {
         this.publicKey = publicKey;
     }
 
-    public P2PKHScriptSig(NulsSignData signData, byte[] publicKey) {
+    public NulsSignData getSignData() {
+        return signData;
+    }
+
+    public void setSignData(NulsSignData signData) {
         this.signData = signData;
-        this.publicKey = publicKey;
-    }
-
-
-    public static P2PKHScriptSig createFromBytes(byte[] bytes) throws NulsException {
-        P2PKHScriptSig sig = new P2PKHScriptSig();
-        sig.parse(bytes,0);
-        return sig;
-    }
-
-    @Override
-    public byte[] getBytes() {
-        try {
-            return this.serialize();
-        } catch (IOException e) {
-            Log.error(e);
-            return null;
-        }
-    }
-
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(publicKey.length);
-        stream.write(publicKey);
-        stream.writeNulsData(signData);
-
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        int length = byteBuffer.readByte();
-        this.publicKey = byteBuffer.readBytes(length);
-        this.signData = new NulsSignData();
-        this.signData.parse(byteBuffer);
-
-    }
-
-    @Override
-    public int size() {
-        int size = 1 + publicKey.length;
-        size += SerializeUtils.sizeOfNulsData(signData);
-        return size;
     }
 }

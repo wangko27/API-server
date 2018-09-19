@@ -24,7 +24,6 @@
  */
 package io.nuls.api.crypto;
 
-
 import io.nuls.api.utils.log.Log;
 
 import java.util.Base64;

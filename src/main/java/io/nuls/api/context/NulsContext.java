@@ -56,6 +56,11 @@ public class NulsContext {
      */
     public static byte CONTRACT_ADDRESS_TYPE = 2;
 
+    /**
+     * 多重签名地址
+     * contract address type
+     */
+    public static byte P2SH_ADDRESS_TYPE = 3;
     /*
      *  chain name
      */

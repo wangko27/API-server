@@ -27,7 +27,6 @@ package io.nuls.api.crypto;
 /**
  *
  * @author facjas
- * @date 2017/11/20
  */
 
 public class SM3 {

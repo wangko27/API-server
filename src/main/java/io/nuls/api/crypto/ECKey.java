@@ -24,6 +24,8 @@
  */
 package io.nuls.api.crypto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.api.utils.AssertUtil;
 import io.nuls.api.utils.log.Log;
 import org.slf4j.Logger;
@@ -51,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Comparator;
 
 /**
  * 椭圆曲线加密
@@ -104,6 +107,8 @@ public class ECKey {
 
     /**
      * 根据私匙和公匙创建
+     * @param priv
+     * @param pub
      */
     private ECKey(BigInteger priv, ECPoint pub) {
         if (priv != null) {
@@ -116,18 +121,14 @@ public class ECKey {
         creationTimeSeconds = System.currentTimeMillis();
     }
 
-    /**
-     * 根据私匙创建密码器
-     *
-     * @return ECKey
-     */
     public static ECKey fromPrivate(BigInteger privKey) {
         return fromPrivate(privKey, true);
     }
 
     /**
      * 根据私匙创建密码器，并选择是否压缩公匙
-     *
+     * @param privKey private key
+     * @param compressed compressed
      * @return ECKey
      */
     public static ECKey fromPrivate(BigInteger privKey, boolean compressed) {
@@ -136,29 +137,15 @@ public class ECKey {
         return new ECKey(privKey, getPointWithCompression(point, compressed));
     }
 
-    /**
-     * 只有公匙
-     *
-     * @return ECKey
-     */
+
     public static ECKey fromPublicOnly(byte[] pubKey) {
         return new ECKey(null, CURVE.getCurve().decodePoint(pubKey));
     }
 
-    /**
-     * 只有公匙
-     *
-     * @return ECKey
-     */
     public static ECKey fromPublicOnly(ECPoint pub) {
         return new ECKey(null, pub);
     }
 
-    /**
-     * 根据私匙计算公匙
-     *
-     * @return ECKey
-     */
     public static ECPoint publicPointFromPrivate(BigInteger privKey) {
         if (privKey.bitLength() > CURVE.getN().bitLength()) {
             privKey = privKey.mod(CURVE.getN());
@@ -166,11 +153,6 @@ public class ECKey {
         return new FixedPointCombMultiplier().multiply(CURVE.getG(), privKey);
     }
 
-    /**
-     * 通过加密的私钥创建ECKey
-     *
-     * @return ECKey
-     */
     public static ECKey fromEncrypted(EncryptedData encryptedPrivateKey, byte[] pubKey) {
         ECKey key = fromPublicOnly(pubKey);
         AssertUtil.canNotEmpty(encryptedPrivateKey, "encryptedPrivateKey can not null!");
@@ -178,11 +160,6 @@ public class ECKey {
         return key;
     }
 
-    /**
-     * 获取公匙内容
-     *
-     * @return byte[]
-     */
     protected byte[] getPubKey(boolean compressed) {
         return pub.getEncoded(compressed);
     }
@@ -201,6 +178,7 @@ public class ECKey {
      *
      * @return BigInteger
      */
+    @JsonIgnore
     public BigInteger getPrivKey() {
         if (priv == null) {
             throw new MissingPrivateKeyException();
@@ -213,6 +191,7 @@ public class ECKey {
      *
      * @return byte[]
      */
+    @JsonIgnore
     public byte[] getPrivKeyBytes() {
         return getPrivKey().toByteArray();
     }
@@ -222,6 +201,7 @@ public class ECKey {
      *
      * @return String
      */
+    @JsonIgnore
     public String getPrivateKeyAsHex() {
         return Hex.encode(getPrivKeyBytes());
     }
@@ -235,11 +215,6 @@ public class ECKey {
         return getPublicKeyAsHex(false);
     }
 
-    /**
-     * 获取公匙转16进制后的字符串
-     *
-     * @return String
-     */
     public String getPublicKeyAsHex(boolean compressed) {
         return Hex.encode(getPubKey(compressed));
     }
@@ -258,9 +233,6 @@ public class ECKey {
         return CURVE.getCurve().createPoint(x, y, compressed);
     }
 
-    /**
-     * 验证签名
-     */
     public static boolean verify(byte[] data, ECDSASignature signature, byte[] pub) {
         ECDSASigner signer = new ECDSASigner();
         ECPublicKeyParameters params = new ECPublicKeyParameters(CURVE.getCurve().decodePoint(pub), CURVE);
@@ -273,16 +245,10 @@ public class ECKey {
         }
     }
 
-    /**
-     * 验证签名
-     */
     public static boolean verify(byte[] data, byte[] signature, byte[] pub) {
         return verify(data, ECDSASignature.decodeFromDER(signature), pub);
     }
 
-    /**
-     * 验证签名
-     */
     public boolean verify(byte[] hash, byte[] signature) {
         return ECKey.verify(hash, signature, getPubKey());
     }
@@ -358,6 +324,7 @@ public class ECKey {
          * the same validator. However, we dislike the ability to modify the bits of a Bitcoin transaction after it's
          * been signed, as that violates various assumed invariants. Thus in future only one of those forms will be
          * considered legal and the other will be banned.
+         * @return ECDSASignature
          */
         public ECDSASignature toCanonicalised() {
             if (!isCanonical()) {
@@ -373,11 +340,6 @@ public class ECKey {
         }
     }
 
-    /**
-     * 签名
-     *
-     * @return ECDSASignature
-     */
     public byte[] sign(byte[] hash) {
         return sign(hash, null);
     }
@@ -399,28 +361,14 @@ public class ECKey {
         return new ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
     }
 
-    /**
-     * 是否包含私匙
-     *
-     * @return boolean
-     */
     public boolean hasPrivKey() {
         return priv != null;
     }
 
-    /**
-     * 公钥是否压缩
-     *
-     * @return boolean
-     */
     public boolean isCompressed() {
         return pub.isCompressed();
     }
 
-
-    /**
-     * 设置创建时间
-     */
     public void setCreationTimeSeconds(long creationTimeSeconds) {
         this.creationTimeSeconds = creationTimeSeconds;
     }
@@ -438,17 +386,23 @@ public class ECKey {
     }
 
     public static boolean isValidPrivteHex(String privateHex) {
-        byte[] privateKey;
-        try {
-            privateKey = Hex.decode(privateHex);
-        } catch (Exception e) {
+        int len = privateHex.length();
+        if (len % 2 == 1) {
             return false;
         }
 
-        if (privateKey.length < 32 || privateKey.length > 34) {
+        if (len < 60 || len > 66) {
             return false;
         }
-
         return true;
     }
+
+    public static final Comparator<ECKey> PUBKEY_COMPARATOR = new Comparator<ECKey>() {
+        private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+
+        @Override
+        public int compare(ECKey k1, ECKey k2) {
+            return comparator.compare(k1.getPubKey(), k2.getPubKey());
+        }
+    };
 }

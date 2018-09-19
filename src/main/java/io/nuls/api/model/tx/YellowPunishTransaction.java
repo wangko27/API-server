@@ -50,7 +50,6 @@ public class YellowPunishTransaction extends Transaction<YellowPunishData> {
         return null;
     }
 
-    @Override
     public boolean isFreeOfFee() {
         return true;
     }

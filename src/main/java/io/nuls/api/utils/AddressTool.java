@@ -26,18 +26,13 @@
 package io.nuls.api.utils;
 
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.NulsContext;
-import io.nuls.api.crypto.ECKey;
-import io.nuls.api.crypto.Hex;
-import io.nuls.api.crypto.script.P2PKHScriptSig;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.Address;
 import io.nuls.api.utils.log.Log;
-
-import java.math.BigInteger;
+import io.nuls.sdk.core.script.P2PKHScriptSig;
 
 /**
  * @author: Niels Wang

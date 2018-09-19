@@ -11,6 +11,7 @@ import io.nuls.api.server.leveldb.service.impl.LevelDBServiceImpl;
  * Date:  2018/7/7 0007
  */
 public class LevelDbUtil {
+
     private static DBService dbService;
 
     public static DBService getInstance(){
@@ -25,6 +26,7 @@ public class LevelDbUtil {
             dbService.createArea(Constant.UTXO_DB_ALIAS_NAME);
             dbService.createArea(Constant.HISTORY_DB_NAME);
             dbService.createArea(Constant.BALANCE_DB_NAME);
+            dbService.createArea(Constant.PROTOCOL_DB_NAME);
             /*System.out.println("-------------休眠开始，20s，让leveldb加载数据");
             try {
                 Thread.sleep(20000L);

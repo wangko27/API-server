@@ -553,7 +553,7 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(KernelErrorCode.TX_TYPE_NULL);
             }
             boradTx.parse(new NulsByteBuffer(data));
-            boradTx.setScriptSig(Hex.decode(contractTransParam.getSign()));
+       //     boradTx.setScriptSig(Hex.decode(contractTransParam.getSign()));
             return borad(transaction,Hex.encode(boradTx.serialize()));
         }else{
             return RpcClientResult.getFailed();
@@ -605,7 +605,7 @@ public class TransactionResource {
             //94015
 
             boradTx.parse(new NulsByteBuffer(data));
-            boradTx.setScriptSig(Hex.decode(transactionParam.getSign()));
+         //   boradTx.setScriptSig(Hex.decode(transactionParam.getSign()));
             return borad(transaction,Hex.encode(boradTx.serialize()));
         }else{
             return RpcClientResult.getFailed();

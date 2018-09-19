@@ -156,9 +156,9 @@ public class RpcTransferUtil {
         tx.setSize(txModel.getSize());
         tx.setType(txModel.getType());
         tx.setCreateTime(txModel.getTime());
-        if (txModel.getScriptSig() != null) {
-            tx.setScriptSign(Hex.encode(txModel.getScriptSig()));
-        }
+//        if (txModel.getScriptSig() != null) {
+//            tx.setScriptSign(Hex.encode(txModel.getScriptSig()));
+//        }
 
         List<Input> inputs = new ArrayList<>();
         byte[] hashByte, owner;

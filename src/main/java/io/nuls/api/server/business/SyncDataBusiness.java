@@ -30,6 +30,7 @@ import io.nuls.api.entity.Transaction;
 import io.nuls.api.entity.TransactionRelation;
 import io.nuls.api.entity.TxData;
 import io.nuls.api.entity.Utxo;
+import io.nuls.api.model.BlockExtendsData;
 import io.nuls.api.model.ContractTokenTransferDto;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
@@ -93,6 +94,9 @@ public class SyncDataBusiness {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void syncData(Block block) throws Exception {
+
+        //新增代码，判断主网协议版本号，版本号升级到2以后，交易hash的生成方式会改变
+
         long time1 = System.currentTimeMillis(), time2;
         /*list*/
         //存放区块内交易新生成的utxo
@@ -361,6 +365,16 @@ public class SyncDataBusiness {
         contractTokenInfoList = null;
         contractTransactionList = null;
         contractTokenTransferInfoList = null;
+    }
+
+    /**
+     * 检查nuls主网
+     */
+    private void checkNulsProtocolUpgrade(BlockHeader blockHeader) {
+        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        if(extendsData.getCurrentVersion() != null && extendsData.getMainVersion() == 2) {
+
+        }
     }
 
     /**

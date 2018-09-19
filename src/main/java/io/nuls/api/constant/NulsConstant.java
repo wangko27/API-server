@@ -115,6 +115,16 @@ public interface NulsConstant {
      */
     long BLOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
 
+    /**
+     * 脚本标识位
+     * Null placeholder.
+     */
+    byte[] SIGN_HOLDER = new byte[]{(byte) 0x00, (byte) 0x00};
 
-
+    /**
+     * 出块间隔时间（秒）
+     * Block interval time.
+     * unit:second
+     */
+    long BLOCK_TIME_INTERVAL_SECOND = 10;
 }

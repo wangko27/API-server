@@ -68,7 +68,6 @@ public class CoinBaseTransaction extends Transaction {
     }
 
 
-    @Override
     public boolean isFreeOfFee() {
         return true;
     }

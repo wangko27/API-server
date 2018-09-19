@@ -50,7 +50,6 @@ public class RedPunishTransaction extends Transaction<RedPunishData> {
         return "--";
     }
 
-    @Override
     public boolean isFreeOfFee() {
         return true;
     }

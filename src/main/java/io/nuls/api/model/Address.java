@@ -25,7 +25,6 @@
 
 package io.nuls.api.model;
 
-import io.nuls.api.constant.ErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.NulsContext;
 import io.nuls.api.exception.NulsRuntimeException;
@@ -36,7 +35,6 @@ import io.nuls.api.utils.log.Log;
 
 /**
  * @author: Chralie
- * @date: 2018/5/4
  */
 public class Address {
 
