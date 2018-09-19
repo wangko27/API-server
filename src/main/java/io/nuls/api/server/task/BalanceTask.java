@@ -14,6 +14,7 @@ import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,7 +34,6 @@ public class BalanceTask {
 
     public void execute() {
         try{
-            Log.info("开始加载持币排行榜");
             /*加载持币账户排行榜*/
             List<UtxoDto> blockDtoList = utxoBusiness.getBlockSumTxamount();
             BalanceListContext.reset(blockDtoList);

@@ -390,19 +390,21 @@ public class UtxoBusiness implements BaseService<Utxo, String> {
     public List<UtxoDto> getBlockSumTxamount(){
         List<UtxoDto> ulist = new ArrayList<>();
         List<AddressHashIndex> allList = addressHashIndexLevelDbService.getAll();
-        //统计地址
-        String address;
-        //统计金额
-        long total = 0;
         Utxo utxo;
+        UtxoDto utxoDto;
         for(AddressHashIndex addressHashIndex : allList){
-            address = addressHashIndex.getAddress();
             Set<String> utxoSet = addressHashIndex.getHashIndexSet();
+            utxoDto = new UtxoDto();
+            utxoDto.setAddress(addressHashIndex.getAddress());
             for(String hashIndex:utxoSet){
                 utxo = selectUtxoByHashAndIndex(hashIndex);
-                total += utxo.getAmount();
+                if(null == utxo.getSpendTxHash()){
+                    utxoDto.setTotal(utxo.getAmount()+utxoDto.getTotal());
+                }
             }
-            ulist.add(new UtxoDto(address,total));
+            if(utxoDto.getTotal() > 0){
+                ulist.add(utxoDto);
+            }
         }
         return ulist;
     }
