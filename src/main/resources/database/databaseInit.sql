@@ -347,6 +347,7 @@ CREATE TABLE `contract_result_info` (
   `decimals` bigint(19) DEFAULT NULL COMMENT '货币小数位精度',
   `remark` varchar(100) DEFAULT NULL COMMENT '备注',
   `create_time` bigint(15) DEFAULT NULL COMMENT '交易时间',
+  `confirm_count` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`tx_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约交易返回结果表';
 
