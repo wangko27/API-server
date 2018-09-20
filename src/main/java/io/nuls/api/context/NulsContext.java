@@ -65,6 +65,10 @@ public class NulsContext {
      *  chain name
      */
     public static String CHAIN_NAME = "NULS";
+    /**
+     * 更换交易hash算法的高度，默认为空，当协议版本升级到2之后记录区块高度
+     */
+    public static volatile Long CHANGE_HASH_SERIALIZE_HEIGHT;
 
 
     public static void CacheNulsStatistics(String key, NulsStatistics nulsStatistics){

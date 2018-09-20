@@ -25,18 +25,15 @@
 
 package io.nuls.api.utils;
 
-
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.context.NulsContext;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
 import io.nuls.api.model.Address;
 import io.nuls.api.utils.log.Log;
-import io.nuls.sdk.core.script.P2PKHScriptSig;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/9
  */
 public class AddressTool {
 
@@ -59,18 +56,7 @@ public class AddressTool {
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
         Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
-
         return address.getAddressBytes();
-    }
-
-    public static String getStringAddress(byte[] publicKey) {
-        if (publicKey == null) {
-            return null;
-        }
-        byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
-        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
-
-        return address.getBase58();
     }
 
     private static byte getXor(byte[] body) {
@@ -79,13 +65,6 @@ public class AddressTool {
             xor ^= body[i];
         }
         return xor;
-    }
-
-    public static byte[] getAddress(P2PKHScriptSig scriptSig) {
-        if (scriptSig == null) {
-            return null;
-        }
-        return getAddress(scriptSig.getPublicKey());
     }
 
     public static boolean validAddress(String address) {
@@ -116,12 +95,38 @@ public class AddressTool {
         if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
             return false;
         }
-        if (NulsContext.DEFAULT_ADDRESS_TYPE != type && NulsContext.CONTRACT_ADDRESS_TYPE != type) {
+        if (NulsContext.DEFAULT_ADDRESS_TYPE != type && NulsContext.CONTRACT_ADDRESS_TYPE != type && NulsContext.P2SH_ADDRESS_TYPE != type) {
             return false;
         }
         try {
             checkXOR(bytes);
         } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean validContractAddress(byte[] addressBytes) {
+        if (addressBytes == null) {
+            return false;
+        }
+        if (addressBytes.length != Address.ADDRESS_LENGTH) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.CONTRACT_ADDRESS_TYPE != type) {
             return false;
         }
         return true;
@@ -167,5 +172,11 @@ public class AddressTool {
         return true;
     }
 
+    public static boolean isPay2ScriptHashAddress(byte[] addr) {
+        if (addr != null && addr.length > 3) {
+            return addr[2] == NulsContext.P2SH_ADDRESS_TYPE;
+        }
 
+        return false;
+    }
 }

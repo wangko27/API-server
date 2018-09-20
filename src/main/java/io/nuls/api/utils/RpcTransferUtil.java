@@ -156,9 +156,9 @@ public class RpcTransferUtil {
         tx.setSize(txModel.getSize());
         tx.setType(txModel.getType());
         tx.setCreateTime(txModel.getTime());
-//        if (txModel.getScriptSig() != null) {
-//            tx.setScriptSign(Hex.encode(txModel.getScriptSig()));
-//        }
+        if (txModel.getTransactionSignature() != null) {
+            tx.setScriptSign(Hex.encode(txModel.getTransactionSignature()));
+        }
 
         List<Input> inputs = new ArrayList<>();
         byte[] hashByte, owner;
@@ -393,12 +393,13 @@ public class RpcTransferUtil {
     }
 
     public static ContractResultInfo toContractResult(Map<String, Object> map) throws Exception {
+
         ContractResultInfo result = null;
         try {
             result = new ContractResultInfo();
-            result.setConfirmCount(map.get("confirmCount") != null ? Integer.parseInt(map.get("confirmCount").toString()) : 0);
             map = (Map<String, Object>) map.get("data");
             if (map != null) {
+
                 result.setErrorMessage((String) map.get("errorMessage"));
                 result.setSuccess(map.get("success").toString());
                 result.setActualContractFee(map.get("actualContractFee") != null ? Long.parseLong(map.get("actualContractFee").toString()) : 0);

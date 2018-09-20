@@ -5,6 +5,7 @@ import io.nuls.api.constant.Constant;
 import io.nuls.api.constant.ContractConstant;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
+import io.nuls.api.context.NulsContext;
 import io.nuls.api.context.UtxoContext;
 import io.nuls.api.entity.AddressHashIndex;
 import io.nuls.api.entity.AddressRewardDetail;
@@ -32,6 +33,7 @@ import io.nuls.api.entity.TxData;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.model.BlockExtendsData;
 import io.nuls.api.model.ContractTokenTransferDto;
+import io.nuls.api.server.dao.mapper.leveldb.ProtocolLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.UtxoLevelDbService;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
 import io.nuls.api.server.resources.SyncDataHandler;
@@ -84,6 +86,7 @@ public class SyncDataBusiness {
 
     private WebwalletUtxoLevelDbService webwalletUtxoLevelDbService = WebwalletUtxoLevelDbService.getInstance();
     private UtxoLevelDbService utxoLevelDbService = UtxoLevelDbService.getInstance();
+    private ProtocolLevelDbService protocolLevelDbService = ProtocolLevelDbService.getInstance();
     private RestFulUtils restFulUtils = RestFulUtils.getInstance();
 
 
@@ -96,6 +99,7 @@ public class SyncDataBusiness {
     public void syncData(Block block) throws Exception {
 
         //新增代码，判断主网协议版本号，版本号升级到2以后，交易hash的生成方式会改变
+        checkNulsProtocolUpgrade(block.getHeader());
 
         long time1 = System.currentTimeMillis(), time2;
         /*list*/
@@ -247,8 +251,7 @@ public class SyncDataBusiness {
                         //合约调用结果
                         contractResultInfoList.add(resultData);
                     }
-                }
-                else if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
+                } else if (tx.getType() == EntityConstant.TX_TYPE_CONTRACT_TRANSFER) {
                     //合约内部转账
                     ContractTransferInfo transferInfo = (ContractTransferInfo) tx.getTxData();
                     transferInfo.setTxHash(tx.getHash());
@@ -261,7 +264,6 @@ public class SyncDataBusiness {
                     //合约内部转账交易记录
                     contractTransferInfoList.add(transferInfo);
                 }
-
 
 
             }
@@ -368,12 +370,19 @@ public class SyncDataBusiness {
     }
 
     /**
-     * 检查nuls主网
+     * 检查nuls主网是否已升级，未升级时检查每个区块头的升级信息
+     * 一旦出现新版本的区块，就视为升级成功
      */
     private void checkNulsProtocolUpgrade(BlockHeader blockHeader) {
-        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
-        if(extendsData.getCurrentVersion() != null && extendsData.getMainVersion() == 2) {
+        //如果已经记录了升级高度，直接退出
+        if (NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT != null) {
+            return;
+        }
 
+        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        if (extendsData.getCurrentVersion() != null && extendsData.getMainVersion() == 2) {
+            NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = blockHeader.getHeight();
+            protocolLevelDbService.saveChangeTxHashBlockHeight(blockHeader.getHeight());
         }
     }
 
