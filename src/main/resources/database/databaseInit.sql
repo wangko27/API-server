@@ -286,7 +286,7 @@ CREATE TABLE `contract_call_info` (
   `price` bigint(19) DEFAULT NULL COMMENT '执行合约单价',
   `method_name` varchar(80) DEFAULT NULL COMMENT '方法名称',
   `method_desc` varchar(200) DEFAULT NULL COMMENT '方法签名',
-  `args` varchar(200) DEFAULT NULL COMMENT '调用合约参数'
+  `args` text DEFAULT NULL COMMENT '调用合约参数'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约调用交易表';
 
 -- ----------------------------
