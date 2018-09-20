@@ -37,7 +37,9 @@ public class RpcTransferUtil {
 
         String scriptSign = (String) map.get("scriptSig");
         String extend = (String) map.get("extend");
-        blockHeader.setTempExtend(Hex.decode(extend));
+        if(extend != null) {
+            blockHeader.setTempExtend(Hex.decode(extend));
+        }
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("scriptSign", scriptSign);
         dataMap.put("extend", extend);
