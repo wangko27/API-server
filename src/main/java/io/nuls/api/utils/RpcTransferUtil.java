@@ -37,6 +37,7 @@ public class RpcTransferUtil {
 
         String scriptSign = (String) map.get("scriptSig");
         String extend = (String) map.get("extend");
+        blockHeader.setTempExtend(Hex.decode(extend));
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("scriptSign", scriptSign);
         dataMap.put("extend", extend);
@@ -48,7 +49,7 @@ public class RpcTransferUtil {
         byte[] data = Base64.getDecoder().decode(hexBlock);
         io.nuls.api.model.Block blockModel = new io.nuls.api.model.Block();
         blockModel.parse(new NulsByteBuffer(data));
-
+        header.setTempExtend(blockModel.getHeader().getExtend());
         Block block = new Block();
         header.setSize(blockModel.size());
         block.setHeader(header);
