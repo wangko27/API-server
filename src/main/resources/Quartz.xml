@@ -70,7 +70,7 @@
     <bean id="webwalletTransactionTaskTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="webwalletTransactionSync" />
         <property name="startDelay" value="0" />
-        <property name="repeatInterval" value="6000000" /><!-- 每10分钟调度一次 -->
+        <property name="repeatInterval" value="600000" /><!-- 每10分钟调度一次 -->
     </bean>
     <bean id="agentNodeSyncTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
         <property name="jobDetail" ref="agentNodeSync" />

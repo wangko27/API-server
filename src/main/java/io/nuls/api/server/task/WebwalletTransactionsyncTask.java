@@ -8,6 +8,7 @@ import io.nuls.api.entity.WebwalletTransaction;
 import io.nuls.api.server.business.WebwalletTransactionBusiness;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.TimeService;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,15 +34,17 @@ public class WebwalletTransactionsyncTask {
      * 每隔十分钟去未确认交易表中查询所有未确认的交易，去链上验证，验证通过就重发，验证不通过就删除
      */
     public void execute(){
-        System.out.println("----------------------每隔十分钟，清理未确认交易------------------------------");
+        Log.info("----------------------每隔十分钟，清理未确认交易------------------------------");
         List<WebwalletTransaction> list = webwalletTransactionBusiness.getListByTime(EntityConstant.WEBWALLET_STATUS_NOTCONFIRM, TimeService.currentTimeMillis()-600000);
         Map<String, String> params = new HashMap<>();
         RpcClientResult result = null;
         for(WebwalletTransaction webwalletTransaction:list){
             params.put("txHex", webwalletTransaction.getSignData());
             result = syncDataHandler.valiTransaction(params);
+            Log.info("重发交易："+webwalletTransaction.getHash());
             if(result.isSuccess()){
-                syncDataHandler.broadcast(params);
+                result = syncDataHandler.broadcast(params);
+                Log.info("重发结果："+result);
             }else{
                 /*验证失败，需要删除，删除前也需要验证，找到这个地址的所有未确认交易，
                 如果有交易的input使用了这个地址的output，那么相应的交易也需要删除

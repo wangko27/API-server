@@ -1,21 +1,16 @@
 package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.ErrorCode;
-import io.nuls.api.context.IndexContext;
-import io.nuls.api.entity.*;
-import io.nuls.api.server.business.BlockBusiness;
-import io.nuls.api.server.business.TransactionBusiness;
+import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.UtxoBusiness;
-import io.nuls.api.server.dto.TransactionDto;
-import io.nuls.api.utils.StringUtils;
-import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Description:
