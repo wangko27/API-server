@@ -54,6 +54,7 @@ public class RpcTransferUtil {
         header.setTempExtend(blockModel.getHeader().getExtend());
         Block block = new Block();
         header.setSize(blockModel.size());
+        header.setTempExtend(blockModel.getHeader().getExtend());
         block.setHeader(header);
 
         List<Transaction> txList = new ArrayList<>();
@@ -195,7 +196,8 @@ public class RpcTransferUtil {
                 utxo.setTxHash(tx.getHash());
                 utxo.setTxIndex(i);
                 utxo.setAmount(coin.getNa().getValue());
-                utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
+               // utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
+                utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getAddress()));
                 utxo.setLockTime(coin.getLockTime());
                 outputs.add(utxo);
 
