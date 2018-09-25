@@ -29,6 +29,7 @@ import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.crypto.params.ECKeyGenerationParameters;
 import org.spongycastle.math.ec.ECCurve;
 import org.spongycastle.math.ec.ECFieldElement;
+import org.spongycastle.math.ec.ECFieldElement.Fp;
 import org.spongycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
@@ -72,8 +73,8 @@ public class SM2 {
         this.ecc_gx = new BigInteger(ECC_PARAM[4], 16);
         this.ecc_gy = new BigInteger(ECC_PARAM[5], 16);
 
-        this.ecc_gx_fieldelement = new ECFieldElement.Fp(this.ecc_p, this.ecc_gx);
-        this.ecc_gy_fieldelement = new ECFieldElement.Fp(this.ecc_p, this.ecc_gy);
+        this.ecc_gx_fieldelement = new Fp(this.ecc_p, this.ecc_gx);
+        this.ecc_gy_fieldelement = new Fp(this.ecc_p, this.ecc_gy);
 
         this.ecc_curve = new ECCurve.Fp(this.ecc_p, this.ecc_a, this.ecc_b);
         this.ecc_point_g = new ECPoint.Fp(this.ecc_curve, this.ecc_gx_fieldelement, this.ecc_gy_fieldelement);

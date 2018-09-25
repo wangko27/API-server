@@ -2,15 +2,20 @@ package io.nuls.api.server.resources.impl;
 
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.entity.Utxo;
 import io.nuls.api.server.business.UtxoBusiness;
+import io.nuls.api.server.dto.TransFeeDto;
+import io.nuls.api.utils.AddressTool;
+import io.nuls.api.utils.TransactionFeeCalculator;
+import io.nuls.api.utils.TransactionTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Description: utxo相关
@@ -52,4 +57,50 @@ public class UtxoResource {
         result.setData(utxoBusiness.getListByAddress(address,pageNumber,pageSize));
         return result;
     }
+
+    /**
+     * 获取某地址的可用的UTXO数量和总额—做零钱换整功能
+     * @param address 地址
+     * @return
+     */
+    @GET
+    @Path("/getTotalUTXO/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getTotalUTXO(@PathParam("address")String address){
+        RpcClientResult result = RpcClientResult.getSuccess();
+        List<Utxo> list = utxoBusiness.getUsableUtxo(address);
+        Long sum = list.stream().mapToLong(e -> e.getAmount()).sum();
+        Map<String, String> map = new HashMap<>();
+        map.put("size", list.size() + "");
+        map.put("sum", sum + "");
+        result.setData(map);
+        return result;
+    }
+
+    /**
+     * 预估手续费—做零钱换整功能
+     * @param address 地址
+     * @return
+     */
+    @GET
+    @Path("/estimateFee/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult estimateFee(@PathParam("address")String address){
+        RpcClientResult result = RpcClientResult.getSuccess();
+        if (address == null) {
+            return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
+        }
+        if (!AddressTool.validAddress(address)) {
+            return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
+        }
+        List<Utxo> list = utxoBusiness.getUsableUtxo(address);
+        Long sum = list.stream().mapToLong(e -> e.getAmount()).sum();
+        TransFeeDto transferTxFee = TransactionTool.getChangeTxFee(list, sum, "", TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.getValue());
+        Long fee = transferTxFee.getNa().getValue();
+        Map<String, Long> map = new HashMap<>();
+        map.put("fee", fee);
+        result.setData(transferTxFee);
+        return result;
+    }
+
 }

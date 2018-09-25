@@ -37,6 +37,9 @@ public class RpcTransferUtil {
 
         String scriptSign = (String) map.get("scriptSig");
         String extend = (String) map.get("extend");
+        if(extend != null) {
+            blockHeader.setTempExtend(Hex.decode(extend));
+        }
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("scriptSign", scriptSign);
         dataMap.put("extend", extend);
@@ -48,9 +51,10 @@ public class RpcTransferUtil {
         byte[] data = Base64.getDecoder().decode(hexBlock);
         io.nuls.api.model.Block blockModel = new io.nuls.api.model.Block();
         blockModel.parse(new NulsByteBuffer(data));
-
+        header.setTempExtend(blockModel.getHeader().getExtend());
         Block block = new Block();
         header.setSize(blockModel.size());
+        header.setTempExtend(blockModel.getHeader().getExtend());
         block.setHeader(header);
 
         List<Transaction> txList = new ArrayList<>();
@@ -156,8 +160,8 @@ public class RpcTransferUtil {
         tx.setSize(txModel.getSize());
         tx.setType(txModel.getType());
         tx.setCreateTime(txModel.getTime());
-        if (txModel.getScriptSig() != null) {
-            tx.setScriptSign(Hex.encode(txModel.getScriptSig()));
+        if (txModel.getTransactionSignature() != null) {
+            tx.setScriptSign(Hex.encode(txModel.getTransactionSignature()));
         }
 
         List<Input> inputs = new ArrayList<>();
@@ -192,7 +196,8 @@ public class RpcTransferUtil {
                 utxo.setTxHash(tx.getHash());
                 utxo.setTxIndex(i);
                 utxo.setAmount(coin.getNa().getValue());
-                utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
+               // utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
+                utxo.setAddress(AddressTool.getStringAddressByBytes(coin.getAddress()));
                 utxo.setLockTime(coin.getLockTime());
                 outputs.add(utxo);
 
@@ -393,12 +398,13 @@ public class RpcTransferUtil {
     }
 
     public static ContractResultInfo toContractResult(Map<String, Object> map) throws Exception {
+
         ContractResultInfo result = null;
         try {
             result = new ContractResultInfo();
-            result.setConfirmCount(map.get("confirmCount") != null ? Integer.parseInt(map.get("confirmCount").toString()) : 0);
             map = (Map<String, Object>) map.get("data");
             if (map != null) {
+
                 result.setErrorMessage((String) map.get("errorMessage"));
                 result.setSuccess(map.get("success").toString());
                 result.setActualContractFee(map.get("actualContractFee") != null ? Long.parseLong(map.get("actualContractFee").toString()) : 0);

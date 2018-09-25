@@ -40,7 +40,7 @@ public class AccountResource {
                 return result;
             }
             result = RpcClientResult.getSuccess();
-            result.setData(AddressTool.getStringAddress(Hex.decode(publicKey)));
+            result.setData(AddressTool.getStringAddressByBytes(Hex.decode(publicKey)));
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

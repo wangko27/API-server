@@ -32,6 +32,8 @@ public class BlockHeader {
 
     private byte[] extend;
 
+    private byte[] tempExtend;
+
     private List<String> txHashList;
 
     public String getHash() {
@@ -152,5 +154,13 @@ public class BlockHeader {
 
     public void setTxHashList(List<String> txHashList) {
         this.txHashList = txHashList;
+    }
+
+    public byte[] getTempExtend() {
+        return tempExtend;
+    }
+
+    public void setTempExtend(byte[] tempExtend) {
+        this.tempExtend = tempExtend;
     }
 }

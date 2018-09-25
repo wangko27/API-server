@@ -56,10 +56,19 @@ public class NulsContext {
      */
     public static byte CONTRACT_ADDRESS_TYPE = 2;
 
+    /**
+     * 多重签名地址
+     * contract address type
+     */
+    public static byte P2SH_ADDRESS_TYPE = 3;
     /*
      *  chain name
      */
     public static String CHAIN_NAME = "NULS";
+    /**
+     * 更换交易hash算法的高度，默认为空，当协议版本升级到2之后记录区块高度
+     */
+    public static volatile Long CHANGE_HASH_SERIALIZE_HEIGHT;
 
 
     public static void CacheNulsStatistics(String key, NulsStatistics nulsStatistics){

@@ -24,6 +24,7 @@
 package io.nuls.api.constant;
 
 import io.nuls.api.entity.Na;
+import io.nuls.api.utils.StringUtils;
 
 /**
  *
@@ -114,6 +115,8 @@ public interface Constant {
     String UTXO_DB_ALIAS_NAME="aliasdb";
     String HISTORY_DB_NAME="hsitorydb";
     String BALANCE_DB_NAME="balancedb";
+    String PROTOCOL_DB_NAME = "protocoldb";
+    byte[] CHANGE_HASH_HEIGHT_KEY = StringUtils.bytes("changeHashHeight");
 
     String ADDRESS_REWARD_DETAIL = "reward";
     /**

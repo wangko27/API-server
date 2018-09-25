@@ -286,7 +286,7 @@ CREATE TABLE `contract_call_info` (
   `price` bigint(19) DEFAULT NULL COMMENT '执行合约单价',
   `method_name` varchar(80) DEFAULT NULL COMMENT '方法名称',
   `method_desc` varchar(200) DEFAULT NULL COMMENT '方法签名',
-  `args` varchar(200) DEFAULT NULL COMMENT '调用合约参数'
+  `args` text DEFAULT NULL COMMENT '调用合约参数'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约调用交易表';
 
 -- ----------------------------
@@ -347,6 +347,7 @@ CREATE TABLE `contract_result_info` (
   `decimals` bigint(19) DEFAULT NULL COMMENT '货币小数位精度',
   `remark` varchar(100) DEFAULT NULL COMMENT '备注',
   `create_time` bigint(15) DEFAULT NULL COMMENT '交易时间',
+  `confirm_count` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`tx_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='智能合约交易返回结果表';
 

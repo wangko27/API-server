@@ -25,6 +25,7 @@
 package io.nuls.api.crypto;
 
 import org.spongycastle.math.ec.ECPoint;
+
 import java.math.BigInteger;
 
 /**

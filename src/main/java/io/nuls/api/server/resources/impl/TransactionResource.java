@@ -9,10 +9,7 @@ import io.nuls.api.exception.NulsException;
 import io.nuls.api.model.tx.*;
 import io.nuls.api.server.business.*;
 import io.nuls.api.server.dao.mapper.leveldb.WebwalletUtxoLevelDbService;
-import io.nuls.api.server.dto.ContractTransParam;
-import io.nuls.api.server.dto.TransFeeDto;
-import io.nuls.api.server.dto.TransactionDto;
-import io.nuls.api.server.dto.TransactionParam;
+import io.nuls.api.server.dto.*;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.*;
 import io.nuls.api.utils.log.Log;
@@ -446,7 +443,7 @@ public class TransactionResource {
     }
 
     /**
-     * 根据参数组装只能合约交易
+     * 根据参数组装智能合约交易
      * @param contractTransParam 参数对象
      * @return 交易hash
      * @throws Exception
@@ -553,7 +550,7 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(KernelErrorCode.TX_TYPE_NULL);
             }
             boradTx.parse(new NulsByteBuffer(data));
-            boradTx.setScriptSig(Hex.decode(contractTransParam.getSign()));
+            boradTx.setTransactionSignature(Hex.decode(contractTransParam.getSign()));
             return borad(transaction,Hex.encode(boradTx.serialize()));
         }else{
             return RpcClientResult.getFailed();
@@ -605,7 +602,7 @@ public class TransactionResource {
             //94015
 
             boradTx.parse(new NulsByteBuffer(data));
-            boradTx.setScriptSig(Hex.decode(transactionParam.getSign()));
+            boradTx.setTransactionSignature(Hex.decode(transactionParam.getSign()));
             return borad(transaction,Hex.encode(boradTx.serialize()));
         }else{
             return RpcClientResult.getFailed();
@@ -689,5 +686,48 @@ public class TransactionResource {
             return RpcClientResult.getFailed(KernelErrorCode.BLOCK_NOT_SYNC);
         }
         return RpcClientResult.getSuccess();
+    }
+
+    /**
+     * 零钱换整交易
+     * @param param
+     * @return
+     */
+    @POST
+    @Path("/changeWhole")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult changeWhole(ChangeWholeParam param) throws Exception {
+        if (param == null) {
+            return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
+        }
+        if (!AddressTool.validAddress(param.getAddress())) {
+            return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
+        }
+        if(StringUtils.isNotBlank(param.getRemark()) && StringUtils.isSpecialChar(param.getRemark())){
+            return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_ERROR);
+        }
+        if (!StringUtils.validTxRemark(param.getRemark())) {
+            return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
+        }
+        RpcClientResult result  = valiHeight();
+        Map<String,Object> attr = new HashMap<>(1);
+        attr.put("hash","");
+        if(result.isSuccess()) {
+            io.nuls.api.model.Transaction transaction = null;
+            List<Utxo> list = utxoBusiness.getUsableUtxo(param.getAddress());
+            transaction = TransactionTool.changeWholeTxForApi(
+                    param.getAddress(),
+                    param.getPassword(),
+                    param.getRemark(),
+                    list
+            );
+            if(null == transaction){
+                return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
+            }
+            attr.put("hash",transaction.getHash().getDigestHex());
+            result = saveWalletTransaction(transaction,param.getAddress(),null);
+            result.setData(attr);
+        }
+        return result;
     }
 }

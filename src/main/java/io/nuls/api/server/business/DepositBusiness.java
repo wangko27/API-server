@@ -125,6 +125,9 @@ public class DepositBusiness implements BaseService<Deposit, String> {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int updateAgentNodeByDeposit(Deposit deposit) {
         AgentNode agentNode = agentNodeMapper.selectByPrimaryKey(deposit.getAgentHash());
+        if(agentNode == null) {
+            System.out.println("---------");
+        }
         agentNode.setTotalDeposit(agentNode.getTotalDeposit() + deposit.getAmount());
         agentNode.setDepositCount(agentNode.getDepositCount() + 1);
         return agentNodeMapper.updateByPrimaryKey(agentNode);
