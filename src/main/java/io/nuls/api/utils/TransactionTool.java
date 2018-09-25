@@ -4,6 +4,7 @@ import io.nuls.api.cfg.NulsConfig;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.constant.NulsConstant;
 import io.nuls.api.crypto.Hex;
+import io.nuls.api.crypto.script.SignatureUtil;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.exception.NulsException;
@@ -17,6 +18,7 @@ import org.spongycastle.util.Arrays;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TransactionTool {
@@ -54,6 +56,24 @@ public class TransactionTool {
         // 124 + 38;
         int size = 162+getRemarkSize(remark);
         return calcFee(utxoList, size, amount, Na.valueOf(unitPrice));
+    }
+
+    /**
+     * 获取零钱换整交易手续费
+     * 交易手续费的计算：手续费单价 * 交易大小
+     * 手续费单价(min)：100000 NA/1KB
+     * 交易大小的计算：（124 + 50 * inputs.length + 38 * outputs.length + remark.bytes.length ）/1024
+     *
+     * @param utxoList  可用未花费集合
+     * @param amount    转账金额
+     * @param remark    交易备注
+     * @param unitPrice 手续费单价
+     * @return
+     */
+    public static TransFeeDto getChangeTxFee(List<Utxo> utxoList, long amount, String remark, long unitPrice) {
+        // 124 + 38;
+        int size = 162+getRemarkSize(remark);
+        return calcChangeFee(utxoList, size, amount, Na.valueOf(unitPrice));
     }
 
     /**
@@ -513,6 +533,26 @@ public class TransactionTool {
         return null;
     }
 
+    private static TransFeeDto calcChangeFee(List<Utxo> utxoList, int size, long amount, Na unitPrice) {
+        TransFeeDto transFeeDto = new TransFeeDto();
+        long values = 0;
+        Utxo utxo;
+        Na fee = null;
+        for (int i = 0; i < utxoList.size(); i++) {
+            utxo = utxoList.get(i);
+            values += utxo.getAmount();
+            //每条from的长度为50
+            size += 50;
+            if (i == 127) {
+                size += 1;
+            }
+        }
+        fee = TransactionFeeCalculator.getFee(size + 38, unitPrice);
+        transFeeDto.setSize(size);
+        transFeeDto.setNa(fee);
+        return transFeeDto;
+    }
+
     public static CoinData createCoinData(List<Utxo> utxoList, List<Coin> outputs, long amount) {
         List<Coin> inputs = new ArrayList<>();
         Utxo utxo;
@@ -555,5 +595,37 @@ public class TransactionTool {
         coin.setLockTime(utxo.getLockTime());
         coin.setNa(Na.valueOf(utxo.getAmount()));
         return coin;
+    }
+
+    public static Transaction changeWholeTxForApi(String address, String password, String remark, List<Utxo> list) {
+        List<Coin> outputs = new ArrayList<>();
+        Coin to = new Coin();
+        to.setLockTime(0);
+        Long sum = list.stream().mapToLong(e -> e.getAmount()).sum();
+        to.setNa(Na.valueOf(sum));
+        to.setOwner(AddressTool.getAddress(address));
+        outputs.add(to);
+
+        CoinData coinData = createCoinData(list, outputs, sum);
+        if (coinData != null) {
+            TransferTransaction tx = new TransferTransaction();
+            tx.setTime(TimeService.currentTimeMillis());
+            if (StringUtils.isNotBlank(remark)) {
+                try {
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
+                }
+            }
+            tx.setCoinData(coinData);
+            try {
+                tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            } catch (IOException e) {
+                throw new NulsRuntimeException(KernelErrorCode.DATA_PARSE_ERROR);
+            }
+            return tx;
+        }
+
+        return null;
     }
 }

@@ -14,7 +14,6 @@ import io.nuls.api.server.dao.util.Searchable;
 import io.nuls.api.server.dto.FreezeDto;
 import io.nuls.api.server.dto.UtxoDto;
 import io.nuls.api.utils.StringUtils;
-import io.nuls.api.utils.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
