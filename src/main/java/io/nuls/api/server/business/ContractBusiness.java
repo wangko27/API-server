@@ -190,7 +190,9 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                 searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
                 ContractAddressInfo contractAddressInfo = contractAddressInfoMapper.selectBySearchable(searchable);
                 List<ContractTokenTransferInfo> contractTokenTransferInfoList = contractTokenTransferInfoMapper.selectList(searchable);
-                calContractTokenAssets(contractTokenTransferInfoList, contractAddressInfo.getContractAddress(), true);
+                if (contractAddressInfo != null) {
+                    calContractTokenAssets(contractTokenTransferInfoList, contractAddressInfo.getContractAddress(), true);
+                }
             }
             contractTokenTransferInfoMapper.deleteList(txHashList);
         }
@@ -751,11 +753,20 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         Searchable searchable1 = new Searchable();
         searchable1.addCondition("tx_hash", SearchOperator.eq, hash);
         ContractResultInfo contractResultInfo = contractResultInfoMapper.selectBySearchable(searchable1);
+        ContractResultInfoDto contractResultInfoDto = ContractResultInfoDto.parse(contractResultInfo);
         ContractTransactionDetailDto detail = new ContractTransactionDetailDto(transaction);
         detail.setStatus(contractResultInfo.getSuccess());
         detail.setConfirmCount(contractResultInfo.getConfirmCount());
         detail.setContractAddress(contractResultInfo.getContractAddress());
-        detail.setResultDto(contractResultInfo);
+        detail.setResultDto(contractResultInfoDto);
         return detail;
+    }
+
+    public PageInfo<ContractTransaction> getContractTxListByContractAddress(String contractAddress, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Map<String,Object> params=new HashMap<>(1);
+        params.put("contractAddress",contractAddress);
+        PageInfo<ContractTransaction> page = new PageInfo<>(contractTransactionMapper.selectContractTxList(params));
+        return page;
     }
 }

@@ -63,7 +63,7 @@ public class ContractTransactionDetailDto {
 
     private TxData txData;
 
-    private ContractResultInfo resultDto;
+    private ContractResultInfoDto resultDto;
 
     public ContractTransactionDetailDto(Transaction transaction) {
         this.amount = transaction.getAmount();
@@ -96,11 +96,11 @@ public class ContractTransactionDetailDto {
         this.confirmCount = confirmCount;
     }
 
-    public ContractResultInfo getResultDto() {
+    public ContractResultInfoDto getResultDto() {
         return resultDto;
     }
 
-    public void setResultDto(ContractResultInfo resultDto) {
+    public void setResultDto(ContractResultInfoDto resultDto) {
         this.resultDto = resultDto;
     }
 

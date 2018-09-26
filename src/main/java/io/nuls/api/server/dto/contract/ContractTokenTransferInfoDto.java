@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 代币转账信息DTO
+ * 代币转账信息DTO,包含代币名称、符号等信息
  */
 public class ContractTokenTransferInfoDto {
     private String contractAddress;

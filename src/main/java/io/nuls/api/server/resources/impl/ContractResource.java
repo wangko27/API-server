@@ -123,5 +123,22 @@ public class ContractResource {
         return result;
     }
 
+    @GET
+    @Path("/transactions/{contractAddress}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getContractTxListByContractAddress(@PathParam("contractAddress") String contractAddress, @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        RpcClientResult result = RpcClientResult.getSuccess();
+        //参数校验
+        if (contractAddress == null) {
+            return RpcClientResult.getFailed(ContractErrorCode.PARAMETER_ERROR);
+        }
+        if (!AddressTool.validAddress(contractAddress)) {
+            return RpcClientResult.getFailed(ContractErrorCode.ILLEGAL_CONTRACT_ADDRESS);
+        }
+
+        result.setData(contractBusiness.getContractTxListByContractAddress(contractAddress, pageNumber, pageSize));
+        return result;
+    }
+
 
 }

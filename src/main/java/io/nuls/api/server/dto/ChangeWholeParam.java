@@ -11,21 +11,9 @@ public class ChangeWholeParam {
      */
     private String address;
     /**
-     * 密码
-     */
-    private String password;
-    /**
      * 备注
      */
     private String remark;
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     public String getAddress() {
         return address;
