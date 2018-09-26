@@ -14,6 +14,7 @@ import io.nuls.api.entity.ContractTokenInfo;
 import io.nuls.api.entity.ContractTokenTransferInfo;
 import io.nuls.api.entity.ContractTransaction;
 import io.nuls.api.entity.ContractTransferInfo;
+import io.nuls.api.entity.ContractInfo;
 import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
@@ -580,15 +581,45 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
+     * edit by Flyglede
      * @param pageNumber
      * @param pageSize
      * @return
      */
-    public PageInfo<ContractAddressInfo> getContractInfoList(int pageNumber, int pageSize) {
+    public PageInfo<ContractInfo> getContractInfoList(int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         Searchable searchable = new Searchable();
         PageHelper.orderBy("create_time desc");
-        PageInfo<ContractAddressInfo> page = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
+        PageInfo<ContractAddressInfo> pageContractAddressInfo = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
+        List<ContractAddressInfo> lstContractAddressInfo = new ArrayList<ContractAddressInfo>();
+        List<ContractInfo> lstContractInfo = new ArrayList<ContractInfo>();
+        lstContractAddressInfo = pageContractAddressInfo.getList();
+        if(lstContractAddressInfo!=null) {
+            for(int i=0;i<lstContractAddressInfo.size();i++) {
+                ContractInfo contractInfo = new ContractInfo();
+                contractInfo.setTotalsupply(lstContractAddressInfo.get(i).getTotalsupply());
+                contractInfo.setTokenName(lstContractAddressInfo.get(i).getTokenName());
+                contractInfo.setSymbol(lstContractAddressInfo.get(i).getSymbol());
+                contractInfo.setStatus(lstContractAddressInfo.get(i).getStatus());
+                contractInfo.setMethods(lstContractAddressInfo.get(i).getMethods());
+                contractInfo.setIsNrc20(lstContractAddressInfo.get(i).getIsNrc20());
+                contractInfo.setDeleteHash(lstContractAddressInfo.get(i).getDeleteHash());
+                contractInfo.setDecimals(lstContractAddressInfo.get(i).getDecimals());
+                contractInfo.setCreateTxHash(lstContractAddressInfo.get(i).getCreateTxHash());
+                contractInfo.setCreateTime(lstContractAddressInfo.get(i).getCreateTime());
+                contractInfo.setCreater(lstContractAddressInfo.get(i).getCreater());
+                contractInfo.setContractAddress(lstContractAddressInfo.get(i).getContractAddress());
+                contractInfo.setBlockHeight(lstContractAddressInfo.get(i).getBlockHeight());
+                //查询合约地址余额
+                Balance balance = balanceBusiness.getBalance(lstContractAddressInfo.get(i).getContractAddress());
+                if (balance != null) {
+                    //设置余额
+                    contractInfo.setBalance(balance.getUsable());
+                }
+                lstContractInfo.add(contractInfo);
+            }
+        }
+        PageInfo<ContractInfo> page = new PageInfo<>(lstContractInfo);
         return page;
     }
 
