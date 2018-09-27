@@ -24,6 +24,7 @@
  */
 package io.nuls.api.model;
 
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.constant.NulsConstant;
 import io.nuls.api.context.NulsContext;
 import io.nuls.api.crypto.UnsafeByteArrayOutputStream;
@@ -139,6 +140,9 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 //     * trading in the validation of this kind of new type block size is not taken into account, the types of transactions do not need poundage
 //     */
     public boolean isSystemTx() {
+        if ((type == EntityConstant.TX_TYPE_YELLOW_PUNISH) || (type == EntityConstant.TX_TYPE_RED_PUNISH) || (type == EntityConstant.TX_TYPE_COINBASE)){
+            return true;
+        }
         return false;
     }
 
