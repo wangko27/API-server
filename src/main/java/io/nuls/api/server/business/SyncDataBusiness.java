@@ -350,7 +350,7 @@ public class SyncDataBusiness {
         }
 
         time2 = System.currentTimeMillis();
-        System.out.println("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
+        Log.info("高度：" + block.getHeader().getHeight() + "---交易笔数：" + txList.size() + "---保存耗时：" + (time2 - time1));
         utxoMap = null;
         fromList = null;
         txList = null;

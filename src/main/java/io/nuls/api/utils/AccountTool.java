@@ -51,6 +51,11 @@ public class AccountTool {
         return new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
     }
 
+    public static String newAddressString(byte[] publicKey) throws NulsException {
+        Address addr = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
+        return addr.getBase58();
+    }
+
     public static Account createAccount(String prikey) throws NulsException {
         ECKey key = null;
         if (StringUtils.isBlank(prikey)) {

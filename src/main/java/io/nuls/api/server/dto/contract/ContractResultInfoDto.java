@@ -27,6 +27,12 @@
 package io.nuls.api.server.dto.contract;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.nuls.api.entity.ContractResultInfo;
+import io.nuls.api.utils.JSONUtils;
+import io.nuls.api.utils.log.Log;
+import org.springframework.beans.BeanUtils;
+
+import java.util.List;
 
 /**
  * @author: PierreLuo
@@ -71,7 +77,7 @@ public class ContractResultInfoDto {
 
     private String events;
 
-    private String tokenTransfers;
+    private List<SimpleContractTokenTransferInfoDto> tokenTransfers;
 
     private String tokenName;
 
@@ -82,6 +88,18 @@ public class ContractResultInfoDto {
     private String remark;
 
     private Long createTime;
+
+    public static ContractResultInfoDto parse(ContractResultInfo info) {
+        ContractResultInfoDto dto = new ContractResultInfoDto();
+        try {
+            BeanUtils.copyProperties(info, dto);
+            List<SimpleContractTokenTransferInfoDto> list = JSONUtils.json2list(info.getTokenTransfers(), SimpleContractTokenTransferInfoDto.class);
+            dto.setTokenTransfers(list);
+        } catch (Exception e){
+            Log.error("ContractResultInfoDto Parse Error!" + e.getMessage());
+        }
+        return dto;
+    }
 
     public String getTxHash() {
         return txHash;
@@ -235,14 +253,6 @@ public class ContractResultInfoDto {
         this.events = events == null ? null : events.trim();
     }
 
-    public String getTokenTransfers() {
-        return tokenTransfers;
-    }
-
-    public void setTokenTransfers(String tokenTransfers) {
-        this.tokenTransfers = tokenTransfers == null ? null : tokenTransfers.trim();
-    }
-
     public String getTokenName() {
         return tokenName;
     }
@@ -277,6 +287,14 @@ public class ContractResultInfoDto {
 
     public Long getCreateTime() {
         return createTime;
+    }
+
+    public List<SimpleContractTokenTransferInfoDto> getTokenTransfers() {
+        return tokenTransfers;
+    }
+
+    public void setTokenTransfers(List<SimpleContractTokenTransferInfoDto> tokenTransfers) {
+        this.tokenTransfers = tokenTransfers;
     }
 
     public void setCreateTime(Long createTime) {

@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.context.IndexContext;
 import io.nuls.api.entity.*;
+import io.nuls.api.server.dao.mapper.ContractTransactionMapper;
 import io.nuls.api.server.dao.mapper.TransactionMapper;
 import io.nuls.api.server.dao.mapper.leveldb.TransactionLevelDbService;
 import io.nuls.api.server.dao.util.SearchOperator;
@@ -16,7 +17,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Description: 交易
@@ -36,6 +40,8 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
     private DepositBusiness depositBusiness;
     @Autowired
     private UtxoBusiness utxoBusiness;
+    @Autowired
+    private ContractTransactionMapper contractTransactionMapper;
 
     private TransactionLevelDbService transactionLevelDbService = TransactionLevelDbService.getInstance();
 
@@ -63,6 +69,25 @@ public class TransactionBusiness implements BaseService<Transaction, Long> {
         //加载list，加载leveldb中的真实交易数据
         PageInfo<Transaction> page = new PageInfo<>(transactionMapper.selectList(searchable));
         page.setList(formatTransaction(page.getList()));
+        return page;
+    }
+
+    public PageInfo<Transaction> getContractTxListByContractAddress(String contractAddress, int pageNumber, int pageSize) {
+        PageHelper.startPage(pageNumber, pageSize);
+        Map<String,Object> params=new HashMap<>(1);
+        params.put("contractAddress",contractAddress);
+        List<ContractTransaction> contractTransactions = contractTransactionMapper.selectContractTxList(params);
+        PageInfo page = new PageInfo<>(contractTransactions);
+        List<String> hashs = new ArrayList<>();
+        for (ContractTransaction contractTransaction : contractTransactions) {
+            hashs.add(contractTransaction.getTxHash());
+        }
+
+        Searchable searchable = new Searchable();
+        searchable.addCondition("hash", SearchOperator.in, hashs);
+        PageHelper.orderBy("id desc");
+        List<Transaction> transactions = transactionMapper.selectList(searchable);
+        page.setList(formatTransaction(transactions));
         return page;
     }
 

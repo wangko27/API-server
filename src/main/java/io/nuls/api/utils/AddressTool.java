@@ -67,6 +67,11 @@ public class AddressTool {
         return xor;
     }
 
+    /**
+     * 验证地址是否有效，该方法支持所有类型的地址
+     * @param address
+     * @return
+     */
     public static boolean validAddress(String address) {
         if (StringUtils.isBlank(address)) {
             return false;
@@ -93,6 +98,9 @@ public class AddressTool {
             return false;
         }
         if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.MAIN_NET_VERSION <= 1 && NulsContext.DEFAULT_ADDRESS_TYPE != type) {
             return false;
         }
         if (NulsContext.DEFAULT_ADDRESS_TYPE != type && NulsContext.CONTRACT_ADDRESS_TYPE != type && NulsContext.P2SH_ADDRESS_TYPE != type) {

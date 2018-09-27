@@ -3,8 +3,8 @@ package io.nuls.api.server.resources.impl;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Utxo;
+import io.nuls.api.model.Na;
 import io.nuls.api.server.business.UtxoBusiness;
-import io.nuls.api.server.dto.TransFeeDto;
 import io.nuls.api.utils.AddressTool;
 import io.nuls.api.utils.TransactionFeeCalculator;
 import io.nuls.api.utils.TransactionTool;
@@ -59,7 +59,7 @@ public class UtxoResource {
     }
 
     /**
-     * 获取某地址的可用的UTXO数量和总额—做零钱换整功能
+     * 获取某地址的可用的UTXO数量和总金额—做零钱换整功能
      * @param address 地址
      * @return
      */
@@ -68,6 +68,10 @@ public class UtxoResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getTotalUTXO(@PathParam("address")String address){
         RpcClientResult result = RpcClientResult.getSuccess();
+        if (!AddressTool.validAddress(address)) {
+            result = RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
+            return result;
+        }
         List<Utxo> list = utxoBusiness.getUsableUtxo(address);
         Long sum = list.stream().mapToLong(e -> e.getAmount()).sum();
         Map<String, String> map = new HashMap<>();
@@ -94,12 +98,10 @@ public class UtxoResource {
             return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
         }
         List<Utxo> list = utxoBusiness.getUsableUtxo(address);
-        Long sum = list.stream().mapToLong(e -> e.getAmount()).sum();
-        TransFeeDto transferTxFee = TransactionTool.getChangeTxFee(list, sum, "", TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.getValue());
-        Long fee = transferTxFee.getNa().getValue();
+        Na fee = TransactionTool.getChangeTxFee(list, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES, address);
         Map<String, Long> map = new HashMap<>();
-        map.put("fee", fee);
-        result.setData(transferTxFee);
+        map.put("fee", fee.getValue());
+        result.setData(map);
         return result;
     }
 

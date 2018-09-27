@@ -3,9 +3,12 @@ package io.nuls.api.utils;
 import io.nuls.api.cfg.NulsConfig;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.constant.NulsConstant;
+import io.nuls.api.constant.TransactionConstant;
+import io.nuls.api.context.NulsContext;
 import io.nuls.api.crypto.Hex;
+import io.nuls.api.crypto.script.P2PHKSignature;
+import io.nuls.api.crypto.script.Script;
 import io.nuls.api.crypto.script.SignatureUtil;
-import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.entity.Utxo;
 import io.nuls.api.exception.NulsException;
 import io.nuls.api.exception.NulsRuntimeException;
@@ -18,10 +21,13 @@ import org.spongycastle.util.Arrays;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TransactionTool {
+
+    private static Lock lock = new ReentrantLock();
 
     /**
      * 根据备注获取size
@@ -50,11 +56,11 @@ public class TransactionTool {
      * @param amount    转账金额
      * @param remark    交易备注
      * @param unitPrice 手续费单价
+     * @param toAddress
      * @return
      */
-    public static TransFeeDto getTransferTxFee(List<Utxo> utxoList, long amount, String remark, long unitPrice) {
-        // 124 + 38;
-        int size = 162+getRemarkSize(remark);
+    public static TransFeeDto getTransferTxFee(List<Utxo> utxoList, long amount, String remark, long unitPrice, String toAddress) {
+        int size = TransactionConstant.BASE_TRANSACTION_SIZE + getBaseToSize(toAddress) +getRemarkSize(remark);
         return calcFee(utxoList, size, amount, Na.valueOf(unitPrice));
     }
 
@@ -65,15 +71,56 @@ public class TransactionTool {
      * 交易大小的计算：（124 + 50 * inputs.length + 38 * outputs.length + remark.bytes.length ）/1024
      *
      * @param utxoList  可用未花费集合
-     * @param amount    转账金额
-     * @param remark    交易备注
-     * @param unitPrice 手续费单价
+     * @param price 手续费单价
      * @return
      */
-    public static TransFeeDto getChangeTxFee(List<Utxo> utxoList, long amount, String remark, long unitPrice) {
-        // 124 + 38;
-        int size = 162+getRemarkSize(remark);
-        return calcChangeFee(utxoList, size, amount, Na.valueOf(unitPrice));
+    public static Na getChangeTxFee(List<Utxo> utxoList, Na price, String address) {
+        lock.lock();
+        try {
+            if (utxoList.isEmpty()) {//没有可用余额
+                Result.getFailed(KernelErrorCode.DATA_ERROR);
+            }
+            int txSize = TransactionConstant.BASE_TRANSACTION_SIZE + getBaseToSize(address) + TransactionConstant.MAX_REMARK_LEN;
+            int targetSize = TransactionConstant.MAX_TX_SIZE - txSize;
+            int size = TransactionConstant.BASE_TRANSACTION_SIZE + getBaseToSize(address);
+            //将所有余额从大到小排序后，累计未花费的余额
+            byte signType = 0;
+            int txNum = 1;
+            for (int i = 0; i < utxoList.size(); i++) {
+                Utxo utxo = utxoList.get(i);
+                if (utxo.getAmount()==0L) {
+                    continue;
+                }
+                size += TransactionConstant.BASE_FROM_SIZE;
+                if (i == 127) {
+                    size += 1;
+                }
+                /**
+                 * 判断是否是脚本验证UTXO
+                 * */
+                if (signType != 3) {
+
+                    if ((signType & 0x01) == 0 && AddressTool.getAddress(utxo.getAddress()).length == 23) {
+                        signType = (byte) (signType | 0x01);
+                        size += P2PHKSignature.SERIALIZE_LENGTH;
+                    } else if ((signType & 0x02) == 0 && AddressTool.getAddress(utxo.getAddress()).length != 23) {
+                        signType = (byte) (signType | 0x02);
+                        size += P2PHKSignature.SERIALIZE_LENGTH;
+                    }
+                }
+                if (size > targetSize * txNum) {//大于一个tx的size 所以需要另一个tx装
+                    size += txSize;
+                    txNum++;
+                    signType = 0;
+                }
+            }
+            Na fee = TransactionFeeCalculator.getFee(size, price);
+            return fee;
+        } catch (Exception e) {
+            return Na.ZERO;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -533,26 +580,6 @@ public class TransactionTool {
         return null;
     }
 
-    private static TransFeeDto calcChangeFee(List<Utxo> utxoList, int size, long amount, Na unitPrice) {
-        TransFeeDto transFeeDto = new TransFeeDto();
-        long values = 0;
-        Utxo utxo;
-        Na fee = null;
-        for (int i = 0; i < utxoList.size(); i++) {
-            utxo = utxoList.get(i);
-            values += utxo.getAmount();
-            //每条from的长度为50
-            size += 50;
-            if (i == 127) {
-                size += 1;
-            }
-        }
-        fee = TransactionFeeCalculator.getFee(size + 38, unitPrice);
-        transFeeDto.setSize(size);
-        transFeeDto.setNa(fee);
-        return transFeeDto;
-    }
-
     public static CoinData createCoinData(List<Utxo> utxoList, List<Coin> outputs, long amount) {
         List<Coin> inputs = new ArrayList<>();
         Utxo utxo;
@@ -587,6 +614,28 @@ public class TransactionTool {
         return null;
     }
 
+    /**
+     * 组装零钱换整交易,不存在找零
+     * @param utxoList
+     * @return
+     */
+    public static CoinData createCoinData(List<Utxo> utxoList, Coin to, String address) {
+        List<Coin> inputs = new ArrayList<>();
+        Utxo utxo;
+        long values = 0;
+        Na fee = getChangeTxFee(utxoList, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES, address);
+        for (int i = 0; i < utxoList.size(); i++) {
+            utxo = utxoList.get(i);
+            values += utxo.getAmount();
+            inputs.add(transferToFrom(utxo));
+        }
+        CoinData coinData = new CoinData();
+        coinData.setFrom(inputs);
+        to.setNa(Na.valueOf(values).minus(fee));//真正转账额度等于总金额-手续费
+        coinData.getTo().add(to);
+        return coinData;
+    }
+
 
     public static Coin transferToFrom(Utxo utxo) {
         Coin coin = new Coin();
@@ -597,18 +646,45 @@ public class TransactionTool {
         return coin;
     }
 
-    public static Transaction changeWholeTxForApi(String address, String password, String remark, List<Utxo> list) {
+    /**
+     * 根据地址组装零钱换整交易，是一组转账交易，转出与转入是同一个地址，并且不找零。暂不考虑超多零钱循环换整的场景
+     * @param address
+     * @param remark
+     * @param list
+     * @return
+     */
+    public static List<io.nuls.api.model.Transaction> changeWholeTxForApi(String address, String remark, List<Utxo> list) {
+        List<io.nuls.api.model.Transaction> transactions = new ArrayList<>();//列表
+        int txSize = TransactionConstant.BASE_TRANSACTION_SIZE + getBaseToSize(address) + TransactionConstant.MAX_REMARK_LEN;//基础交易大小
+        int targetSize = TransactionConstant.MAX_TX_SIZE - txSize;//一笔交易的最大容量
+        int count = targetSize / TransactionConstant.BASE_FROM_SIZE;//一笔交易最多容纳多少笔from
+        List<List<Utxo>> txList = new ArrayList<>();
+        List<Utxo> txs = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if ((i!=0) && (i%count==0)) {
+                txList.add(txs);
+                txs = new ArrayList<>();
+            }
+            txs.add(list.get(i));
+        }
+        txList.add(txs);
+
+        for (List<Utxo> utxos : txList) {
+            transactions.add(getTransaction(utxos, address, remark));
+        }
+        return transactions;
+    }
+
+    private static Transaction getTransaction(List<Utxo> utxos, String address, String remark) {
+        TransferTransaction tx = new TransferTransaction();
         List<Coin> outputs = new ArrayList<>();
         Coin to = new Coin();
         to.setLockTime(0);
-        Long sum = list.stream().mapToLong(e -> e.getAmount()).sum();
-        to.setNa(Na.valueOf(sum));
         to.setOwner(AddressTool.getAddress(address));
         outputs.add(to);
 
-        CoinData coinData = createCoinData(list, outputs, sum);
+        CoinData coinData = createCoinData(utxos, to, address);
         if (coinData != null) {
-            TransferTransaction tx = new TransferTransaction();
             tx.setTime(TimeService.currentTimeMillis());
             if (StringUtils.isNotBlank(remark)) {
                 try {
@@ -623,9 +699,17 @@ public class TransactionTool {
             } catch (IOException e) {
                 throw new NulsRuntimeException(KernelErrorCode.DATA_PARSE_ERROR);
             }
-            return tx;
         }
+        return tx;
+    }
 
-        return null;
+    private static int getBaseToSize(String toAddress){
+        byte[] receiverAddr = AddressTool.getAddress(toAddress);
+        if (StringUtils.isNotBlank(toAddress) && (receiverAddr[2] == NulsContext.P2SH_ADDRESS_TYPE)) {//多重签名地址
+            Script scriptPubkey = SignatureUtil.createOutputScript(receiverAddr);
+            return scriptPubkey.getProgram().length;
+        } else {//普通地址
+            return TransactionConstant.BASE_TO_SIZE;
+        }
     }
 }

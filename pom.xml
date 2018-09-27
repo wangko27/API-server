@@ -212,12 +212,6 @@
             <artifactId>quartz</artifactId>
             <version>2.3.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>23.0</version>
-        </dependency>
         <!-- nuls - sdk -->
         <dependency>
             <groupId>io.nuls.sdk</groupId>

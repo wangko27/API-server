@@ -3,8 +3,19 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.ContractConstant;
-import io.nuls.api.entity.*;
+import io.nuls.api.entity.Balance;
+import io.nuls.api.entity.ContractAddressInfo;
+import io.nuls.api.entity.ContractCallInfo;
+import io.nuls.api.entity.ContractCreateInfo;
+import io.nuls.api.entity.ContractDeleteInfo;
+import io.nuls.api.entity.ContractResultInfo;
+import io.nuls.api.entity.ContractTokenAssets;
 import io.nuls.api.entity.ContractTokenInfo;
+import io.nuls.api.entity.ContractTokenTransferInfo;
+import io.nuls.api.entity.ContractTransaction;
+import io.nuls.api.entity.ContractTransferInfo;
+import io.nuls.api.entity.ContractInfo;
+import io.nuls.api.entity.Transaction;
 import io.nuls.api.server.dao.mapper.ContractAddressInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCallInfoMapper;
 import io.nuls.api.server.dao.mapper.ContractCreateInfoMapper;
@@ -180,7 +191,9 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                 searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
                 ContractAddressInfo contractAddressInfo = contractAddressInfoMapper.selectBySearchable(searchable);
                 List<ContractTokenTransferInfo> contractTokenTransferInfoList = contractTokenTransferInfoMapper.selectList(searchable);
-                calContractTokenAssets(contractTokenTransferInfoList, contractAddressInfo.getContractAddress(), true);
+                if (contractAddressInfo != null) {
+                    calContractTokenAssets(contractTokenTransferInfoList, contractAddressInfo.getContractAddress(), true);
+                }
             }
             contractTokenTransferInfoMapper.deleteList(txHashList);
         }
@@ -568,7 +581,6 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
     }
 
     /**
-     * edit by Flyglede
      * @param pageNumber
      * @param pageSize
      * @return
@@ -578,30 +590,30 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         Searchable searchable = new Searchable();
         PageHelper.orderBy("create_time desc");
         PageInfo<ContractAddressInfo> pageContractAddressInfo = new PageInfo<>(contractAddressInfoMapper.selectList(searchable));
-        List<ContractAddressInfo> lstContractAddressInfo = pageContractAddressInfo.getList();
+        List<ContractAddressInfo> lstContractAddressInfo = new ArrayList<ContractAddressInfo>();
         List<ContractInfo> lstContractInfo = new ArrayList<ContractInfo>();
+        lstContractAddressInfo = pageContractAddressInfo.getList();
         if(lstContractAddressInfo!=null) {
             for(int i=0;i<lstContractAddressInfo.size();i++) {
                 ContractInfo contractInfo = new ContractInfo();
-                contractInfo.setBlockHeight(lstContractAddressInfo.get(i).getBlockHeight());
-                contractInfo.setContractAddress(lstContractAddressInfo.get(i).getContractAddress());
-                contractInfo.setCreater(lstContractAddressInfo.get(i).getCreater());
-                contractInfo.setCreateTime(lstContractAddressInfo.get(i).getCreateTime());
-                contractInfo.setCreateTxHash(lstContractAddressInfo.get(i).getCreateTxHash());
-                contractInfo.setDecimals(lstContractAddressInfo.get(i).getDecimals());
-                contractInfo.setDeleteHash(lstContractAddressInfo.get(i).getDeleteHash());
-                contractInfo.setIsNrc20(lstContractAddressInfo.get(i).getIsNrc20());
-                contractInfo.setMethods(lstContractAddressInfo.get(i).getMethods());
-                contractInfo.setStatus(lstContractAddressInfo.get(i).getStatus());
-                contractInfo.setSymbol(lstContractAddressInfo.get(i).getSymbol());
-                contractInfo.setTokenName(lstContractAddressInfo.get(i).getTokenName());
                 contractInfo.setTotalsupply(lstContractAddressInfo.get(i).getTotalsupply());
+                contractInfo.setTokenName(lstContractAddressInfo.get(i).getTokenName());
+                contractInfo.setSymbol(lstContractAddressInfo.get(i).getSymbol());
+                contractInfo.setStatus(lstContractAddressInfo.get(i).getStatus());
+                contractInfo.setMethods(lstContractAddressInfo.get(i).getMethods());
+                contractInfo.setIsNrc20(lstContractAddressInfo.get(i).getIsNrc20());
+                contractInfo.setDeleteHash(lstContractAddressInfo.get(i).getDeleteHash());
+                contractInfo.setDecimals(lstContractAddressInfo.get(i).getDecimals());
+                contractInfo.setCreateTxHash(lstContractAddressInfo.get(i).getCreateTxHash());
+                contractInfo.setCreateTime(lstContractAddressInfo.get(i).getCreateTime());
+                contractInfo.setCreater(lstContractAddressInfo.get(i).getCreater());
+                contractInfo.setContractAddress(lstContractAddressInfo.get(i).getContractAddress());
+                contractInfo.setBlockHeight(lstContractAddressInfo.get(i).getBlockHeight());
+                //查询合约地址余额
                 Balance balance = balanceBusiness.getBalance(lstContractAddressInfo.get(i).getContractAddress());
                 if (balance != null) {
                     //设置余额
                     contractInfo.setBalance(balance.getUsable());
-                } else {
-                    contractInfo.setBalance(0L);
                 }
                 lstContractInfo.add(contractInfo);
             }
@@ -771,11 +783,13 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         Searchable searchable1 = new Searchable();
         searchable1.addCondition("tx_hash", SearchOperator.eq, hash);
         ContractResultInfo contractResultInfo = contractResultInfoMapper.selectBySearchable(searchable1);
+        ContractResultInfoDto contractResultInfoDto = ContractResultInfoDto.parse(contractResultInfo);
         ContractTransactionDetailDto detail = new ContractTransactionDetailDto(transaction);
         detail.setStatus(contractResultInfo.getSuccess());
         detail.setConfirmCount(contractResultInfo.getConfirmCount());
         detail.setContractAddress(contractResultInfo.getContractAddress());
-        detail.setResultDto(contractResultInfo);
+        detail.setResultDto(contractResultInfoDto);
         return detail;
     }
+
 }

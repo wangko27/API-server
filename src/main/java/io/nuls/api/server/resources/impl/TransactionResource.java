@@ -216,7 +216,7 @@ public class TransactionResource {
     @GET
     @Path("/transFee")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getTransFee(@QueryParam("address")String address,@QueryParam("money")long money,@QueryParam("remark")String remark,@QueryParam("price")long price,@QueryParam("types")int types,@QueryParam("alias")String alias){
+    public RpcClientResult getTransFee(@QueryParam("address")String address,@QueryParam("money")long money,@QueryParam("remark")String remark,@QueryParam("price")long price,@QueryParam("types")int types,@QueryParam("alias")String alias, @QueryParam("toAddress")String toAddress){
         RpcClientResult result;
         if(!StringUtils.validAddress(address)){
             return RpcClientResult.getFailed(KernelErrorCode.ADDRESS_ERROR);
@@ -236,7 +236,7 @@ public class TransactionResource {
                     return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
                 }
                 //size: 备注长度+162
-                transFeeDto = TransactionTool.getTransferTxFee(list,money,remark,price);
+                transFeeDto = TransactionTool.getTransferTxFee(list,money,remark,price,toAddress);
                 if(null == transFeeDto){
                     //余额不足，计算最大可以转多少
                     feeType = EntityConstant.TRANSFEE_NOTENOUGHT_UTXO;
@@ -331,7 +331,7 @@ public class TransactionResource {
                     return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
                 }
                 //转账
-                transFeeDto =TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice());
+                transFeeDto =TransactionTool.getTransferTxFee(list,transactionParam.getMoney(),transactionParam.getRemark(),transactionParam.getPrice(), transactionParam.getToAddress());
                 if(null == transFeeDto){
                     return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
                 }
@@ -431,6 +431,8 @@ public class TransactionResource {
             if(null != transaction){
                 attr.put("hash",transaction.getHash().getDigestHex());
                 attr.put("tx",transaction);
+                attr.put("base",Base64.getEncoder().encodeToString(transaction.serialize()));
+                //Base64.getDecoder().decode(transaction.getSignData())
                 result = saveWalletTransaction(transaction,transactionParam.getAddress(),temp);
                 result.setData(attr);
             }else{
@@ -600,7 +602,6 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             }
             //94015
-
             boradTx.parse(new NulsByteBuffer(data));
             boradTx.setTransactionSignature(Hex.decode(transactionParam.getSign()));
             return borad(transaction,Hex.encode(boradTx.serialize()));
@@ -635,6 +636,24 @@ public class TransactionResource {
                 temp);
         if (webwalletTransactionBusiness.save(webwalletTransaction) != 1) {
             return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
+        }
+        return RpcClientResult.getSuccess();
+    }
+
+    /**
+     * 批量保存webwallet 临时交易（发送交易先保存到临时交易表）
+     * @param transactions 交易
+     * @param sender 交易发送者
+     * @param temp 任意值，webwallet的任意值，会存入数据库，目前是存了别名交易的别名，防止别名重复设置，还存了退出交易的hash，防止重复退出
+     * @return 保存结果
+     * @throws Exception 转换交易
+     */
+    private RpcClientResult saveWalletTransactions(List<io.nuls.api.model.Transaction> transactions, String sender, String temp) throws Exception {
+        for (io.nuls.api.model.Transaction transaction : transactions) {
+            RpcClientResult result = saveWalletTransaction(transaction, sender, temp);
+            if (result.isFailed()) {
+                return RpcClientResult.getFailed(KernelErrorCode.TX_SAVETEMPUTXO_ERROR);
+            }
         }
         return RpcClientResult.getSuccess();
     }
@@ -709,24 +728,30 @@ public class TransactionResource {
         if (!StringUtils.validTxRemark(param.getRemark())) {
             return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
         }
+        List<Map<String,Object>> data = new ArrayList<>();
         RpcClientResult result  = valiHeight();
-        Map<String,Object> attr = new HashMap<>(1);
-        attr.put("hash","");
+        List<String> hashs = new ArrayList<>();
         if(result.isSuccess()) {
-            io.nuls.api.model.Transaction transaction = null;
+            List<io.nuls.api.model.Transaction> transactions = new ArrayList<>();
             List<Utxo> list = utxoBusiness.getUsableUtxo(param.getAddress());
-            transaction = TransactionTool.changeWholeTxForApi(
+            transactions = TransactionTool.changeWholeTxForApi(
                     param.getAddress(),
-                    param.getPassword(),
                     param.getRemark(),
                     list
             );
-            if(null == transaction){
+            if(null == transactions || transactions.isEmpty() || transactions.size() == 0){
                 return RpcClientResult.getFailed(KernelErrorCode.BALANCE_NOT_ENOUGH);
             }
-            attr.put("hash",transaction.getHash().getDigestHex());
-            result = saveWalletTransaction(transaction,param.getAddress(),null);
-            result.setData(attr);
+            transactions.forEach(e -> hashs.add(e.getHash().getDigestHex()));
+            result = saveWalletTransactions(transactions,param.getAddress(),null);
+            for (io.nuls.api.model.Transaction transaction : transactions) {
+                Map<String,Object> attr = new HashMap<>(2);
+                attr.put("tx", transaction);
+                attr.put("hash",transaction.getHash().getDigestHex());
+                data.add(attr);
+            }
+
+            result.setData(data);
         }
         return result;
     }

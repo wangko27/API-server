@@ -8,6 +8,7 @@ import io.nuls.api.entity.WebwalletTransaction;
 import io.nuls.api.server.business.WebwalletTransactionBusiness;
 import io.nuls.api.server.resources.SyncDataHandler;
 import io.nuls.api.utils.TimeService;
+import io.nuls.api.utils.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,7 @@ public class WebwalletTransactionsyncTask {
      * 每隔十分钟去未确认交易表中查询所有未确认的交易，去链上验证，验证通过就重发，验证不通过就删除
      */
     public void execute(){
-        System.out.println("----------------------每隔十分钟，清理未确认交易------------------------------");
+        Log.info("----------------------每隔十分钟，清理未确认交易------------------------------");
         List<WebwalletTransaction> list = webwalletTransactionBusiness.getListByTime(EntityConstant.WEBWALLET_STATUS_NOTCONFIRM, TimeService.currentTimeMillis()-600000);
         Map<String, String> params = new HashMap<>();
         RpcClientResult result = null;
