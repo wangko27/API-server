@@ -381,6 +381,7 @@ public class SyncDataBusiness {
 
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getTempExtend());
         if (extendsData.getCurrentVersion() != null && extendsData.getMainVersion() == 2) {
+            NulsContext.MAIN_NET_VERSION = extendsData.getMainVersion();
             NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = blockHeader.getHeight();
             protocolLevelDbService.saveChangeTxHashBlockHeight(blockHeader.getHeight());
         }

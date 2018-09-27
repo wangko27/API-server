@@ -156,6 +156,9 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
      * @param txHashList
      */
     public void rollbackContractDeleteInfo(List<String> txHashList) {
+        if (txHashList.size() <= 0) {
+            return;
+        }
         for (String hash : txHashList) {
             Searchable searchable = new Searchable();
             searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
@@ -449,6 +452,8 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
         PageInfo page = new PageInfo<>(contractTokenAssets);
         List<ContractTokenAssetsDto> list = ContractTokenAssetsDto.parseList(contractTokenAssets);
+        ContractTokenInfo contractTokenInfo = contractTokenInfoMapper.selectTokenByAddress(address);
+        list.forEach(e -> e.setDecimals(contractTokenInfo.getDecimals()));
         page.setList(list);
         return page;
     }

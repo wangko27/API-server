@@ -34,7 +34,7 @@ import java.util.List;
 
 public class ContractTokenAssetsDto {
     private String accountAddress;
-
+    private Long decimals;
     private String amount;
 
     public ContractTokenAssetsDto(ContractTokenAssets info) {
@@ -57,6 +57,14 @@ public class ContractTokenAssetsDto {
 
     public void setAccountAddress(String accountAddress) {
         this.accountAddress = accountAddress == null ? null : accountAddress.trim();
+    }
+
+    public Long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(Long decimals) {
+        this.decimals = decimals;
     }
 
     public String getAmount() {
