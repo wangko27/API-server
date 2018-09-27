@@ -28,6 +28,7 @@ import io.nuls.api.constant.ContractErrorCode;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.entity.RpcClientResult;
 import io.nuls.api.server.business.ContractBusiness;
+import io.nuls.api.server.business.TransactionBusiness;
 import io.nuls.api.utils.AddressTool;
 import io.nuls.api.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,8 @@ public class ContractResource {
 
     @Autowired
     private ContractBusiness contractBusiness;
+    @Autowired
+    private TransactionBusiness transactionBusiness;
 
     @GET
     @Path("")
@@ -123,6 +126,13 @@ public class ContractResource {
         return result;
     }
 
+    /**
+     * 根据合约地址获取合约交易列表
+     * @param contractAddress
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
     @GET
     @Path("/transactions/{contractAddress}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -136,7 +146,7 @@ public class ContractResource {
             return RpcClientResult.getFailed(ContractErrorCode.ILLEGAL_CONTRACT_ADDRESS);
         }
 
-        result.setData(contractBusiness.getContractTxListByContractAddress(contractAddress, pageNumber, pageSize));
+        result.setData(transactionBusiness.getContractTxListByContractAddress(contractAddress, pageNumber, pageSize));
         return result;
     }
 

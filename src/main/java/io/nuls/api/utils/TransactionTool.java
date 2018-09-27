@@ -632,6 +632,7 @@ public class TransactionTool {
         CoinData coinData = new CoinData();
         coinData.setFrom(inputs);
         to.setNa(Na.valueOf(values).minus(fee));//真正转账额度等于总金额-手续费
+        coinData.getTo().add(to);
         return coinData;
     }
 
@@ -646,53 +647,13 @@ public class TransactionTool {
     }
 
     /**
-     * 根据地址组装零钱换整交易，是一组转账交易，转出与转入是同一个地址，并且不找零
-     * @param address
-     * @param remark
-     * @param list
-     * @return
-     */
-    public static List<io.nuls.api.model.Transaction> changeWholeTxForApi(String address, String remark, List<Utxo> list) {
-        List<io.nuls.api.model.Transaction> transactions = new ArrayList<>();
-        List<Coin> outputs = new ArrayList<>();
-        Coin to = new Coin();
-        to.setLockTime(0);
-        Long sum = list.stream().mapToLong(e -> e.getAmount()).sum();
-        to.setNa(Na.valueOf(sum));
-        to.setOwner(AddressTool.getAddress(address));
-        outputs.add(to);
-
-        CoinData coinData = createCoinData(list, outputs, sum);
-        if (coinData != null) {
-            TransferTransaction tx = new TransferTransaction();
-            tx.setTime(TimeService.currentTimeMillis());
-            if (StringUtils.isNotBlank(remark)) {
-                try {
-                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
-                } catch (UnsupportedEncodingException e) {
-                    throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
-                }
-            }
-            tx.setCoinData(coinData);
-            try {
-                tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            } catch (IOException e) {
-                throw new NulsRuntimeException(KernelErrorCode.DATA_PARSE_ERROR);
-            }
-            transactions.add(tx);
-        }
-
-        return transactions;
-    }
-
-    /**
      * 根据地址组装零钱换整交易，是一组转账交易，转出与转入是同一个地址，并且不找零。暂不考虑超多零钱循环换整的场景
      * @param address
      * @param remark
      * @param list
      * @return
      */
-    public static List<io.nuls.api.model.Transaction> changeWholeTxForApi222(String address, String remark, List<Utxo> list) {
+    public static List<io.nuls.api.model.Transaction> changeWholeTxForApi(String address, String remark, List<Utxo> list) {
         List<io.nuls.api.model.Transaction> transactions = new ArrayList<>();//列表
         int txSize = TransactionConstant.BASE_TRANSACTION_SIZE + getBaseToSize(address) + TransactionConstant.MAX_REMARK_LEN;//基础交易大小
         int targetSize = TransactionConstant.MAX_TX_SIZE - txSize;//一笔交易的最大容量
@@ -706,6 +667,7 @@ public class TransactionTool {
             }
             txs.add(list.get(i));
         }
+        txList.add(txs);
 
         for (List<Utxo> utxos : txList) {
             transactions.add(getTransaction(utxos, address, remark));

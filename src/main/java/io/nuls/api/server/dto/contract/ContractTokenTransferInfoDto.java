@@ -48,6 +48,7 @@ public class ContractTokenTransferInfoDto {
     private BigInteger txValue;
     private Long createTime;
     private String txHash;
+    private String createTxHash;
 
     public ContractTokenTransferInfoDto() {
     }
@@ -71,9 +72,18 @@ public class ContractTokenTransferInfoDto {
             dto.setName(name);
             dto.setSymbol(symbol);
             dto.setDecimals(decimals);
+            dto.setCreateTxHash(data.getCreateTxHash());
             contractTokenTransferInfoDtos.add(dto);
         }
         return contractTokenTransferInfoDtos;
+    }
+
+    public String getCreateTxHash() {
+        return createTxHash;
+    }
+
+    public void setCreateTxHash(String createTxHash) {
+        this.createTxHash = createTxHash;
     }
 
     public String getContractAddress() {

@@ -793,11 +793,4 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         return detail;
     }
 
-    public PageInfo<ContractTransaction> getContractTxListByContractAddress(String contractAddress, int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
-        Map<String,Object> params=new HashMap<>(1);
-        params.put("contractAddress",contractAddress);
-        PageInfo<ContractTransaction> page = new PageInfo<>(contractTransactionMapper.selectContractTxList(params));
-        return page;
-    }
 }

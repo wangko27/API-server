@@ -727,6 +727,7 @@ public class TransactionResource {
         if (!StringUtils.validTxRemark(param.getRemark())) {
             return RpcClientResult.getFailed(KernelErrorCode.TX_REMARK_LENTH_ERROR);
         }
+        List<Map<String,Object>> data = new ArrayList<>();
         RpcClientResult result  = valiHeight();
         List<String> hashs = new ArrayList<>();
         if(result.isSuccess()) {
@@ -742,7 +743,14 @@ public class TransactionResource {
             }
             transactions.forEach(e -> hashs.add(e.getHash().getDigestHex()));
             result = saveWalletTransactions(transactions,param.getAddress(),null);
-            result.setData(transactions);
+            for (io.nuls.api.model.Transaction transaction : transactions) {
+                Map<String,Object> attr = new HashMap<>(2);
+                attr.put("tx", transaction);
+                attr.put("hash",transaction.getHash().getDigestHex());
+                data.add(attr);
+            }
+
+            result.setData(data);
         }
         return result;
     }

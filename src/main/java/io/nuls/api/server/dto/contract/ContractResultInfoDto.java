@@ -96,13 +96,8 @@ public class ContractResultInfoDto {
             List<SimpleContractTokenTransferInfoDto> list = JSONUtils.json2list(info.getTokenTransfers(), SimpleContractTokenTransferInfoDto.class);
             dto.setTokenTransfers(list);
         } catch (Exception e){
-            Log.error("ContractResultInfoDto Parse Error!");
+            Log.error("ContractResultInfoDto Parse Error!" + e.getMessage());
         }
-//        dto.setActualContractFee(info.getActualContractFee());
-//        dto.setBalance(info.getBalance());
-//        dto.setContractAddress(info.getContractAddress());
-//        dto.setCreateTime(info.getCreateTime());
-//        dto.setDecimals(info.getDecimals());
         return dto;
     }
 
