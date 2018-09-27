@@ -28,6 +28,7 @@ package io.nuls.api.server.dto.contract;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.nuls.api.entity.ContractResultInfo;
+import io.nuls.api.entity.ContractTransferInfo;
 import io.nuls.api.utils.JSONUtils;
 import io.nuls.api.utils.log.Log;
 import org.springframework.beans.BeanUtils;
@@ -73,7 +74,7 @@ public class ContractResultInfoDto {
 
     private Long nonce;
 
-    private String transfers;
+    private List<ContractTransferInfo> transfers;
 
     private String events;
 
@@ -237,12 +238,12 @@ public class ContractResultInfoDto {
         this.nonce = nonce;
     }
 
-    public String getTransfers() {
+    public List<ContractTransferInfo> getTransfers() {
         return transfers;
     }
 
-    public void setTransfers(String transfers) {
-        this.transfers = transfers == null ? null : transfers.trim();
+    public void setTransfers(List<ContractTransferInfo> transfers) {
+        this.transfers = transfers;
     }
 
     public String getEvents() {

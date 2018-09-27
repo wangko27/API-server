@@ -789,6 +789,10 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         searchable1.addCondition("tx_hash", SearchOperator.eq, hash);
         ContractResultInfo contractResultInfo = contractResultInfoMapper.selectBySearchable(searchable1);
         ContractResultInfoDto contractResultInfoDto = ContractResultInfoDto.parse(contractResultInfo);
+        Searchable searchable2 = new Searchable();
+        searchable2.addCondition("orgin_tx_hash", SearchOperator.eq, hash);
+        List<ContractTransferInfo> contractTransferInfos = contractTransferInfoMapper.selectList(searchable2);
+        contractResultInfoDto.setTransfers(contractTransferInfos);
         ContractTransactionDetailDto detail = new ContractTransactionDetailDto(transaction);
         detail.setStatus(contractResultInfo.getSuccess());
         detail.setConfirmCount(contractResultInfo.getConfirmCount());
