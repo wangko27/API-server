@@ -3,6 +3,7 @@ package io.nuls.api.server.resources.impl;
 import io.nuls.api.constant.KernelErrorCode;
 import io.nuls.api.crypto.Hex;
 import io.nuls.api.entity.RpcClientResult;
+import io.nuls.api.utils.AccountTool;
 import io.nuls.api.utils.AddressTool;
 import io.nuls.api.utils.StringUtils;
 import io.nuls.api.utils.log.Log;
@@ -40,7 +41,8 @@ public class AccountResource {
                 return result;
             }
             result = RpcClientResult.getSuccess();
-            result.setData(AddressTool.getStringAddressByBytes(Hex.decode(publicKey)));
+            //result.setData(AddressTool.getStringAddressByBytes(Hex.decode(publicKey)));
+            result.setData(AccountTool.newAddressString(Hex.decode(publicKey)));
         } catch (Exception e) {
             result = RpcClientResult.getFailed();
             Log.error(e);

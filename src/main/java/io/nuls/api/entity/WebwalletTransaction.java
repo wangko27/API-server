@@ -10,21 +10,6 @@ public class WebwalletTransaction {
 
     }
 
-    public WebwalletTransaction(Transaction tx,String signData,String address,String temp){
-        this.hash = tx.getHash();
-        this.type = tx.getType();
-        this.status = EntityConstant.WEBWALLET_STATUS_NOTCONFIRM;
-        this.createTime = tx.getCreateTime();
-        this.inputs = tx.getInputs();
-        this.outputs = tx.getOutputs();
-        this.remark = tx.getRemark();
-        this.signData = signData;
-        this.address = address;
-        this.outputList = tx.getOutputList();
-        this.fee = tx.getFee();
-        this.temp = temp;
-    }
-
     public void caclTx(WebwalletTransaction tx,String address){
         //未确认的交易，我自己发起的，只有转账、设置别名、委托、退出委托四种
         tx.setAmount(0L);
@@ -52,6 +37,21 @@ public class WebwalletTransaction {
                 }
             }
         }
+    }
+
+    public WebwalletTransaction(Transaction tx,String signData,String address,String temp){
+        this.hash = tx.getHash();
+        this.type = tx.getType();
+        this.status = EntityConstant.WEBWALLET_STATUS_NOTCONFIRM;
+        this.createTime = tx.getCreateTime();
+        this.inputs = tx.getInputs();
+        this.outputs = tx.getOutputs();
+        this.remark = tx.getRemark();
+        this.signData = signData;
+        this.address = address;
+        this.outputList = tx.getOutputList();
+        this.fee = tx.getFee();
+        this.temp = temp;
     }
 
     private String hash;

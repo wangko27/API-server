@@ -431,6 +431,8 @@ public class TransactionResource {
             if(null != transaction){
                 attr.put("hash",transaction.getHash().getDigestHex());
                 attr.put("tx",transaction);
+                attr.put("base",Base64.getEncoder().encodeToString(transaction.serialize()));
+                //Base64.getDecoder().decode(transaction.getSignData())
                 result = saveWalletTransaction(transaction,transactionParam.getAddress(),temp);
                 result.setData(attr);
             }else{
@@ -600,7 +602,6 @@ public class TransactionResource {
                 return RpcClientResult.getFailed(KernelErrorCode.PARAMETER_ERROR);
             }
             //94015
-
             boradTx.parse(new NulsByteBuffer(data));
             boradTx.setTransactionSignature(Hex.decode(transactionParam.getSign()));
             return borad(transaction,Hex.encode(boradTx.serialize()));

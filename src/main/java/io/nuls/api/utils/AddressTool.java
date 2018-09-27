@@ -100,6 +100,9 @@ public class AddressTool {
         if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
             return false;
         }
+        if (NulsContext.MAIN_NET_VERSION <= 1 && NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+            return false;
+        }
         if (NulsContext.DEFAULT_ADDRESS_TYPE != type && NulsContext.CONTRACT_ADDRESS_TYPE != type && NulsContext.P2SH_ADDRESS_TYPE != type) {
             return false;
         }
@@ -111,28 +114,14 @@ public class AddressTool {
         return true;
     }
 
-    /**
-     * 验证地址是否有效，该方法支持指定类型的地址
-     * @param address
-     * @param addressType
-     * @return
-     */
-    public static boolean validAddressByType(String address, Byte addressType) {
-        if (StringUtils.isBlank(address)) {
+    public static boolean validContractAddress(byte[] addressBytes) {
+        if (addressBytes == null) {
             return false;
         }
-        byte[] bytes;
-        try {
-            bytes = Base58.decode(address);
-            if (bytes.length != Address.ADDRESS_LENGTH + 1) {
-                return false;
-            }
-        } catch (NulsException e) {
-            return false;
-        } catch (Exception e) {
+        if (addressBytes.length != Address.ADDRESS_LENGTH) {
             return false;
         }
-        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
         short chainId;
         byte type;
         try {
@@ -145,16 +134,12 @@ public class AddressTool {
         if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
             return false;
         }
-        if (addressType != type) {
-            return false;
-        }
-        try {
-            checkXOR(bytes);
-        } catch (Exception e) {
+        if (NulsContext.CONTRACT_ADDRESS_TYPE != type) {
             return false;
         }
         return true;
     }
+
 
     public static void checkXOR(byte[] hashs) {
         byte[] body = new byte[Address.ADDRESS_LENGTH];
