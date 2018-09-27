@@ -62,11 +62,6 @@ public class NulsContext {
      */
     public static byte P2SH_ADDRESS_TYPE = 3;
 
-    /**
-     * 主网运行中的版本，默认为1，会根据钱包更新到的块的最新版本做修改
-     */
-    public static volatile Integer MAIN_NET_VERSION = 1;
-
     /*
      *  chain name
      */
