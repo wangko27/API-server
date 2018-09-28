@@ -138,4 +138,11 @@
     SELECT COUNT(1) FROM contract_transaction
     <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
   </select>
+
+  <select id="selectBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from contract_transaction
+    <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+  </select>
 </mapper>

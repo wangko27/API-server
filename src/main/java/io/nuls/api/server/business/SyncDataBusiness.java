@@ -245,7 +245,7 @@ public class SyncDataBusiness {
                         contractTransaction.setCreater(data.getCreater());
                         deleteContractDataList.add(data);
                     }
-                    if (ContractConstant.CONTRACT_STATUS_SUCCESS.equals(resultData.getSuccess()) && StringUtils.isNotBlank(resultData.getContractAddress())) {
+                    if (StringUtils.isNotBlank(resultData.getContractAddress())) {
                         //合约交易记录
                         contractTransactionList.add(contractTransaction);
                         //合约调用结果

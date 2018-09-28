@@ -55,4 +55,9 @@
         from contract_delete_info
         <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
     </select>
+
+    <delete id="deleteBySearchable" parameterType="io.nuls.api.server.dao.util.Searchable">
+        DELETE from contract_delete_info
+        <include refid="io.nuls.api.server.dao.mapper.CommonMapper.Search_Where"/>
+    </delete>
 </mapper>

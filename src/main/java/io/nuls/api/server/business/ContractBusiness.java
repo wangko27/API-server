@@ -3,6 +3,7 @@ package io.nuls.api.server.business;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.nuls.api.constant.ContractConstant;
+import io.nuls.api.constant.EntityConstant;
 import io.nuls.api.entity.Balance;
 import io.nuls.api.entity.ContractAddressInfo;
 import io.nuls.api.entity.ContractCallInfo;
@@ -160,10 +161,19 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
             return;
         }
         for (String hash : txHashList) {
+            Searchable s1 = new Searchable();
+            s1.addCondition("tx_hash", SearchOperator.eq, hash);
+            ContractTransaction contractTransaction = contractTransactionMapper.selectBySearchable(s1);
+            if (contractTransaction == null || contractTransaction.getTxType() != EntityConstant.TX_TYPE_DELETE_CONTRACT) {
+                continue;
+            }
             Searchable searchable = new Searchable();
             searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
+            ContractDeleteInfo contractDeleteInfo = contractDeleteInfoMapper.selectBySearchable(searchable);
             //变更合约状态为正常，最后删除该交易
-            ContractAddressInfo contractAddressInfo = contractAddressInfoMapper.selectBySearchable(searchable);
+            Searchable searchable1 = new Searchable();
+            searchable1.addCondition("contract_address", SearchOperator.eq, contractDeleteInfo.getContractAddress());
+            ContractAddressInfo contractAddressInfo = contractAddressInfoMapper.selectBySearchable(searchable1);
             contractAddressInfo.setStatus(ContractConstant.CONTRACT_STATUS_NORMAL);
             contractAddressInfoMapper.updateByPrimaryKey(contractAddressInfo);
             contractDeleteInfoMapper.deleteBySearchable(searchable);
@@ -194,7 +204,7 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
                 searchable.addCondition("create_tx_hash", SearchOperator.eq, hash);
                 ContractAddressInfo contractAddressInfo = contractAddressInfoMapper.selectBySearchable(searchable);
                 List<ContractTokenTransferInfo> contractTokenTransferInfoList = contractTokenTransferInfoMapper.selectList(searchable);
-                if (contractAddressInfo != null) {
+                if (contractAddressInfo != null && contractTokenTransferInfoList.size() > 0) {
                     calContractTokenAssets(contractTokenTransferInfoList, contractAddressInfo.getContractAddress(), true);
                 }
             }
@@ -536,7 +546,9 @@ public class ContractBusiness implements BaseService<ContractDeleteInfo, String>
         }
         Searchable searchable = new Searchable();
         searchable.addCondition("contract_address", SearchOperator.eq, contractAddress);
-        searchable.addCondition("account_address", SearchOperator.in, lists);
+        if (lists.size() > 0) {
+            searchable.addCondition("account_address", SearchOperator.in, lists);
+        }
         List<ContractTokenAssets> contractTokenAssets = contractTokenAssetsMapper.selectList(searchable);
         for (Map.Entry<String, BigInteger> stringLongEntry : tempMap.entrySet()) {
             String address = stringLongEntry.getKey();
